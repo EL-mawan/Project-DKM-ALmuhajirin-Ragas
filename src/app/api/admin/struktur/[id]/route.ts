@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth'
 import { db } from '@/lib/db'
 import { authOptions } from '@/lib/auth/config'
 
+import { checkPermission } from '@/lib/auth/rbac'
+
 export async function PATCH(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -16,7 +18,7 @@ export async function PATCH(
       include: { role: true }
     })
 
-    if (!user?.role.permissions.includes('{"resource":"struktur","action":"update"}')) {
+    if (!checkPermission(user as any, 'struktur', 'update')) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
@@ -48,7 +50,7 @@ export async function DELETE(
       include: { role: true }
     })
 
-    if (!user?.role.permissions.includes('{"resource":"struktur","action":"delete"}')) {
+    if (!checkPermission(user as any, 'struktur', 'delete')) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 

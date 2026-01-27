@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { db } from '@/lib/db'
 import { authOptions } from '@/lib/auth/config'
+import { checkPermission } from '@/lib/auth/rbac'
 
 export async function GET(request: NextRequest) {
   try {
@@ -28,7 +29,7 @@ export async function POST(request: NextRequest) {
       include: { role: true }
     })
 
-    if (!user?.role.permissions.includes('{"resource":"struktur","action":"create"}')) {
+    if (!checkPermission(user as any, 'struktur', 'create')) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
