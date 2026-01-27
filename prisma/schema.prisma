@@ -1,0 +1,242 @@
+// This is your Prisma schema file,
+// DKM Al-Muhajirin Ragas Grenyang - Complete Management System
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Roles for RBAC System
+model Role {
+  id          String @id @default(cuid())
+  name        String @unique
+  description String?
+  permissions String // JSON string of permissions
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  users User[]
+}
+
+// Users with role-based access
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String
+  phone     String?
+  address   String?
+  avatar    String?
+  isActive  Boolean  @default(true)
+  roleId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  role         Role @relation(fields: [roleId], references: [id])
+  auditLogs    AuditLog[]
+  
+  @@map("users")
+}
+
+// Organizational Structure
+model StrukturOrganisasi {
+  id          String   @id @default(cuid())
+  name        String
+  position    String
+  description String?
+  image       String?
+  order       Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@map("struktur_organisasi")
+}
+
+// Family Heads (Kepala Keluarga)
+model JamaahKepalaKeluarga {
+  id          String   @id @default(cuid())
+  nik         String   @unique
+  name        String
+  address     String
+  phone       String?
+  familyCount Int      @default(1)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@map("jamaah_kepala_keluarga")
+}
+
+// Youth Members (Remaja)
+model JamaahRemaja {
+  id          String   @id @default(cuid())
+  name        String
+  address     String
+  phone       String?
+  birthDate   DateTime?
+  education   String?
+  skills      String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@map("jamaah_remaja")
+}
+
+// Needy Groups (Kaum Dhuafa)
+model KaumDhuafa {
+  id          String   @id @default(cuid())
+  name        String
+  type        String // janda, guru_ngaji, fakir_miskin, yatim, yatim_piatu, fisabilillah
+  address     String
+  phone       String?
+  nik         String?
+  description String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@map("kaum_dhuafa")
+}
+
+// Activities
+model Kegiatan {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  date        DateTime
+  location    String?
+  image       String?
+  status      String   @default("pending") // pending, approved, rejected
+  createdBy   String
+  approvedBy  String?
+  approvedAt  DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@map("kegiatan")
+}
+
+// Income (Pemasukan)
+model KeuanganPemasukan {
+  id          String   @id @default(cuid())
+  amount      Float    // Total Jumlah
+  source      String   // Sumber Dana (infak, zakat, dll)
+  sourceUnit  String?  // Unit Sumber (misal: Dus, Box)
+  qty         Float    @default(1)
+  unitPrice   Float    // Nominal per unit
+  description String?  // Keterangan
+  date        DateTime
+  createdBy   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@map("keuangan_pemasukan")
+}
+
+// Expenses (Pengeluaran)
+model KeuanganPengeluaran {
+  id          String   @id @default(cuid())
+  itemName    String   // Nama Barang / Jenis Pengeluaran
+  amount      Float    // Total
+  unitPrice   Float    // Satuan Harga
+  qty         Float    @default(1)
+  unitType    String?  // Satuan (kg, pcs, dll)
+  category    String   // Kategori (operasional, kegiatan, dll)
+  description String?  // Keterangan
+  date        DateTime
+  createdBy   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@map("keuangan_pengeluaran")
+}
+
+// Financial Reports
+model LaporanKeuangan {
+  id          String   @id @default(cuid())
+  title       String
+  period      String // monthly, yearly, custom
+  startDate   DateTime
+  endDate     DateTime
+  totalIncome Float
+  totalExpense Float
+  fileUrl     String?
+  status      String   @default("pending") // pending, approved, rejected
+  createdBy   String
+  approvedBy  String?
+  approvedAt  DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@map("laporan_keuangan")
+}
+
+// News/Announcements
+model Berita {
+  id          String   @id @default(cuid())
+  title       String
+  content     String
+  image       String?
+  status      String   @default("pending") // pending, approved, rejected
+  createdBy   String
+  approvedBy  String?
+  approvedAt  DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@map("berita")
+}
+
+// Gallery
+model Galeri {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  imageUrl    String
+  type        String   @default("foto") // foto, video
+  category    String? // kegiatan, masjid, umum
+  createdBy   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@map("galeri")
+}
+
+// Contact Messages
+model KontakMasuk {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  phone     String?
+  subject   String
+  message   String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@map("kontak_masuk")
+}
+
+// Audit Logs
+model AuditLog {
+  id          String   @id @default(cuid())
+  userId      String
+  action      String
+  table       String?
+  recordId    String?
+  oldValues   String? // JSON
+  newValues   String? // JSON
+  ipAddress   String?
+  userAgent   String?
+  createdAt   DateTime @default(now())
+  
+  user User @relation(fields: [userId], references: [id])
+  
+  @@map("audit_logs")
+}
