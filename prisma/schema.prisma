@@ -241,3 +241,20 @@ model AuditLog {
   
   @@map("audit_logs")
 }
+
+// Homepage Content Management
+model HomepageContent {
+  id          String   @id @default(cuid())
+  section     String   @unique // hero, about, stats, contact, footer
+  title       String?
+  subtitle    String?
+  description String?
+  content     String?  // JSON string for complex data
+  imageUrl    String?
+  isActive    Boolean  @default(true)
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@map("homepage_content")
+}
