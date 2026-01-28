@@ -18,8 +18,8 @@ export function Footer() {
           {/* Masjid Info */}
           <div className="space-y-4">
             <div className="flex items-center space-x-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                <Building className="h-5 w-5" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white overflow-hidden shadow-sm">
+                <img src="/logo.jpg" alt="Logo Al-Muhajirin" className="h-full w-full object-cover" />
               </div>
               <div>
                 <h3 className="font-semibold text-foreground">
