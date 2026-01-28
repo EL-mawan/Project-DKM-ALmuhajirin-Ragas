@@ -16,14 +16,15 @@ import {
   Calendar,
   Layers,
   Edit2,
-  MoreVertical
+  MoreVertical,
+  Loader2
 } from 'lucide-react'
 import { AdminLayout } from '@/components/layout/admin-layout'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { cn } from '@/lib/utils'
+import { cn, formatCurrency } from '@/lib/utils'
 
 export default function KeuanganAdmin() {
   const [loading, setLoading] = useState(true)
@@ -32,6 +33,7 @@ export default function KeuanganAdmin() {
   const [activeTab, setActiveTab] = useState('income')
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingItem, setEditingItem] = useState<any>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const [formData, setFormData] = useState({
     type: 'income',
     date: new Date().toISOString().slice(0, 16),
@@ -77,6 +79,7 @@ export default function KeuanganAdmin() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     try {
+      setIsSubmitting(true)
       const url = editingItem ? `/api/admin/keuangan/${editingItem.id}` : '/api/admin/keuangan'
       const method = editingItem ? 'PATCH' : 'POST'
 
@@ -97,6 +100,8 @@ export default function KeuanganAdmin() {
       }
     } catch (error) {
       toast.error('Terjadi kesalahan')
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -168,19 +173,19 @@ export default function KeuanganAdmin() {
           <Card className="rounded-[2.5rem] border-none shadow-sm bg-emerald-50/50">
             <CardContent className="p-8">
               <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">Total Pemasukan</p>
-              <h3 className="text-3xl font-black text-[#0b3d2e] mt-1">Rp {(data.income?.total || 0).toLocaleString('id-ID')}</h3>
+              <h3 className="text-3xl font-black text-[#0b3d2e] mt-1">{formatCurrency(data.income?.total || 0)}</h3>
             </CardContent>
           </Card>
           <Card className="rounded-[2.5rem] border-none shadow-sm bg-rose-50/50">
             <CardContent className="p-8">
               <p className="text-[10px] font-black text-rose-600 uppercase tracking-widest">Total Pengeluaran</p>
-              <h3 className="text-3xl font-black text-[#0b3d2e] mt-1">Rp {(data.expense?.total || 0).toLocaleString('id-ID')}</h3>
+              <h3 className="text-3xl font-black text-[#0b3d2e] mt-1">{formatCurrency(data.expense?.total || 0)}</h3>
             </CardContent>
           </Card>
           <Card className="rounded-[2.5rem] border-none shadow-sm bg-indigo-50/50">
             <CardContent className="p-8">
               <p className="text-[10px] font-black text-indigo-600 uppercase tracking-widest">Saldo Akhir</p>
-              <h3 className="text-3xl font-black text-[#0b3d2e] mt-1">Rp {(data.balance || 0).toLocaleString('id-ID')}</h3>
+              <h3 className="text-3xl font-black text-[#0b3d2e] mt-1">{formatCurrency(data.balance || 0)}</h3>
             </CardContent>
           </Card>
         </div>
@@ -389,9 +394,13 @@ export default function KeuanganAdmin() {
                   </Button>
                   <Button 
                     type="submit" 
+                    disabled={isSubmitting}
                     className="flex-[2] h-16 rounded-[1.5rem] font-black bg-[#0b3d2e] hover:bg-[#062c21] shadow-2xl shadow-emerald-900/10 text-white uppercase tracking-widest"
                   >
-                    {editingItem ? 'Simpan Perubahan' : 'Simpan Transaksi'}
+                    {isSubmitting ? (
+                      <Loader2 className="h-5 w-5 animate-spin mr-2" />
+                    ) : null}
+                    {isSubmitting ? 'Memproses...' : (editingItem ? 'Simpan Perubahan' : 'Simpan Transaksi')}
                   </Button>
                 </div>
               </form>
@@ -482,7 +491,7 @@ export default function KeuanganAdmin() {
                         </td>
                         <td className="px-10 py-8">
                           <div className={cn("text-lg font-black tracking-tight", tx.txType === 'income' ? "text-emerald-600" : "text-rose-600")}>
-                            {tx.txType === 'income' ? '+' : '-'} Rp {tx.amount.toLocaleString('id-ID')}
+                            {tx.txType === 'income' ? '+' : '-'} {formatCurrency(tx.amount)}
                           </div>
                         </td>
                         <td className="px-10 py-8 text-right">

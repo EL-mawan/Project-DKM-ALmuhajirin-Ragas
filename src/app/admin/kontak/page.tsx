@@ -10,7 +10,8 @@ import {
   MessageSquare,
   Mail,
   User,
-  Clock
+  Clock,
+  Loader2
 } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { toast } from 'sonner'
@@ -20,6 +21,7 @@ export default function KontakAdmin() {
   const [loading, setLoading] = useState(true)
   const [data, setData] = useState([])
   const [search, setSearch] = useState('')
+  const [deletingId, setDeletingId] = useState<string | null>(null)
 
   const fetchData = async () => {
     try {
@@ -41,6 +43,7 @@ export default function KontakAdmin() {
   const handleDelete = async (id: string) => {
     if (!confirm('Hapus pesan ini?')) return
     try {
+      setDeletingId(id)
       const res = await fetch(`/api/admin/kontak/${id}`, { method: 'DELETE' })
       if (res.ok) {
         toast.success('Pesan dihapus')
@@ -48,6 +51,8 @@ export default function KontakAdmin() {
       }
     } catch (error) {
       toast.error('Gagal menghapus pesan')
+    } finally {
+      setDeletingId(null)
     }
   }
 
@@ -122,10 +127,15 @@ export default function KontakAdmin() {
                           <Button 
                             variant="ghost" 
                             size="icon" 
+                            disabled={deletingId === item.id}
                             className="rounded-xl h-10 w-10 text-rose-400 hover:bg-rose-50 hover:text-rose-600"
                             onClick={() => handleDelete(item.id)}
                           >
-                            <Trash2 className="h-4 w-4" />
+                            {deletingId === item.id ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <Trash2 className="h-4 w-4" />
+                            )}
                           </Button>
                         </td>
                       </tr>

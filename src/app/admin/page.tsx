@@ -39,7 +39,7 @@ import { signOut } from 'next-auth/react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { AdminLayout } from '@/components/layout/admin-layout'
 import { ADMIN_MENU_ITEMS } from '@/lib/constants/admin-nav'
-import { cn } from '@/lib/utils'
+import { cn, formatCurrency } from '@/lib/utils'
 
 export default function AdminDashboard() {
   const { data: session, status } = useSession()
@@ -89,9 +89,9 @@ export default function AdminDashboard() {
           title: 'Manajemen Perbendaharaan',
           welcome: 'Pantau arus kas dan transparansi dana umat.',
           stats: [
-            { label: 'Pemasukan/Bln', value: 'Rp 45.2Jt', icon: ArrowUpRight, color: 'text-emerald-500' },
-            { label: 'Pengeluaran/Bln', value: 'Rp 32.8Jt', icon: ArrowDownRight, color: 'text-rose-500' },
-            { label: 'Saldo Aktif', value: 'Rp 142.5Jt', icon: DollarSign, color: 'text-primary' },
+            { label: 'Pemasukan/Bln', value: formatCurrency(45200000), icon: ArrowUpRight, color: 'text-emerald-500' },
+            { label: 'Pengeluaran/Bln', value: formatCurrency(32800000), icon: ArrowDownRight, color: 'text-rose-500' },
+            { label: 'Saldo Aktif', value: formatCurrency(142500000), icon: DollarSign, color: 'text-primary' },
             { label: 'Laporan Pending', value: '2', icon: AlertCircle, color: 'text-amber-500' }
           ]
         }
@@ -226,7 +226,7 @@ export default function AdminDashboard() {
                 <h3 className="text-lg font-bold text-[#0b3d2e]">Aktivitas Terupdate</h3>
                 <Button variant="link" className="text-primary font-bold">Lensa Audit</Button>
               </div>
-              <div className="bg-white rounded-[2.5rem] sm:rounded-[2rem] border border-neutral-100 overflow-hidden shadow-sm">
+              <div className="bg-white rounded-[2.5rem] sm:rounded-4xl border border-neutral-100 overflow-hidden shadow-sm">
                 {[1, 2, 3, 4].map((i) => (
                   <div key={i} className="p-5 flex items-center justify-between border-b border-neutral-50 last:border-0 hover:bg-neutral-50 transition-colors">
                     <div className="flex items-center space-x-4">
@@ -250,7 +250,7 @@ export default function AdminDashboard() {
           {/* Quick Actions Card (Desktop Only) */}
           <div className="hidden lg:block space-y-6">
             <h3 className="text-lg font-bold text-[#0b3d2e]">Shortcut Kendali</h3>
-            <div className="bg-gradient-to-br from-[#0b3d2e] to-[#0b3d2e]/90 rounded-[2rem] p-8 text-white shadow-xl shadow-[#0b3d2e]/20 space-y-6">
+            <div className="bg-linear-to-br from-[#0b3d2e] to-[#0b3d2e]/90 rounded-4xl p-8 text-white shadow-xl shadow-[#0b3d2e]/20 space-y-6">
               <p className="text-sm font-medium opacity-90 leading-relaxed">
                 Butuh bantuan pengelolaan? Akses modul utama dengan cepat melalui tombol dibawah ini sesuai kewenangan Anda.
               </p>

@@ -13,7 +13,8 @@ import {
   MapPin,
   Phone,
   Home,
-  GraduationCap
+  GraduationCap,
+  Loader2
 } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { toast } from 'sonner'
@@ -29,6 +30,7 @@ export default function JamaahAdmin() {
   const [activeTab, setActiveTab] = useState('kk')
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingItem, setEditingItem] = useState<any>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
   
   const [formData, setFormData] = useState({
     name: '',
@@ -72,6 +74,7 @@ export default function JamaahAdmin() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     try {
+      setIsSubmitting(true)
       const url = editingItem ? `/api/admin/jamaah/${editingItem.id}` : '/api/admin/jamaah'
       const method = editingItem ? 'PATCH' : 'POST'
 
@@ -107,6 +110,8 @@ export default function JamaahAdmin() {
       }
     } catch (error) {
       toast.error('Terjadi kesalahan')
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -273,8 +278,13 @@ export default function JamaahAdmin() {
                     />
                   </div>
                 )}
-                <Button type="submit" className="w-full rounded-2xl py-6 font-bold mt-4 shadow-lg shadow-primary/20">
-                  {editingItem ? 'Simpan Perubahan' : 'Simpan Data'}
+                <Button 
+                  type="submit" 
+                  disabled={isSubmitting}
+                  className="w-full rounded-2xl py-6 font-bold mt-4 shadow-lg shadow-primary/20"
+                >
+                  {isSubmitting && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+                  {isSubmitting ? 'Memproses...' : (editingItem ? 'Simpan Perubahan' : 'Simpan Data')}
                 </Button>
               </form>
             </DialogContent>

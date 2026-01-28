@@ -11,7 +11,8 @@ import {
   Trash2, 
   User,
   Mail,
-  Shield
+  Shield,
+  Loader2
 } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { toast } from 'sonner'
@@ -27,6 +28,7 @@ export default function UsersAdmin() {
   const [search, setSearch] = useState('')
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingUser, setEditingUser] = useState<any>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -63,6 +65,7 @@ export default function UsersAdmin() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     try {
+      setIsSubmitting(true)
       const url = editingUser ? `/api/admin/users/${editingUser.id}` : '/api/admin/users'
       const method = editingUser ? 'PUT' : 'POST'
 
@@ -84,6 +87,8 @@ export default function UsersAdmin() {
       }
     } catch (error) {
       toast.error('Terjadi kesalahan')
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -203,8 +208,13 @@ export default function UsersAdmin() {
                     </Select>
                   </div>
                 </div>
-                <Button type="submit" className="w-full rounded-2xl py-6 font-bold mt-4">
-                  {editingUser ? 'Simpan Perubahan' : 'Buat Akun'}
+                <Button 
+                  type="submit" 
+                  disabled={isSubmitting}
+                  className="w-full rounded-2xl py-6 font-bold mt-4"
+                >
+                  {isSubmitting && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+                  {isSubmitting ? 'Memproses...' : (editingUser ? 'Simpan Perubahan' : 'Buat Akun')}
                 </Button>
               </form>
             </DialogContent>

@@ -23,6 +23,8 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 
+import { cn, formatCurrency } from '@/lib/utils'
+
 export default function Home() {
   const [data, setData] = useState<any>(null)
   const [loading, setLoading] = useState(true)
@@ -284,9 +286,9 @@ export default function Home() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto mb-16">
             {[
-              { label: 'Pemasukan Total', value: loading ? '...' : `Rp ${((data?.keuangan?.totalIncome || 0) / 1000000).toFixed(1)}Jt`, delta: '+12%', color: 'text-emerald-500' },
-              { label: 'Pengeluaran Total', value: loading ? '...' : `Rp ${((data?.keuangan?.totalExpense || 0) / 1000000).toFixed(1)}Jt`, delta: '+8%', color: 'text-amber-500' },
-              { label: 'Saldo Kas Masjid', value: loading ? '...' : `Rp ${((data?.keuangan?.balance || 0) / 1000000).toFixed(1)}Jt`, delta: 'Stabil', color: 'text-primary' }
+              { label: 'Pemasukan Total', value: loading ? '...' : formatCurrency(data?.keuangan?.totalIncome || 0), delta: '+12%', color: 'text-emerald-500' },
+              { label: 'Pengeluaran Total', value: loading ? '...' : formatCurrency(data?.keuangan?.totalExpense || 0), delta: '+8%', color: 'text-amber-500' },
+              { label: 'Saldo Kas Masjid', value: loading ? '...' : formatCurrency(data?.keuangan?.balance || 0), delta: 'Stabil', color: 'text-primary' }
             ].map((item, index) => (
               <div key={index} className="p-10 rounded-[2.5rem] bg-background border border-border/50 shadow-xl shadow-primary/5 relative group">
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1/2 h-1 bg-primary scale-x-0 group-hover:scale-x-100 transition-transform duration-500" />

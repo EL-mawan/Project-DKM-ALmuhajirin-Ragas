@@ -4,13 +4,13 @@ import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Plus, Search, FileText, Download, Trash2, Eye, Calendar, DollarSign, ArrowUpCircle, ArrowDownCircle, Printer } from 'lucide-react'
+import { Plus, Search, FileText, Download, Trash2, Eye, Calendar, DollarSign, ArrowUpCircle, ArrowDownCircle, Printer, Loader2 } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { AdminLayout } from '@/components/layout/admin-layout'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
 import { toast } from 'sonner'
-import { cn } from '@/lib/utils'
+import { cn, formatCurrency } from '@/lib/utils'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 
@@ -23,6 +23,7 @@ export default function LaporanAdmin() {
   const [isFetching, setIsFetching] = useState(false)
   const [transactions, setTransactions] = useState({ income: [], expense: [] })
   const [isExportingPDF, setIsExportingPDF] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
   
   const [formData, setFormData] = useState({
     title: '',
@@ -160,6 +161,7 @@ export default function LaporanAdmin() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     try {
+      setIsSubmitting(true)
       const res = await fetch('/api/admin/laporan', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -176,6 +178,8 @@ export default function LaporanAdmin() {
       }
     } catch (error) {
       toast.error('Terjadi kesalahan')
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -374,8 +378,10 @@ export default function LaporanAdmin() {
                   <Button 
                     className="flex-1 h-12 sm:h-14 rounded-2xl font-bold bg-[#0b3d2e] hover:bg-[#062c21] shadow-xl shadow-emerald-900/10 text-white border-none order-2 sm:order-3"
                     onClick={handleSubmit}
+                    disabled={isSubmitting}
                   >
-                    Simpan Draft
+                    {isSubmitting && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+                    {isSubmitting ? 'Menyimpan...' : 'Simpan Draft'}
                   </Button>
                 </div>
               </DialogContent>
@@ -442,12 +448,12 @@ export default function LaporanAdmin() {
                         </td>
                         <td className="px-8 py-6">
                            <div className="flex flex-col space-y-1">
-                             <div className="text-[10px] font-black text-emerald-600 flex items-center">
-                               <ArrowUpCircle className="h-3 w-3 mr-1" /> Rp {report.totalIncome?.toLocaleString('id-ID') || 0}
-                             </div>
-                             <div className="text-[10px] font-black text-rose-600 flex items-center">
-                               <ArrowDownCircle className="h-3 w-3 mr-1" /> Rp {report.totalExpense?.toLocaleString('id-ID') || 0}
-                             </div>
+                              <div className="text-[10px] font-black text-emerald-600 flex items-center">
+                                <ArrowUpCircle className="h-3 w-3 mr-1" /> {formatCurrency(report.totalIncome || 0)}
+                              </div>
+                              <div className="text-[10px] font-black text-rose-600 flex items-center">
+                                <ArrowDownCircle className="h-3 w-3 mr-1" /> {formatCurrency(report.totalExpense || 0)}
+                              </div>
                            </div>
                         </td>
                         <td className="px-8 py-6 text-right">

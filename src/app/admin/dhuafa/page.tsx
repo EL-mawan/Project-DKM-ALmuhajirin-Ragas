@@ -12,7 +12,8 @@ import {
   Heart,
   User,
   MapPin,
-  Phone
+  Phone,
+  Loader2
 } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { toast } from 'sonner'
@@ -28,6 +29,7 @@ export default function DhuafaAdmin() {
   const [search, setSearch] = useState('')
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingItem, setEditingItem] = useState<any>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const [formData, setFormData] = useState({
     nomor: '',
     name: '',
@@ -64,6 +66,7 @@ export default function DhuafaAdmin() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     try {
+      setIsSubmitting(true)
       const url = editingItem ? `/api/admin/dhuafa/${editingItem.id}` : '/api/admin/dhuafa'
       const method = editingItem ? 'PATCH' : 'POST'
 
@@ -85,6 +88,8 @@ export default function DhuafaAdmin() {
       }
     } catch (error) {
       toast.error('Terjadi kesalahan sistem')
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -215,8 +220,13 @@ export default function DhuafaAdmin() {
                     onChange={e => setFormData({...formData, address: e.target.value})}
                   />
                 </div>
-                <Button type="submit" className="w-full rounded-2xl py-6 font-bold mt-4 shadow-lg shadow-primary/20">
-                  {editingItem ? 'Simpan Perubahan' : 'Daftarkan Penerima'}
+                <Button 
+                  type="submit" 
+                  disabled={isSubmitting}
+                  className="w-full rounded-2xl py-6 font-bold mt-4 shadow-lg shadow-primary/20"
+                >
+                  {isSubmitting && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+                  {isSubmitting ? 'Memproses...' : (editingItem ? 'Simpan Perubahan' : 'Daftarkan Penerima')}
                 </Button>
               </form>
             </DialogContent>

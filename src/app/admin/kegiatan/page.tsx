@@ -14,7 +14,8 @@ import {
   Calendar,
   MapPin,
   Clock,
-  Filter
+  Filter,
+  Loader2
 } from 'lucide-react'
 import { 
   DropdownMenu, 
@@ -53,6 +54,7 @@ export default function KegiatanAdmin() {
   const [search, setSearch] = useState('')
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingItem, setEditingItem] = useState<Kegiatan | null>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const [formData, setFormData] = useState<any>({
     title: '',
@@ -110,6 +112,7 @@ export default function KegiatanAdmin() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     try {
+      setIsSubmitting(true)
       const url = editingItem ? `/api/admin/kegiatan/${editingItem.id}` : '/api/admin/kegiatan'
       const method = editingItem ? 'PATCH' : 'POST'
 
@@ -152,6 +155,8 @@ export default function KegiatanAdmin() {
       }
     } catch (error) {
       toast.error('Terjadi kesalahan sistem')
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -423,8 +428,13 @@ export default function KegiatanAdmin() {
                     />
                   </div>
                 </div>
-                <Button type="submit" className="w-full rounded-4xl py-8 font-black uppercase tracking-widest shadow-2xl shadow-emerald-900/10 text-white bg-[#0b3d2e] hover:bg-[#062c21]">
-                  {editingItem ? 'Simpan Perubahan' : 'Terbitkan Kegiatan'}
+                <Button 
+                  type="submit" 
+                  disabled={isSubmitting}
+                  className="w-full rounded-4xl py-8 font-black uppercase tracking-widest shadow-2xl shadow-emerald-900/10 text-white bg-[#0b3d2e] hover:bg-[#062c21]"
+                >
+                  {isSubmitting && <Loader2 className="h-5 w-5 animate-spin mr-2" />}
+                  {isSubmitting ? 'Memproses...' : (editingItem ? 'Simpan Perubahan' : 'Terbitkan Kegiatan')}
                 </Button>
               </form>
             </DialogContent>

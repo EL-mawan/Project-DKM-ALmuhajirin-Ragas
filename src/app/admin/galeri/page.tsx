@@ -12,7 +12,8 @@ import {
   Image as ImageIcon,
   ExternalLink,
   Film,
-  Camera
+  Camera,
+  Loader2
 } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { toast } from 'sonner'
@@ -27,6 +28,7 @@ export default function GaleriAdmin() {
   const [search, setSearch] = useState('')
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingItem, setEditingItem] = useState<any>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
   
   const [formData, setFormData] = useState({
     title: '',
@@ -55,6 +57,7 @@ export default function GaleriAdmin() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     try {
+      setIsSubmitting(true)
       const url = editingItem ? `/api/admin/galeri/${editingItem.id}` : '/api/admin/galeri'
       const method = editingItem ? 'PATCH' : 'POST'
 
@@ -74,6 +77,8 @@ export default function GaleriAdmin() {
       }
     } catch (error) {
       toast.error('Terjadi kesalahan')
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -181,8 +186,13 @@ export default function GaleriAdmin() {
                     </div>
                   </div>
                 </div>
-                <Button type="submit" className="w-full rounded-2xl py-6 font-bold mt-4 shadow-lg shadow-primary/20">
-                  {editingItem ? 'Simpan Perubahan' : 'Simpan Media'}
+                <Button 
+                  type="submit" 
+                  disabled={isSubmitting}
+                  className="w-full rounded-2xl py-6 font-bold mt-4 shadow-lg shadow-primary/20"
+                >
+                  {isSubmitting && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+                  {isSubmitting ? 'Memproses...' : (editingItem ? 'Simpan Perubahan' : 'Simpan Media')}
                 </Button>
               </form>
             </DialogContent>

@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { toast } from 'sonner'
-import { Plus, Search, Edit2, Trash2, Globe, Lock, Eye, Newspaper } from 'lucide-react'
+import { Plus, Search, Edit2, Trash2, Globe, Lock, Eye, Newspaper, Loader2 } from 'lucide-react'
 import { AdminLayout } from '@/components/layout/admin-layout'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
@@ -19,6 +19,7 @@ export default function BeritaAdmin() {
   const [search, setSearch] = useState('')
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingArticle, setEditingArticle] = useState<any>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const [formData, setFormData] = useState({
     title: '',
     content: '',
@@ -47,6 +48,7 @@ export default function BeritaAdmin() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     try {
+      setIsSubmitting(true)
       const url = editingArticle ? `/api/admin/berita/${editingArticle.id}` : '/api/admin/berita'
       const method = editingArticle ? 'PATCH' : 'POST'
 
@@ -67,6 +69,8 @@ export default function BeritaAdmin() {
       }
     } catch (error) {
       toast.error('Terjadi kesalahan')
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -182,8 +186,13 @@ export default function BeritaAdmin() {
                     />
                   </div>
                 </div>
-                <Button type="submit" className="w-full rounded-2xl py-6 font-bold mt-4">
-                  {editingArticle ? 'Simpan Perubahan' : 'Terbitkan Sekarang'}
+                 <Button 
+                  type="submit" 
+                  disabled={isSubmitting}
+                  className="w-full rounded-2xl py-6 font-bold mt-4"
+                >
+                  {isSubmitting && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+                  {isSubmitting ? 'Memproses...' : (editingArticle ? 'Simpan Perubahan' : 'Terbitkan Sekarang')}
                 </Button>
               </form>
             </DialogContent>
