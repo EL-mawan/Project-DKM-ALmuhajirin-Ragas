@@ -168,20 +168,20 @@ export default function JamaahAdmin() {
       <div className="p-6 sm:p-8 space-y-6">
         {/* Statistics Cards - Only for KK */}
         {activeTab === 'kk' && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Card className="rounded-[2rem] border-none shadow-sm bg-emerald-50/50">
+          <div className="flex gap-4 overflow-x-auto pb-2 snap-x snap-mandatory md:grid md:grid-cols-3">
+            <Card className="rounded-4xl border-none shadow-sm bg-emerald-50/50 min-w-[280px] snap-center md:min-w-0">
               <CardContent className="p-6">
                 <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">RT 015</p>
                 <h3 className="text-3xl font-black text-[#0b3d2e] mt-1">{rt015Count} KK</h3>
               </CardContent>
             </Card>
-            <Card className="rounded-[2rem] border-none shadow-sm bg-blue-50/50">
+            <Card className="rounded-4xl border-none shadow-sm bg-blue-50/50 min-w-[280px] snap-center md:min-w-0">
               <CardContent className="p-6">
                 <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest">RT 016</p>
                 <h3 className="text-3xl font-black text-[#0b3d2e] mt-1">{rt016Count} KK</h3>
               </CardContent>
             </Card>
-            <Card className="rounded-[2rem] border-none shadow-sm bg-indigo-50/50">
+            <Card className="rounded-4xl border-none shadow-sm bg-indigo-50/50 min-w-[280px] snap-center md:min-w-0">
               <CardContent className="p-6">
                 <p className="text-[10px] font-black text-indigo-600 uppercase tracking-widest">Total Warga</p>
                 <h3 className="text-3xl font-black text-[#0b3d2e] mt-1">{totalCount} KK</h3>

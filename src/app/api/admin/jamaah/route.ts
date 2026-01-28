@@ -45,6 +45,40 @@ export async function POST(request: NextRequest) {
       if (!user || !checkPermission(user as any, 'jamaah_kepala_keluarga', 'create')) {
         return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
       }
+
+      // Check if nomor+RT combination already exists
+      const existingWithSameNomorRT = await db.jamaahKepalaKeluarga.findFirst({
+        where: {
+          nomor,
+          rt
+        }
+      })
+
+      // If duplicate nomor+RT exists, increment all records with same or higher nomor in that RT
+      if (existingWithSameNomorRT) {
+        // Get all records with nomor >= current nomor in the same RT, ordered by nomor descending
+        const recordsToUpdate = await db.jamaahKepalaKeluarga.findMany({
+          where: {
+            rt,
+            nomor: {
+              gte: nomor
+            }
+          },
+          orderBy: {
+            nomor: 'desc'
+          }
+        })
+
+        // Update each record's nomor by incrementing it
+        for (const record of recordsToUpdate) {
+          const newNomor = (parseInt(record.nomor) + 1).toString().padStart(record.nomor.length, '0')
+          await db.jamaahKepalaKeluarga.update({
+            where: { id: record.id },
+            data: { nomor: newNomor }
+          })
+        }
+      }
+
       const newItem = await db.jamaahKepalaKeluarga.create({
         data: {
           nomor,
@@ -52,7 +86,8 @@ export async function POST(request: NextRequest) {
           name,
           rt,
           rw,
-          keterangan
+          keterangan,
+          phone
         }
       })
       return NextResponse.json(newItem, { status: 201 })
