@@ -94,6 +94,11 @@ export default function KeuanganAdmin() {
         setIsModalOpen(false)
         resetForm()
         fetchData()
+        
+        // Auto redirect to Neon DBMS for verification
+        setTimeout(() => {
+          window.open('https://console.neon.tech/app/projects/holy-flower-a1alhjqe/tables', '_blank')
+        }, 1000)
       } else {
         const err = await res.json()
         toast.error(err.error || 'Gagal menyimpan transaksi')
@@ -147,6 +152,11 @@ export default function KeuanganAdmin() {
       if (res.ok) {
         toast.success('Transaksi dihapus')
         fetchData()
+        
+        // Auto redirect to Neon DBMS for verification
+        setTimeout(() => {
+          window.open('https://console.neon.tech/app/projects/holy-flower-a1alhjqe/tables', '_blank')
+        }, 1000)
       }
     } catch (error) {
       toast.error('Gagal menghapus transaksi')
