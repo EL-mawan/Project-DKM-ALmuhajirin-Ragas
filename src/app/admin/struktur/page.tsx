@@ -75,7 +75,7 @@ export default function StrukturAdmin() {
         
         // Auto redirect to Neon DBMS for verification
         setTimeout(() => {
-          window.open('https://console.neon.tech/app/projects/holy-flower-a1alhjqe/tables', '_blank')
+          window.open('https://console.neon.tech/app/projects/blue-truth-a1k6q73b/tables', '_blank')
         }, 1000)
       } else {
         const err = await res.json()
@@ -98,7 +98,7 @@ export default function StrukturAdmin() {
         
         // Auto redirect to Neon DBMS for verification
         setTimeout(() => {
-          window.open('https://console.neon.tech/app/projects/holy-flower-a1alhjqe/tables', '_blank')
+          window.open('https://console.neon.tech/app/projects/blue-truth-a1k6q73b/tables', '_blank')
         }, 1000)
       }
     } catch (error) {
