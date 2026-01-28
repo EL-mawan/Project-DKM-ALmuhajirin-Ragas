@@ -67,8 +67,8 @@ export function Header() {
         <div className="flex h-20 items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-3 group outline-none">
-            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white overflow-hidden shadow-lg shadow-primary/20 group-hover:scale-105 transition-transform">
-              <img src="/logo.jpg" alt="Logo Al-Muhajirin" className="h-full w-full object-cover" />
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white p-1.5 overflow-hidden shadow-lg shadow-primary/20 group-hover:scale-105 transition-transform">
+              <img src="/logo.jpg" alt="Logo Al-Muhajirin" className="h-full w-full object-contain" />
             </div>
             <div className="hidden lg:block leading-tight">
               <h1 className="text-lg font-bold tracking-tight text-foreground">
@@ -154,8 +154,8 @@ export function Header() {
                 <div className="flex flex-col h-full">
                   <div className="p-6 border-b border-border/50">
                     <Link href="/" className="flex items-center space-x-3" onClick={() => setIsMenuOpen(false)}>
-                      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white overflow-hidden shadow-md">
-                        <img src="/logo.jpg" alt="Logo Al-Muhajirin" className="h-full w-full object-cover" />
+                      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white p-1 overflow-hidden shadow-md">
+                        <img src="/logo.jpg" alt="Logo Al-Muhajirin" className="h-full w-full object-contain" />
                       </div>
                       <div>
                         <h2 className="text-lg font-bold text-foreground">Al-Muhajirin</h2>
