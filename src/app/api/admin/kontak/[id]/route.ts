@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { db } from '@/lib/db'
 import { authOptions } from '@/lib/auth/config'
+import { checkPermission } from '@/lib/auth/rbac'
 
 export async function DELETE(
   request: NextRequest,
@@ -12,11 +13,11 @@ export async function DELETE(
     if (!session || !session.user?.email) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
     const user = await db.user.findUnique({
-      where: { email: session.user.email },
+      where: { email: session.user.email || '' },
       include: { role: true }
     })
 
-    if (!user?.role.permissions.includes('{"resource":"kontak","action":"delete"}')) {
+    if (!user || !checkPermission(user as any, 'kontak', 'delete')) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 

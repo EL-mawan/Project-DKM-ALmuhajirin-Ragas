@@ -3,10 +3,21 @@ import { getServerSession } from 'next-auth'
 import { db } from '@/lib/db'
 import { authOptions } from '@/lib/auth/config'
 
+import { checkPermission } from '@/lib/auth/rbac'
+
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
-    if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    if (!session || !session.user?.email) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+    const user = await db.user.findUnique({
+      where: { email: session.user.email || '' },
+      include: { role: true }
+    })
+
+    if (!user || !checkPermission(user as any, 'berita', 'read')) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
 
     const berita = await db.berita.findMany({
       orderBy: { createdAt: 'desc' }
@@ -24,11 +35,11 @@ export async function POST(request: NextRequest) {
     if (!session || !session.user?.email) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
     const user = await db.user.findUnique({
-      where: { email: session.user.email },
+      where: { email: session.user.email || '' },
       include: { role: true }
     })
 
-    if (!user?.role.permissions.includes('{"resource":"berita","action":"create"}')) {
+    if (!user || !checkPermission(user as any, 'berita', 'create')) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
@@ -44,9 +55,8 @@ export async function POST(request: NextRequest) {
         title,
         content,
         image,
-        category,
         status: status || 'draft',
-        authorId: user.id
+        createdBy: user.id
       }
     })
 

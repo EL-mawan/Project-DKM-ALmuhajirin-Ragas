@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { db } from '@/lib/db'
 import { authOptions } from '@/lib/auth/config'
+import { checkPermission } from '@/lib/auth/rbac'
 
 // GET /api/admin/kegiatan/[id] - Get specific activity
 export async function GET(
@@ -31,12 +32,31 @@ export async function PATCH(
 ) {
   try {
     const session = await getServerSession(authOptions)
-    if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    if (!session || !session.user?.email) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+    const user = await db.user.findUnique({
+      where: { email: session.user.email || '' },
+      include: { role: true }
+    })
+
+    if (!user || !checkPermission(user as any, 'kegiatan', 'update')) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
 
     const body = await request.json()
+    const { title, category, description, date, location, image, status } = body
+
     const updated = await db.kegiatan.update({
       where: { id: params.id },
-      data: body
+      data: {
+        title,
+        category,
+        description,
+        date: date ? new Date(date) : undefined,
+        location,
+        image,
+        status
+      }
     })
 
     return NextResponse.json(updated)
@@ -52,7 +72,16 @@ export async function DELETE(
 ) {
   try {
     const session = await getServerSession(authOptions)
-    if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    if (!session || !session.user?.email) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+    const user = await db.user.findUnique({
+      where: { email: session.user.email || '' },
+      include: { role: true }
+    })
+
+    if (!user || !checkPermission(user as any, 'kegiatan', 'delete')) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
 
     await db.kegiatan.delete({
       where: { id: params.id }

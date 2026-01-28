@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { db } from '@/lib/db'
 import { authOptions } from '@/lib/auth/config'
+import { checkPermission } from '@/lib/auth/rbac'
 
 // GET /api/admin/roles - Get all roles
 export async function GET(request: NextRequest) {
@@ -13,11 +14,11 @@ export async function GET(request: NextRequest) {
 
     // Check if user has permission to read roles
     const user = await db.user.findUnique({
-      where: { email: session.user.email },
+      where: { email: session.user.email || '' },
       include: { role: true }
     })
 
-    if (!user || !user.role.permissions.includes('{"resource":"roles","action":"read"}')) {
+    if (!user || !checkPermission(user as any, 'roles', 'read')) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
@@ -51,11 +52,11 @@ export async function POST(request: NextRequest) {
 
     // Check if user has permission to create roles
     const user = await db.user.findUnique({
-      where: { email: session.user.email },
+      where: { email: session.user.email || '' },
       include: { role: true }
     })
 
-    if (!user || !user.role.permissions.includes('{"resource":"roles","action":"create"}')) {
+    if (!user || !checkPermission(user as any, 'roles', 'create')) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 

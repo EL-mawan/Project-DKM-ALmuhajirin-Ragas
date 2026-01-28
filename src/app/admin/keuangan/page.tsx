@@ -206,8 +206,12 @@ export default function KeuanganAdmin() {
             </DialogTrigger>
             <DialogContent className="sm:max-w-[650px] p-0 overflow-hidden border-none rounded-[40px] shadow-2xl">
               <div className="p-8 bg-[#0b3d2e] text-white">
-                <DialogTitle className="text-2xl font-black tracking-tight">Input Transaksi Baru</DialogTitle>
-                <p className="text-emerald-100/60 text-xs mt-1">Lengkapi rincian keuangan masjid dengan teliti.</p>
+                <DialogTitle className="text-2xl font-black tracking-tight">
+                  {editingItem ? 'Edit Transaksi' : 'Input Transaksi Baru'}
+                </DialogTitle>
+                <p className="text-emerald-100/60 text-xs mt-1">
+                  {editingItem ? 'Perbarui rincian transaksi kas masjid.' : 'Lengkapi rincian keuangan masjid dengan teliti.'}
+                </p>
               </div>
 
               <form onSubmit={handleSubmit} className="p-8 space-y-6 max-h-[75vh] overflow-y-auto bg-white">
@@ -387,7 +391,7 @@ export default function KeuanganAdmin() {
                     type="submit" 
                     className="flex-[2] h-16 rounded-[1.5rem] font-black bg-[#0b3d2e] hover:bg-[#062c21] shadow-2xl shadow-emerald-900/10 text-white uppercase tracking-widest"
                   >
-                    Simpan Transaksi
+                    {editingItem ? 'Simpan Perubahan' : 'Simpan Transaksi'}
                   </Button>
                 </div>
               </form>

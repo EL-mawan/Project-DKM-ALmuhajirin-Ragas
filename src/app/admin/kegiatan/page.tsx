@@ -423,7 +423,7 @@ export default function KegiatanAdmin() {
                     />
                   </div>
                 </div>
-                <Button type="submit" className="w-full rounded-[2rem] py-8 font-black uppercase tracking-widest shadow-2xl shadow-emerald-900/10 text-white bg-[#0b3d2e] hover:bg-[#062c21]">
+                <Button type="submit" className="w-full rounded-4xl py-8 font-black uppercase tracking-widest shadow-2xl shadow-emerald-900/10 text-white bg-[#0b3d2e] hover:bg-[#062c21]">
                   {editingItem ? 'Simpan Perubahan' : 'Terbitkan Kegiatan'}
                 </Button>
               </form>

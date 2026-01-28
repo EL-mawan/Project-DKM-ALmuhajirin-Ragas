@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { db } from '@/lib/db'
 import { authOptions } from '@/lib/auth/config'
+import { checkPermission } from '@/lib/auth/rbac'
 
 export async function DELETE(
   request: NextRequest,
@@ -13,16 +14,16 @@ export async function DELETE(
 
     // Check permissions
     const user = await db.user.findUnique({
-      where: { email: session.user.email },
+      where: { email: session.user.email || '' },
       include: { role: true }
-    }) as any
+    })
 
     if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 })
 
     // Try to delete from income first
     const income = await db.keuanganPemasukan.findUnique({ where: { id: params.id } })
     if (income) {
-      if (!user.role.permissions.includes('{"resource":"keuangan_pemasukan","action":"delete"}')) {
+      if (!checkPermission(user as any, 'keuangan_pemasukan', 'delete')) {
         return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
       }
       await db.keuanganPemasukan.delete({ where: { id: params.id } })
@@ -32,7 +33,7 @@ export async function DELETE(
     // Then try expense
     const expense = await db.keuanganPengeluaran.findUnique({ where: { id: params.id } })
     if (expense) {
-      if (!user.role.permissions.includes('{"resource":"keuangan_pengeluaran","action":"delete"}')) {
+      if (!checkPermission(user as any, 'keuangan_pengeluaran', 'delete')) {
         return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
       }
       await db.keuanganPengeluaran.delete({ where: { id: params.id } })
@@ -54,9 +55,9 @@ export async function PATCH(
     if (!session || !session.user?.email) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
     const user = await db.user.findUnique({
-      where: { email: session.user.email },
+      where: { email: session.user.email || '' },
       include: { role: true }
-    }) as any
+    })
 
     const body = await request.json()
     const { 
@@ -67,7 +68,7 @@ export async function PATCH(
     // Try income
     const income = await db.keuanganPemasukan.findUnique({ where: { id: params.id } })
     if (income) {
-      if (!user?.role.permissions.includes('{"resource":"keuangan_pemasukan","action":"update"}')) {
+      if (!user || !checkPermission(user as any, 'keuangan_pemasukan', 'update')) {
         return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
       }
       const updated = await db.keuanganPemasukan.update({
@@ -88,7 +89,7 @@ export async function PATCH(
     // Try expense
     const expense = await db.keuanganPengeluaran.findUnique({ where: { id: params.id } })
     if (expense) {
-      if (!user?.role.permissions.includes('{"resource":"keuangan_pengeluaran","action":"update"}')) {
+      if (!user || !checkPermission(user as any, 'keuangan_pengeluaran', 'update')) {
         return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
       }
       const updated = await db.keuanganPengeluaran.update({

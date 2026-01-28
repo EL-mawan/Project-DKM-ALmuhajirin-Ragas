@@ -3,7 +3,7 @@ import { getServerSession } from 'next-auth'
 import { db } from '@/lib/db'
 import { authOptions } from '@/lib/auth/config'
 import { hashPassword } from '@/lib/auth/password'
-import { ROLE_CONFIGS } from '@/lib/auth/rbac'
+import { ROLE_CONFIGS, checkPermission } from '@/lib/auth/rbac'
 
 // GET /api/admin/users - Get all users
 export async function GET(request: NextRequest) {
@@ -15,11 +15,11 @@ export async function GET(request: NextRequest) {
 
     // Check if user has permission to read users
     const user = await db.user.findUnique({
-      where: { email: session.user.email },
+      where: { email: session.user.email || '' },
       include: { role: true }
     })
 
-    if (!user || !user.role.permissions.includes('{"resource":"users","action":"read"}')) {
+    if (!user || !checkPermission(user as any, 'users', 'read')) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
@@ -61,11 +61,11 @@ export async function POST(request: NextRequest) {
 
     // Check if user has permission to create users
     const user = await db.user.findUnique({
-      where: { email: session.user.email },
+      where: { email: session.user.email || '' },
       include: { role: true }
     })
 
-    if (!user || !user.role.permissions.includes('{"resource":"users","action":"create"}')) {
+    if (!user || !checkPermission(user as any, 'users', 'create')) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 

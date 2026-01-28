@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { db } from '@/lib/db'
 import { authOptions } from '@/lib/auth/config'
 import { hashPassword } from '@/lib/auth/password'
+import { checkPermission } from '@/lib/auth/rbac'
 
 // GET /api/admin/users/[id] - Get single user
 export async function GET(
@@ -20,9 +21,9 @@ export async function GET(
     const user = await db.user.findUnique({
       where: { email: session.user.email || '' },
       include: { role: true }
-    }) as any
+    })
 
-    if (!user || !user.role.permissions.includes('{"resource":"users","action":"read"}')) {
+    if (!user || !checkPermission(user as any, 'users', 'read')) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
@@ -69,9 +70,9 @@ export async function PUT(
     const user = await db.user.findUnique({
       where: { email: session.user.email || '' },
       include: { role: true }
-    }) as any
+    })
 
-    if (!user || !user.role.permissions.includes('{"resource":"users","action":"update"}')) {
+    if (!user || !checkPermission(user as any, 'users', 'update')) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
@@ -153,9 +154,9 @@ export async function DELETE(
     const user = await db.user.findUnique({
       where: { email: session.user.email || '' },
       include: { role: true }
-    }) as any
+    })
 
-    if (!user || !user.role.permissions.includes('{"resource":"users","action":"delete"}')) {
+    if (!user || !checkPermission(user as any, 'users', 'delete')) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { db } from '@/lib/db'
 import { authOptions } from '@/lib/auth/config'
+import { checkPermission } from '@/lib/auth/rbac'
 
 export async function GET(
   request: NextRequest,
@@ -36,14 +37,21 @@ export async function PATCH(
       include: { role: true }
     })
 
-    if (!user?.role.permissions.includes('{"resource":"berita","action":"update"}')) {
+    if (!user || !checkPermission(user as any, 'berita', 'update')) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
     const body = await request.json()
+    const { title, content, image, status } = body
+
     const updated = await db.berita.update({
       where: { id: params.id },
-      data: body
+      data: {
+        title,
+        content,
+        image,
+        status
+      }
     })
 
     return NextResponse.json(updated)
@@ -65,7 +73,7 @@ export async function DELETE(
       include: { role: true }
     })
 
-    if (!user?.role.permissions.includes('{"resource":"berita","action":"delete"}')) {
+    if (!user || !checkPermission(user as any, 'berita', 'delete')) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
