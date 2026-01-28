@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { db } from '@/lib/db'
 import { authOptions } from '@/lib/auth/config'
+import { checkPermission } from '@/lib/auth/rbac'
 
 export async function PATCH(
   request: NextRequest,
@@ -16,14 +17,24 @@ export async function PATCH(
       include: { role: true }
     })
 
-    if (!user?.role.permissions.includes('{"resource":"dhuafa","action":"update"}')) {
+    if (!user || !checkPermission(user as any, 'dhuafa', 'update')) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
     const body = await request.json()
+    const { nomor, name, type, address, phone, nik, keterangan } = body
+
     const updated = await db.kaumDhuafa.update({
       where: { id: params.id },
-      data: body
+      data: {
+        nomor,
+        name,
+        type,
+        address,
+        phone,
+        nik,
+        keterangan
+      }
     })
 
     return NextResponse.json(updated)
@@ -45,7 +56,7 @@ export async function DELETE(
       include: { role: true }
     })
 
-    if (!user?.role.permissions.includes('{"resource":"dhuafa","action":"delete"}')) {
+    if (!user || !checkPermission(user as any, 'dhuafa', 'delete')) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
