@@ -495,7 +495,7 @@ export default function KeuanganAdmin() {
                           </div>
                         </td>
                         <td className="px-10 py-8 text-right">
-                          <div className="flex justify-end opacity-0 group-hover:opacity-100 transition-opacity space-x-2">
+                          <div className="flex justify-end space-x-2">
                              <Button 
                               variant="ghost" 
                               size="icon" 
