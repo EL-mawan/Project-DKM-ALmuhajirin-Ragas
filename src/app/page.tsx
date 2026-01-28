@@ -8,8 +8,6 @@ import {
   Calendar,
   Users,
   Heart,
-  FileText,
-  Newspaper,
   Image,
   Phone,
   ArrowRight,
@@ -107,21 +105,6 @@ export default function Home() {
                   </Link>
                 </Button>
               </div>
-
-              {/* Trust Indicators */}
-              <div className="pt-8 flex items-center space-x-8 border-t border-border/40">
-                <div className="flex -space-x-3">
-                  {[1, 2, 3, 4].map((i) => (
-                    <div key={i} className="h-10 w-10 rounded-full border-2 border-background bg-muted overflow-hidden">
-                      <img src={`/api/placeholder/40/40`} alt="Avatar" className="w-full h-full object-cover" />
-                    </div>
-                  ))}
-                </div>
-                <div className="text-sm">
-                  <p className="font-bold text-foreground">{data?.stats?.jamaahKK ? `${data.stats.jamaahKK}+` : '...'} Jamaah Aktif</p>
-                  <p className="text-muted-foreground">Bergabung dalam kegiatan rutin</p>
-                </div>
-              </div>
             </div>
 
             <div className="relative group perspective-1000">
@@ -210,11 +193,6 @@ export default function Home() {
                 <p className="text-muted-foreground leading-relaxed">
                   {item.description}
                 </p>
-                <div className="mt-8 pt-6 border-t border-border/50">
-                  <button className="flex items-center text-sm font-bold text-primary hover:gap-2 transition-all">
-                    Selengkapnya <ArrowRight className="ml-1 h-4 w-4" />
-                  </button>
-                </div>
               </div>
             ))}
           </div>
@@ -323,16 +301,6 @@ export default function Home() {
               </div>
             ))}
           </div>
-
-          <div className="flex flex-col sm:flex-row justify-center gap-4">
-            <Button size="lg" className="rounded-2xl px-8 h-14 bg-primary text-white">
-              <FileText className="mr-2 h-5 w-5" />
-              Download Laporan PDF
-            </Button>
-            <Button variant="outline" size="lg" className="rounded-2xl px-8 h-14 border-primary/20 text-primary hover:bg-primary/5">
-              Info Detail Keuangan
-            </Button>
-          </div>
         </div>
       </section>
 
@@ -364,12 +332,6 @@ export default function Home() {
                 <img key={i} src={`https://images.unsplash.com/photo-1542332213-31f87348057f?q=80&w=2670&auto=format&fit=crop`} alt={`Placeholder ${i}`} className="rounded-3xl" />
               ))
             )}
-          </div>
-
-          <div className="text-center">
-            <Button variant="outline" size="lg" className="rounded-full px-10 border-border/50 hover:bg-primary/5 hover:text-primary transition-all">
-              Lihat Selengkapnya di Instagram
-            </Button>
           </div>
         </div>
       </section>
