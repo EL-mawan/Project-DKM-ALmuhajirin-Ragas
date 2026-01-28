@@ -25,12 +25,38 @@ export async function PATCH(
       if (!user || !checkPermission(user as any, 'jamaah_kepala_keluarga', 'update')) {
         return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
       }
+
+      // Check for collisions if nomor or rt is changed
+      const current = await db.jamaahKepalaKeluarga.findUnique({ where: { id } })
+      if (current && (current.nomor !== nomor || current.rt !== rt)) {
+        const conflict = await db.jamaahKepalaKeluarga.findFirst({
+          where: { nomor, rt, NOT: { id } }
+        })
+
+        if (conflict) {
+          // Increment shift logic
+          const toShift = await db.jamaahKepalaKeluarga.findMany({
+            where: { rt, nomor: { gte: nomor }, NOT: { id } },
+            orderBy: { nomor: 'desc' }
+          })
+
+          for (const item of toShift) {
+            const nextVal = (parseInt(item.nomor) + 1).toString().padStart(item.nomor.length, '0')
+            await db.jamaahKepalaKeluarga.update({
+              where: { id: item.id },
+              data: { nomor: nextVal }
+            })
+          }
+        }
+      }
+
       const updated = await db.jamaahKepalaKeluarga.update({
         where: { id },
         data: {
           nomor,
           blok,
           name,
+          phone,
           rt,
           rw,
           keterangan

@@ -61,7 +61,7 @@ model StrukturOrganisasi {
 // Family Heads (Kepala Keluarga)
 model JamaahKepalaKeluarga {
   id          String   @id @default(cuid())
-  nomor       String   @unique // Nomor KK or ID
+  nomor       String   // Nomor KK or ID
   blok        String   // Blok / Link
   name        String   // Nama Lengkap
   phone       String?  // Nomor HP/WA
@@ -72,6 +72,7 @@ model JamaahKepalaKeluarga {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   
+  @@unique([nomor, rt]) // Unique combination of nomor and RT
   @@map("jamaah_kepala_keluarga")
 }
 

@@ -11,6 +11,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Building, Eye, EyeOff, Loader2, Lock, Mail, ArrowLeft, ShieldCheck } from 'lucide-react'
 import { motion } from 'framer-motion'
+import { StatusPopup } from '@/components/ui/status-popup'
+import { useStatusPopup } from '@/lib/hooks/use-status-popup'
 
 export default function LoginPage() {
   const { data: session, status } = useSession()
@@ -20,6 +22,7 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
   const router = useRouter()
+  const { statusProps, showSuccess, showError } = useStatusPopup()
 
   // Silent redirect if already logged in (no alert)
   useEffect(() => {
@@ -50,10 +53,21 @@ export default function LoginPage() {
       if (result?.error) {
         setError('Email atau password salah. Silakan coba lagi.')
       } else {
-        // Refresh session and redirect
+        // Refresh session
         await getSession()
-        router.replace('/admin')
-        router.refresh()
+        
+        // Show success popup
+        showSuccess(
+          'Login Berhasil',
+          'Selamat datang kembali di Panel Administrasi DKM Al-Muhajirin.',
+          'Oke'
+        )
+
+        // Small delay then redirect
+        setTimeout(() => {
+          router.replace('/admin')
+          router.refresh()
+        }, 1500)
       }
     } catch (err) {
       setError('Terjadi kesalahan sistem. Silakan coba lagi.')
@@ -188,6 +202,7 @@ export default function LoginPage() {
           &copy; 2026 DKM AL-MUHAJIRIN • ECO-SYSTEM SECURE
         </p>
       </motion.div>
+      <StatusPopup {...statusProps} />
     </div>
   )
 }
