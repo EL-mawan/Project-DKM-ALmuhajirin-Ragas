@@ -44,13 +44,19 @@ export async function POST(request: NextRequest) {
       if (!user?.role.permissions.includes('{"resource":"jamaah_kepala_keluarga","action":"create"}')) {
         return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
       }
+      // rest contains nomor, blok, name, rt, rw, keterangan
       const newItem = await db.jamaahKepalaKeluarga.create({ data: rest })
       return NextResponse.json(newItem, { status: 201 })
     } else if (type === 'remaja') {
       if (!user?.role.permissions.includes('{"resource":"jamaah_remaja","action":"create"}')) {
         return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
       }
-      const newItem = await db.jamaahRemaja.create({ data: rest })
+      const newItem = await db.jamaahRemaja.create({ 
+        data: {
+          ...rest,
+          birthDate: rest.birthDate ? new Date(rest.birthDate) : undefined
+        } 
+      })
       return NextResponse.json(newItem, { status: 201 })
     }
 

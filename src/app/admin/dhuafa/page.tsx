@@ -29,12 +29,13 @@ export default function DhuafaAdmin() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingItem, setEditingItem] = useState<any>(null)
   const [formData, setFormData] = useState({
+    nomor: '',
     name: '',
     type: 'fakir_miskin',
     address: '',
     phone: '',
     nik: '',
-    description: ''
+    keterangan: ''
   })
 
   const fetchData = async () => {
@@ -70,7 +71,7 @@ export default function DhuafaAdmin() {
         toast.success(editingItem ? 'Data diperbarui' : 'Data berhasil ditambahkan')
         setIsModalOpen(false)
         setEditingItem(null)
-        setFormData({ name: '', type: 'fakir_miskin', address: '', phone: '', nik: '', description: '' })
+        resetForm()
         fetchData()
       } else {
         toast.error('Gagal menyimpan data')
@@ -93,9 +94,13 @@ export default function DhuafaAdmin() {
     }
   }
 
+  const resetForm = () => {
+    setFormData({ nomor: '', name: '', type: 'fakir_miskin', address: '', phone: '', nik: '', keterangan: '' })
+  }
+
   const filteredData = data.filter((item: any) => 
     item.name.toLowerCase().includes(search.toLowerCase()) ||
-    item.nik?.includes(search)
+    item.nomor?.includes(search)
   )
 
   const getTypeName = (type: string) => {
@@ -123,7 +128,7 @@ export default function DhuafaAdmin() {
             setIsModalOpen(open)
             if (!open) {
               setEditingItem(null)
-              setFormData({ name: '', type: 'fakir_miskin', address: '', phone: '', nik: '', description: '' })
+              resetForm()
             }
           }}>
             <DialogTrigger asChild>
@@ -141,7 +146,16 @@ export default function DhuafaAdmin() {
               <form onSubmit={handleSubmit} className="space-y-4 pt-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label>Nama Lengkap</Label>
+                    <Label>Nomor</Label>
+                    <Input 
+                      className="rounded-xl h-12"
+                      placeholder="Contoh: 001"
+                      value={formData.nomor}
+                      onChange={e => setFormData({...formData, nomor: e.target.value})}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Nama Lengkap*</Label>
                     <Input 
                       required 
                       className="rounded-xl h-12"
@@ -150,15 +164,7 @@ export default function DhuafaAdmin() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>NIK (Opsional)</Label>
-                    <Input 
-                      className="rounded-xl h-12"
-                      value={formData.nik}
-                      onChange={e => setFormData({...formData, nik: e.target.value})}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Kategori</Label>
+                    <Label>Kategori*</Label>
                     <Select 
                       value={formData.type} 
                       onValueChange={val => setFormData({...formData, type: val})}
@@ -186,20 +192,20 @@ export default function DhuafaAdmin() {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label>Alamat Lengkap</Label>
-                  <Input 
-                    required
-                    className="rounded-xl h-12"
-                    value={formData.address}
-                    onChange={e => setFormData({...formData, address: e.target.value})}
+                  <Label>Keterangan</Label>
+                  <Textarea 
+                    className="rounded-xl min-h-[100px]"
+                    placeholder="Contoh: Sangat membutuhkan bantuan rutin..."
+                    value={formData.keterangan}
+                    onChange={e => setFormData({...formData, keterangan: e.target.value})}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Keterangan Tambahan</Label>
-                  <Textarea 
-                    className="rounded-xl min-h-[100px]"
-                    value={formData.description}
-                    onChange={e => setFormData({...formData, description: e.target.value})}
+                  <Label>Alamat (Opsional)</Label>
+                  <Input 
+                    className="rounded-xl h-12"
+                    value={formData.address}
+                    onChange={e => setFormData({...formData, address: e.target.value})}
                   />
                 </div>
                 <Button type="submit" className="w-full rounded-2xl py-6 font-bold mt-4 shadow-lg shadow-primary/20">
@@ -217,7 +223,7 @@ export default function DhuafaAdmin() {
               <div className="relative w-full md:w-96">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input 
-                  placeholder="Cari nama atau NIK..." 
+                  placeholder="Cari nama atau nomor..." 
                   className="pl-10 rounded-full bg-gray-50/50 border-gray-100 focus:bg-white transition-all h-12"
                   value={search}
                   onChange={e => setSearch(e.target.value)}
@@ -240,9 +246,9 @@ export default function DhuafaAdmin() {
                 <table className="w-full text-left">
                   <thead>
                     <tr className="bg-gray-50/50 text-[10px] uppercase tracking-widest font-bold text-gray-400">
-                      <th className="px-8 py-5">Nama & NIK</th>
+                      <th className="px-8 py-5">Nomor & Nama</th>
                       <th className="px-8 py-5">Kategori</th>
-                      <th className="px-8 py-5">Alamat / Kontak</th>
+                      <th className="px-8 py-5">Keterangan</th>
                       <th className="px-8 py-5 text-right">Aksi</th>
                     </tr>
                   </thead>
@@ -250,8 +256,8 @@ export default function DhuafaAdmin() {
                     {filteredData.map((item: any) => (
                       <tr key={item.id} className="hover:bg-gray-50/30 transition-colors group">
                         <td className="px-8 py-6">
+                          <div className="text-[10px] font-bold text-primary uppercase tracking-widest mb-1">NO: {item.nomor || '-'}</div>
                           <div className="font-bold text-[#0b3d2e]">{item.name}</div>
-                          <div className="text-xs text-muted-foreground font-mono mt-0.5">NIK: {item.nik || '-'}</div>
                         </td>
                         <td className="px-8 py-6">
                           <Badge variant="secondary" className="rounded-full px-3 py-1 font-bold text-[10px] uppercase tracking-wider bg-rose-50 text-rose-600 border-rose-100">
@@ -259,16 +265,14 @@ export default function DhuafaAdmin() {
                           </Badge>
                         </td>
                         <td className="px-8 py-6">
-                          <div className="flex flex-col space-y-1">
-                            <div className="text-xs text-neutral-600 flex items-center">
-                              <MapPin className="h-3 w-3 mr-1 text-primary" /> {item.address}
-                            </div>
-                            {item.phone && (
-                              <div className="text-xs text-neutral-400 flex items-center">
-                                <Phone className="h-3 w-3 mr-1" /> {item.phone}
-                              </div>
-                            )}
+                          <div className="text-xs text-neutral-500 line-clamp-2 max-w-xs italic">
+                            {item.keterangan ? `"${item.keterangan}"` : '-'}
                           </div>
+                          {item.address && (
+                            <div className="text-[9px] text-muted-foreground mt-1 flex items-center capitalize">
+                              <MapPin className="h-2 w-2 mr-1" /> {item.address}
+                            </div>
+                          )}
                         </td>
                         <td className="px-8 py-6 text-right">
                           <div className="flex justify-end space-x-2">
@@ -279,12 +283,13 @@ export default function DhuafaAdmin() {
                               onClick={() => {
                                 setEditingItem(item)
                                 setFormData({
+                                  nomor: item.nomor || '',
                                   name: item.name,
                                   type: item.type,
-                                  address: item.address,
+                                  address: item.address || '',
                                   phone: item.phone || '',
                                   nik: item.nik || '',
-                                  description: item.description || ''
+                                  keterangan: item.keterangan || ''
                                 })
                                 setIsModalOpen(true)
                               }}

@@ -20,7 +20,7 @@ export const metadata: Metadata = {
   keywords: ["DKM Al-Muhajirin", "Masjid Jami' Al-Muhajirin", "Ragas Grenyang", "Masjid Bogor", "DKM", "Islam", "Jamaah", "Kegiatan Sosial"],
   authors: [{ name: "DKM Al-Muhajirin Ragas Grenyang" }],
   icons: {
-    icon: "/logo.jpg",
+    icon: "/logo.png",
   },
   openGraph: {
     title: "DKM Al-Muhajirin Ragas Grenyang",

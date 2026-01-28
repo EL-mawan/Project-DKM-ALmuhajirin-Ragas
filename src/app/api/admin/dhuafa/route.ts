@@ -33,16 +33,17 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { name, type, address, phone, nik, description } = body
+    const { nomor, name, type, address, phone, nik, keterangan } = body
 
     const newItem = await db.kaumDhuafa.create({
       data: {
+        nomor,
         name,
         type,
         address,
         phone,
         nik,
-        description
+        keterangan
       }
     })
 

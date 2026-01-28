@@ -92,7 +92,7 @@ export function AdminLayout({ children, title, subtitle }: AdminLayoutProps) {
             <div className="p-8 flex items-center justify-between border-b border-[#1a4d3d]">
               <div className="flex items-center space-x-3">
                 <div className="h-10 w-10 rounded-xl bg-white p-1 overflow-hidden flex items-center justify-center border border-white/10">
-                  <img src="/logo.jpg" alt="Logo" className="h-full w-full object-contain" />
+                  <img src="/logo.png" alt="Logo" className="h-full w-full object-contain" />
                 </div>
                 <div>
                   <h2 className="text-lg font-bold tracking-tight text-white">Admin DKM</h2>
@@ -174,7 +174,7 @@ export function AdminLayout({ children, title, subtitle }: AdminLayoutProps) {
             </div>
           </header>
 
-          <div className="flex-1 overflow-y-auto pt-[var(--header-height,0px)] sm:pt-0">
+          <div className="flex-1 overflow-y-auto pt-(--header-height,0px) sm:pt-0">
             {children}
           </div>
         </main>

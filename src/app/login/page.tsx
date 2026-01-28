@@ -80,12 +80,12 @@ export default function LoginPage() {
             <div className="flex justify-center mb-6">
               <div className="relative">
                 <div className="absolute inset-0 bg-emerald-500/20 blur-xl rounded-full" />
-                <div className="relative flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-500 text-white shadow-xl shadow-emerald-500/20">
-                  <Building className="h-8 w-8" />
+                <div className="relative flex h-16 w-16 items-center justify-center rounded-2xl bg-white p-2 shadow-xl shadow-emerald-500/20 overflow-hidden">
+                  <img src="/logo.png" alt="Logo" className="h-full w-full object-contain" />
                 </div>
               </div>
             </div>
-            <CardTitle className="text-3xl font-black tracking-tight text-white mb-2">Pintu Masuk</CardTitle>
+            <CardTitle className="text-3xl font-black tracking-tight text-white mb-2">Assalamualaikum</CardTitle>
             <CardDescription className="text-emerald-100/60 font-medium">
               Panel Administrasi DKM Al-Muhajirin
             </CardDescription>
@@ -111,7 +111,7 @@ export default function LoginPage() {
                   <Input
                     id="email"
                     type="email"
-                    placeholder="admin@almuhajirin.com"
+                    placeholder="katuran.com"
                     className="h-14 pl-11 rounded-2xl bg-white/5 border-white/10 text-white placeholder:text-emerald-100/20 focus:bg-white/10 focus:border-emerald-500/50 transition-all text-base"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
@@ -185,7 +185,7 @@ export default function LoginPage() {
         </Card>
         
         <p className="mt-8 text-center text-emerald-100/20 text-[10px] font-black uppercase tracking-[0.3em]">
-          &copy; 2024 DKM AL-MUHAJIRIN • ECO-SYSTEM SECURE
+          &copy; 2026 DKM AL-MUHAJIRIN • ECO-SYSTEM SECURE
         </p>
       </motion.div>
     </div>

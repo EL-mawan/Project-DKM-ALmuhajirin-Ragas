@@ -32,13 +32,15 @@ export default function JamaahAdmin() {
   
   const [formData, setFormData] = useState({
     name: '',
-    address: '',
     phone: '',
     // KK specific
-    kkNumber: '',
+    nomor: '',
+    blok: '',
     rt: '',
     rw: '',
+    keterangan: '',
     // Remaja specific
+    address: '',
     birthDate: '',
     education: '',
     skills: ''
@@ -67,19 +69,35 @@ export default function JamaahAdmin() {
       const url = editingItem ? `/api/admin/jamaah/${editingItem.id}` : '/api/admin/jamaah'
       const method = editingItem ? 'PATCH' : 'POST'
 
+      // Clean up payload based on type
+      const payload: any = { ...formData, type: activeTab }
+      if (activeTab === 'kk') {
+        delete payload.birthDate
+        delete payload.education
+        delete payload.skills
+        delete payload.address
+      } else {
+        delete payload.nomor
+        delete payload.blok
+        delete payload.rt
+        delete payload.rw
+        delete payload.keterangan
+      }
+
       const res = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...formData, type: activeTab })
+        body: JSON.stringify(payload)
       })
 
       if (res.ok) {
-        toast.success('Data jamaah berhasil disimpan')
+        toast.success(`Data ${activeTab === 'kk' ? 'Warga' : 'Remaja'} berhasil disimpan`)
         setIsModalOpen(false)
         resetForm()
         fetchData(activeTab)
       } else {
-        toast.error('Gagal menyimpan data')
+        const err = await res.json()
+        toast.error(err.error || 'Gagal menyimpan data')
       }
     } catch (error) {
       toast.error('Terjadi kesalahan')
@@ -102,15 +120,15 @@ export default function JamaahAdmin() {
   const resetForm = () => {
     setEditingItem(null)
     setFormData({
-      name: '', address: '', phone: '',
-      kkNumber: '', rt: '', rw: '',
+      name: '', phone: '', address: '',
+      nomor: '', blok: '', rt: '', rw: '', keterangan: '',
       birthDate: '', education: '', skills: ''
     })
   }
 
   const filteredData = data.filter((item: any) => 
     item.name.toLowerCase().includes(search.toLowerCase()) ||
-    item.address?.toLowerCase().includes(search.toLowerCase())
+    (activeTab === 'kk' ? item.blok?.toLowerCase() : item.address?.toLowerCase())?.includes(search.toLowerCase())
   )
 
   return (
@@ -143,7 +161,7 @@ export default function JamaahAdmin() {
               <form onSubmit={handleSubmit} className="space-y-4 pt-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label>Nama Lengkap</Label>
+                    <Label>Nama Lengkap*</Label>
                     <Input 
                       required 
                       className="rounded-xl h-12"
@@ -163,11 +181,21 @@ export default function JamaahAdmin() {
                   {activeTab === 'kk' ? (
                     <>
                       <div className="space-y-2">
-                        <Label>No. KK</Label>
+                        <Label>Nomor* (ID/Urutan)</Label>
                         <Input 
+                          required
                           className="rounded-xl h-12"
-                          value={formData.kkNumber}
-                          onChange={e => setFormData({...formData, kkNumber: e.target.value})}
+                          value={formData.nomor}
+                          onChange={e => setFormData({...formData, nomor: e.target.value})}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Blok / Link*</Label>
+                        <Input 
+                          required
+                          className="rounded-xl h-12"
+                          value={formData.blok}
+                          onChange={e => setFormData({...formData, blok: e.target.value})}
                         />
                       </div>
                       <div className="grid grid-cols-2 gap-2">
@@ -187,6 +215,14 @@ export default function JamaahAdmin() {
                             onChange={e => setFormData({...formData, rw: e.target.value})}
                           />
                         </div>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Keterangan</Label>
+                        <Input 
+                          className="rounded-xl h-12"
+                          value={formData.keterangan}
+                          onChange={e => setFormData({...formData, keterangan: e.target.value})}
+                        />
                       </div>
                     </>
                   ) : (
@@ -208,17 +244,17 @@ export default function JamaahAdmin() {
                           onChange={e => setFormData({...formData, education: e.target.value})}
                         />
                       </div>
+                      <div className="space-y-2 md:col-span-2">
+                        <Label>Alamat (Remaja)</Label>
+                        <Input 
+                          required
+                          className="rounded-xl h-12"
+                          value={formData.address}
+                          onChange={e => setFormData({...formData, address: e.target.value})}
+                        />
+                      </div>
                     </>
                   )}
-                </div>
-                <div className="space-y-2">
-                  <Label>Alamat</Label>
-                  <Input 
-                    required
-                    className="rounded-xl h-12"
-                    value={formData.address}
-                    onChange={e => setFormData({...formData, address: e.target.value})}
-                  />
                 </div>
                 {activeTab === 'remaja' && (
                   <div className="space-y-2">
@@ -248,7 +284,7 @@ export default function JamaahAdmin() {
               <div className="relative w-full md:w-96">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input 
-                  placeholder={`Cari nama atau ${activeTab === 'kk' ? 'alamat' : 'pendidikan'}...`}
+                  placeholder={`Cari nama atau ${activeTab === 'kk' ? 'blok' : 'pendidikan'}...`}
                   className="pl-10 rounded-full bg-gray-50/50 border-gray-100 focus:bg-white transition-all h-12"
                   value={search}
                   onChange={e => setSearch(e.target.value)}
@@ -272,7 +308,7 @@ export default function JamaahAdmin() {
                   <thead>
                     <tr className="bg-gray-50/50 text-[10px] uppercase tracking-widest font-bold text-gray-400">
                       <th className="px-8 py-5">Nama & Detail</th>
-                      <th className="px-8 py-5">Kontak / Alamat</th>
+                      <th className="px-8 py-5">Lokasi / Alamat</th>
                       <th className="px-8 py-5">Info Lain</th>
                       <th className="px-8 py-5 text-right">Aksi</th>
                     </tr>
@@ -283,7 +319,7 @@ export default function JamaahAdmin() {
                         <td className="px-8 py-6">
                           <div className="font-bold text-[#0b3d2e]">{item.name}</div>
                           {activeTab === 'kk' ? (
-                            <div className="text-xs text-muted-foreground mt-0.5">KK: {item.kkNumber || '-'}</div>
+                            <div className="text-[10px] font-bold text-primary mt-0.5">NOMOR: {item.nomor}</div>
                           ) : (
                             <div className="text-xs text-muted-foreground mt-0.5 flex items-center">
                               <GraduationCap className="h-3 w-3 mr-1" /> {item.education || '-'}
@@ -293,7 +329,7 @@ export default function JamaahAdmin() {
                         <td className="px-8 py-6">
                           <div className="text-xs text-neutral-600 flex items-center">
                             <MapPin className="h-3 w-3 mr-1 text-primary shrink-0" /> 
-                            <span className="line-clamp-1">{item.address}</span>
+                            <span className="line-clamp-1">{activeTab === 'kk' ? item.blok : item.address}</span>
                           </div>
                           {item.phone && (
                             <div className="text-xs text-neutral-400 flex items-center mt-1">
@@ -303,9 +339,12 @@ export default function JamaahAdmin() {
                         </td>
                         <td className="px-8 py-6">
                           {activeTab === 'kk' ? (
-                            <div className="flex gap-2">
-                              <Badge variant="outline" className="text-[9px] uppercase font-bold bg-neutral-50">RT {item.rt}</Badge>
-                              <Badge variant="outline" className="text-[9px] uppercase font-bold bg-neutral-50">RW {item.rw}</Badge>
+                            <div className="flex flex-col gap-2">
+                              <div className="flex gap-2">
+                                <Badge variant="outline" className="text-[9px] uppercase font-bold bg-neutral-50 border-emerald-100">RT {item.rt}</Badge>
+                                <Badge variant="outline" className="text-[9px] uppercase font-bold bg-neutral-50 border-emerald-100">RW {item.rw}</Badge>
+                              </div>
+                              {item.keterangan && <div className="text-[10px] text-muted-foreground italic">"{item.keterangan}"</div>}
                             </div>
                           ) : (
                             <div className="text-xs font-medium text-neutral-500 line-clamp-1">
@@ -323,11 +362,13 @@ export default function JamaahAdmin() {
                                 setEditingItem(item)
                                 setFormData({
                                   name: item.name,
-                                  address: item.address,
+                                  address: item.address || '',
                                   phone: item.phone || '',
-                                  kkNumber: item.kkNumber || '',
+                                  nomor: item.nomor || '',
+                                  blok: item.blok || '',
                                   rt: item.rt || '',
                                   rw: item.rw || '',
+                                  keterangan: item.keterangan || '',
                                   birthDate: item.birthDate || '',
                                   education: item.education || '',
                                   skills: item.skills || ''

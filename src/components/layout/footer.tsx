@@ -19,7 +19,7 @@ export function Footer() {
           <div className="space-y-4">
             <div className="flex items-center space-x-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white p-1 overflow-hidden shadow-sm">
-                <img src="/logo.jpg" alt="Logo Al-Muhajirin" className="h-full w-full object-contain" />
+                <img src="/logo.png" alt="Logo Al-Muhajirin" className="h-full w-full object-contain" />
               </div>
               <div>
                 <h3 className="font-semibold text-foreground">
@@ -124,7 +124,7 @@ export function Footer() {
             <h4 className="font-semibold text-foreground">Kontak Kami</h4>
             <div className="space-y-3">
               <div className="flex items-start space-x-3">
-                <MapPin className="h-5 w-5 text-muted-foreground mt-0.5 flex-shrink-0" />
+                <MapPin className="h-5 w-5 text-muted-foreground mt-0.5 shrink-0" />
                 <div>
                   <p className="text-sm text-muted-foreground">
                     Jl. Ragas Grenyang No. 123<br />
@@ -134,19 +134,19 @@ export function Footer() {
                 </div>
               </div>
               <div className="flex items-center space-x-3">
-                <Phone className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                <Phone className="h-5 w-5 text-muted-foreground shrink-0" />
                 <p className="text-sm text-muted-foreground">
                   (0251) 1234-5678
                 </p>
               </div>
               <div className="flex items-center space-x-3">
-                <Mail className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                <Mail className="h-5 w-5 text-muted-foreground shrink-0" />
                 <p className="text-sm text-muted-foreground">
                   info@almuhajirin.com
                 </p>
               </div>
               <div className="flex items-center space-x-3">
-                <Clock className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                <Clock className="h-5 w-5 text-muted-foreground shrink-0" />
                 <div>
                   <p className="text-sm text-muted-foreground">
                     <strong>Admin Office:</strong><br />

@@ -25,7 +25,7 @@ export async function PATCH(
       }
       const updated = await db.jamaahKepalaKeluarga.update({
         where: { id: params.id },
-        data
+        data // Contains nomor, blok, name, rt, rw, keterangan
       })
       return NextResponse.json(updated)
     } else {

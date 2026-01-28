@@ -23,7 +23,7 @@ export function MobileAdminHeader({ title, subtitle, variant = 'dashboard' }: Mo
       <div className="flex items-center space-x-3">
         <div className="h-10 w-10 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center">
            <div className="h-7 w-7 rounded-lg bg-white p-0.5 overflow-hidden flex items-center justify-center">
-             <img src="/logo.jpg" alt="Logo" className="h-full w-full object-contain" />
+             <img src="/logo.png" alt="Logo" className="h-full w-full object-contain" />
            </div>
         </div>
         <div>

@@ -76,10 +76,10 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { title, description, date, location, image } = body
+    const { title, description, date, location, image, category } = body
 
     // Validate required fields
-    if (!title || !description || !date) {
+    if (!title || !description || !date || !category) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
 
@@ -87,11 +87,12 @@ export async function POST(request: NextRequest) {
     const newKegiatan = await db.kegiatan.create({
       data: {
         title,
+        category,
         description,
         date: new Date(date),
         location,
         image,
-        status: 'pending',
+        status: 'approved',
         createdBy: user.id
       }
     })

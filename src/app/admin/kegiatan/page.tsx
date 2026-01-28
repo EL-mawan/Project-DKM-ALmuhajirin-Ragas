@@ -36,6 +36,7 @@ import Link from 'next/link'
 interface Kegiatan {
   id: string
   title: string
+  category: string
   description: string
   date: string
   location: string
@@ -44,6 +45,7 @@ interface Kegiatan {
 }
 
 import { AdminLayout } from '@/components/layout/admin-layout'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 export default function KegiatanAdmin() {
   const [loading, setLoading] = useState(true)
@@ -54,10 +56,31 @@ export default function KegiatanAdmin() {
 
   const [formData, setFormData] = useState({
     title: '',
+    category: 'PHBI',
     description: '',
     date: '',
-    location: ''
+    location: '',
+    // Dynamic field based on category
+    specificDetail: ''
   })
+
+  const getDynamicLabel = (cat: string) => {
+    switch (cat) {
+      case 'PHBI': return 'Nama Penceramah / Pengisi'
+      case 'Pengajian Rutin': return 'Kitab / Materi Pembahasan'
+      case 'Pendidikan': return 'Target Peserta / Jenjang'
+      default: return 'Keterangan Tambahan'
+    }
+  }
+
+  const getDynamicPlaceholder = (cat: string) => {
+    switch (cat) {
+      case 'PHBI': return 'Contoh: KH. Zainuddin MZ'
+      case 'Pengajian Rutin': return 'Contoh: Kitab Riyadhus Shalihin'
+      case 'Pendidikan': return 'Contoh: Remaja Masjid / Anak-anak'
+      default: return 'Contoh: Membawa perlengkapan sholat'
+    }
+  }
 
   const fetchData = async () => {
     try {
@@ -84,17 +107,26 @@ export default function KegiatanAdmin() {
         : '/api/admin/kegiatan'
       const method = editingItem ? 'PATCH' : 'POST'
 
+      // Prepend specific detail to description
+      const fullDescription = formData.specificDetail 
+        ? `[${getDynamicLabel(formData.category)}: ${formData.specificDetail}] ${formData.description}` 
+        : formData.description
+
       const res = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+        body: JSON.stringify({
+          ...formData,
+          description: fullDescription,
+          status: 'approved' // Automatically published if created by admin
+        })
       })
 
       if (res.ok) {
         toast.success(editingItem ? 'Kegiatan diperbarui' : 'Kegiatan ditambahkan')
         setIsModalOpen(false)
         setEditingItem(null)
-        setFormData({ title: '', description: '', date: '', location: '' })
+        setFormData({ title: '', category: 'PHBI', description: '', date: '', location: '', specificDetail: '' })
         fetchData()
       } else {
         toast.error('Gagal menyimpan kegiatan')
@@ -119,7 +151,8 @@ export default function KegiatanAdmin() {
 
   const filteredData = data.filter(item => 
     item.title.toLowerCase().includes(search.toLowerCase()) ||
-    item.location.toLowerCase().includes(search.toLowerCase())
+    item.location.toLowerCase().includes(search.toLowerCase()) ||
+    item.category?.toLowerCase().includes(search.toLowerCase())
   )
 
   return (
@@ -135,7 +168,7 @@ export default function KegiatanAdmin() {
             setIsModalOpen(open)
             if (!open) {
               setEditingItem(null)
-              setFormData({ title: '', description: '', date: '', location: '' })
+              setFormData({ title: '', category: 'PHBI', description: '', date: '', location: '', specificDetail: '' })
             }
           }}>
             <DialogTrigger asChild>
@@ -153,7 +186,7 @@ export default function KegiatanAdmin() {
               <form onSubmit={handleSubmit} className="space-y-6 pt-4">
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <label className="text-sm font-semibold uppercase tracking-wider text-gray-500">Nama Kegiatan</label>
+                    <label className="text-sm font-semibold uppercase tracking-wider text-gray-500">Nama Kegiatan*</label>
                     <Input 
                       required 
                       className="rounded-xl"
@@ -162,11 +195,42 @@ export default function KegiatanAdmin() {
                       onChange={e => setFormData({...formData, title: e.target.value})}
                     />
                   </div>
+
                   <div className="space-y-2">
-                    <label className="text-sm font-semibold uppercase tracking-wider text-gray-500">Deskripsi</label>
+                    <label className="text-sm font-semibold uppercase tracking-wider text-gray-500">Kategori*</label>
+                    <Select 
+                      value={formData.category} 
+                      onValueChange={val => setFormData({...formData, category: val})}
+                    >
+                      <SelectTrigger className="rounded-xl">
+                        <SelectValue placeholder="Pilih Kategori" />
+                      </SelectTrigger>
+                      <SelectContent className="rounded-xl">
+                        <SelectItem value="PHBI">PHBI</SelectItem>
+                        <SelectItem value="Pengajian Rutin">Pengajian Rutin</SelectItem>
+                        <SelectItem value="Pendidikan">Pendidikan</SelectItem>
+                        <SelectItem value="Lainnya">Lainnya</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Dynamic Field */}
+                  <div className="space-y-2 animate-in fade-in slide-in-from-top-1">
+                    <label className="text-sm font-bold tracking-wider text-primary uppercase text-[10px]">{getDynamicLabel(formData.category)}</label>
+                    <Input 
+                      required 
+                      className="rounded-xl border-primary/20 focus:border-primary"
+                      placeholder={getDynamicPlaceholder(formData.category)} 
+                      value={formData.specificDetail}
+                      onChange={e => setFormData({...formData, specificDetail: e.target.value})}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold uppercase tracking-wider text-gray-500">Deskripsi / Detail Acara</label>
                     <textarea 
                       required 
-                      className="w-full min-h-[100px] rounded-xl border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      className="w-full min-h-[80px] rounded-xl border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                       placeholder="Berikan detail singkat mengenai kegiatan..." 
                       value={formData.description}
                       onChange={e => setFormData({...formData, description: e.target.value})}
@@ -174,7 +238,7 @@ export default function KegiatanAdmin() {
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <label className="text-sm font-semibold uppercase tracking-wider text-gray-500">Tanggal</label>
+                      <label className="text-sm font-semibold uppercase tracking-wider text-gray-500">Tanggal & Waktu</label>
                       <Input 
                         required 
                         type="datetime-local" 
@@ -210,7 +274,7 @@ export default function KegiatanAdmin() {
               <div className="relative w-full md:w-96">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input 
-                  placeholder="Cari kegiatan..." 
+                  placeholder="Cari kegiatan atau kategori..." 
                   className="pl-10 rounded-full bg-gray-50/50 border-gray-100 focus:bg-white transition-all h-12"
                   value={search}
                   onChange={e => setSearch(e.target.value)}
@@ -234,8 +298,8 @@ export default function KegiatanAdmin() {
                   <thead>
                     <tr className="bg-gray-50/50 text-[10px] uppercase tracking-[0.2em] font-bold text-gray-400">
                       <th className="px-8 py-5">Nama Kegiatan</th>
+                      <th className="px-8 py-5">Kategori</th>
                       <th className="px-8 py-5 hidden md:table-cell">Waktu & Lokasi</th>
-                      <th className="px-8 py-5">Status</th>
                       <th className="px-8 py-5 text-right">Aksi</th>
                     </tr>
                   </thead>
@@ -249,6 +313,11 @@ export default function KegiatanAdmin() {
                           </div>
                           <div className="text-xs text-muted-foreground line-clamp-1 mt-1 hidden md:block">{item.description}</div>
                         </td>
+                        <td className="px-8 py-6">
+                          <Badge className="rounded-full px-3 py-1 font-bold tracking-wider text-[9px] uppercase bg-primary/5 text-primary border-primary/10">
+                            {item.category || 'Lainnya'}
+                          </Badge>
+                        </td>
                         <td className="px-8 py-6 hidden md:table-cell">
                           <div className="flex flex-col space-y-2">
                             <div className="flex items-center text-xs text-gray-600 font-medium">
@@ -261,14 +330,6 @@ export default function KegiatanAdmin() {
                             </div>
                           </div>
                         </td>
-                        <td className="px-8 py-6">
-                          <Badge className={`rounded-full px-3 py-1 font-bold tracking-wider text-[10px] uppercase ${
-                            item.status === 'approved' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 
-                            'bg-amber-50 text-amber-600 border-amber-100'
-                          }`} variant="outline">
-                            {item.status === 'approved' ? 'Terbit' : 'Pending'}
-                          </Badge>
-                        </td>
                         <td className="px-8 py-6 text-right">
                           <div className="flex justify-end space-x-2">
                             <Button 
@@ -277,9 +338,13 @@ export default function KegiatanAdmin() {
                               className="rounded-xl hover:bg-primary/5 hover:text-primary h-10 w-10"
                               onClick={() => {
                                 setEditingItem(item)
+                                // Parse specific info from description if it exists
+                                const detailMatch = item.description.match(/^\[(.*?): (.*?)\] (.*)$/)
                                 setFormData({
                                   title: item.title,
-                                  description: item.description,
+                                  category: item.category || 'PHBI',
+                                  specificDetail: detailMatch ? detailMatch[2] : '',
+                                  description: detailMatch ? detailMatch[3] : item.description,
                                   date: new Date(item.date).toISOString().slice(0, 16),
                                   location: item.location
                                 })

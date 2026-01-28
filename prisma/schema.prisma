@@ -61,11 +61,12 @@ model StrukturOrganisasi {
 // Family Heads (Kepala Keluarga)
 model JamaahKepalaKeluarga {
   id          String   @id @default(cuid())
-  nik         String   @unique
-  name        String
-  address     String
-  phone       String?
-  familyCount Int      @default(1)
+  nomor       String   @unique // Nomor KK or ID
+  blok        String   // Blok / Link
+  name        String   // Nama Lengkap
+  rt          String?
+  rw          String?
+  keterangan  String?
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -92,12 +93,13 @@ model JamaahRemaja {
 // Needy Groups (Kaum Dhuafa)
 model KaumDhuafa {
   id          String   @id @default(cuid())
-  name        String
-  type        String // janda, guru_ngaji, fakir_miskin, yatim, yatim_piatu, fisabilillah
-  address     String
+  nomor       String?   // Nomor
+  name        String   // Nama Lengkap
+  type        String   // Kategori: janda, guru_ngaji, fakir_miskin, yatim, yatim_piatu, fisabilillah
+  keterangan  String?  // Keterangan
+  address     String?
   phone       String?
   nik         String?
-  description String?
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -109,6 +111,7 @@ model KaumDhuafa {
 model Kegiatan {
   id          String   @id @default(cuid())
   title       String
+  category    String   // PHBI, Pengajian Rutin, Pendidikan, Lainnya
   description String
   date        DateTime
   location    String?
