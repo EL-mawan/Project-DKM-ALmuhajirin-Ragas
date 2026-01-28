@@ -43,7 +43,7 @@ export default function JamaahAdmin() {
     nomor: '',
     blok: '',
     rt: '015',
-    rw: '003',
+    rw: '008',
     keterangan: '',
     address: '',
     birthDate: '',
@@ -141,7 +141,7 @@ export default function JamaahAdmin() {
     setEditingItem(null)
     setFormData({
       name: '', phone: '', address: '',
-      nomor: '', blok: '', rt: '015', rw: '003', keterangan: '',
+      nomor: '', blok: '', rt: '015', rw: '008', keterangan: '',
       birthDate: '', education: '', skills: ''
     })
   }
@@ -168,23 +168,23 @@ export default function JamaahAdmin() {
       <div className="p-6 sm:p-8 space-y-6">
         {/* Statistics Cards - Only for KK */}
         {activeTab === 'kk' && (
-          <div className="flex gap-4 overflow-x-auto pb-2 snap-x snap-mandatory md:grid md:grid-cols-3">
-            <Card className="rounded-4xl border-none shadow-sm bg-emerald-50/50 min-w-[280px] snap-center md:min-w-0">
-              <CardContent className="p-6">
-                <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">RT 015</p>
-                <h3 className="text-3xl font-black text-[#0b3d2e] mt-1">{rt015Count} KK</h3>
+          <div className="grid grid-cols-3 gap-2 sm:gap-4">
+            <Card className="rounded-2xl sm:rounded-4xl border-none shadow-sm bg-emerald-50/50">
+              <CardContent className="p-3 sm:p-6">
+                <p className="text-[8px] sm:text-[10px] font-black text-emerald-600 uppercase tracking-widest">RT 015</p>
+                <h3 className="text-xl sm:text-3xl font-black text-[#0b3d2e] mt-0.5 sm:mt-1">{rt015Count} KK</h3>
               </CardContent>
             </Card>
-            <Card className="rounded-4xl border-none shadow-sm bg-blue-50/50 min-w-[280px] snap-center md:min-w-0">
-              <CardContent className="p-6">
-                <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest">RT 016</p>
-                <h3 className="text-3xl font-black text-[#0b3d2e] mt-1">{rt016Count} KK</h3>
+            <Card className="rounded-2xl sm:rounded-4xl border-none shadow-sm bg-blue-50/50">
+              <CardContent className="p-3 sm:p-6">
+                <p className="text-[8px] sm:text-[10px] font-black text-blue-600 uppercase tracking-widest">RT 016</p>
+                <h3 className="text-xl sm:text-3xl font-black text-[#0b3d2e] mt-0.5 sm:mt-1">{rt016Count} KK</h3>
               </CardContent>
             </Card>
-            <Card className="rounded-4xl border-none shadow-sm bg-indigo-50/50 min-w-[280px] snap-center md:min-w-0">
-              <CardContent className="p-6">
-                <p className="text-[10px] font-black text-indigo-600 uppercase tracking-widest">Total Warga</p>
-                <h3 className="text-3xl font-black text-[#0b3d2e] mt-1">{totalCount} KK</h3>
+            <Card className="rounded-2xl sm:rounded-4xl border-none shadow-sm bg-indigo-50/50">
+              <CardContent className="p-3 sm:p-6">
+                <p className="text-[8px] sm:text-[10px] font-black text-indigo-600 uppercase tracking-widest">Total</p>
+                <h3 className="text-xl sm:text-3xl font-black text-[#0b3d2e] mt-0.5 sm:mt-1">{totalCount} KK</h3>
               </CardContent>
             </Card>
           </div>

@@ -64,6 +64,7 @@ model JamaahKepalaKeluarga {
   nomor       String   @unique // Nomor KK or ID
   blok        String   // Blok / Link
   name        String   // Nama Lengkap
+  phone       String?  // Nomor HP/WA
   rt          String?
   rw          String?
   keterangan  String?
