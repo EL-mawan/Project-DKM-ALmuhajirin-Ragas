@@ -42,8 +42,8 @@ export async function DELETE(
     }
 
     return NextResponse.json({ error: 'Record not found' }, { status: 404 })
-  } catch (error) {
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  } catch (error: any) {
+    return NextResponse.json({ error: 'Internal server error', details: error.message }, { status: 500 })
   }
 }
 
@@ -111,7 +111,7 @@ export async function PATCH(
     }
 
     return NextResponse.json({ error: 'Not found' }, { status: 404 })
-  } catch (error) {
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  } catch (error: any) {
+    return NextResponse.json({ error: 'Internal server error', details: error.message }, { status: 500 })
   }
 }
