@@ -14,7 +14,8 @@ import {
   Phone,
   Home,
   GraduationCap,
-  Loader2
+  Loader2,
+  Filter
 } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { AdminLayout } from '@/components/layout/admin-layout'
@@ -23,12 +24,14 @@ import { Label } from '@/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { StatusPopup } from '@/components/ui/status-popup'
 import { useStatusPopup } from '@/lib/hooks/use-status-popup'
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 
 export default function JamaahAdmin() {
   const [loading, setLoading] = useState(true)
   const [data, setData] = useState<any[]>([])
   const [search, setSearch] = useState('')
   const [activeTab, setActiveTab] = useState('kk')
+  const [rtFilter, setRtFilter] = useState<string>('all') // Filter RT
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingItem, setEditingItem] = useState<any>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -39,8 +42,8 @@ export default function JamaahAdmin() {
     phone: '',
     nomor: '',
     blok: '',
-    rt: '',
-    rw: '',
+    rt: '015',
+    rw: '003',
     keterangan: '',
     address: '',
     birthDate: '',
@@ -138,19 +141,55 @@ export default function JamaahAdmin() {
     setEditingItem(null)
     setFormData({
       name: '', phone: '', address: '',
-      nomor: '', blok: '', rt: '', rw: '', keterangan: '',
+      nomor: '', blok: '', rt: '015', rw: '003', keterangan: '',
       birthDate: '', education: '', skills: ''
     })
   }
 
-  const filteredData = (Array.isArray(data) ? data : []).filter((item: any) => 
-    item?.name?.toLowerCase().includes(search.toLowerCase()) ||
-    (activeTab === 'kk' ? item?.blok?.toLowerCase() : item?.address?.toLowerCase())?.includes(search.toLowerCase())
-  )
+  // Filter data berdasarkan search dan RT
+  const filteredData = (Array.isArray(data) ? data : []).filter((item: any) => {
+    const matchesSearch = item?.name?.toLowerCase().includes(search.toLowerCase()) ||
+      (activeTab === 'kk' ? item?.blok?.toLowerCase() : item?.address?.toLowerCase())?.includes(search.toLowerCase())
+    
+    const matchesRT = activeTab === 'kk' 
+      ? (rtFilter === 'all' || item?.rt === rtFilter)
+      : true
+    
+    return matchesSearch && matchesRT
+  })
+
+  // Statistik RT
+  const rt015Count = activeTab === 'kk' ? data.filter(item => item?.rt === '015').length : 0
+  const rt016Count = activeTab === 'kk' ? data.filter(item => item?.rt === '016').length : 0
+  const totalCount = activeTab === 'kk' ? data.length : data.length
 
   return (
     <AdminLayout title="Data Jamaah" subtitle="Kelola database warga & remaja Masjid.">
       <div className="p-6 sm:p-8 space-y-6">
+        {/* Statistics Cards - Only for KK */}
+        {activeTab === 'kk' && (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Card className="rounded-[2rem] border-none shadow-sm bg-emerald-50/50">
+              <CardContent className="p-6">
+                <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">RT 015</p>
+                <h3 className="text-3xl font-black text-[#0b3d2e] mt-1">{rt015Count} KK</h3>
+              </CardContent>
+            </Card>
+            <Card className="rounded-[2rem] border-none shadow-sm bg-blue-50/50">
+              <CardContent className="p-6">
+                <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest">RT 016</p>
+                <h3 className="text-3xl font-black text-[#0b3d2e] mt-1">{rt016Count} KK</h3>
+              </CardContent>
+            </Card>
+            <Card className="rounded-[2rem] border-none shadow-sm bg-indigo-50/50">
+              <CardContent className="p-6">
+                <p className="text-[10px] font-black text-indigo-600 uppercase tracking-widest">Total Warga</p>
+                <h3 className="text-3xl font-black text-[#0b3d2e] mt-1">{totalCount} KK</h3>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <Tabs value={activeTab} className="w-full md:w-auto" onValueChange={(val) => setActiveTab(val)}>
             <TabsList className="bg-white border rounded-2xl p-1 h-12 shadow-sm">
@@ -215,25 +254,24 @@ export default function JamaahAdmin() {
                           onChange={e => setFormData({...formData, blok: e.target.value})}
                         />
                       </div>
-                      <div className="grid grid-cols-2 gap-2">
-                        <div className="space-y-2">
-                          <Label>RT</Label>
-                          <Input 
-                            className="rounded-xl h-12"
-                            value={formData.rt}
-                            onChange={e => setFormData({...formData, rt: e.target.value})}
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label>RW</Label>
-                          <Input 
-                            className="rounded-xl h-12"
-                            value={formData.rw}
-                            onChange={e => setFormData({...formData, rw: e.target.value})}
-                          />
-                        </div>
+                      <div className="space-y-2 md:col-span-2">
+                        <Label>RT*</Label>
+                        <RadioGroup 
+                          value={formData.rt} 
+                          onValueChange={(val) => setFormData({...formData, rt: val})}
+                          className="flex gap-4"
+                        >
+                          <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="015" id="rt015" />
+                            <Label htmlFor="rt015" className="cursor-pointer font-bold">RT 015</Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="016" id="rt016" />
+                            <Label htmlFor="rt016" className="cursor-pointer font-bold">RT 016</Label>
+                          </div>
+                        </RadioGroup>
                       </div>
-                      <div className="space-y-2">
+                      <div className="space-y-2 md:col-span-2">
                         <Label>Keterangan</Label>
                         <Input 
                           className="rounded-xl h-12"
@@ -303,14 +341,45 @@ export default function JamaahAdmin() {
               <CardTitle className="text-xl font-bold text-[#0b3d2e]">
                 {activeTab === 'kk' ? 'Data Kepala Keluarga' : 'Data Remaja Masjid'}
               </CardTitle>
-              <div className="relative w-full md:w-96">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input 
-                  placeholder={`Cari nama atau ${activeTab === 'kk' ? 'blok' : 'pendidikan'}...`}
-                  className="pl-10 rounded-full bg-gray-50/50 border-gray-100 focus:bg-white transition-all h-12"
-                  value={search}
-                  onChange={e => setSearch(e.target.value)}
-                />
+              <div className="flex gap-2 w-full md:w-auto">
+                {activeTab === 'kk' && (
+                  <div className="flex gap-2">
+                    <Button
+                      variant={rtFilter === 'all' ? 'default' : 'outline'}
+                      size="sm"
+                      className="rounded-xl"
+                      onClick={() => setRtFilter('all')}
+                    >
+                      <Filter className="h-3 w-3 mr-1" />
+                      Semua
+                    </Button>
+                    <Button
+                      variant={rtFilter === '015' ? 'default' : 'outline'}
+                      size="sm"
+                      className="rounded-xl"
+                      onClick={() => setRtFilter('015')}
+                    >
+                      RT 015
+                    </Button>
+                    <Button
+                      variant={rtFilter === '016' ? 'default' : 'outline'}
+                      size="sm"
+                      className="rounded-xl"
+                      onClick={() => setRtFilter('016')}
+                    >
+                      RT 016
+                    </Button>
+                  </div>
+                )}
+                <div className="relative flex-1 md:w-96">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input 
+                    placeholder={`Cari nama atau ${activeTab === 'kk' ? 'blok' : 'pendidikan'}...`}
+                    className="pl-10 rounded-full bg-gray-50/50 border-gray-100 focus:bg-white transition-all h-10"
+                    value={search}
+                    onChange={e => setSearch(e.target.value)}
+                  />
+                </div>
               </div>
             </div>
           </CardHeader>
@@ -329,51 +398,78 @@ export default function JamaahAdmin() {
                 <table className="w-full text-left">
                   <thead>
                     <tr className="bg-gray-50/50 text-[10px] uppercase tracking-widest font-bold text-gray-400">
-                      <th className="px-8 py-5">Nama & Detail</th>
-                      <th className="px-8 py-5">Lokasi / Alamat</th>
-                      <th className="px-8 py-5">Info Lain</th>
-                      <th className="px-8 py-5 text-right">Aksi</th>
+                      {activeTab === 'kk' ? (
+                        <>
+                          <th className="px-8 py-5">No.</th>
+                          <th className="px-8 py-5">Nama</th>
+                          <th className="px-8 py-5">Blok/Link</th>
+                          <th className="px-8 py-5">Keterangan</th>
+                          <th className="px-8 py-5 text-right">Aksi</th>
+                        </>
+                      ) : (
+                        <>
+                          <th className="px-8 py-5">Nama & Detail</th>
+                          <th className="px-8 py-5">Lokasi / Alamat</th>
+                          <th className="px-8 py-5">Info Lain</th>
+                          <th className="px-8 py-5 text-right">Aksi</th>
+                        </>
+                      )}
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-50">
                     {filteredData.map((item: any) => (
                       <tr key={item.id} className="hover:bg-gray-50/30 transition-colors group">
-                        <td className="px-8 py-6">
-                          <div className="font-bold text-[#0b3d2e]">{item.name}</div>
-                          {activeTab === 'kk' ? (
-                            <div className="text-[10px] font-bold text-primary mt-0.5">NOMOR: {item.nomor}</div>
-                          ) : (
-                            <div className="text-xs text-muted-foreground mt-0.5 flex items-center">
-                              <GraduationCap className="h-3 w-3 mr-1" /> {item.education || '-'}
-                            </div>
-                          )}
-                        </td>
-                        <td className="px-8 py-6">
-                          <div className="text-xs text-neutral-600 flex items-center">
-                            <MapPin className="h-3 w-3 mr-1 text-primary shrink-0" /> 
-                            <span className="line-clamp-1">{activeTab === 'kk' ? item.blok : item.address}</span>
-                          </div>
-                          {item.phone && (
-                            <div className="text-xs text-neutral-400 flex items-center mt-1">
-                              <Phone className="h-3 w-3 mr-1 text-primary shrink-0" /> {item.phone}
-                            </div>
-                          )}
-                        </td>
-                        <td className="px-8 py-6">
-                          {activeTab === 'kk' ? (
-                            <div className="flex flex-col gap-2">
-                              <div className="flex gap-2">
-                                <Badge variant="outline" className="text-[9px] uppercase font-bold bg-neutral-50 border-emerald-100">RT {item.rt}</Badge>
-                                <Badge variant="outline" className="text-[9px] uppercase font-bold bg-neutral-50 border-emerald-100">RW {item.rw}</Badge>
+                        {activeTab === 'kk' ? (
+                          <>
+                            <td className="px-8 py-6">
+                              <div className="font-bold text-primary">{item.nomor}</div>
+                            </td>
+                            <td className="px-8 py-6">
+                              <div className="font-bold text-[#0b3d2e]">{item.name}</div>
+                              {item.phone && (
+                                <div className="text-xs text-neutral-400 flex items-center mt-1">
+                                  <Phone className="h-3 w-3 mr-1 text-primary shrink-0" /> {item.phone}
+                                </div>
+                              )}
+                            </td>
+                            <td className="px-8 py-6">
+                              <div className="font-medium text-neutral-700">{item.blok}</div>
+                              <Badge variant="outline" className="text-[9px] uppercase font-bold bg-neutral-50 border-emerald-100 mt-1">
+                                RT {item.rt}
+                              </Badge>
+                            </td>
+                            <td className="px-8 py-6">
+                              <div className="text-xs text-muted-foreground italic max-w-xs line-clamp-2">
+                                {item.keterangan || '-'}
                               </div>
-                              {item.keterangan && <div className="text-[10px] text-muted-foreground italic">"{item.keterangan}"</div>}
-                            </div>
-                          ) : (
-                            <div className="text-xs font-medium text-neutral-500 line-clamp-1">
-                              {item.skills || 'Tidak ada info skill'}
-                            </div>
-                          )}
-                        </td>
+                            </td>
+                          </>
+                        ) : (
+                          <>
+                            <td className="px-8 py-6">
+                              <div className="font-bold text-[#0b3d2e]">{item.name}</div>
+                              <div className="text-xs text-muted-foreground mt-0.5 flex items-center">
+                                <GraduationCap className="h-3 w-3 mr-1" /> {item.education || '-'}
+                              </div>
+                            </td>
+                            <td className="px-8 py-6">
+                              <div className="text-xs text-neutral-600 flex items-center">
+                                <MapPin className="h-3 w-3 mr-1 text-primary shrink-0" /> 
+                                <span className="line-clamp-1">{item.address}</span>
+                              </div>
+                              {item.phone && (
+                                <div className="text-xs text-neutral-400 flex items-center mt-1">
+                                  <Phone className="h-3 w-3 mr-1 text-primary shrink-0" /> {item.phone}
+                                </div>
+                              )}
+                            </td>
+                            <td className="px-8 py-6">
+                              <div className="text-xs font-medium text-neutral-500 line-clamp-1">
+                                {item.skills || 'Tidak ada info skill'}
+                              </div>
+                            </td>
+                          </>
+                        )}
                         <td className="px-8 py-6 text-right">
                           <div className="flex justify-end space-x-2">
                             <Button 
@@ -388,8 +484,8 @@ export default function JamaahAdmin() {
                                   phone: item.phone || '',
                                   nomor: item.nomor || '',
                                   blok: item.blok || '',
-                                  rt: item.rt || '',
-                                  rw: item.rw || '',
+                                  rt: item.rt || '015',
+                                  rw: item.rw || '003',
                                   keterangan: item.keterangan || '',
                                   birthDate: item.birthDate || '',
                                   education: item.education || '',

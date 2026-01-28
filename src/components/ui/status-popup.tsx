@@ -22,7 +22,7 @@ export function StatusPopup({
   type,
   title,
   description,
-  actionLabel = 'Paham'
+  actionLabel = 'Oke'
 }: StatusPopupProps) {
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
