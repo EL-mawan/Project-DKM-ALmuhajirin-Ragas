@@ -14,7 +14,9 @@ import {
   ArrowUpCircle, 
   ArrowDownCircle, 
   Calendar,
-  Layers
+  Layers,
+  Edit2,
+  MoreVertical
 } from 'lucide-react'
 import { AdminLayout } from '@/components/layout/admin-layout'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
@@ -27,8 +29,9 @@ export default function KeuanganAdmin() {
   const [loading, setLoading] = useState(true)
   const [data, setData] = useState<any>({ income: { data: [] }, expense: { data: [] } })
   const [search, setSearch] = useState('')
-  const [activeTab, setActiveTab] = useState('all')
+  const [activeTab, setActiveTab] = useState('income')
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [editingItem, setEditingItem] = useState<any>(null)
   const [formData, setFormData] = useState({
     type: 'income',
     date: new Date().toISOString().slice(0, 16),
@@ -74,35 +77,62 @@ export default function KeuanganAdmin() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     try {
-      const res = await fetch('/api/admin/keuangan', {
-        method: 'POST',
+      const url = editingItem ? `/api/admin/keuangan/${editingItem.id}` : '/api/admin/keuangan'
+      const method = editingItem ? 'PATCH' : 'POST'
+
+      const res = await fetch(url, {
+        method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
       })
 
       if (res.ok) {
-        toast.success('Transaksi berhasil dicatat')
+        toast.success(editingItem ? 'Transaksi diperbarui' : 'Transaksi berhasil dicatat')
         setIsModalOpen(false)
-        setFormData({
-          type: formData.type,
-          date: new Date().toISOString().slice(0, 16),
-          source: '',
-          sourceUnit: '',
-          qty: '1',
-          unitPrice: '',
-          amount: '0',
-          itemName: '',
-          unitType: '',
-          category: '',
-          description: '',
-        })
+        resetForm()
         fetchData()
       } else {
-        toast.error('Gagal menyimpan transaksi')
+        const err = await res.json()
+        toast.error(err.error || 'Gagal menyimpan transaksi')
       }
     } catch (error) {
       toast.error('Terjadi kesalahan')
     }
+  }
+
+  const resetForm = () => {
+    setEditingItem(null)
+    setFormData({
+      type: formData.type,
+      date: new Date().toISOString().slice(0, 16),
+      source: '',
+      sourceUnit: '',
+      qty: '1',
+      unitPrice: '',
+      amount: '0',
+      itemName: '',
+      unitType: '',
+      category: '',
+      description: '',
+    })
+  }
+
+  const handleEdit = (item: any) => {
+    setEditingItem(item)
+    setFormData({
+      type: item.txType,
+      date: new Date(item.date).toISOString().slice(0, 16),
+      source: item.source || '',
+      sourceUnit: item.sourceUnit || '',
+      qty: item.qty?.toString() || '1',
+      unitPrice: item.unitPrice?.toString() || '',
+      amount: item.amount.toString(),
+      itemName: item.itemName || '',
+      unitType: item.unitType || '',
+      category: item.category || '',
+      description: item.description || '',
+    })
+    setIsModalOpen(true)
   }
 
   const handleDelete = async (id: string) => {
@@ -156,15 +186,18 @@ export default function KeuanganAdmin() {
         </div>
 
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-          <Tabs defaultValue="all" className="w-full md:w-auto" onValueChange={setActiveTab}>
+          <Tabs defaultValue="income" className="w-full md:w-auto" onValueChange={setActiveTab}>
             <TabsList className="bg-white border-none rounded-2xl p-1.5 h-14 shadow-sm">
-              <TabsTrigger value="all" className="rounded-xl px-8 font-bold data-[state=active]:bg-emerald-600 data-[state=active]:text-white">Semua</TabsTrigger>
+              <TabsTrigger value="all" className="rounded-xl px-8 font-bold data-[state=active]:bg-emerald-600 data-[state=active]:text-white hidden md:flex">Semua</TabsTrigger>
               <TabsTrigger value="income" className="rounded-xl px-8 font-bold data-[state=active]:bg-emerald-600 data-[state=active]:text-white">Pemasukan</TabsTrigger>
               <TabsTrigger value="expense" className="rounded-xl px-8 font-bold data-[state=active]:bg-emerald-600 data-[state=active]:text-white">Pengeluaran</TabsTrigger>
             </TabsList>
           </Tabs>
 
-          <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+          <Dialog open={isModalOpen} onOpenChange={(open) => {
+            setIsModalOpen(open)
+            if (!open) resetForm()
+          }}>
             <DialogTrigger asChild>
               <Button className="rounded-2xl shadow-xl shadow-emerald-900/10 h-14 px-10 font-bold w-full md:w-auto bg-[#0b3d2e] hover:bg-[#062c21] text-white">
                 <Plus className="h-5 w-5 mr-2" />
@@ -449,7 +482,15 @@ export default function KeuanganAdmin() {
                           </div>
                         </td>
                         <td className="px-10 py-8 text-right">
-                          <div className="flex justify-end opacity-0 group-hover:opacity-100 transition-opacity">
+                          <div className="flex justify-end opacity-0 group-hover:opacity-100 transition-opacity space-x-2">
+                             <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              className="rounded-2xl h-12 w-12 text-emerald-600 hover:bg-emerald-50 transition-all active:scale-90"
+                              onClick={() => handleEdit(tx)}
+                            >
+                              <Edit2 className="h-5 w-5" />
+                            </Button>
                             <Button 
                               variant="ghost" 
                               size="icon" 

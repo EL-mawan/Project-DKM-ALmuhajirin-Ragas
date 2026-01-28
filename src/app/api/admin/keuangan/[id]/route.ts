@@ -59,7 +59,10 @@ export async function PATCH(
     }) as any
 
     const body = await request.json()
-    const { amount, source, category, description, date } = body
+    const { 
+      amount, source, sourceUnit, qty, unitPrice, 
+      itemName, unitType, category, description, date 
+    } = body
 
     // Try income
     const income = await db.keuanganPemasukan.findUnique({ where: { id: params.id } })
@@ -72,6 +75,9 @@ export async function PATCH(
         data: {
           amount: amount ? parseFloat(amount) : undefined,
           source,
+          sourceUnit,
+          qty: qty ? parseFloat(qty) : undefined,
+          unitPrice: unitPrice ? parseFloat(unitPrice) : undefined,
           description,
           date: date ? new Date(date) : undefined
         }
@@ -88,7 +94,11 @@ export async function PATCH(
       const updated = await db.keuanganPengeluaran.update({
         where: { id: params.id },
         data: {
+          itemName,
           amount: amount ? parseFloat(amount) : undefined,
+          unitPrice: unitPrice ? parseFloat(unitPrice) : undefined,
+          qty: qty ? parseFloat(qty) : undefined,
+          unitType,
           category,
           description,
           date: date ? new Date(date) : undefined
