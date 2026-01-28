@@ -54,14 +54,22 @@ export default function KegiatanAdmin() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingItem, setEditingItem] = useState<Kegiatan | null>(null)
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<any>({
     title: '',
     category: 'PHBI',
     description: '',
     date: '',
     location: '',
-    // Dynamic field based on category
-    specificDetail: ''
+    // PHBI specific
+    memperingati: '',
+    // Pengajian specific
+    setiapHari: 'Senin',
+    waktu: '',
+    pemateri: [''],
+    kitab: '',
+    // Pendidikan specific
+    materi: '',
+    target: '',
   })
 
   const getDynamicLabel = (cat: string) => {
@@ -102,37 +110,83 @@ export default function KegiatanAdmin() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     try {
-      const url = editingItem 
-        ? `/api/admin/kegiatan/${editingItem.id}` 
-        : '/api/admin/kegiatan'
+      const url = editingItem ? `/api/admin/kegiatan/${editingItem.id}` : '/api/admin/kegiatan'
       const method = editingItem ? 'PATCH' : 'POST'
 
-      // Prepend specific detail to description
-      const fullDescription = formData.specificDetail 
-        ? `[${getDynamicLabel(formData.category)}: ${formData.specificDetail}] ${formData.description}` 
-        : formData.description
+      // Construct dynamic description or content based on category
+      let finalTitle = formData.title
+      let finalDate = formData.date
+      let finalDescription = formData.description
+
+      if (formData.category === 'PHBI') {
+        finalTitle = `PHBI: ${formData.memperingati}`
+      } else if (formData.category === 'Pengajian Rutin') {
+        finalTitle = `Pengajian: ${formData.kitab}`
+        finalDescription = `Pemateri: ${formData.pemateri.filter((p: string) => p).join(', ')}\nJadwal: Setiap ${formData.setiapHari} Pukul ${formData.waktu}\n\n${formData.description}`
+      } else if (formData.category === 'Pendidikan') {
+        finalTitle = `Pendidikan: ${formData.materi}`
+        finalDescription = `Pemateri: ${formData.pemateri[0] || '-'}\nTarget: ${formData.target}\n\n${formData.description}`
+      }
 
       const res = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          ...formData,
-          description: fullDescription,
-          status: 'approved' // Automatically published if created by admin
+          title: finalTitle,
+          category: formData.category,
+          description: finalDescription,
+          date: finalDate,
+          location: formData.location,
+          status: 'approved'
         })
       })
 
       if (res.ok) {
         toast.success(editingItem ? 'Kegiatan diperbarui' : 'Kegiatan ditambahkan')
         setIsModalOpen(false)
-        setEditingItem(null)
-        setFormData({ title: '', category: 'PHBI', description: '', date: '', location: '', specificDetail: '' })
+        resetForm()
         fetchData()
       } else {
-        toast.error('Gagal menyimpan kegiatan')
+        const err = await res.json()
+        toast.error(err.error || 'Gagal menyimpan kegiatan')
       }
     } catch (error) {
-      toast.error('Terjadi kesalahan')
+      toast.error('Terjadi kesalahan sistem')
+    }
+  }
+
+  const resetForm = () => {
+    setEditingItem(null)
+    setFormData({
+      title: '',
+      category: 'PHBI',
+      description: '',
+      date: '',
+      location: '',
+      memperingati: '',
+      setiapHari: 'Senin',
+      waktu: '',
+      pemateri: [''],
+      kitab: '',
+      materi: '',
+      target: '',
+    })
+  }
+
+  const addPemateri = () => {
+    setFormData({ ...formData, pemateri: [...formData.pemateri, ''] })
+  }
+
+  const updatePemateri = (index: number, value: string) => {
+    const newPemateri = [...formData.pemateri]
+    newPemateri[index] = value
+    setFormData({ ...formData, pemateri: newPemateri })
+  }
+
+  const removePemateri = (index: number) => {
+    if (formData.pemateri.length > 1) {
+      const newPemateri = formData.pemateri.filter((_: any, i: number) => i !== index)
+      setFormData({ ...formData, pemateri: newPemateri })
     }
   }
 
@@ -183,30 +237,19 @@ export default function KegiatanAdmin() {
                   {editingItem ? 'Edit Kegiatan' : 'Tambah Kegiatan Baru'}
                 </DialogTitle>
               </DialogHeader>
-              <form onSubmit={handleSubmit} className="space-y-6 pt-4">
+              <form onSubmit={handleSubmit} className="space-y-6 pt-4 max-h-[70vh] overflow-y-auto px-1">
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <label className="text-sm font-semibold uppercase tracking-wider text-gray-500">Nama Kegiatan*</label>
-                    <Input 
-                      required 
-                      className="rounded-xl"
-                      placeholder="Contoh: Tabligh Akbar..." 
-                      value={formData.title}
-                      onChange={e => setFormData({...formData, title: e.target.value})}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="text-sm font-semibold uppercase tracking-wider text-gray-500">Kategori*</label>
+                    <label className="text-[10px] font-black uppercase tracking-widest text-[#0b3d2e]/60">Kategori Kegiatan*</label>
                     <Select 
                       value={formData.category} 
                       onValueChange={val => setFormData({...formData, category: val})}
                     >
-                      <SelectTrigger className="rounded-xl">
+                      <SelectTrigger className="rounded-xl h-12 border-emerald-100">
                         <SelectValue placeholder="Pilih Kategori" />
                       </SelectTrigger>
                       <SelectContent className="rounded-xl">
-                        <SelectItem value="PHBI">PHBI</SelectItem>
+                        <SelectItem value="PHBI">PHBI (Peringatan Hari Besar)</SelectItem>
                         <SelectItem value="Pengajian Rutin">Pengajian Rutin</SelectItem>
                         <SelectItem value="Pendidikan">Pendidikan</SelectItem>
                         <SelectItem value="Lainnya">Lainnya</SelectItem>
@@ -214,53 +257,174 @@ export default function KegiatanAdmin() {
                     </Select>
                   </div>
 
-                  {/* Dynamic Field */}
-                  <div className="space-y-2 animate-in fade-in slide-in-from-top-1">
-                    <label className="text-sm font-bold tracking-wider text-primary uppercase text-[10px]">{getDynamicLabel(formData.category)}</label>
-                    <Input 
-                      required 
-                      className="rounded-xl border-primary/20 focus:border-primary"
-                      placeholder={getDynamicPlaceholder(formData.category)} 
-                      value={formData.specificDetail}
-                      onChange={e => setFormData({...formData, specificDetail: e.target.value})}
-                    />
-                  </div>
+                  {formData.category === 'PHBI' && (
+                    <div className="space-y-4 animate-in fade-in slide-in-from-top-2">
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-[#0b3d2e]/60">Memperingati*</label>
+                        <Input 
+                          required 
+                          placeholder="Misal: Isra Mi'raj 1445H"
+                          className="rounded-xl h-12"
+                          value={formData.memperingati}
+                          onChange={e => setFormData({...formData, memperingati: e.target.value})}
+                        />
+                      </div>
+                    </div>
+                  )}
 
-                  <div className="space-y-2">
-                    <label className="text-sm font-semibold uppercase tracking-wider text-gray-500">Deskripsi / Detail Acara</label>
-                    <textarea 
-                      required 
-                      className="w-full min-h-[80px] rounded-xl border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                      placeholder="Berikan detail singkat mengenai kegiatan..." 
-                      value={formData.description}
-                      onChange={e => setFormData({...formData, description: e.target.value})}
-                    />
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
+                  {formData.category === 'Pengajian Rutin' && (
+                    <div className="space-y-4 animate-in fade-in slide-in-from-top-2">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <label className="text-[10px] font-black uppercase tracking-widest text-[#0b3d2e]/60">Setiap Hari*</label>
+                          <Select 
+                            value={formData.setiapHari} 
+                            onValueChange={val => setFormData({...formData, setiapHari: val})}
+                          >
+                            <SelectTrigger className="rounded-xl h-12">
+                              <SelectValue placeholder="Pilih Hari" />
+                            </SelectTrigger>
+                            <SelectContent className="rounded-xl">
+                              {['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'].map(h => (
+                                <SelectItem key={h} value={h}>{h}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-[10px] font-black uppercase tracking-widest text-[#0b3d2e]/60">Waktu / Jam*</label>
+                          <Input 
+                            required 
+                            placeholder="Misal: 19:30 WIB"
+                            className="rounded-xl h-12"
+                            value={formData.waktu}
+                            onChange={e => setFormData({...formData, waktu: e.target.value})}
+                          />
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                         <label className="text-[10px] font-black uppercase tracking-widest text-[#0b3d2e]/60">Kitab / Materi*</label>
+                         <Input 
+                           required 
+                           placeholder="Misal: Safinatun Najah"
+                           className="rounded-xl h-12"
+                           value={formData.kitab}
+                           onChange={e => setFormData({...formData, kitab: e.target.value})}
+                         />
+                      </div>
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                          <label className="text-[10px] font-black uppercase tracking-widest text-[#0b3d2e]/60">Nama-nama Pemateri</label>
+                          <Button type="button" variant="ghost" size="sm" onClick={addPemateri} className="h-7 text-[10px] text-emerald-600 font-bold">
+                            <Plus className="h-3 w-3 mr-1" /> Tambah Pemateri
+                          </Button>
+                        </div>
+                        {formData.pemateri.map((p: string, i: number) => (
+                          <div key={i} className="flex gap-2">
+                            <Input 
+                              placeholder={`Pemateri ${i+1}`}
+                              className="rounded-xl h-11"
+                              value={p}
+                              onChange={e => updatePemateri(i, e.target.value)}
+                            />
+                            {formData.pemateri.length > 1 && (
+                              <Button type="button" variant="ghost" size="icon" onClick={() => removePemateri(i)} className="text-rose-400">
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {formData.category === 'Pendidikan' && (
+                    <div className="space-y-4 animate-in fade-in slide-in-from-top-2">
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-[#0b3d2e]/60">Materi Pendidikan*</label>
+                        <Input 
+                          required 
+                          placeholder="Misal: Kursus Bahasa Arab"
+                          className="rounded-xl h-12"
+                          value={formData.materi}
+                          onChange={e => setFormData({...formData, materi: e.target.value})}
+                        />
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <label className="text-[10px] font-black uppercase tracking-widest text-[#0b3d2e]/60">Nama Pemateri*</label>
+                          <Input 
+                            required 
+                            placeholder="Ustadz ..."
+                            className="rounded-xl h-12"
+                            value={formData.pemateri[0]}
+                            onChange={e => updatePemateri(0, e.target.value)}
+                          />
+                        </div>
+                        <div className="space-y-2">
+                           <label className="text-[10px] font-black uppercase tracking-widest text-[#0b3d2e]/60">Target Peserta*</label>
+                           <Input 
+                             required 
+                             placeholder="Misal: Remaja / Anak-anak"
+                             className="rounded-xl h-12"
+                             value={formData.target}
+                             onChange={e => setFormData({...formData, target: e.target.value})}
+                           />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {formData.category === 'Lainnya' && (
+                    <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
+                      <label className="text-[10px] font-black uppercase tracking-widest text-[#0b3d2e]/60">Nama Kegiatan*</label>
+                      <Input 
+                        required 
+                        className="rounded-xl h-12"
+                        placeholder="Masukkan nama kegiatan..." 
+                        value={formData.title}
+                        onChange={e => setFormData({...formData, title: e.target.value})}
+                      />
+                    </div>
+                  )}
+
+                  {(formData.category !== 'Pengajian Rutin') && (
                     <div className="space-y-2">
-                      <label className="text-sm font-semibold uppercase tracking-wider text-gray-500">Tanggal & Waktu</label>
+                      <label className="text-[10px] font-black uppercase tracking-widest text-[#0b3d2e]/60">Waktu Peringatan / Pelaksanaan*</label>
                       <Input 
                         required 
                         type="datetime-local" 
-                        className="rounded-xl"
+                        className="rounded-xl h-12"
                         value={formData.date}
                         onChange={e => setFormData({...formData, date: e.target.value})}
                       />
                     </div>
-                    <div className="space-y-2">
-                      <label className="text-sm font-semibold uppercase tracking-wider text-gray-500">Lokasi</label>
-                      <Input 
-                        required 
-                        className="rounded-xl"
-                        placeholder="Contoh: Aula Masjid" 
-                        value={formData.location}
-                        onChange={e => setFormData({...formData, location: e.target.value})}
-                      />
-                    </div>
+                  )}
+
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-[#0b3d2e]/60">Lokasi Kegiatan*</label>
+                    <Input 
+                      required 
+                      className="rounded-xl h-12"
+                      placeholder="Contoh: Aula Masjid / Teras Masjid" 
+                      value={formData.location}
+                      onChange={e => setFormData({...formData, location: e.target.value})}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-[#0b3d2e]/60">Deskripsi / Detail Acara*</label>
+                    <textarea 
+                      required 
+                      className="w-full min-h-[100px] rounded-2xl border border-emerald-50 bg-neutral-50 p-4 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                      placeholder="Berikan detail tambahan mengenai kegiatan..." 
+                      value={formData.description}
+                      onChange={e => setFormData({...formData, description: e.target.value})}
+                    />
                   </div>
                 </div>
-                <Button type="submit" className="w-full rounded-2xl py-6 font-bold shadow-lg shadow-primary/20">
-                  {editingItem ? 'Simpan Perubahan' : 'Publish Kegiatan'}
+                <Button type="submit" className="w-full rounded-[2rem] py-8 font-black uppercase tracking-widest shadow-2xl shadow-emerald-900/10 text-white bg-[#0b3d2e] hover:bg-[#062c21]">
+                  {editingItem ? 'Simpan Perubahan' : 'Terbitkan Kegiatan'}
                 </Button>
               </form>
             </DialogContent>

@@ -22,7 +22,7 @@ import { Textarea } from '@/components/ui/textarea'
 
 export default function StrukturAdmin() {
   const [loading, setLoading] = useState(true)
-  const [data, setData] = useState([])
+  const [data, setData] = useState<any[]>([])
   const [search, setSearch] = useState('')
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingItem, setEditingItem] = useState<any>(null)
@@ -70,10 +70,11 @@ export default function StrukturAdmin() {
         setFormData({ name: '', position: '', description: '', image: '', order: '0' })
         fetchData()
       } else {
-        toast.error('Gagal menyimpan data')
+        const err = await res.json()
+        toast.error(err.error || 'Gagal menyimpan data')
       }
     } catch (error) {
-      toast.error('Terjadi kesalahan')
+      toast.error('Terjadi kesalahan sistem')
     }
   }
 

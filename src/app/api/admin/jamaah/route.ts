@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { db } from '@/lib/db'
 import { authOptions } from '@/lib/auth/config'
+import { checkPermission } from '@/lib/auth/rbac'
 
 export async function GET(request: NextRequest) {
   try {
@@ -41,14 +42,14 @@ export async function POST(request: NextRequest) {
     const { type, ...rest } = body
 
     if (type === 'kk') {
-      if (!user?.role.permissions.includes('{"resource":"jamaah_kepala_keluarga","action":"create"}')) {
+      if (!user || !checkPermission(user as any, 'jamaah_kepala_keluarga', 'create')) {
         return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
       }
       // rest contains nomor, blok, name, rt, rw, keterangan
       const newItem = await db.jamaahKepalaKeluarga.create({ data: rest })
       return NextResponse.json(newItem, { status: 201 })
     } else if (type === 'remaja') {
-      if (!user?.role.permissions.includes('{"resource":"jamaah_remaja","action":"create"}')) {
+      if (!user || !checkPermission(user as any, 'jamaah_remaja', 'create')) {
         return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
       }
       const newItem = await db.jamaahRemaja.create({ 

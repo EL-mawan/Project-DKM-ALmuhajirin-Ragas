@@ -24,7 +24,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 export default function JamaahAdmin() {
   const [loading, setLoading] = useState(true)
-  const [data, setData] = useState([])
+  const [data, setData] = useState<any[]>([])
   const [search, setSearch] = useState('')
   const [activeTab, setActiveTab] = useState('kk')
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -51,8 +51,14 @@ export default function JamaahAdmin() {
       setLoading(true)
       const res = await fetch(`/api/admin/jamaah?type=${type}`)
       const json = await res.json()
-      setData(json || [])
+      if (res.ok) {
+        setData(Array.isArray(json) ? json : [])
+      } else {
+        setData([])
+        toast.error(json.error || 'Gagal mengambil data')
+      }
     } catch (error) {
+      setData([])
       toast.error('Gagal mengambil data')
     } finally {
       setLoading(false)
@@ -126,9 +132,9 @@ export default function JamaahAdmin() {
     })
   }
 
-  const filteredData = data.filter((item: any) => 
-    item.name.toLowerCase().includes(search.toLowerCase()) ||
-    (activeTab === 'kk' ? item.blok?.toLowerCase() : item.address?.toLowerCase())?.includes(search.toLowerCase())
+  const filteredData = (Array.isArray(data) ? data : []).filter((item: any) => 
+    item?.name?.toLowerCase().includes(search.toLowerCase()) ||
+    (activeTab === 'kk' ? item?.blok?.toLowerCase() : item?.address?.toLowerCase())?.includes(search.toLowerCase())
   )
 
   return (

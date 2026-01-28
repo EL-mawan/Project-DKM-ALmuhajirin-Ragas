@@ -24,7 +24,7 @@ import { Textarea } from '@/components/ui/textarea'
 
 export default function DhuafaAdmin() {
   const [loading, setLoading] = useState(true)
-  const [data, setData] = useState([])
+  const [data, setData] = useState<any[]>([])
   const [search, setSearch] = useState('')
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingItem, setEditingItem] = useState<any>(null)
@@ -43,8 +43,14 @@ export default function DhuafaAdmin() {
       setLoading(true)
       const res = await fetch('/api/admin/dhuafa')
       const json = await res.json()
-      setData(json || [])
+      if (res.ok) {
+        setData(Array.isArray(json) ? json : [])
+      } else {
+        setData([])
+        toast.error(json.error || 'Gagal mengambil data')
+      }
     } catch (error) {
+      setData([])
       toast.error('Gagal mengambil data')
     } finally {
       setLoading(false)
@@ -74,10 +80,11 @@ export default function DhuafaAdmin() {
         resetForm()
         fetchData()
       } else {
-        toast.error('Gagal menyimpan data')
+        const err = await res.json()
+        toast.error(err.error || 'Gagal menyimpan data')
       }
     } catch (error) {
-      toast.error('Terjadi kesalahan')
+      toast.error('Terjadi kesalahan sistem')
     }
   }
 
@@ -98,9 +105,9 @@ export default function DhuafaAdmin() {
     setFormData({ nomor: '', name: '', type: 'fakir_miskin', address: '', phone: '', nik: '', keterangan: '' })
   }
 
-  const filteredData = data.filter((item: any) => 
-    item.name.toLowerCase().includes(search.toLowerCase()) ||
-    item.nomor?.includes(search)
+  const filteredData = (Array.isArray(data) ? data : []).filter((item: any) => 
+    item?.name?.toLowerCase().includes(search.toLowerCase()) ||
+    item?.nomor?.includes(search)
   )
 
   const getTypeName = (type: string) => {

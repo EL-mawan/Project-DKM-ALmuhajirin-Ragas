@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { db } from '@/lib/db'
 import { authOptions } from '@/lib/auth/config'
+import { checkPermission } from '@/lib/auth/rbac'
 
 export async function PATCH(
   request: NextRequest,
@@ -17,26 +18,37 @@ export async function PATCH(
     })
 
     const body = await request.json()
-    const { type, ...data } = body
+    const { type, name, phone, nomor, blok, rt, rw, keterangan, address, birthDate, education, skills } = body
 
     if (type === 'kk') {
-      if (!user?.role.permissions.includes('{"resource":"jamaah_kepala_keluarga","action":"update"}')) {
+      if (!user || !checkPermission(user as any, 'jamaah_kepala_keluarga', 'update')) {
         return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
       }
       const updated = await db.jamaahKepalaKeluarga.update({
         where: { id: params.id },
-        data // Contains nomor, blok, name, rt, rw, keterangan
+        data: {
+          nomor,
+          blok,
+          name,
+          rt,
+          rw,
+          keterangan
+        }
       })
       return NextResponse.json(updated)
     } else {
-      if (!user?.role.permissions.includes('{"resource":"jamaah_remaja","action":"update"}')) {
+      if (!user || !checkPermission(user as any, 'jamaah_remaja', 'update')) {
         return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
       }
       const updated = await db.jamaahRemaja.update({
         where: { id: params.id },
         data: {
-          ...data,
-          birthDate: data.birthDate ? new Date(data.birthDate) : undefined
+          name,
+          address,
+          phone,
+          birthDate: birthDate ? new Date(birthDate) : undefined,
+          education,
+          skills
         }
       })
       return NextResponse.json(updated)
@@ -63,12 +75,12 @@ export async function DELETE(
     const type = searchParams.get('type')
 
     if (type === 'kk') {
-      if (!user?.role.permissions.includes('{"resource":"jamaah_kepala_keluarga","action":"delete"}')) {
+      if (!user || !checkPermission(user as any, 'jamaah_kepala_keluarga', 'delete')) {
         return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
       }
       await db.jamaahKepalaKeluarga.delete({ where: { id: params.id } })
     } else {
-      if (!user?.role.permissions.includes('{"resource":"jamaah_remaja","action":"delete"}')) {
+      if (!user || !checkPermission(user as any, 'jamaah_remaja', 'delete')) {
         return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
       }
       await db.jamaahRemaja.delete({ where: { id: params.id } })

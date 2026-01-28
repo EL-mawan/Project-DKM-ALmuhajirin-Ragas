@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import { 
   Plus, 
   Search, 
+  Edit2, 
   Trash2, 
   Image as ImageIcon,
   ExternalLink,
@@ -25,6 +26,7 @@ export default function GaleriAdmin() {
   const [data, setData] = useState([])
   const [search, setSearch] = useState('')
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [editingItem, setEditingItem] = useState<any>(null)
   
   const [formData, setFormData] = useState({
     title: '',
@@ -53,16 +55,19 @@ export default function GaleriAdmin() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     try {
-      const res = await fetch('/api/admin/galeri', {
-        method: 'POST',
+      const url = editingItem ? `/api/admin/galeri/${editingItem.id}` : '/api/admin/galeri'
+      const method = editingItem ? 'PATCH' : 'POST'
+
+      const res = await fetch(url, {
+        method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
       })
 
       if (res.ok) {
-        toast.success('Media berhasil ditambahkan')
+        toast.success(editingItem ? 'Media diperbarui' : 'Media berhasil ditambahkan')
         setIsModalOpen(false)
-        setFormData({ title: '', url: '', type: 'image', category: 'Kegiatan' })
+        resetForm()
         fetchData()
       } else {
         toast.error('Gagal menyimpan media')
@@ -70,6 +75,11 @@ export default function GaleriAdmin() {
     } catch (error) {
       toast.error('Terjadi kesalahan')
     }
+  }
+
+  const resetForm = () => {
+    setEditingItem(null)
+    setFormData({ title: '', url: '', type: 'image', category: 'Kegiatan' })
   }
 
   const handleDelete = async (id: string) => {
@@ -99,7 +109,10 @@ export default function GaleriAdmin() {
             <p className="text-muted-foreground text-sm hidden sm:block">Total {filteredData.length} item dokumentasi.</p>
           </div>
           
-          <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+          <Dialog open={isModalOpen} onOpenChange={(open) => {
+            setIsModalOpen(open)
+            if (!open) resetForm()
+          }}>
             <DialogTrigger asChild>
               <Button className="rounded-xl shadow-lg w-full sm:w-auto py-6 sm:py-2">
                 <Plus className="h-4 w-4 mr-2" />
@@ -108,7 +121,9 @@ export default function GaleriAdmin() {
             </DialogTrigger>
             <DialogContent className="sm:max-w-[500px] rounded-[2.5rem]">
               <DialogHeader>
-                <DialogTitle className="text-2xl font-bold text-[#0b3d2e]">Tambah Media Baru</DialogTitle>
+                <DialogTitle className="text-2xl font-bold text-[#0b3d2e]">
+                  {editingItem ? 'Edit Media' : 'Tambah Media Baru'}
+                </DialogTitle>
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-4 pt-4">
                 <div className="space-y-4">
@@ -167,7 +182,7 @@ export default function GaleriAdmin() {
                   </div>
                 </div>
                 <Button type="submit" className="w-full rounded-2xl py-6 font-bold mt-4 shadow-lg shadow-primary/20">
-                  Simpan Media
+                  {editingItem ? 'Simpan Perubahan' : 'Simpan Media'}
                 </Button>
               </form>
             </DialogContent>
@@ -241,14 +256,33 @@ export default function GaleriAdmin() {
                            </div>
                         </td>
                         <td className="px-8 py-6 text-right">
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
-                            className="rounded-xl h-10 w-10 text-rose-400 hover:bg-rose-50 hover:text-rose-600"
-                            onClick={() => handleDelete(item.id)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
+                          <div className="flex justify-end space-x-2">
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              className="rounded-xl h-10 w-10 hover:bg-primary/5 hover:text-primary"
+                              onClick={() => {
+                                setEditingItem(item)
+                                setFormData({
+                                  title: item.title,
+                                  url: item.imageUrl,
+                                  type: item.type,
+                                  category: item.category
+                                })
+                                setIsModalOpen(true)
+                              }}
+                            >
+                              <Edit2 className="h-4 w-4" />
+                            </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              className="rounded-xl h-10 w-10 text-rose-400 hover:bg-rose-50 hover:text-rose-600"
+                              onClick={() => handleDelete(item.id)}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
                         </td>
                       </tr>
                     ))}

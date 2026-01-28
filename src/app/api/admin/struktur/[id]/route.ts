@@ -23,11 +23,16 @@ export async function PATCH(
     }
 
     const body = await request.json()
+    const { name, position, description, image, order } = body
+
     const updated = await db.strukturOrganisasi.update({
       where: { id: params.id },
       data: {
-        ...body,
-        order: body.order ? parseInt(body.order) : undefined
+        name,
+        position,
+        description,
+        image,
+        order: order ? parseInt(order) : undefined
       }
     })
 

@@ -85,7 +85,7 @@ export function AdminLayout({ children, title, subtitle }: AdminLayoutProps) {
 
   return (
     <Layout showHeader={false} showFooter={false}>
-      <div className="min-h-screen bg-neutral-50 flex overflow-hidden">
+      <div className="h-screen bg-neutral-50 flex overflow-hidden">
         {/* Sidebar (Desktop) */}
         <aside className="fixed inset-y-0 left-0 z-50 w-72 bg-[#0b3d2e] border-r border-[#1a4d3d] transition-transform duration-300 lg:translate-x-0 lg:static hidden md:flex flex-col text-white shadow-2xl">
           <div className="flex flex-col h-full">
