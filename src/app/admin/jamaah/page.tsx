@@ -17,7 +17,6 @@ import {
   Loader2
 } from 'lucide-react'
 import { Input } from '@/components/ui/input'
-import { toast } from 'sonner'
 import { AdminLayout } from '@/components/layout/admin-layout'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
@@ -38,13 +37,11 @@ export default function JamaahAdmin() {
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
-    // KK specific
     nomor: '',
     blok: '',
     rt: '',
     rw: '',
     keterangan: '',
-    // Remaja specific
     address: '',
     birthDate: '',
     education: '',
@@ -60,11 +57,9 @@ export default function JamaahAdmin() {
         setData(Array.isArray(json) ? json : [])
       } else {
         setData([])
-        toast.error(json.error || 'Gagal mengambil data')
       }
     } catch (error) {
       setData([])
-      toast.error('Gagal mengambil data')
     } finally {
       setLoading(false)
     }
@@ -74,6 +69,24 @@ export default function JamaahAdmin() {
     fetchData(activeTab)
   }, [activeTab])
 
+  // Helper untuk navigasi Enter
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && e.target instanceof HTMLInputElement) {
+      if (e.target.type === 'submit') return;
+      
+      e.preventDefault();
+      const form = e.target.form;
+      if (!form) return;
+      
+      const index = Array.prototype.indexOf.call(form, e.target);
+      const nextElement = form.elements[index + 1] as HTMLElement;
+      
+      if (nextElement) {
+        nextElement.focus();
+      }
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     try {
@@ -81,20 +94,7 @@ export default function JamaahAdmin() {
       const url = editingItem ? `/api/admin/jamaah/${editingItem.id}` : '/api/admin/jamaah'
       const method = editingItem ? 'PATCH' : 'POST'
 
-      // Clean up payload based on type
-      const payload: any = { ...formData, type: activeTab }
-      if (activeTab === 'kk') {
-        delete payload.birthDate
-        delete payload.education
-        delete payload.skills
-        delete payload.address
-      } else {
-        delete payload.nomor
-        delete payload.blok
-        delete payload.rt
-        delete payload.rw
-        delete payload.keterangan
-      }
+      const payload = { ...formData, type: activeTab }
 
       const res = await fetch(url, {
         method,
@@ -104,23 +104,18 @@ export default function JamaahAdmin() {
 
       if (res.ok) {
         showSuccess(
-          'Penyimpanan Berhasil',
-          `Data ${activeTab === 'kk' ? 'Kepala Keluarga' : 'Jamaah Remaja'} telah diperbarui di database Neon.`
+          'Berhasil!',
+          `Data jamaah telah berhasil disimpan ke database.`
         )
         setIsModalOpen(false)
         resetForm()
         fetchData(activeTab)
-
-        // Auto redirect to Neon DBMS for verification
-        setTimeout(() => {
-          window.open('https://console.neon.tech/app/projects/blue-truth-a1k6q73b/tables', '_blank')
-        }, 1000)
       } else {
         const err = await res.json()
-        showError('Gagal Menyimpan', err.error || 'Terjadi gangguan saat mengirim data ke Neon.')
+        showError('Gagal Menyimpan', err.details || err.error || 'Terjadi kesalahan sistem.')
       }
-    } catch (error) {
-      showError('Kesalahan Sistem', 'Tidak dapat memproses data jamaah saat ini.')
+    } catch (error: any) {
+      showError('error', error.message)
     } finally {
       setIsSubmitting(false)
     }
@@ -131,16 +126,11 @@ export default function JamaahAdmin() {
     try {
       const res = await fetch(`/api/admin/jamaah/${id}?type=${activeTab}`, { method: 'DELETE' })
       if (res.ok) {
-        showSuccess('Data Dihapus', 'Informasi jamaah telah berhasil dibersihkan dari server.')
+        showSuccess('Dihapus', 'Data telah berhasil dihapus.')
         fetchData(activeTab)
-
-        // Auto redirect to Neon DBMS for verification
-        setTimeout(() => {
-          window.open('https://console.neon.tech/app/projects/blue-truth-a1k6q73b/tables', '_blank')
-        }, 1000)
       }
     } catch (error) {
-      showError('Gagal Menghapus', 'Data tidak dapat dihapus karena masalah koneksi.')
+      showError('Error', 'Gagal menghapus data.')
     }
   }
 
@@ -162,7 +152,7 @@ export default function JamaahAdmin() {
     <AdminLayout title="Data Jamaah" subtitle="Kelola database warga & remaja Masjid.">
       <div className="p-6 sm:p-8 space-y-6">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-          <Tabs defaultValue="kk" className="w-full md:w-auto" onValueChange={(val) => setActiveTab(val)}>
+          <Tabs value={activeTab} className="w-full md:w-auto" onValueChange={(val) => setActiveTab(val)}>
             <TabsList className="bg-white border rounded-2xl p-1 h-12 shadow-sm">
               <TabsTrigger value="kk" className="rounded-xl px-6 font-bold">Kepala Keluarga</TabsTrigger>
               <TabsTrigger value="remaja" className="rounded-xl px-6 font-bold">Remaja Masjid</TabsTrigger>
@@ -185,7 +175,7 @@ export default function JamaahAdmin() {
                   {editingItem ? 'Edit Data' : 'Tambah Data'} {activeTab === 'kk' ? 'Kepala Keluarga' : 'Remaja'}
                 </DialogTitle>
               </DialogHeader>
-              <form onSubmit={handleSubmit} className="space-y-4 pt-4">
+              <form onSubmit={handleSubmit} onKeyDown={handleKeyDown} className="space-y-4 pt-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>Nama Lengkap*</Label>
@@ -272,9 +262,9 @@ export default function JamaahAdmin() {
                         />
                       </div>
                       <div className="space-y-2 md:col-span-2">
-                        <Label>Alamat (Remaja)</Label>
+                        <Label>Alamat (Remaja)*</Label>
                         <Input 
-                          required
+                          required={activeTab === 'remaja'}
                           className="rounded-xl h-12"
                           value={formData.address}
                           onChange={e => setFormData({...formData, address: e.target.value})}

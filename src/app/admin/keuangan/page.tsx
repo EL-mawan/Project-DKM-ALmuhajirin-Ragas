@@ -63,6 +63,24 @@ export default function KeuanganAdmin() {
     }
   }, [formData.qty, formData.unitPrice])
 
+  // Helper untuk navigasi Enter
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement)) {
+      if (e.target.type === 'submit') return;
+      
+      e.preventDefault();
+      const form = (e.target as any).form;
+      if (!form) return;
+      
+      const index = Array.prototype.indexOf.call(form, e.target);
+      const nextElement = form.elements[index + 1] as HTMLElement;
+      
+      if (nextElement) {
+        nextElement.focus();
+      }
+    }
+  };
+
   const fetchData = async () => {
     try {
       setLoading(true)
@@ -101,11 +119,6 @@ export default function KeuanganAdmin() {
         setIsModalOpen(false)
         resetForm()
         fetchData()
-        
-        // Auto redirect to Neon DBMS for verification
-        setTimeout(() => {
-          window.open('https://console.neon.tech/app/projects/blue-truth-a1k6q73b/tables', '_blank')
-        }, 1000)
       } else {
         const err = await res.json()
         showError('Gagal Menyimpan', err.error || 'Terjadi kendala saat menghubungi database Neon.')
@@ -159,11 +172,6 @@ export default function KeuanganAdmin() {
       if (res.ok) {
         showSuccess('Dihapus Permanen', 'Data transaksi telah dihapus dari database Neon.')
         fetchData()
-        
-        // Auto redirect to Neon DBMS for verification
-        setTimeout(() => {
-          window.open('https://console.neon.tech/app/projects/blue-truth-a1k6q73b/tables', '_blank')
-        }, 1000)
       }
     } catch (error) {
       showError('Gagal Menghapus', 'Transaksi gagal dihapus karena kendala koneksi.')
@@ -236,7 +244,7 @@ export default function KeuanganAdmin() {
                 </p>
               </div>
 
-              <form onSubmit={handleSubmit} className="p-8 space-y-6 max-h-[75vh] overflow-y-auto bg-white">
+              <form onSubmit={handleSubmit} onKeyDown={handleKeyDown} className="p-8 space-y-6 max-h-[75vh] overflow-y-auto bg-white">
                 <div className="grid grid-cols-2 gap-2 p-1.5 bg-neutral-100 rounded-[1.5rem]">
                   <button 
                     type="button"

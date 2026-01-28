@@ -31,6 +31,24 @@ export default function BeritaAdmin() {
     image: ''
   })
 
+  // Helper untuk navigasi Enter
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement)) {
+      if (e.target.type === 'submit') return;
+      
+      e.preventDefault();
+      const form = (e.target as any).form;
+      if (!form) return;
+      
+      const index = Array.prototype.indexOf.call(form, e.target);
+      const nextElement = form.elements[index + 1] as HTMLElement;
+      
+      if (nextElement) {
+        nextElement.focus();
+      }
+    }
+  };
+
   const fetchData = async () => {
     try {
       setLoading(true)
@@ -127,7 +145,7 @@ export default function BeritaAdmin() {
                   {editingArticle ? 'Edit Artikel' : 'Tulis Artikel Baru'}
                 </DialogTitle>
               </DialogHeader>
-              <form onSubmit={handleSubmit} className="space-y-4 pt-4">
+              <form onSubmit={handleSubmit} onKeyDown={handleKeyDown} className="space-y-4 pt-4">
                 <div className="grid gap-4">
                   <div className="space-y-2">
                     <Label>Judul Artikel</Label>

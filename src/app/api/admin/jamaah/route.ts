@@ -39,31 +39,43 @@ export async function POST(request: NextRequest) {
     })
 
     const body = await request.json()
-    const { type, ...rest } = body
+    const { type, name, phone, nomor, blok, rt, rw, keterangan, address, birthDate, education, skills } = body
 
     if (type === 'kk') {
       if (!user || !checkPermission(user as any, 'jamaah_kepala_keluarga', 'create')) {
         return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
       }
-      // rest contains nomor, blok, name, rt, rw, keterangan
-      const newItem = await db.jamaahKepalaKeluarga.create({ data: rest })
+      const newItem = await db.jamaahKepalaKeluarga.create({
+        data: {
+          nomor,
+          blok,
+          name,
+          rt,
+          rw,
+          keterangan
+        }
+      })
       return NextResponse.json(newItem, { status: 201 })
     } else if (type === 'remaja') {
       if (!user || !checkPermission(user as any, 'jamaah_remaja', 'create')) {
         return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
       }
-      const newItem = await db.jamaahRemaja.create({ 
+      const newItem = await db.jamaahRemaja.create({
         data: {
-          ...rest,
-          birthDate: rest.birthDate ? new Date(rest.birthDate) : undefined
-        } 
+          name,
+          address,
+          phone,
+          birthDate: birthDate ? new Date(birthDate) : undefined,
+          education,
+          skills
+        }
       })
       return NextResponse.json(newItem, { status: 201 })
     }
 
     return NextResponse.json({ error: 'Invalid type' }, { status: 400 })
-  } catch (error) {
-    console.error('Jamaah Error:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  } catch (error: any) {
+    console.error('Jamaah POST Error:', error)
+    return NextResponse.json({ error: 'Gagal membuat data jamaah', details: error.message }, { status: 500 })
   }
 }

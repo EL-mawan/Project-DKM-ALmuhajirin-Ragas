@@ -43,6 +43,24 @@ export default function DhuafaAdmin() {
     keterangan: ''
   })
 
+  // Helper untuk navigasi Enter
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement)) {
+      if (e.target.type === 'submit') return;
+      
+      e.preventDefault();
+      const form = (e.target as any).form;
+      if (!form) return;
+      
+      const index = Array.prototype.indexOf.call(form, e.target);
+      const nextElement = form.elements[index + 1] as HTMLElement;
+      
+      if (nextElement) {
+        nextElement.focus();
+      }
+    }
+  };
+
   const fetchData = async () => {
     try {
       setLoading(true)
@@ -52,11 +70,9 @@ export default function DhuafaAdmin() {
         setData(Array.isArray(json) ? json : [])
       } else {
         setData([])
-        toast.error(json.error || 'Gagal mengambil data')
       }
     } catch (error) {
       setData([])
-      toast.error('Gagal mengambil data')
     } finally {
       setLoading(false)
     }
@@ -88,11 +104,6 @@ export default function DhuafaAdmin() {
         setEditingItem(null)
         resetForm()
         fetchData()
-
-        // Auto redirect to Neon DBMS for verification
-        setTimeout(() => {
-          window.open('https://console.neon.tech/app/projects/blue-truth-a1k6q73b/tables', '_blank')
-        }, 1000)
       } else {
         const err = await res.json()
         showError('Gagal Menyimpan', err.error || 'Terjadi gangguan koneksi ke server Neon.')
@@ -111,11 +122,6 @@ export default function DhuafaAdmin() {
       if (res.ok) {
         showSuccess('Berhasil Dihapus', 'Data dhuafa tersebut sudah tidak ada lagi di database.')
         fetchData()
-
-        // Auto redirect to Neon DBMS for verification
-        setTimeout(() => {
-          window.open('https://console.neon.tech/app/projects/blue-truth-a1k6q73b/tables', '_blank')
-        }, 1000)
       }
     } catch (error) {
       showError('Gagal Menghapus', 'Hapus data gagal karena masalah teknis.')
@@ -171,7 +177,7 @@ export default function DhuafaAdmin() {
                   {editingItem ? 'Edit Data Dhuafa' : 'Tambah Penerima Baru'}
                 </DialogTitle>
               </DialogHeader>
-              <form onSubmit={handleSubmit} className="space-y-4 pt-4">
+              <form onSubmit={handleSubmit} onKeyDown={handleKeyDown} className="space-y-4 pt-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>Nomor</Label>

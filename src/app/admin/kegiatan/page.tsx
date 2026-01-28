@@ -1,28 +1,21 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Layout } from '@/components/layout'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { 
   Plus, 
   Search, 
-  MoreVertical, 
   Edit2, 
   Trash2, 
   Calendar,
   MapPin,
-  Clock,
-  Filter,
   Loader2
 } from 'lucide-react'
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuTrigger 
-} from '@/components/ui/dropdown-menu'
+import { Input } from '@/components/ui/input'
+import { toast } from 'sonner'
+import { AdminLayout } from '@/components/layout/admin-layout'
 import { 
   Dialog, 
   DialogContent, 
@@ -30,11 +23,9 @@ import {
   DialogTitle, 
   DialogTrigger 
 } from '@/components/ui/dialog'
-import { Input } from '@/components/ui/input'
-import { toast } from 'sonner'
-import Link from 'next/link'
 import { StatusPopup } from '@/components/ui/status-popup'
 import { useStatusPopup } from '@/lib/hooks/use-status-popup'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 interface Kegiatan {
   id: string
@@ -46,9 +37,6 @@ interface Kegiatan {
   status: string
   createdAt: string
 }
-
-import { AdminLayout } from '@/components/layout/admin-layout'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 export default function KegiatanAdmin() {
   const [loading, setLoading] = useState(true)
@@ -65,35 +53,32 @@ export default function KegiatanAdmin() {
     description: '',
     date: '',
     location: '',
-    // PHBI specific
     memperingati: '',
-    // Pengajian specific
     setiapHari: 'Senin',
     waktu: '',
     pemateri: [''],
     kitab: '',
-    // Pendidikan specific
     materi: '',
     target: '',
   })
 
-  const getDynamicLabel = (cat: string) => {
-    switch (cat) {
-      case 'PHBI': return 'Nama Penceramah / Pengisi'
-      case 'Pengajian Rutin': return 'Kitab / Materi Pembahasan'
-      case 'Pendidikan': return 'Target Peserta / Jenjang'
-      default: return 'Keterangan Tambahan'
+  // Helper untuk navigasi Enter
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement)) {
+      if (e.target.type === 'submit') return;
+      
+      e.preventDefault();
+      const form = (e.target as any).form;
+      if (!form) return;
+      
+      const index = Array.prototype.indexOf.call(form, e.target);
+      const nextElement = form.elements[index + 1] as HTMLElement;
+      
+      if (nextElement) {
+        nextElement.focus();
+      }
     }
-  }
-
-  const getDynamicPlaceholder = (cat: string) => {
-    switch (cat) {
-      case 'PHBI': return 'Contoh: KH. Zainuddin MZ'
-      case 'Pengajian Rutin': return 'Contoh: Kitab Riyadhus Shalihin'
-      case 'Pendidikan': return 'Contoh: Remaja Masjid / Anak-anak'
-      default: return 'Contoh: Membawa perlengkapan sholat'
-    }
-  }
+  };
 
   const fetchData = async () => {
     try {
@@ -119,7 +104,6 @@ export default function KegiatanAdmin() {
       const url = editingItem ? `/api/admin/kegiatan/${editingItem.id}` : '/api/admin/kegiatan'
       const method = editingItem ? 'PATCH' : 'POST'
 
-      // Construct dynamic description or content based on category
       let finalTitle = formData.title
       let finalDate = formData.date
       let finalDescription = formData.description
@@ -234,7 +218,7 @@ export default function KegiatanAdmin() {
             setIsModalOpen(open)
             if (!open) {
               setEditingItem(null)
-              setFormData({ title: '', category: 'PHBI', description: '', date: '', location: '', specificDetail: '' })
+              resetForm()
             }
           }}>
             <DialogTrigger asChild>
@@ -249,7 +233,7 @@ export default function KegiatanAdmin() {
                   {editingItem ? 'Edit Kegiatan' : 'Tambah Kegiatan Baru'}
                 </DialogTitle>
               </DialogHeader>
-              <form onSubmit={handleSubmit} className="space-y-6 pt-4 max-h-[70vh] overflow-y-auto px-1">
+              <form onSubmit={handleSubmit} onKeyDown={handleKeyDown} className="space-y-6 pt-4 max-h-[70vh] overflow-y-auto px-1">
                 <div className="space-y-4">
                   <div className="space-y-2">
                     <label className="text-[10px] font-black uppercase tracking-widest text-[#0b3d2e]/60">Kategori Kegiatan*</label>
@@ -519,13 +503,10 @@ export default function KegiatanAdmin() {
                               className="rounded-xl hover:bg-primary/5 hover:text-primary h-10 w-10"
                               onClick={() => {
                                 setEditingItem(item)
-                                // Parse specific info from description if it exists
-                                const detailMatch = item.description.match(/^\[(.*?): (.*?)\] (.*)$/)
                                 setFormData({
                                   title: item.title,
                                   category: item.category || 'PHBI',
-                                  specificDetail: detailMatch ? detailMatch[2] : '',
-                                  description: detailMatch ? detailMatch[3] : item.description,
+                                  description: item.description,
                                   date: new Date(item.date).toISOString().slice(0, 16),
                                   location: item.location
                                 })
