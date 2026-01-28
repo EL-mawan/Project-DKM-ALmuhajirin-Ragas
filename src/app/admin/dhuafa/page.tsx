@@ -22,6 +22,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
+import { StatusPopup } from '@/components/ui/status-popup'
+import { useStatusPopup } from '@/lib/hooks/use-status-popup'
 
 export default function DhuafaAdmin() {
   const [loading, setLoading] = useState(true)
@@ -30,6 +32,7 @@ export default function DhuafaAdmin() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingItem, setEditingItem] = useState<any>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const { statusProps, showSuccess, showError } = useStatusPopup()
   const [formData, setFormData] = useState({
     nomor: '',
     name: '',
@@ -77,7 +80,10 @@ export default function DhuafaAdmin() {
       })
 
       if (res.ok) {
-        toast.success(editingItem ? 'Data diperbarui' : 'Data berhasil ditambahkan')
+        showSuccess(
+          editingItem ? 'Update Berhasil' : 'Data Ditambahkan',
+          editingItem ? 'Data kaum dhuafa telah diperbarui di database Neon.' : 'Penerima baru telah berhasil didaftarkan ke sistem.'
+        )
         setIsModalOpen(false)
         setEditingItem(null)
         resetForm()
@@ -85,14 +91,14 @@ export default function DhuafaAdmin() {
 
         // Auto redirect to Neon DBMS for verification
         setTimeout(() => {
-          window.open('https://console.neon.tech/app/projects/holy-flower-a1alhjqe/tables', '_blank')
+          window.open('https://console.neon.tech/app/projects/blue-truth-a1k6q73b/tables', '_blank')
         }, 1000)
       } else {
         const err = await res.json()
-        toast.error(err.error || 'Gagal menyimpan data')
+        showError('Gagal Menyimpan', err.error || 'Terjadi gangguan koneksi ke server Neon.')
       }
     } catch (error) {
-      toast.error('Terjadi kesalahan sistem')
+      showError('Kesalahan Sistem', 'Tidak dapat menyimpan data dhuafa saat ini.')
     } finally {
       setIsSubmitting(false)
     }
@@ -103,7 +109,7 @@ export default function DhuafaAdmin() {
     try {
       const res = await fetch(`/api/admin/dhuafa/${id}`, { method: 'DELETE' })
       if (res.ok) {
-        toast.success('Dihapus')
+        showSuccess('Berhasil Dihapus', 'Data dhuafa tersebut sudah tidak ada lagi di database.')
         fetchData()
 
         // Auto redirect to Neon DBMS for verification
@@ -112,7 +118,7 @@ export default function DhuafaAdmin() {
         }, 1000)
       }
     } catch (error) {
-      toast.error('Gagal menghapus')
+      showError('Gagal Menghapus', 'Hapus data gagal karena masalah teknis.')
     }
   }
 
@@ -342,6 +348,7 @@ export default function DhuafaAdmin() {
           </CardContent>
         </Card>
       </div>
+      <StatusPopup {...statusProps} />
     </AdminLayout>
   )
 }

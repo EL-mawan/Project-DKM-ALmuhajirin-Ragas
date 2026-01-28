@@ -21,6 +21,8 @@ import { AdminLayout } from '@/components/layout/admin-layout'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { StatusPopup } from '@/components/ui/status-popup'
+import { useStatusPopup } from '@/lib/hooks/use-status-popup'
 
 export default function GaleriAdmin() {
   const [loading, setLoading] = useState(true)
@@ -29,6 +31,7 @@ export default function GaleriAdmin() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingItem, setEditingItem] = useState<any>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const { statusProps, showSuccess, showError } = useStatusPopup()
   
   const [formData, setFormData] = useState({
     title: '',
@@ -68,15 +71,19 @@ export default function GaleriAdmin() {
       })
 
       if (res.ok) {
-        toast.success(editingItem ? 'Media diperbarui' : 'Media berhasil ditambahkan')
+        showSuccess(
+          'Media Tersimpan',
+          'Dokumentasi baru kini telah tersedia di galeri publik.'
+        )
         setIsModalOpen(false)
         resetForm()
         fetchData()
       } else {
-        toast.error('Gagal menyimpan media')
+        const err = await res.json()
+        showError('Gagal Upload', err.error || 'Server tidak dapat memproses file media saat ini.')
       }
     } catch (error) {
-      toast.error('Terjadi kesalahan')
+      showError('Kesalahan Jaringan', 'Sistem tidak dapat terhubung ke server database.')
     } finally {
       setIsSubmitting(false)
     }
@@ -92,11 +99,11 @@ export default function GaleriAdmin() {
     try {
       const res = await fetch(`/api/admin/galeri/${id}`, { method: 'DELETE' })
       if (res.ok) {
-        toast.success('Media dihapus')
+        showSuccess('Media Dihapus', 'File dokumentasi telah dibersihkan dari server.')
         fetchData()
       }
     } catch (error) {
-      toast.error('Gagal menghapus media')
+      showError('Gagal Menghapus', 'Media tidak dapat dihapus karena gangguan sistem.')
     }
   }
 
@@ -303,6 +310,7 @@ export default function GaleriAdmin() {
           </CardContent>
         </Card>
       </div>
+      <StatusPopup {...statusProps} />
     </AdminLayout>
   )
 }

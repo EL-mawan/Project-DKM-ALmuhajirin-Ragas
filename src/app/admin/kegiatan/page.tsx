@@ -33,6 +33,8 @@ import {
 import { Input } from '@/components/ui/input'
 import { toast } from 'sonner'
 import Link from 'next/link'
+import { StatusPopup } from '@/components/ui/status-popup'
+import { useStatusPopup } from '@/lib/hooks/use-status-popup'
 
 interface Kegiatan {
   id: string
@@ -55,6 +57,7 @@ export default function KegiatanAdmin() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingItem, setEditingItem] = useState<Kegiatan | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const { statusProps, showSuccess, showError } = useStatusPopup()
 
   const [formData, setFormData] = useState<any>({
     title: '',
@@ -145,16 +148,20 @@ export default function KegiatanAdmin() {
       })
 
       if (res.ok) {
-        toast.success(editingItem ? 'Kegiatan diperbarui' : 'Kegiatan ditambahkan')
+        showSuccess(
+          editingItem ? 'Agenda Diperbarui' : 'Agenda Ditambahkan',
+          editingItem ? 'Jadwal kegiatan masjid telah berhasil dimodifikasi.' : 'Kegiatan baru telah berhasil dijadwalkan di kalender DKM.'
+        )
         setIsModalOpen(false)
+        setEditingItem(null)
         resetForm()
         fetchData()
       } else {
         const err = await res.json()
-        toast.error(err.error || 'Gagal menyimpan kegiatan')
+        showError('Gagal Menyimpan', err.error || 'Server Neon sedang mengalami gangguan koneksi.')
       }
     } catch (error) {
-      toast.error('Terjadi kesalahan sistem')
+      showError('Kesalahan Pemuatan', 'Maaf, sistem tidak dapat memproses agenda saat ini.')
     } finally {
       setIsSubmitting(false)
     }
@@ -200,11 +207,11 @@ export default function KegiatanAdmin() {
     try {
       const res = await fetch(`/api/admin/kegiatan/${id}`, { method: 'DELETE' })
       if (res.ok) {
-        toast.success('Kegiatan dihapus')
+        showSuccess('Kegiatan Dibatalkan', 'Agenda telah dihapus secara permanen dari sistem.')
         fetchData()
       }
     } catch (error) {
-      toast.error('Gagal menghapus kegiatan')
+      showError('Gagal Menghapus', 'Agenda gagal dihapus karena kendala jaringan.')
     }
   }
 
@@ -546,6 +553,7 @@ export default function KegiatanAdmin() {
           </CardContent>
         </Card>
       </div>
+      <StatusPopup {...statusProps} />
     </AdminLayout>
   )
 }

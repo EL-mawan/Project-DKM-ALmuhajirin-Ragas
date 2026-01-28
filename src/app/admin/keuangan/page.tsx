@@ -25,6 +25,9 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { cn, formatCurrency } from '@/lib/utils'
+import { StatusPopup } from '@/components/ui/status-popup'
+import { useStatusPopup } from '@/lib/hooks/use-status-popup'
+
 
 export default function KeuanganAdmin() {
   const [loading, setLoading] = useState(true)
@@ -34,6 +37,7 @@ export default function KeuanganAdmin() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingItem, setEditingItem] = useState<any>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const { statusProps, showSuccess, showError, showLoading } = useStatusPopup()
   const [formData, setFormData] = useState({
     type: 'income',
     date: new Date().toISOString().slice(0, 16),
@@ -90,7 +94,10 @@ export default function KeuanganAdmin() {
       })
 
       if (res.ok) {
-        toast.success(editingItem ? 'Transaksi diperbarui' : 'Transaksi berhasil dicatat')
+        showSuccess(
+          editingItem ? 'Pembaruan Berhasil' : 'Pencatatan Berhasil',
+          editingItem ? 'Transaksi kas masjid telah diperbarui di sistem.' : 'Transaksi baru telah berhasil dicatat ke database.'
+        )
         setIsModalOpen(false)
         resetForm()
         fetchData()
@@ -101,10 +108,10 @@ export default function KeuanganAdmin() {
         }, 1000)
       } else {
         const err = await res.json()
-        toast.error(err.error || 'Gagal menyimpan transaksi')
+        showError('Gagal Menyimpan', err.error || 'Terjadi kendala saat menghubungi database Neon.')
       }
     } catch (error) {
-      toast.error('Terjadi kesalahan')
+      showError('Kesalahan Sistem', 'Tidak dapat memproses transaksi saat ini.')
     } finally {
       setIsSubmitting(false)
     }
@@ -150,7 +157,7 @@ export default function KeuanganAdmin() {
     try {
       const res = await fetch(`/api/admin/keuangan/${id}`, { method: 'DELETE' })
       if (res.ok) {
-        toast.success('Transaksi dihapus')
+        showSuccess('Dihapus Permanen', 'Data transaksi telah dihapus dari database Neon.')
         fetchData()
         
         // Auto redirect to Neon DBMS for verification
@@ -159,7 +166,7 @@ export default function KeuanganAdmin() {
         }, 1000)
       }
     } catch (error) {
-      toast.error('Gagal menghapus transaksi')
+      showError('Gagal Menghapus', 'Transaksi gagal dihapus karena kendala koneksi.')
     }
   }
 
@@ -533,6 +540,7 @@ export default function KeuanganAdmin() {
           </CardContent>
         </Card>
       </div>
+      <StatusPopup {...statusProps} />
     </AdminLayout>
   )
 }

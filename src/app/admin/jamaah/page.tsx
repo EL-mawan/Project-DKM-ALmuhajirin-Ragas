@@ -22,6 +22,8 @@ import { AdminLayout } from '@/components/layout/admin-layout'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { StatusPopup } from '@/components/ui/status-popup'
+import { useStatusPopup } from '@/lib/hooks/use-status-popup'
 
 export default function JamaahAdmin() {
   const [loading, setLoading] = useState(true)
@@ -31,6 +33,7 @@ export default function JamaahAdmin() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingItem, setEditingItem] = useState<any>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const { statusProps, showSuccess, showError } = useStatusPopup()
   
   const [formData, setFormData] = useState({
     name: '',
@@ -100,7 +103,10 @@ export default function JamaahAdmin() {
       })
 
       if (res.ok) {
-        toast.success(`Data ${activeTab === 'kk' ? 'Warga' : 'Remaja'} berhasil disimpan`)
+        showSuccess(
+          'Penyimpanan Berhasil',
+          `Data ${activeTab === 'kk' ? 'Kepala Keluarga' : 'Jamaah Remaja'} telah diperbarui di database Neon.`
+        )
         setIsModalOpen(false)
         resetForm()
         fetchData(activeTab)
@@ -111,10 +117,10 @@ export default function JamaahAdmin() {
         }, 1000)
       } else {
         const err = await res.json()
-        toast.error(err.error || 'Gagal menyimpan data')
+        showError('Gagal Menyimpan', err.error || 'Terjadi gangguan saat mengirim data ke Neon.')
       }
     } catch (error) {
-      toast.error('Terjadi kesalahan')
+      showError('Kesalahan Sistem', 'Tidak dapat memproses data jamaah saat ini.')
     } finally {
       setIsSubmitting(false)
     }
@@ -125,7 +131,7 @@ export default function JamaahAdmin() {
     try {
       const res = await fetch(`/api/admin/jamaah/${id}?type=${activeTab}`, { method: 'DELETE' })
       if (res.ok) {
-        toast.success('Data dihapus')
+        showSuccess('Data Dihapus', 'Informasi jamaah telah berhasil dibersihkan dari server.')
         fetchData(activeTab)
 
         // Auto redirect to Neon DBMS for verification
@@ -134,7 +140,7 @@ export default function JamaahAdmin() {
         }, 1000)
       }
     } catch (error) {
-      toast.error('Gagal menghapus')
+      showError('Gagal Menghapus', 'Data tidak dapat dihapus karena masalah koneksi.')
     }
   }
 
@@ -423,6 +429,7 @@ export default function JamaahAdmin() {
           </CardContent>
         </Card>
       </div>
+      <StatusPopup {...statusProps} />
     </AdminLayout>
   )
 }

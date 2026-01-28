@@ -12,6 +12,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
+import { StatusPopup } from '@/components/ui/status-popup'
+import { useStatusPopup } from '@/lib/hooks/use-status-popup'
 
 export default function BeritaAdmin() {
   const [loading, setLoading] = useState(true)
@@ -20,6 +22,7 @@ export default function BeritaAdmin() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingArticle, setEditingArticle] = useState<any>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const { statusProps, showSuccess, showError } = useStatusPopup()
   const [formData, setFormData] = useState({
     title: '',
     content: '',
@@ -59,16 +62,20 @@ export default function BeritaAdmin() {
       })
 
       if (res.ok) {
-        toast.success(editingArticle ? 'Artikel diperbarui' : 'Artikel diterbitkan')
+        showSuccess(
+          editingArticle ? 'Artikel Terupdate' : 'Artikel Terbit',
+          editingArticle ? 'Konten artikel telah berhasil diperbarui di server.' : 'Artikel baru Anda telah berhasil dibagikan ke khalayak.'
+        )
         setIsModalOpen(false)
         setEditingArticle(null)
         setFormData({ title: '', content: '', category: 'Berita', status: 'draft', image: '' })
         fetchData()
       } else {
-        toast.error('Gagal menyimpan artikel')
+        const err = await res.json()
+        showError('Gagal Menyimpan', err.error || 'Terjadi gangguan saat menyimpan artikel.')
       }
     } catch (error) {
-      toast.error('Terjadi kesalahan')
+      showError('Kesalahan Pemuatan', 'Sistem sedang sibuk, silakan coba beberapa saat lagi.')
     } finally {
       setIsSubmitting(false)
     }
@@ -79,11 +86,11 @@ export default function BeritaAdmin() {
     try {
       const res = await fetch(`/api/admin/berita/${id}`, { method: 'DELETE' })
       if (res.ok) {
-        toast.success('Artikel dihapus')
+        showSuccess('Berhasil Dihapus', 'Artikel telah dihapus secara permanen dari database.')
         fetchData()
       }
     } catch (error) {
-      toast.error('Gagal menghapus berita')
+      showError('Gagal Menghapus', 'Maaf, artikel tidak dapat dihapus saat ini.')
     }
   }
 
@@ -296,6 +303,7 @@ export default function BeritaAdmin() {
           </CardContent>
         </Card>
       </div>
+      <StatusPopup {...statusProps} />
     </AdminLayout>
   )
 }

@@ -20,6 +20,8 @@ import { AdminLayout } from '@/components/layout/admin-layout'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
+import { StatusPopup } from '@/components/ui/status-popup'
+import { useStatusPopup } from '@/lib/hooks/use-status-popup'
 
 export default function StrukturAdmin() {
   const [loading, setLoading] = useState(true)
@@ -28,6 +30,7 @@ export default function StrukturAdmin() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingItem, setEditingItem] = useState<any>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const { statusProps, showSuccess, showError } = useStatusPopup()
   const [formData, setFormData] = useState({
     name: '',
     position: '',
@@ -67,7 +70,10 @@ export default function StrukturAdmin() {
       })
 
       if (res.ok) {
-        toast.success(editingItem ? 'Data diperbarui' : 'Pengurus ditambahkan')
+        showSuccess(
+          editingItem ? 'Data Diperbarui' : 'Berhasil Menambah',
+          editingItem ? 'Informasi pengurus DKM telah berhasil diperbarui.' : 'Pengurus baru telah resmi terdaftar di sistem.'
+        )
         setIsModalOpen(false)
         setEditingItem(null)
         setFormData({ name: '', position: '', description: '', image: '', order: '0' })
@@ -79,10 +85,10 @@ export default function StrukturAdmin() {
         }, 1000)
       } else {
         const err = await res.json()
-        toast.error(err.error || 'Gagal menyimpan data')
+        showError('Gagal Menyimpan', err.error || 'Pastikan database Neon terhubung dengan baik.')
       }
     } catch (error) {
-      toast.error('Terjadi kesalahan sistem')
+      showError('Kesalahan Server', 'Tidak dapat memproses perubahan data pengurus.')
     } finally {
       setIsSubmitting(false)
     }
@@ -93,7 +99,7 @@ export default function StrukturAdmin() {
     try {
       const res = await fetch(`/api/admin/struktur/${id}`, { method: 'DELETE' })
       if (res.ok) {
-        toast.success('Dihapus')
+        showSuccess('Penghapusan Berhasil', 'Data pengurus telah dihapus dari database Neon.')
         fetchData()
         
         // Auto redirect to Neon DBMS for verification
@@ -102,7 +108,7 @@ export default function StrukturAdmin() {
         }, 1000)
       }
     } catch (error) {
-      toast.error('Gagal menghapus')
+      showError('Gagal Menghapus', 'Terjadi kendala teknis saat mencoba menghapus data.')
     }
   }
 
@@ -282,6 +288,7 @@ export default function StrukturAdmin() {
           </CardContent>
         </Card>
       </div>
+      <StatusPopup {...statusProps} />
     </AdminLayout>
   )
 }
