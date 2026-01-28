@@ -15,7 +15,8 @@ import {
   Home,
   GraduationCap,
   Loader2,
-  Filter
+  Filter,
+  Download
 } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { AdminLayout } from '@/components/layout/admin-layout'
@@ -25,6 +26,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { StatusPopup } from '@/components/ui/status-popup'
 import { useStatusPopup } from '@/lib/hooks/use-status-popup'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
+import jsPDF from 'jspdf'
+import autoTable from 'jspdf-autotable'
 
 export default function JamaahAdmin() {
   const [loading, setLoading] = useState(true)
@@ -158,6 +161,67 @@ export default function JamaahAdmin() {
     return matchesSearch && matchesRT
   })
 
+  // Urutkan data berdasarkan nomor untuk PDF
+  const sortedDataForPDF = [...filteredData].sort((a, b) => parseInt(a.nomor) - parseInt(b.nomor))
+
+  // PDF Generation Function
+  const generatePDF = () => {
+    const doc = new jsPDF()
+    
+    // Add Header
+    doc.setFontSize(16)
+    doc.setFont('helvetica', 'bold')
+    doc.text('Data Masyarakat Kp. Ragas Grenyang Masjid Al-Muhajirin', 105, 15, { align: 'center' })
+    
+    doc.setFontSize(12)
+    const rtLabel = rtFilter === 'all' ? '015 & 016' : rtFilter
+    doc.text(`RT. ${rtLabel}`, 105, 22, { align: 'center' })
+
+    // Define table columns
+    const tableColumn = ["No", "Nama", "Blok/Link", "Keterangan", "Nominal (Rp)"]
+    const tableRows: any[] = []
+
+    // Map data to rows
+    sortedDataForPDF.forEach((item, index) => {
+      const rowData = [
+        item.nomor,
+        item.name,
+        item.blok,
+        item.keterangan || '-',
+        "" // Nominal empty for manual entry
+      ]
+      tableRows.push(rowData)
+    })
+
+    // Generate table
+    autoTable(doc, {
+      head: [tableColumn],
+      body: tableRows,
+      startY: 30,
+      theme: 'grid',
+      headStyles: { 
+        fillColor: [11, 61, 46], // #0b3d2e
+        textColor: [255, 255, 255],
+        fontStyle: 'bold',
+        halign: 'center'
+      },
+      styles: {
+        fontSize: 10,
+        cellPadding: 3,
+      },
+      columnStyles: {
+        0: { halign: 'center', cellWidth: 15 },
+        1: { cellWidth: 50 },
+        2: { cellWidth: 40 },
+        3: { cellWidth: 50 },
+        4: { cellWidth: 35 }
+      }
+    })
+
+    // Save the PDF
+    doc.save(`Data_Jamaah_RT_${rtLabel}_${new Date().toLocaleDateString()}.pdf`)
+  }
+
   // Statistik RT
   const rt015Count = activeTab === 'kk' ? data.filter(item => item?.rt === '015').length : 0
   const rt016Count = activeTab === 'kk' ? data.filter(item => item?.rt === '016').length : 0
@@ -198,141 +262,155 @@ export default function JamaahAdmin() {
             </TabsList>
           </Tabs>
 
-          <Dialog open={isModalOpen} onOpenChange={(open) => {
-            setIsModalOpen(open)
-            if (!open) resetForm()
-          }}>
-            <DialogTrigger asChild>
-              <Button className="rounded-xl shadow-lg w-full sm:w-auto py-6 sm:py-2">
-                <Plus className="h-4 w-4 mr-2" />
-                Tambah {activeTab === 'kk' ? 'Warga' : 'Remaja'}
+          <div className="flex flex-wrap gap-3 w-full sm:w-auto">
+            {activeTab === 'kk' && (
+              <Button 
+                variant="outline" 
+                className="rounded-xl shadow-md bg-white border-emerald-100 text-[#0b3d2e] flex-1 sm:flex-none py-6 sm:py-2"
+                onClick={generatePDF}
+                disabled={filteredData.length === 0}
+              >
+                <Download className="h-4 w-4 mr-2" />
+                Unduh PDF
               </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[600px] rounded-[2.5rem]">
-              <DialogHeader>
-                <DialogTitle className="text-2xl font-bold text-[#0b3d2e]">
-                  {editingItem ? 'Edit Data' : 'Tambah Data'} {activeTab === 'kk' ? 'Kepala Keluarga' : 'Remaja'}
-                </DialogTitle>
-              </DialogHeader>
-              <form onSubmit={handleSubmit} onKeyDown={handleKeyDown} className="space-y-4 pt-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>Nama Lengkap*</Label>
-                    <Input 
-                      required 
-                      className="rounded-xl h-12"
-                      value={formData.name}
-                      onChange={e => setFormData({...formData, name: e.target.value})}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>No. HP/WA</Label>
-                    <Input 
-                      className="rounded-xl h-12"
-                      value={formData.phone}
-                      onChange={e => setFormData({...formData, phone: e.target.value})}
-                    />
-                  </div>
-
-                  {activeTab === 'kk' ? (
-                    <>
-                      <div className="space-y-2">
-                        <Label>Nomor* (ID/Urutan)</Label>
-                        <Input 
-                          required
-                          className="rounded-xl h-12"
-                          value={formData.nomor}
-                          onChange={e => setFormData({...formData, nomor: e.target.value})}
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Blok / Link*</Label>
-                        <Input 
-                          required
-                          className="rounded-xl h-12"
-                          value={formData.blok}
-                          onChange={e => setFormData({...formData, blok: e.target.value})}
-                        />
-                      </div>
-                      <div className="space-y-2 md:col-span-2">
-                        <Label>RT*</Label>
-                        <RadioGroup 
-                          value={formData.rt} 
-                          onValueChange={(val) => setFormData({...formData, rt: val})}
-                          className="flex gap-4"
-                        >
-                          <div className="flex items-center space-x-2">
-                            <RadioGroupItem value="015" id="rt015" />
-                            <Label htmlFor="rt015" className="cursor-pointer font-bold">RT 015</Label>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <RadioGroupItem value="016" id="rt016" />
-                            <Label htmlFor="rt016" className="cursor-pointer font-bold">RT 016</Label>
-                          </div>
-                        </RadioGroup>
-                      </div>
-                      <div className="space-y-2 md:col-span-2">
-                        <Label>Keterangan</Label>
-                        <Input 
-                          className="rounded-xl h-12"
-                          value={formData.keterangan}
-                          onChange={e => setFormData({...formData, keterangan: e.target.value})}
-                        />
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      <div className="space-y-2">
-                        <Label>Tgl Lahir</Label>
-                        <Input 
-                          type="date"
-                          className="rounded-xl h-12"
-                          value={formData.birthDate ? new Date(formData.birthDate).toISOString().split('T')[0] : ''}
-                          onChange={e => setFormData({...formData, birthDate: e.target.value})}
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Pendidikan Terakhir</Label>
-                        <Input 
-                          className="rounded-xl h-12"
-                          value={formData.education}
-                          onChange={e => setFormData({...formData, education: e.target.value})}
-                        />
-                      </div>
-                      <div className="space-y-2 md:col-span-2">
-                        <Label>Alamat (Remaja)*</Label>
-                        <Input 
-                          required={activeTab === 'remaja'}
-                          className="rounded-xl h-12"
-                          value={formData.address}
-                          onChange={e => setFormData({...formData, address: e.target.value})}
-                        />
-                      </div>
-                    </>
-                  )}
-                </div>
-                {activeTab === 'remaja' && (
-                  <div className="space-y-2">
-                    <Label>Keahlian / Skill</Label>
-                    <Input 
-                      className="rounded-xl h-12"
-                      placeholder="Contoh: Desain Grafis, IT, dll"
-                      value={formData.skills}
-                      onChange={e => setFormData({...formData, skills: e.target.value})}
-                    />
-                  </div>
-                )}
-                <Button 
-                  type="submit" 
-                  disabled={isSubmitting}
-                  className="w-full rounded-2xl py-6 font-bold mt-4 shadow-lg shadow-primary/20"
-                >
-                  {isSubmitting && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-                  {isSubmitting ? 'Memproses...' : (editingItem ? 'Simpan Perubahan' : 'Simpan Data')}
+            )}
+            
+            <Dialog open={isModalOpen} onOpenChange={(open) => {
+              setIsModalOpen(open)
+              if (!open) resetForm()
+            }}>
+              <DialogTrigger asChild>
+                <Button className="rounded-xl shadow-lg flex-1 sm:flex-none py-6 sm:py-2">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Tambah {activeTab === 'kk' ? 'Warga' : 'Remaja'}
                 </Button>
-              </form>
-            </DialogContent>
-          </Dialog>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[600px] rounded-[2.5rem]">
+                <DialogHeader>
+                  <DialogTitle className="text-2xl font-bold text-[#0b3d2e]">
+                    {editingItem ? 'Edit Data' : 'Tambah Data'} {activeTab === 'kk' ? 'Kepala Keluarga' : 'Remaja'}
+                  </DialogTitle>
+                </DialogHeader>
+                <form onSubmit={handleSubmit} onKeyDown={handleKeyDown} className="space-y-4 pt-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>Nama Lengkap*</Label>
+                      <Input 
+                        required 
+                        className="rounded-xl h-12"
+                        value={formData.name}
+                        onChange={e => setFormData({...formData, name: e.target.value})}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>No. HP/WA</Label>
+                      <Input 
+                        className="rounded-xl h-12"
+                        value={formData.phone}
+                        onChange={e => setFormData({...formData, phone: e.target.value})}
+                      />
+                    </div>
+
+                    {activeTab === 'kk' ? (
+                      <>
+                        <div className="space-y-2">
+                          <Label>Nomor* (ID/Urutan)</Label>
+                          <Input 
+                            required
+                            className="rounded-xl h-12"
+                            value={formData.nomor}
+                            onChange={e => setFormData({...formData, nomor: e.target.value})}
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Blok / Link*</Label>
+                          <Input 
+                            required
+                            className="rounded-xl h-12"
+                            value={formData.blok}
+                            onChange={e => setFormData({...formData, blok: e.target.value})}
+                          />
+                        </div>
+                        <div className="space-y-2 md:col-span-2">
+                          <Label>RT*</Label>
+                          <RadioGroup 
+                            value={formData.rt} 
+                            onValueChange={(val) => setFormData({...formData, rt: val})}
+                            className="flex gap-4"
+                          >
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="015" id="rt015" />
+                              <Label htmlFor="rt015" className="cursor-pointer font-bold">RT 015</Label>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="016" id="rt016" />
+                              <Label htmlFor="rt016" className="cursor-pointer font-bold">RT 016</Label>
+                            </div>
+                          </RadioGroup>
+                        </div>
+                        <div className="space-y-2 md:col-span-2">
+                          <Label>Keterangan</Label>
+                          <Input 
+                            className="rounded-xl h-12"
+                            value={formData.keterangan}
+                            onChange={e => setFormData({...formData, keterangan: e.target.value})}
+                          />
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <div className="space-y-2">
+                          <Label>Tgl Lahir</Label>
+                          <Input 
+                            type="date"
+                            className="rounded-xl h-12"
+                            value={formData.birthDate ? new Date(formData.birthDate).toISOString().split('T')[0] : ''}
+                            onChange={e => setFormData({...formData, birthDate: e.target.value})}
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Pendidikan Terakhir</Label>
+                          <Input 
+                            className="rounded-xl h-12"
+                            value={formData.education}
+                            onChange={e => setFormData({...formData, education: e.target.value})}
+                          />
+                        </div>
+                        <div className="space-y-2 md:col-span-2">
+                          <Label>Alamat (Remaja)*</Label>
+                          <Input 
+                            required={activeTab === 'remaja'}
+                            className="rounded-xl h-12"
+                            value={formData.address}
+                            onChange={e => setFormData({...formData, address: e.target.value})}
+                          />
+                        </div>
+                      </>
+                    )}
+                  </div>
+                  {activeTab === 'remaja' && (
+                    <div className="space-y-2">
+                      <Label>Keahlian / Skill</Label>
+                      <Input 
+                        className="rounded-xl h-12"
+                        placeholder="Contoh: Desain Grafis, IT, dll"
+                        value={formData.skills}
+                        onChange={e => setFormData({...formData, skills: e.target.value})}
+                      />
+                    </div>
+                  )}
+                  <Button 
+                    type="submit" 
+                    disabled={isSubmitting}
+                    className="w-full rounded-2xl py-6 font-bold mt-4 shadow-lg shadow-primary/20"
+                  >
+                    {isSubmitting && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+                    {isSubmitting ? 'Memproses...' : (editingItem ? 'Simpan Perubahan' : 'Simpan Data')}
+                  </Button>
+                </form>
+              </DialogContent>
+            </Dialog>
+          </div>
         </div>
 
         <Card className="rounded-[2.5rem] border-none shadow-xl overflow-hidden shadow-gray-200/50">
@@ -485,7 +563,7 @@ export default function JamaahAdmin() {
                                   nomor: item.nomor || '',
                                   blok: item.blok || '',
                                   rt: item.rt || '015',
-                                  rw: item.rw || '003',
+                                  rw: item.rw || '008',
                                   keterangan: item.keterangan || '',
                                   birthDate: item.birthDate || '',
                                   education: item.education || '',
