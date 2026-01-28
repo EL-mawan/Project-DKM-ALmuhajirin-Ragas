@@ -22,8 +22,8 @@ export function MobileAdminHeader({ title, subtitle, variant = 'dashboard' }: Mo
     <div className="bg-[#062c21] text-white px-6 h-20 fixed top-0 left-0 right-0 z-50 flex items-center justify-between shadow-2xl shadow-black/40 sm:hidden">
       <div className="flex items-center space-x-3">
         <div className="h-10 w-10 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center">
-           <div className="h-7 w-7 rounded-lg bg-emerald-500 flex items-center justify-center">
-             <Building className="h-4 w-4 text-white" />
+           <div className="h-7 w-7 rounded-lg bg-white overflow-hidden flex items-center justify-center">
+             <img src="/logo.jpg" alt="Logo" className="h-full w-full object-cover" />
            </div>
         </div>
         <div>
