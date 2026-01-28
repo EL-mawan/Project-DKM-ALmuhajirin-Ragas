@@ -7,9 +7,10 @@ import { checkPermission } from '@/lib/auth/rbac'
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const session = await getServerSession(authOptions)
     if (!session || !session.user?.email) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
@@ -18,7 +19,7 @@ export async function PATCH(
       include: { role: true }
     })
 
-    if (!checkPermission(user as any, 'struktur', 'update')) {
+    if (!user || !checkPermission(user as any, 'struktur', 'update')) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
@@ -26,27 +27,32 @@ export async function PATCH(
     const { name, position, description, image, order } = body
 
     const updated = await db.strukturOrganisasi.update({
-      where: { id: params.id },
+      where: { id: id },
       data: {
         name,
         position,
         description,
         image,
-        order: order ? parseInt(order) : undefined
+        order: order !== undefined ? parseInt(order.toString(), 10) : undefined
       }
     })
 
     return NextResponse.json(updated)
-  } catch (error) {
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  } catch (error: any) {
+    console.error('Update Struktur Error:', error)
+    return NextResponse.json({ 
+      error: 'Gagal memperbarui data pengurus', 
+      details: error.message 
+    }, { status: 500 })
   }
 }
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const session = await getServerSession(authOptions)
     if (!session || !session.user?.email) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
@@ -55,12 +61,12 @@ export async function DELETE(
       include: { role: true }
     })
 
-    if (!checkPermission(user as any, 'struktur', 'delete')) {
+    if (!user || !checkPermission(user as any, 'struktur', 'delete')) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
     await db.strukturOrganisasi.delete({
-      where: { id: params.id }
+      where: { id: id }
     })
 
     return NextResponse.json({ message: 'Deleted successfully' })

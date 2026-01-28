@@ -6,9 +6,10 @@ import { checkPermission } from '@/lib/auth/rbac'
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const session = await getServerSession(authOptions)
     if (!session || !session.user?.email) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
@@ -25,7 +26,7 @@ export async function PATCH(
         return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
       }
       const updated = await db.jamaahKepalaKeluarga.update({
-        where: { id: params.id },
+        where: { id },
         data: {
           nomor,
           blok,
@@ -41,7 +42,7 @@ export async function PATCH(
         return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
       }
       const updated = await db.jamaahRemaja.update({
-        where: { id: params.id },
+        where: { id },
         data: {
           name,
           address,
@@ -60,9 +61,10 @@ export async function PATCH(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const session = await getServerSession(authOptions)
     if (!session || !session.user?.email) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
@@ -78,12 +80,12 @@ export async function DELETE(
       if (!user || !checkPermission(user as any, 'jamaah_kepala_keluarga', 'delete')) {
         return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
       }
-      await db.jamaahKepalaKeluarga.delete({ where: { id: params.id } })
+      await db.jamaahKepalaKeluarga.delete({ where: { id } })
     } else {
       if (!user || !checkPermission(user as any, 'jamaah_remaja', 'delete')) {
         return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
       }
-      await db.jamaahRemaja.delete({ where: { id: params.id } })
+      await db.jamaahRemaja.delete({ where: { id } })
     }
 
     return NextResponse.json({ message: 'Deleted successfully' })

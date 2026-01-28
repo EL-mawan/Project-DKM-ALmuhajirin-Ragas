@@ -6,14 +6,15 @@ import { checkPermission } from '@/lib/auth/rbac'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const session = await getServerSession(authOptions)
     if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
     const item = await db.berita.findUnique({
-      where: { id: params.id }
+      where: { id }
     })
 
     if (!item) return NextResponse.json({ error: 'Not found' }, { status: 404 })
@@ -26,9 +27,10 @@ export async function GET(
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const session = await getServerSession(authOptions)
     if (!session || !session.user?.email) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
@@ -45,7 +47,7 @@ export async function PATCH(
     const { title, content, image, status } = body
 
     const updated = await db.berita.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         title,
         content,
@@ -62,9 +64,10 @@ export async function PATCH(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const session = await getServerSession(authOptions)
     if (!session || !session.user?.email) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
@@ -78,7 +81,7 @@ export async function DELETE(
     }
 
     await db.berita.delete({
-      where: { id: params.id }
+      where: { id }
     })
 
     return NextResponse.json({ message: 'Deleted successfully' })

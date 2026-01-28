@@ -6,9 +6,10 @@ import { checkPermission } from '@/lib/auth/rbac'
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const session = await getServerSession(authOptions)
     if (!session || !session.user?.email) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
@@ -21,22 +22,22 @@ export async function DELETE(
     if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 })
 
     // Try to delete from income first
-    const income = await db.keuanganPemasukan.findUnique({ where: { id: params.id } })
+    const income = await db.keuanganPemasukan.findUnique({ where: { id } })
     if (income) {
       if (!checkPermission(user as any, 'keuangan_pemasukan', 'delete')) {
         return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
       }
-      await db.keuanganPemasukan.delete({ where: { id: params.id } })
+      await db.keuanganPemasukan.delete({ where: { id } })
       return NextResponse.json({ message: 'Income record deleted' })
     }
 
     // Then try expense
-    const expense = await db.keuanganPengeluaran.findUnique({ where: { id: params.id } })
+    const expense = await db.keuanganPengeluaran.findUnique({ where: { id } })
     if (expense) {
       if (!checkPermission(user as any, 'keuangan_pengeluaran', 'delete')) {
         return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
       }
-      await db.keuanganPengeluaran.delete({ where: { id: params.id } })
+      await db.keuanganPengeluaran.delete({ where: { id } })
       return NextResponse.json({ message: 'Expense record deleted' })
     }
 
@@ -48,9 +49,10 @@ export async function DELETE(
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const session = await getServerSession(authOptions)
     if (!session || !session.user?.email) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
@@ -66,13 +68,13 @@ export async function PATCH(
     } = body
 
     // Try income
-    const income = await db.keuanganPemasukan.findUnique({ where: { id: params.id } })
+    const income = await db.keuanganPemasukan.findUnique({ where: { id } })
     if (income) {
       if (!user || !checkPermission(user as any, 'keuangan_pemasukan', 'update')) {
         return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
       }
       const updated = await db.keuanganPemasukan.update({
-        where: { id: params.id },
+        where: { id },
         data: {
           amount: amount ? parseFloat(amount) : undefined,
           source,
@@ -87,13 +89,13 @@ export async function PATCH(
     }
 
     // Try expense
-    const expense = await db.keuanganPengeluaran.findUnique({ where: { id: params.id } })
+    const expense = await db.keuanganPengeluaran.findUnique({ where: { id } })
     if (expense) {
       if (!user || !checkPermission(user as any, 'keuangan_pengeluaran', 'update')) {
         return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
       }
       const updated = await db.keuanganPengeluaran.update({
-        where: { id: params.id },
+        where: { id },
         data: {
           itemName,
           amount: amount ? parseFloat(amount) : undefined,

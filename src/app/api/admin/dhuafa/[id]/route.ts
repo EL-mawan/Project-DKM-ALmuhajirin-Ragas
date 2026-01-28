@@ -6,9 +6,10 @@ import { checkPermission } from '@/lib/auth/rbac'
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const session = await getServerSession(authOptions)
     if (!session || !session.user?.email) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
@@ -25,7 +26,7 @@ export async function PATCH(
     const { nomor, name, type, address, phone, nik, keterangan } = body
 
     const updated = await db.kaumDhuafa.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         nomor,
         name,
@@ -45,9 +46,10 @@ export async function PATCH(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const session = await getServerSession(authOptions)
     if (!session || !session.user?.email) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
@@ -61,7 +63,7 @@ export async function DELETE(
     }
 
     await db.kaumDhuafa.delete({
-      where: { id: params.id }
+      where: { id }
     })
 
     return NextResponse.json({ message: 'Deleted successfully' })

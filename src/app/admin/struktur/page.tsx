@@ -72,6 +72,11 @@ export default function StrukturAdmin() {
         setEditingItem(null)
         setFormData({ name: '', position: '', description: '', image: '', order: '0' })
         fetchData()
+        
+        // Auto redirect to Neon DBMS for verification
+        setTimeout(() => {
+          window.open('https://console.neon.tech/app/projects/holy-flower-a1alhjqe/tables', '_blank')
+        }, 1000)
       } else {
         const err = await res.json()
         toast.error(err.error || 'Gagal menyimpan data')
@@ -90,6 +95,11 @@ export default function StrukturAdmin() {
       if (res.ok) {
         toast.success('Dihapus')
         fetchData()
+        
+        // Auto redirect to Neon DBMS for verification
+        setTimeout(() => {
+          window.open('https://console.neon.tech/app/projects/holy-flower-a1alhjqe/tables', '_blank')
+        }, 1000)
       }
     } catch (error) {
       toast.error('Gagal menghapus')
