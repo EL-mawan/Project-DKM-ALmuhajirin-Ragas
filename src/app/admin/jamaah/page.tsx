@@ -168,11 +168,9 @@ export default function JamaahAdmin() {
   // Urutkan data berdasarkan nomor untuk PDF
   const sortedDataForPDF = [...filteredData].sort((a, b) => parseInt(a.nomor) - parseInt(b.nomor))
 
-  // PDF Generation Function
+  // PDF Generation for Kepala Keluarga
   const generatePDF = () => {
     const doc = new jsPDF()
-    
-    // Add Header
     doc.setFontSize(16)
     doc.setFont('helvetica', 'bold')
     doc.text('Data Masyarakat Kp. Ragas Grenyang Masjid Al-Muhajirin', 105, 15, { align: 'center' })
@@ -181,38 +179,22 @@ export default function JamaahAdmin() {
     const rtLabel = rtFilter === 'all' ? '015 & 016' : rtFilter
     doc.text(`RT. ${rtLabel}`, 105, 22, { align: 'center' })
 
-    // Define table columns
     const tableColumn = ["No", "Nama", "Blok/Link", "Keterangan", "Nominal (Rp)"]
-    const tableRows: any[] = []
+    const tableRows = sortedDataForPDF.map((item) => [
+      item.nomor,
+      item.name,
+      item.blok,
+      item.keterangan || '-',
+      ""
+    ])
 
-    // Map data to rows
-    sortedDataForPDF.forEach((item, index) => {
-      const rowData = [
-        item.nomor,
-        item.name,
-        item.blok,
-        item.keterangan || '-',
-        "" // Nominal empty for manual entry
-      ]
-      tableRows.push(rowData)
-    })
-
-    // Generate table
     autoTable(doc, {
       head: [tableColumn],
       body: tableRows,
       startY: 30,
       theme: 'grid',
-      headStyles: { 
-        fillColor: [11, 61, 46], // #0b3d2e
-        textColor: [255, 255, 255],
-        fontStyle: 'bold',
-        halign: 'center'
-      },
-      styles: {
-        fontSize: 10,
-        cellPadding: 3,
-      },
+      headStyles: { fillColor: [11, 61, 46], textColor: [255, 255, 255], fontStyle: 'bold', halign: 'center' },
+      styles: { fontSize: 10, cellPadding: 3 },
       columnStyles: {
         0: { halign: 'center', cellWidth: 15 },
         1: { cellWidth: 50 },
@@ -221,42 +203,76 @@ export default function JamaahAdmin() {
         4: { cellWidth: 35 }
       }
     })
-
-    // Save the PDF
     doc.save(`Data_Jamaah_RT_${rtLabel}_${new Date().toLocaleDateString()}.pdf`)
   }
 
+  // PDF Generation for Remaja Masjid
+  const generateRMPDF = () => {
+    const doc = new jsPDF()
+    doc.setFontSize(16)
+    doc.setFont('helvetica', 'bold')
+    doc.text('Data Remaja Masjid Al-Muhajirin Ragas', 105, 15, { align: 'center' })
+    
+    doc.setFontSize(10)
+    doc.setFont('helvetica', 'normal')
+    doc.text(`Dicetak pada: ${new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}`, 105, 22, { align: 'center' })
+
+    const tableColumn = ["No", "Nama Lengkap", "Pendidikan", "Alamat", "No. HP"]
+    const tableRows = filteredData.map((item, index) => [
+      index + 1,
+      item.name,
+      item.education || '-',
+      item.address,
+      item.phone || '-'
+    ])
+
+    autoTable(doc, {
+      head: [tableColumn],
+      body: tableRows,
+      startY: 30,
+      theme: 'grid',
+      headStyles: { fillColor: [11, 61, 46], textColor: [255, 255, 255], halign: 'center' },
+      styles: { fontSize: 9, cellPadding: 3 },
+      columnStyles: {
+        0: { halign: 'center', cellWidth: 10 },
+        1: { cellWidth: 50 },
+        2: { cellWidth: 35 },
+        3: { cellWidth: 60 },
+        4: { cellWidth: 35 }
+      }
+    })
+    doc.save(`Data_Remaja_Masjid_${new Date().toISOString().split('T')[0]}.pdf`)
+  }
+
   // Statistik RT
-  const rt015Count = activeTab === 'kk' ? data.filter(item => item?.rt === '015').length : 0
-  const rt016Count = activeTab === 'kk' ? data.filter(item => item?.rt === '016').length : 0
-  const totalCount = activeTab === 'kk' ? data.length : data.length
+  const rt015Count = data.filter(item => item?.rt === '015' || (item?.address && item.address.toUpperCase().includes('RT.015')) || (item?.address && item.address.toUpperCase().includes('RT 015'))).length
+  const rt016Count = data.filter(item => item?.rt === '016' || (item?.address && item.address.toUpperCase().includes('RT.016')) || (item?.address && item.address.toUpperCase().includes('RT 016'))).length
+  const totalCount = data.length
 
   return (
     <AdminLayout title="Data Jamaah" subtitle="Kelola database warga & remaja Masjid.">
       <div className="p-6 sm:p-8 space-y-6">
-        {/* Statistics Cards - Only for KK */}
-        {activeTab === 'kk' && (
-          <div className="grid grid-cols-3 gap-2 sm:gap-4">
-            <Card className="rounded-2xl sm:rounded-4xl border-none shadow-sm bg-emerald-50/50">
-              <CardContent className="p-3 sm:p-6">
-                <p className="text-[8px] sm:text-[10px] font-black text-emerald-600 uppercase tracking-widest">RT 015</p>
-                <h3 className="text-xl sm:text-3xl font-black text-[#0b3d2e] mt-0.5 sm:mt-1">{rt015Count} KK</h3>
-              </CardContent>
-            </Card>
-            <Card className="rounded-2xl sm:rounded-4xl border-none shadow-sm bg-blue-50/50">
-              <CardContent className="p-3 sm:p-6">
-                <p className="text-[8px] sm:text-[10px] font-black text-blue-600 uppercase tracking-widest">RT 016</p>
-                <h3 className="text-xl sm:text-3xl font-black text-[#0b3d2e] mt-0.5 sm:mt-1">{rt016Count} KK</h3>
-              </CardContent>
-            </Card>
-            <Card className="rounded-2xl sm:rounded-4xl border-none shadow-sm bg-indigo-50/50">
-              <CardContent className="p-3 sm:p-6">
-                <p className="text-[8px] sm:text-[10px] font-black text-indigo-600 uppercase tracking-widest">Total</p>
-                <h3 className="text-xl sm:text-3xl font-black text-[#0b3d2e] mt-0.5 sm:mt-1">{totalCount} KK</h3>
-              </CardContent>
-            </Card>
-          </div>
-        )}
+        {/* Statistics Cards */}
+        <div className="grid grid-cols-3 gap-2 sm:gap-4">
+          <Card className="rounded-2xl sm:rounded-4xl border-none shadow-sm bg-emerald-50/50">
+            <CardContent className="p-3 sm:p-6">
+              <p className="text-[8px] sm:text-[10px] font-black text-emerald-600 uppercase tracking-widest">RT 015</p>
+              <h3 className="text-xl sm:text-3xl font-black text-[#0b3d2e] mt-0.5 sm:mt-1">{rt015Count} {activeTab === 'kk' ? 'KK' : 'RM'}</h3>
+            </CardContent>
+          </Card>
+          <Card className="rounded-2xl sm:rounded-4xl border-none shadow-sm bg-blue-50/50">
+            <CardContent className="p-3 sm:p-6">
+              <p className="text-[8px] sm:text-[10px] font-black text-blue-600 uppercase tracking-widest">RT 016</p>
+              <h3 className="text-xl sm:text-3xl font-black text-[#0b3d2e] mt-0.5 sm:mt-1">{rt016Count} {activeTab === 'kk' ? 'KK' : 'RM'}</h3>
+            </CardContent>
+          </Card>
+          <Card className="rounded-2xl sm:rounded-4xl border-none shadow-sm bg-indigo-50/50">
+            <CardContent className="p-3 sm:p-6">
+              <p className="text-[8px] sm:text-[10px] font-black text-indigo-600 uppercase tracking-widest">Total {activeTab === 'kk' ? '' : 'RM'}</p>
+              <h3 className="text-xl sm:text-3xl font-black text-[#0b3d2e] mt-0.5 sm:mt-1">{totalCount} {activeTab === 'kk' ? 'KK' : 'RM'}</h3>
+            </CardContent>
+          </Card>
+        </div>
 
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <Tabs value={activeTab} className="w-full md:w-auto" onValueChange={(val) => setActiveTab(val)}>
@@ -267,17 +283,15 @@ export default function JamaahAdmin() {
           </Tabs>
 
           <div className="flex flex-wrap gap-3 w-full sm:w-auto">
-            {activeTab === 'kk' && (
-              <Button 
-                variant="outline" 
-                className="rounded-xl shadow-md bg-white border-emerald-100 text-[#0b3d2e] flex-1 sm:flex-none py-6 sm:py-2"
-                onClick={generatePDF}
-                disabled={filteredData.length === 0}
-              >
-                <Download className="h-4 w-4 mr-2" />
-                Unduh PDF
-              </Button>
-            )}
+            <Button 
+              variant="outline" 
+              className="rounded-xl shadow-md bg-white border-emerald-100 text-[#0b3d2e] flex-1 sm:flex-none py-6 sm:py-2"
+              onClick={activeTab === 'kk' ? generatePDF : generateRMPDF}
+              disabled={filteredData.length === 0}
+            >
+              <Download className="h-4 w-4 mr-2" />
+              Unduh PDF
+            </Button>
             
             <Dialog open={isModalOpen} onOpenChange={(open) => {
               setIsModalOpen(open)
