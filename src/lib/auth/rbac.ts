@@ -92,6 +92,12 @@ export const PERMISSIONS = {
   CONTACT_READ: { resource: 'kontak', action: 'read' },
   CONTACT_DELETE: { resource: 'kontak', action: 'delete' },
   
+  // Official Documents (Persuratan)
+  DOCUMENT_CREATE: { resource: 'dokumen', action: 'create' },
+  DOCUMENT_READ: { resource: 'dokumen', action: 'read' },
+  DOCUMENT_UPDATE: { resource: 'dokumen', action: 'update' },
+  DOCUMENT_DELETE: { resource: 'dokumen', action: 'delete' },
+  
   // Audit Logs
   AUDIT_READ: { resource: 'audit', action: 'read' },
 } as const
@@ -228,7 +234,11 @@ export const ROLE_CONFIGS = {
       PERMISSIONS.USER_READ,
       PERMISSIONS.USER_CREATE,
       PERMISSIONS.USER_UPDATE,
-      PERMISSIONS.USER_DELETE
+      PERMISSIONS.USER_DELETE,
+      PERMISSIONS.DOCUMENT_READ,
+      PERMISSIONS.DOCUMENT_CREATE,
+      PERMISSIONS.DOCUMENT_UPDATE,
+      PERMISSIONS.DOCUMENT_DELETE
     ]
   },
   

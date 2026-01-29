@@ -1,0 +1,501 @@
+'use client'
+
+import { useState, useEffect } from 'react'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { 
+  Plus, 
+  Search, 
+  Edit2, 
+  Trash2, 
+  FileText,
+  Mail,
+  Loader2,
+  Calendar,
+  MapPin,
+  Send,
+  Download,
+  CheckCircle2,
+  History
+} from 'lucide-react'
+import { Input } from '@/components/ui/input'
+import { AdminLayout } from '@/components/layout/admin-layout'
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle, 
+  DialogTrigger 
+} from '@/components/ui/dialog'
+import { StatusPopup } from '@/components/ui/status-popup'
+import { useStatusPopup } from '@/lib/hooks/use-status-popup'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import jsPDF from 'jspdf'
+
+export default function PersuratanAdmin() {
+  const [loading, setLoading] = useState(true)
+  const [data, setData] = useState<any[]>([])
+  const [search, setSearch] = useState('')
+  const [activeTab, setActiveTab] = useState('PROPOSAL')
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [editingItem, setEditingItem] = useState<any>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const { statusProps, showSuccess, showError } = useStatusPopup()
+
+  const [formData, setFormData] = useState<any>({
+    title: '',
+    type: 'PROPOSAL',
+    date: new Date().toISOString().slice(0, 16),
+    content: '',
+    recipient: '',
+    location: '',
+    nomorSurat: ''
+  })
+
+  const fetchData = async () => {
+    try {
+      setLoading(true)
+      const res = await fetch('/api/admin/persuratan')
+      const json = await res.json()
+      setData(Array.isArray(json) ? json : [])
+    } catch (error) {
+      showError('Gagal', 'Terjadi kesalahan saat mengambil data dokumen.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchData()
+  }, [])
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    try {
+      setIsSubmitting(true)
+      const url = editingItem ? `/api/admin/persuratan/${editingItem.id}` : '/api/admin/persuratan'
+      const method = editingItem ? 'PATCH' : 'POST'
+
+      const res = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...formData, type: activeTab })
+      })
+
+      if (res.ok) {
+        showSuccess(
+          editingItem ? 'Dokumen Diperbarui' : 'Dokumen Berhasil Dibuat',
+          `Dokumen ${activeTab.toLowerCase()} telah tersimpan di sistem.`
+        )
+        setIsModalOpen(false)
+        resetForm()
+        fetchData()
+      } else {
+        const err = await res.json()
+        showError('Gagal Menyimpan', err.error || 'Terjadi kesalahan server.')
+      }
+    } catch (error) {
+      showError('Error', 'Sistem tidak dapat memproses permintaan.')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const resetForm = () => {
+    setEditingItem(null)
+    setFormData({
+      title: '',
+      type: activeTab,
+      date: new Date().toISOString().slice(0, 16),
+      content: '',
+      recipient: '',
+      location: '',
+      nomorSurat: ''
+    })
+  }
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('Hapus dokumen ini secara permanen?')) return
+    try {
+      const res = await fetch(`/api/admin/persuratan/${id}`, { method: 'DELETE' })
+      if (res.ok) {
+        showSuccess('Dihapus', 'Dokumen telah dihapus dari database.')
+        fetchData()
+      }
+    } catch (error) {
+      showError('Gagal', 'Gagal menghapus dokumen.')
+    }
+  }
+
+  const filteredData = data.filter(item => 
+    item.type === activeTab &&
+    (item.title.toLowerCase().includes(search.toLowerCase()) ||
+     item.nomorSurat?.toLowerCase().includes(search.toLowerCase()))
+  )
+
+  const generatePDF = (item: any) => {
+    const doc = new jsPDF()
+    
+    // Kop Surat
+    doc.setFontSize(14)
+    doc.setFont('helvetica', 'bold')
+    doc.text('DEWAN KEMAKMURAN MASJID (DKM) AL-MUHAJIRIN', 105, 15, { align: 'center' })
+    doc.setFontSize(10)
+    doc.setFont('helvetica', 'normal')
+    doc.text('Kp. Ragas Grenyang, Desa Bojonegara, Kec. Bojonegara, Serang - Banten', 105, 20, { align: 'center' })
+    doc.line(20, 25, 190, 25)
+
+    // Data Surat
+    doc.setFontSize(12)
+    doc.setFont('helvetica', 'bold')
+    doc.text(item.title.toUpperCase(), 105, 35, { align: 'center' })
+    
+    doc.setFontSize(11)
+    doc.setFont('helvetica', 'normal')
+    if (item.nomorSurat) doc.text(`Nomor: ${item.nomorSurat}`, 20, 45)
+    doc.text(`Tanggal: ${new Date(item.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}`, 20, 52)
+    
+    if (item.recipient) {
+      doc.text('Kepada Yth,', 20, 65)
+      doc.text(item.recipient, 20, 72)
+    }
+
+    if (item.location) {
+      doc.text(`Tempat: ${item.location}`, 20, 85)
+    }
+
+    // Isi
+    doc.setFontSize(11)
+    const splitText = doc.splitTextToSize(item.content || '', 170)
+    doc.text(splitText, 20, 100)
+
+    // TTD
+    const bottom = doc.internal.pageSize.height
+    doc.text('Mengetahui,', 20, bottom - 50)
+    doc.text('Ketua DKM Al-Muhajirin', 20, bottom - 43)
+    doc.text('Sekretaris DKM', 140, bottom - 43)
+    
+    doc.text('( ........................ )', 20, bottom - 20)
+    doc.text('( ........................ )', 140, bottom - 20)
+
+    doc.save(`${item.type}_${item.title.replace(/\s+/g, '_')}.pdf`)
+  }
+
+  return (
+    <AdminLayout title="Administrasi & Persuratan" subtitle="Pembuatan Proposal, Undangan, dan Surat Resmi DKM.">
+      <div className="p-6 sm:p-8 space-y-8">
+        {/* Header Stats / Quick Actions */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <Card className="rounded-[2.5rem] border-none shadow-sm bg-gradient-to-br from-blue-50 to-indigo-50/30">
+            <CardContent className="p-8">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest">Total Proposal</p>
+                  <h3 className="text-3xl font-black text-[#0b3d2e] mt-1">{data.filter(d => d.type === 'PROPOSAL').length}</h3>
+                </div>
+                <div className="h-12 w-12 rounded-2xl bg-white shadow-sm flex items-center justify-center text-blue-500">
+                  <FileText className="h-6 w-6" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="rounded-[2.5rem] border-none shadow-sm bg-gradient-to-br from-emerald-50 to-teal-50/30">
+            <CardContent className="p-8">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">Surat Undangan</p>
+                  <h3 className="text-3xl font-black text-[#0b3d2e] mt-1">{data.filter(d => d.type === 'UNDANGAN').length}</h3>
+                </div>
+                <div className="h-12 w-12 rounded-2xl bg-white shadow-sm flex items-center justify-center text-emerald-500">
+                  <Mail className="h-6 w-6" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="rounded-[2.5rem] border-none shadow-sm bg-gradient-to-br from-amber-50 to-orange-50/30">
+            <CardContent className="p-8">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-[10px] font-black text-amber-600 uppercase tracking-widest">Surat Resmi</p>
+                  <h3 className="text-3xl font-black text-[#0b3d2e] mt-1">{data.filter(d => d.type === 'SURAT_RESMI').length}</h3>
+                </div>
+                <div className="h-12 w-12 rounded-2xl bg-white shadow-sm flex items-center justify-center text-amber-500">
+                  <CheckCircle2 className="h-6 w-6" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full md:w-auto">
+            <TabsList className="bg-white border rounded-[1.5rem] p-1.5 h-16 shadow-sm">
+              <TabsTrigger value="PROPOSAL" className="rounded-xl px-8 font-bold data-[state=active]:bg-[#0b3d2e] data-[state=active]:text-white">Proposal</TabsTrigger>
+              <TabsTrigger value="UNDANGAN" className="rounded-xl px-8 font-bold data-[state=active]:bg-[#0b3d2e] data-[state=active]:text-white">Undangan</TabsTrigger>
+              <TabsTrigger value="SURAT_RESMI" className="rounded-xl px-8 font-bold data-[state=active]:bg-[#0b3d2e] data-[state=active]:text-white">Surat Resmi</TabsTrigger>
+            </TabsList>
+          </Tabs>
+
+          <Dialog open={isModalOpen} onOpenChange={(open) => {
+            setIsModalOpen(open)
+            if (!open) {
+              setEditingItem(null)
+              resetForm()
+            }
+          }}>
+            <DialogTrigger asChild>
+              <Button className="rounded-2xl h-16 px-10 font-black uppercase tracking-widest shadow-xl shadow-primary/20 bg-[#0b3d2e] hover:bg-[#062c21]">
+                <Plus className="h-5 w-5 mr-3" />
+                Buat {activeTab === 'PROPOSAL' ? 'Proposal' : activeTab === 'UNDANGAN' ? 'Undangan' : 'Surat Resmi'}
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[700px] rounded-[3rem] p-0 overflow-hidden border-none shadow-2xl">
+              <div className="bg-[#0b3d2e] p-8 text-white">
+                <DialogTitle className="text-2xl font-black tracking-tight flex items-center gap-3">
+                  <Send className="h-6 w-6 text-emerald-400" />
+                  {editingItem ? 'Edit Dokumen' : `Buat ${activeTab.replace('_', ' ')} Baru`}
+                </DialogTitle>
+                <p className="text-emerald-100/60 text-xs mt-1">Lengkapi rincian dokumen persuratan DKM Al-Muhajirin.</p>
+              </div>
+
+              <form onSubmit={handleSubmit} className="p-8 space-y-6 max-h-[75vh] overflow-y-auto bg-white">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2 md:col-span-2">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Judul / Perihal*</label>
+                    <Input 
+                      required 
+                      className="h-14 rounded-2xl bg-gray-50/50 border-gray-100 font-bold"
+                      placeholder="Masukkan perihal dokumen..."
+                      value={formData.title}
+                      onChange={e => setFormData({...formData, title: e.target.value})}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Nomor Surat (Opsional)</label>
+                    <Input 
+                      className="h-14 rounded-2xl bg-gray-50/50 border-gray-100"
+                      placeholder="Mis: 023/DKM-AM/III/2024"
+                      value={formData.nomorSurat}
+                      onChange={e => setFormData({...formData, nomorSurat: e.target.value})}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Tanggal Dokumen*</label>
+                    <Input 
+                      required 
+                      type="date"
+                      className="h-14 rounded-2xl bg-gray-50/50 border-gray-100"
+                      value={formData.date.slice(0, 10)}
+                      onChange={e => setFormData({...formData, date: e.target.value})}
+                    />
+                  </div>
+
+                  {activeTab !== 'PROPOSAL' && (
+                    <div className="space-y-2 md:col-span-2">
+                      <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Penerima / Kepada Yth*</label>
+                      <Input 
+                        required 
+                        className="h-14 rounded-2xl bg-gray-50/50 border-gray-100 font-medium"
+                        placeholder="Mis: Seluruh Jamaah Masjid / Organisasi XYZ"
+                        value={formData.recipient}
+                        onChange={e => setFormData({...formData, recipient: e.target.value})}
+                      />
+                    </div>
+                  )}
+
+                  {activeTab === 'UNDANGAN' && (
+                    <div className="space-y-2 md:col-span-2">
+                      <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Lokasi Acara*</label>
+                      <Input 
+                        required 
+                        className="h-14 rounded-2xl bg-gray-50/50 border-gray-100"
+                        placeholder="Mis: Ruang Utama Masjid Al-Muhajirin"
+                        value={formData.location}
+                        onChange={e => setFormData({...formData, location: e.target.value})}
+                      />
+                    </div>
+                  )}
+
+                  <div className="space-y-2 md:col-span-2">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Isi / Keterangan Dokumen*</label>
+                    <textarea 
+                      required 
+                      className="w-full min-h-[150px] p-6 rounded-3xl bg-gray-50/50 border border-gray-100 text-sm focus:outline-none focus:ring-4 focus:ring-emerald-500/5 transition-all"
+                      placeholder="Tuliskan isi surat atau deskripsi proposal di sini..."
+                      value={formData.content}
+                      onChange={e => setFormData({...formData, content: e.target.value})}
+                    />
+                  </div>
+                </div>
+
+                <div className="flex gap-4 pt-4">
+                  <Button 
+                    type="button" 
+                    variant="ghost" 
+                    className="flex-1 h-16 rounded-3xl font-bold bg-gray-50 text-gray-400"
+                    onClick={() => setIsModalOpen(false)}
+                  >
+                    Batal
+                  </Button>
+                  <Button 
+                    type="submit" 
+                    disabled={isSubmitting}
+                    className="flex-[2] h-16 rounded-3xl font-black bg-[#0b3d2e] hover:bg-[#062c21] shadow-xl shadow-emerald-900/10 text-white uppercase tracking-widest"
+                  >
+                    {isSubmitting ? (
+                      <Loader2 className="h-5 w-5 animate-spin mr-2" />
+                    ) : null}
+                    {isSubmitting ? 'Memproses...' : (editingItem ? 'Simpan Perubahan' : 'Terbitkan Dokumen')}
+                  </Button>
+                </div>
+              </form>
+            </DialogContent>
+          </Dialog>
+        </div>
+
+        {/* List of Documents */}
+        <Card className="rounded-[3rem] border-none shadow-2xl shadow-gray-200/50 overflow-hidden bg-white">
+          <CardHeader className="p-10 border-b border-gray-50">
+            <div className="flex flex-col md:flex-row justify-between items-center gap-6">
+              <div className="flex items-center gap-4">
+                <div className="h-12 w-12 rounded-2xl bg-[#0b3d2e] text-white flex items-center justify-center">
+                  <History className="h-6 w-6" />
+                </div>
+                <div>
+                  <CardTitle className="text-xl font-black text-[#0b3d2e]">Riwayat Persuratan</CardTitle>
+                  <p className="text-xs text-neutral-400 font-medium">Daftar {activeTab.toLowerCase()} yang telah diterbitkan.</p>
+                </div>
+              </div>
+              <div className="relative w-full md:w-[400px]">
+                <Search className="absolute left-5 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-300" />
+                <Input 
+                  placeholder="Cari perihal atau nomor surat..." 
+                  className="pl-14 h-14 rounded-2xl bg-neutral-50/50 border-transparent focus:bg-white focus:border-emerald-100 transition-all text-sm"
+                  value={search}
+                  onChange={e => setSearch(e.target.value)}
+                />
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="p-0">
+            {loading ? (
+              <div className="flex items-center justify-center p-32">
+                <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#0b3d2e] border-t-transparent"></div>
+              </div>
+            ) : filteredData.length === 0 ? (
+              <div className="text-center py-32">
+                <div className="h-24 w-24 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <FileText className="h-10 w-10 text-gray-200" />
+                </div>
+                <p className="text-lg font-bold text-gray-300">Belum ada dokumen {activeTab.toLowerCase()}</p>
+                <p className="text-sm text-gray-400">Dokumen yang Anda buat akan muncul di riwayat ini.</p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left">
+                  <thead>
+                    <tr className="bg-gray-50/50">
+                      <th className="px-10 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Rincian Dokumen</th>
+                      <th className="px-10 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Info Lain</th>
+                      <th className="px-10 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Status</th>
+                      <th className="px-10 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-right text-gray-400">Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-50">
+                    {filteredData.map((item) => (
+                      <tr key={item.id} className="hover:bg-gray-50/30 transition-all group">
+                        <td className="px-10 py-8">
+                          <div className="flex flex-col">
+                            <span className="font-black text-[#0b3d2e] group-hover:text-blue-600 transition-colors uppercase tracking-tight">{item.title}</span>
+                            <div className="flex items-center gap-3 mt-1.5">
+                              <span className="text-[10px] font-bold text-gray-400 flex items-center bg-gray-100 px-2 py-0.5 rounded-full">
+                                <Calendar className="h-3 w-3 mr-1" />
+                                {new Date(item.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
+                              </span>
+                              {item.nomorSurat && (
+                                <span className="text-[10px] font-bold text-blue-500 uppercase tracking-tighter">
+                                  No: {item.nomorSurat}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-10 py-8">
+                          <div className="flex flex-col">
+                            {item.recipient && (
+                              <span className="text-[11px] font-bold text-gray-600 flex items-center">
+                                <Mail className="h-3 w-3 mr-2 text-rose-400" />
+                                {item.recipient}
+                              </span>
+                            )}
+                            {item.location && (
+                              <span className="text-[10px] text-gray-400 mt-1 flex items-center">
+                                <MapPin className="h-3 w-3 mr-2" />
+                                {item.location}
+                              </span>
+                            )}
+                            {!item.recipient && !item.location && <span className="text-gray-300 text-xs italic">N/A</span>}
+                          </div>
+                        </td>
+                        <td className="px-10 py-8">
+                          <Badge className="rounded-full px-4 py-1.5 font-black text-[9px] uppercase tracking-widest bg-emerald-50 text-emerald-600 border-none">
+                            Tersimpan
+                          </Badge>
+                        </td>
+                        <td className="px-10 py-8 text-right">
+                          <div className="flex justify-end space-x-3 opacity-0 group-hover:opacity-100 transition-all -translate-x-2 group-hover:translate-x-0">
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              className="rounded-2xl h-12 w-12 text-blue-500 hover:bg-blue-50"
+                              onClick={() => generatePDF(item)}
+                            >
+                              <Download className="h-5 w-5" />
+                            </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              className="rounded-2xl h-12 w-12 text-emerald-600 hover:bg-emerald-50"
+                              onClick={() => {
+                                setEditingItem(item)
+                                setFormData({
+                                  title: item.title,
+                                  type: item.type,
+                                  date: item.date,
+                                  content: item.content || '',
+                                  recipient: item.recipient || '',
+                                  location: item.location || '',
+                                  nomorSurat: item.nomorSurat || ''
+                                })
+                                setIsModalOpen(true)
+                              }}
+                            >
+                              <Edit2 className="h-5 w-5" />
+                            </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              className="rounded-2xl h-12 w-12 text-rose-400 hover:bg-rose-50"
+                              onClick={() => handleDelete(item.id)}
+                            >
+                              <Trash2 className="h-5 w-5" />
+                            </Button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+      <StatusPopup {...statusProps} />
+    </AdminLayout>
+  )
+}

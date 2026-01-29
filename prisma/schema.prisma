@@ -262,3 +262,23 @@ model HomepageContent {
 
   @@map("homepage_content")
 }
+
+// Official Documents (Persuratan)
+model DokumenResmi {
+  id          String   @id @default(cuid())
+  nomorSurat  String?  // Optional for Proposal, required for others
+  type        String   // PROPOSAL, UNDANGAN, SURAT_RESMI
+  title       String
+  date        DateTime
+  content     String?  @db.Text // Content body or JSON string
+  recipient   String?  // For Undangan/Surat Resmi
+  location    String?  // For Undangan
+  status      String   @default("draft") // draft, sent, archived
+  fileUrl     String?
+  createdBy   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("dokumen_resmi")
+}
+

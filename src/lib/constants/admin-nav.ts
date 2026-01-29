@@ -22,4 +22,5 @@ export const ADMIN_MENU_ITEMS = [
   { icon: Newspaper, label: 'Berita & Artikel', href: '/admin/berita', roles: ['Master Admin', 'Tokoh Masyarakat', 'Ketua DKM', 'Sekretaris DKM', 'RISMA (Remaja Islam)', 'Bendahara DKM'], color: 'text-orange-500 bg-orange-50 border-orange-100' },
   { icon: Image, label: 'Galeri Foto', href: '/admin/galeri', roles: ['Master Admin', 'Tokoh Masyarakat', 'Ketua DKM', 'Bendahara DKM', 'Sekretaris DKM', 'RISMA (Remaja Islam)'], color: 'text-pink-500 bg-pink-50 border-pink-100' },
   { icon: MessageSquare, label: 'Kontak Pesan', href: '/admin/kontak', roles: ['Master Admin', 'Tokoh Masyarakat', 'Ketua DKM', 'Bendahara DKM', 'Sekretaris DKM', 'RISMA (Remaja Islam)'], color: 'text-teal-500 bg-teal-50 border-teal-100' },
+  { icon: FileText, label: 'Persuratan', href: '/admin/persuratan', roles: ['Master Admin', 'Sekretaris DKM'], color: 'text-blue-500 bg-blue-50 border-blue-100' },
 ]
