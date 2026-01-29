@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -317,135 +318,12 @@ export default function PersuratanAdmin() {
             </TabsList>
           </Tabs>
 
-          <Dialog open={isModalOpen} onOpenChange={(open) => {
-            setIsModalOpen(open)
-            if (!open) {
-              setEditingItem(null)
-              resetForm()
-            }
-          }}>
-            <DialogTrigger asChild>
-              <Button className="rounded-2xl h-16 px-10 font-black uppercase tracking-widest shadow-xl shadow-primary/20 bg-[#0b3d2e] hover:bg-[#062c21]">
-                <Plus className="h-5 w-5 mr-3" />
-                Buat {activeTab === 'PROPOSAL' ? 'Proposal' : activeTab === 'UNDANGAN' ? 'Undangan' : 'Surat Resmi'}
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[700px] rounded-[3rem] p-0 overflow-hidden border-none shadow-2xl">
-              <div className="bg-[#0b3d2e] p-8 text-white">
-                <DialogTitle className="text-2xl font-black tracking-tight flex items-center gap-3">
-                  <Send className="h-6 w-6 text-emerald-400" />
-                  {editingItem ? 'Edit Dokumen' : `Buat ${activeTab.replace('_', ' ')} Baru`}
-                </DialogTitle>
-                <p className="text-emerald-100/60 text-xs mt-1">Lengkapi rincian dokumen persuratan DKM Al-Muhajirin.</p>
-              </div>
-
-              <form onSubmit={handleSubmit} className="p-8 space-y-6 max-h-[75vh] overflow-y-auto bg-white">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-2 md:col-span-2">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Judul / Perihal*</label>
-                    <Input 
-                      required 
-                      className="h-14 rounded-2xl bg-gray-50/50 border-gray-100 font-bold"
-                      placeholder="Masukkan perihal dokumen..."
-                      value={formData.title}
-                      onChange={e => setFormData({...formData, title: e.target.value})}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Nomor Surat (Opsional)</label>
-                    <Input 
-                      className="h-14 rounded-2xl bg-gray-50/50 border-gray-100"
-                      placeholder="Mis: 023/DKM-AM/III/2024"
-                      value={formData.nomorSurat}
-                      onChange={e => setFormData({...formData, nomorSurat: e.target.value})}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Tanggal Dokumen*</label>
-                    <Input 
-                      required 
-                      type="date"
-                      className="h-14 rounded-2xl bg-gray-50/50 border-gray-100"
-                      value={formData.date.slice(0, 10)}
-                      onChange={e => setFormData({...formData, date: e.target.value})}
-                    />
-                  </div>
-
-                  {activeTab !== 'PROPOSAL' && (
-                    <div className="space-y-2 md:col-span-2">
-                      <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Penerima / Kepada Yth*</label>
-                      <Input 
-                        required 
-                        className="h-14 rounded-2xl bg-gray-50/50 border-gray-100 font-medium"
-                        placeholder="Mis: Seluruh Jamaah Masjid / Organisasi XYZ"
-                        value={formData.recipient}
-                        onChange={e => setFormData({...formData, recipient: e.target.value})}
-                      />
-                    </div>
-                  )}
-
-                  {activeTab === 'UNDANGAN' && (
-                    <div className="space-y-2 md:col-span-2">
-                      <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Lokasi Acara*</label>
-                      <Input 
-                        required 
-                        className="h-14 rounded-2xl bg-gray-50/50 border-gray-100"
-                        placeholder="Mis: Ruang Utama Masjid Al-Muhajirin"
-                        value={formData.location}
-                        onChange={e => setFormData({...formData, location: e.target.value})}
-                      />
-                    </div>
-                  )}
-
-                  <div className="space-y-2 md:col-span-2">
-                    <div className="flex justify-between items-center mb-1">
-                      <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Isi / Keterangan Dokumen*</label>
-                      <Button 
-                        type="button" 
-                        variant="ghost" 
-                        size="sm" 
-                        onClick={useTemplate}
-                        className="text-[10px] h-7 font-bold text-emerald-600 hover:bg-emerald-50 rounded-lg border border-emerald-100"
-                      >
-                        <FileText className="h-3 w-3 mr-1" />
-                        Gunakan Template
-                      </Button>
-                    </div>
-                    <textarea 
-                      required 
-                      className="w-full min-h-[180px] p-6 rounded-3xl bg-gray-50/50 border border-gray-100 text-sm focus:outline-none focus:ring-4 focus:ring-emerald-500/5 transition-all leading-relaxed"
-                      placeholder="Tuliskan isi surat atau deskripsi proposal di sini..."
-                      value={formData.content}
-                      onChange={e => setFormData({...formData, content: e.target.value})}
-                    />
-                  </div>
-                </div>
-
-                <div className="flex gap-4 pt-4">
-                  <Button 
-                    type="button" 
-                    variant="ghost" 
-                    className="flex-1 h-16 rounded-3xl font-bold bg-gray-50 text-gray-400"
-                    onClick={() => setIsModalOpen(false)}
-                  >
-                    Batal
-                  </Button>
-                  <Button 
-                    type="submit" 
-                    disabled={isSubmitting}
-                    className="flex-[2] h-16 rounded-3xl font-black bg-[#0b3d2e] hover:bg-[#062c21] shadow-xl shadow-emerald-900/10 text-white uppercase tracking-widest"
-                  >
-                    {isSubmitting ? (
-                      <Loader2 className="h-5 w-5 animate-spin mr-2" />
-                    ) : null}
-                    {isSubmitting ? 'Memproses...' : (editingItem ? 'Simpan Perubahan' : 'Terbitkan Dokumen')}
-                  </Button>
-                </div>
-              </form>
-            </DialogContent>
-          </Dialog>
+          <Link href={`/admin/persuratan/buat?type=${activeTab}`}>
+            <Button className="rounded-2xl h-16 px-10 font-black uppercase tracking-widest shadow-xl shadow-primary/20 bg-[#0b3d2e] hover:bg-[#062c21] w-full sm:w-auto">
+              <Plus className="h-5 w-5 mr-3" />
+              Buat {activeTab === 'PROPOSAL' ? 'Proposal' : activeTab === 'UNDANGAN' ? 'Undangan' : 'Surat Resmi'}
+            </Button>
+          </Link>
         </div>
 
         {/* List of Documents */}
