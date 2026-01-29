@@ -44,6 +44,24 @@ import { cn, formatCurrency } from '@/lib/utils'
 export default function AdminDashboard() {
   const { data: session, status } = useSession()
   const router = useRouter()
+  const [dashboardStats, setDashboardStats] = useState<any>(null)
+  const [loadingStats, setLoadingStats] = useState(true)
+
+  const fetchStats = async () => {
+    try {
+      const res = await fetch('/api/admin/dashboard/stats')
+      const data = await res.json()
+      if (res.ok) setDashboardStats(data)
+    } catch (err) {
+      console.error(err)
+    } finally {
+      setLoadingStats(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchStats()
+  }, [])
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -72,16 +90,26 @@ export default function AdminDashboard() {
 
   // Role-specific stats and welcome text
   const getDashboardConfig = () => {
+    const stats = dashboardStats || {
+      totalJamaah: 0,
+      totalRemaja: 0,
+      totalKegiatan: 0,
+      thisMonthIncome: 0,
+      thisMonthExpense: 0,
+      growthPercent: '0',
+      sticks: [30, 60, 40, 85, 55, 75, 100]
+    }
+
     switch(userRole) {
       case 'Master Admin':
         return {
           title: 'Sistem Kendali Utama',
           welcome: 'Kelola seluruh aspek sistem Al-Muhajirin.',
           stats: [
-            { label: 'Total User', value: '12', icon: Users, color: 'text-blue-500' },
-            { label: 'Audit Log', value: '128', icon: FileText, color: 'text-gray-500' },
+            { label: 'Total Jamaah', value: stats.totalJamaah.toString(), icon: Users, color: 'text-blue-500' },
+            { label: 'Agenda Masjid', value: stats.totalKegiatan.toString(), icon: Calendar, color: 'text-emerald-500' },
             { label: 'Uptime Sistem', value: '99.9%', icon: TrendingUp, color: 'text-emerald-500' },
-            { label: 'Database Size', value: '2.4MB', icon: Building, color: 'text-amber-500' }
+            { label: 'Pemasukan/Bln', value: formatCurrency(stats.thisMonthIncome), icon: ArrowUpRight, color: 'text-emerald-500' }
           ]
         }
       case 'Bendahara DKM':
@@ -89,10 +117,10 @@ export default function AdminDashboard() {
           title: 'Manajemen Perbendaharaan',
           welcome: 'Pantau arus kas dan transparansi dana umat.',
           stats: [
-            { label: 'Pemasukan/Bln', value: formatCurrency(45200000), icon: ArrowUpRight, color: 'text-emerald-500' },
-            { label: 'Pengeluaran/Bln', value: formatCurrency(32800000), icon: ArrowDownRight, color: 'text-rose-500' },
-            { label: 'Saldo Aktif', value: formatCurrency(142500000), icon: DollarSign, color: 'text-primary' },
-            { label: 'Laporan Pending', value: '2', icon: AlertCircle, color: 'text-amber-500' }
+            { label: 'Pemasukan/Bln', value: formatCurrency(stats.thisMonthIncome), icon: ArrowUpRight, color: 'text-emerald-500' },
+            { label: 'Pengeluaran/Bln', value: formatCurrency(stats.thisMonthExpense), icon: ArrowDownRight, color: 'text-rose-500' },
+            { label: 'Saldo Aktif', value: formatCurrency(stats.thisMonthIncome - stats.thisMonthExpense), icon: DollarSign, color: 'text-primary' },
+            { label: 'Laporan Pending', value: '0', icon: AlertCircle, color: 'text-amber-500' }
           ]
         }
       case 'Ketua DKM':
@@ -100,10 +128,10 @@ export default function AdminDashboard() {
           title: 'Dashboard Kebijakan',
           welcome: 'Tinjau dan setujui program kerja serta laporan.',
           stats: [
-            { label: 'Persetujuan Baru', value: '5', icon: AlertCircle, color: 'text-amber-500' },
-            { label: 'Kegiatan Aktif', value: '8', icon: Calendar, color: 'text-blue-500' },
-            { label: 'Total Jamaah', value: '250+', icon: Users, color: 'text-primary' },
-            { label: 'Pesan Masuk', value: '14', icon: MessageSquare, color: 'text-indigo-500' }
+            { label: 'Kegiatan Aktif', value: stats.totalKegiatan.toString(), icon: Calendar, color: 'text-blue-500' },
+            { label: 'Total Jamaah', value: stats.totalJamaah.toString(), icon: Users, color: 'text-primary' },
+            { label: 'Total Remaja', value: stats.totalRemaja.toString(), icon: Heart, color: 'text-rose-500' },
+            { label: 'Pesan Masuk', value: '0', icon: MessageSquare, color: 'text-indigo-500' }
           ]
         }
       default:
@@ -111,16 +139,18 @@ export default function AdminDashboard() {
           title: 'Panel Kendali Konten',
           welcome: 'Selamat datang kembali di sistem kolaborasi DKM.',
           stats: [
-            { label: 'Data Jamaah', value: '250', icon: Users, color: 'text-blue-500' },
-            { label: 'Agenda Masjid', value: '12', icon: Calendar, color: 'text-emerald-500' },
-            { label: 'Galeri Baru', value: '45', icon: Image, color: 'text-purple-500' },
-            { label: 'Pesan', value: '3', icon: MessageSquare, color: 'text-indigo-500' }
+            { label: 'Data Jamaah', value: stats.totalJamaah.toString(), icon: Users, color: 'text-blue-500' },
+            { label: 'Agenda Masjid', value: stats.totalKegiatan.toString(), icon: Calendar, color: 'text-emerald-500' },
+            { label: 'Total Remaja', value: stats.totalRemaja.toString(), icon: Heart, color: 'text-rose-500' },
+            { label: 'Pesan', value: '0', icon: MessageSquare, color: 'text-indigo-500' }
           ]
         }
     }
   }
 
   const { title, welcome, stats: roleStats } = getDashboardConfig()
+  const currentSticks = dashboardStats?.sticks || [30, 60, 40, 85, 55, 75, 100]
+  const currentGrowth = dashboardStats?.growthPercent || '0'
 
   return (
     <AdminLayout title={title} subtitle={welcome}>
@@ -140,10 +170,10 @@ export default function AdminDashboard() {
               <div className="flex justify-between items-start mb-6">
                 <div>
                   <p className="text-white/40 text-[9px] font-bold uppercase tracking-[0.2em] mb-1.5 leading-none">Status Kependudukan</p>
-                  <h2 className="text-2xl font-black tracking-tight text-white mb-1">Status Kendali Utama</h2>
+                  <h2 className="text-2xl font-black tracking-tight text-white mb-1">{title}</h2>
                   <div className="flex items-center text-emerald-400 text-[10px] font-black bg-emerald-400/10 px-2 py-1 rounded-full border border-emerald-400/20 w-fit">
                     <ArrowUpRight className="h-3 w-3 mr-0.5" />
-                    +12.5%
+                    +{currentGrowth}%
                   </div>
                 </div>
                 <div className="bg-emerald-500/20 text-emerald-400 px-3 py-1.5 rounded-full text-[9px] font-black border border-emerald-500/20 uppercase tracking-widest">
@@ -153,7 +183,7 @@ export default function AdminDashboard() {
               
               {/* Minimalist Sparkline Effect */}
               <div className="flex items-end space-x-2 h-10 px-1 mt-8">
-                {[30, 60, 40, 85, 55, 75, 100].map((h, i) => (
+                {currentSticks.map((h: number, i: number) => (
                   <motion.div 
                     key={i}
                     initial={{ height: 0 }}
