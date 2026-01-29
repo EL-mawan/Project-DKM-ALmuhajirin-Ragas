@@ -247,14 +247,14 @@ export default function LaporanAdmin() {
       doc.setFont('helvetica', 'bold')
       doc.text('Mengetahui,', 55, currentY, { align: 'center' })
       doc.text('Ketua DKM Al-Muhajirin', 55, currentY + 6, { align: 'center' })
-      doc.setFont('helvetica', 'normal')
-      doc.text('H. Agung Gunawan', 55, currentY + 35, { align: 'center' , fontStyle: 'underline'})
+      doc.setFont('helvetica', 'underline')
+      doc.text('H. Agung Gunawan', 55, currentY + 35, { align: 'center'})
 
       doc.setFont('helvetica', 'bold')
       doc.text('Hormat kami,', pageWidth - 55, currentY, { align: 'center' })
       doc.text('Bendahara DKM', pageWidth - 55, currentY + 6, { align: 'center' })
-      doc.setFont('helvetica', 'normal')
-      doc.text('Lasturi', pageWidth - 55, currentY + 35, { align: 'center' , fontStyle: 'underline' })
+      doc.setFont('helvetica', 'underline')
+      doc.text('Lasturi', pageWidth - 55, currentY + 35, { align: 'center' })
 
       const totalPages = doc.internal.pages.length - 1
       for (let i = 1; i <= totalPages; i++) {
