@@ -185,7 +185,19 @@ export default function LaporanAdmin() {
       // --- 3. DETAILS SECTION (AUTO-PAGINATED) ---
       let currentY = cardY + cardH + 12
 
+      // Function to check and add new page if space is insufficient
+      const ensureSpace = (needed: number) => {
+        if (currentY + needed > 275) {
+          doc.addPage()
+          drawHeader(doc, logoImg)
+          currentY = 60 // Fresh start after header
+          return true
+        }
+        return false
+      }
+
       // Section A: Pemasukan
+      ensureSpace(40) // Check space for Title + 2-3 rows of table
       doc.setFontSize(10)
       doc.setTextColor(dkmSlate[0], dkmSlate[1], dkmSlate[2])
       doc.setFont('helvetica', 'bold')
@@ -210,9 +222,7 @@ export default function LaporanAdmin() {
           : [['-', '-', 'Tidak ada data pemasukan', '-', '-', '-', 'Rp 0']],
         margin: { top: 55, bottom: 25 },
         didDrawPage: (dt) => {
-          if (dt.pageNumber > 1) {
-            drawHeader(doc, logoImg)
-          }
+          if (dt.pageNumber > 1) drawHeader(doc, logoImg)
         },
         headStyles: { fillColor: [240, 253, 244], textColor: dkmEmerald, fontSize: 8, fontStyle: 'bold' },
         styles: { fontSize: 8, cellPadding: 3 },
@@ -227,6 +237,7 @@ export default function LaporanAdmin() {
       currentY = (doc as any).lastAutoTable.finalY + 12
       
       // Section B: Pengeluaran
+      ensureSpace(40)
       doc.setFontSize(10)
       doc.setTextColor(dkmSlate[0], dkmSlate[1], dkmSlate[2])
       doc.setFont('helvetica', 'bold')
@@ -252,7 +263,7 @@ export default function LaporanAdmin() {
           : [['-', '-', 'Tidak ada data pengeluaran', '-', '-', '-', '-', 'Rp 0']],
         margin: { top: 55, bottom: 25 },
         didDrawPage: (dt) => {
-          drawHeader(doc, logoImg)
+          if (dt.pageNumber > 1) drawHeader(doc, logoImg)
         },
         headStyles: { fillColor: [255, 241, 242], textColor: dkmRose, fontSize: 8, fontStyle: 'bold' },
         styles: { fontSize: 8, cellPadding: 3 },
@@ -267,6 +278,7 @@ export default function LaporanAdmin() {
       currentY = (doc as any).lastAutoTable.finalY + 12
       
       // Section C: Saldo Akhir Summary Table
+      ensureSpace(35)
       doc.setFontSize(10)
       doc.setTextColor(dkmSlate[0], dkmSlate[1], dkmSlate[2])
       doc.setFont('helvetica', 'bold')
@@ -281,6 +293,9 @@ export default function LaporanAdmin() {
            `Rp ${(data.totalIncome - data.totalExpense).toLocaleString('id-ID')}`
         ]],
         margin: { top: 55, bottom: 25 },
+        didDrawPage: (dt) => {
+          if (dt.pageNumber > 1) drawHeader(doc, logoImg)
+        },
         headStyles: { fillColor: [255, 251, 235], textColor: [180, 83, 9], fontSize: 9, fontStyle: 'bold', halign: 'center' },
         styles: { fontSize: 9, cellPadding: 5, halign: 'center' },
         columnStyles: {
@@ -292,11 +307,8 @@ export default function LaporanAdmin() {
 
       currentY = (doc as any).lastAutoTable.finalY + 15
       
-      if (currentY + 50 > 280) {
-        doc.addPage()
-        drawHeader(doc, logoImg)
-        currentY = 60
-      }
+      // Protected Sig section
+      ensureSpace(50) 
 
       doc.setFontSize(10)
       doc.setTextColor(0)
