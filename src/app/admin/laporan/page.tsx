@@ -11,10 +11,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Label } from '@/components/ui/label'
 import { toast } from 'sonner'
 import { cn, formatCurrency } from '@/lib/utils'
+import { useSession } from 'next-auth/react'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 
 export default function LaporanAdmin() {
+  const { data: session } = useSession()
   const [loading, setLoading] = useState(true)
   const [reports, setReports] = useState([])
   const [search, setSearch] = useState('')
@@ -40,72 +42,231 @@ export default function LaporanAdmin() {
     try {
       setIsExportingPDF(true)
       const doc = new jsPDF()
+      const dkmEmerald = [11, 61, 46] // #0b3d2e
+      const dkmOrange = [245, 158, 11] // #f59e0b
+      const dkmRose = [244, 63, 94] // #f43f5e
+      const dkmSlate = [15, 23, 42] // #0f172a
+      const dkmLightEmerald = [240, 253, 244]
+      const dkmLightRose = [255, 241, 242]
+      const dkmLightOrange = [255, 251, 235]
       
-      // Header
+      const pageWidth = doc.internal.pageSize.getWidth()
+      const centerX = pageWidth / 2
+
+      // --- 1. TOP LOGO PILL ---
+      doc.setFillColor(dkmOrange[0], dkmOrange[1], dkmOrange[2])
+      doc.circle(centerX, 25, 12, 'F')
+      // White wallet-like glyph
+      doc.setDrawColor(255, 255, 255)
+      doc.setLineWidth(1)
+      doc.roundedRect(centerX - 5, 21, 10, 7, 1, 1, 'D')
+      doc.line(centerX, 21, centerX, 28)
+
+      // --- 2. HEADER TEXT ---
       doc.setFontSize(18)
-      doc.setTextColor(11, 61, 46)
-      doc.text('DKM AL-MUHAJIRIN', 105, 15, { align: 'center' })
-      doc.setFontSize(10)
-      doc.setTextColor(100)
-      doc.text('Ragas Grenyang, Desa Bojonegara, Kec. Bojonegara, Kab. Serang - Banten', 105, 20, { align: 'center' })
+      doc.setTextColor(dkmSlate[0], dkmSlate[1], dkmSlate[2])
+      doc.setFont('helvetica', 'bold')
+      doc.text('LAPORAN PERTANGGUNGJAWABAN', centerX, 50, { align: 'center' })
       
-      doc.setDrawColor(11, 61, 46)
-      doc.setLineWidth(0.5)
-      doc.line(20, 25, 190, 25)
-      
-      // Title
       doc.setFontSize(14)
+      doc.setTextColor(dkmOrange[0], dkmOrange[1], dkmOrange[2])
+      // Use standard branding if title is generic
+      doc.text('KEUANGAN PANITIA PHBI NUZULUL QUR\'AN', centerX, 58, { align: 'center' })
+      
+      doc.setFontSize(10)
+      doc.setTextColor(148, 163, 184)
+      doc.setFont('helvetica', 'normal')
+      doc.text(`Tahun ${new Date().getFullYear()}`, centerX, 65, { align: 'center' })
+      
+      // Print date capsule
+      doc.setFillColor(248, 250, 252)
+      doc.roundedRect(centerX - 28, 70, 56, 7, 3.5, 3.5, 'F')
+      doc.setFontSize(8)
+      doc.setTextColor(100, 116, 139)
+      const dateStr = new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
+      doc.text(`Ditetapkan: ${dateStr}`, centerX, 74.5, { align: 'center' })
+
+      // Divider
+      doc.setDrawColor(dkmOrange[0], dkmOrange[1], dkmOrange[2])
+      doc.setLineWidth(1.5)
+      doc.line(10, 85, 200, 85)
+
+      // --- 3. SUMMARY CARDS ---
+      const cardY = 95
+      const cardW = 58
+      const cardH = 38
+      const startX = 13
+
+      // Income Card
+      doc.setFillColor(dkmLightEmerald[0], dkmLightEmerald[1], dkmLightEmerald[2])
+      doc.setDrawColor(16, 185, 129, 0.2)
+      doc.roundedRect(startX, cardY, cardW, cardH, 6, 6, 'FD')
+      // Icon
+      doc.setDrawColor(16, 185, 129)
+      doc.circle(startX + cardW/2, cardY + 11, 4.5, 'D')
+      doc.line(startX + cardW/2, cardY + 9, startX + cardW/2, cardY + 13)
+      doc.line(startX + cardW/2 - 1.5, cardY + 10.5, startX + cardW/2, cardY + 9)
+      doc.line(startX + cardW/2 + 1.5, cardY + 10.5, startX + cardW/2, cardY + 9)
+      
+      doc.setFontSize(7)
+      doc.setTextColor(16, 185, 129)
+      doc.setFont('helvetica', 'bold')
+      doc.text('TOTAL PEMASUKAN', startX + cardW/2, cardY + 22, { align: 'center' })
+      doc.setFontSize(14)
+      doc.setTextColor(dkmEmerald[0], dkmEmerald[1], dkmEmerald[2])
+      doc.text(`Rp ${data.totalIncome.toLocaleString('id-ID')}`, startX + cardW/2, cardY + 31, { align: 'center' })
+
+      // Expense Card
+      doc.setFillColor(dkmLightRose[0], dkmLightRose[1], dkmLightRose[2])
+      doc.setDrawColor(dkmRose[0], dkmRose[1], dkmRose[2], 0.2)
+      doc.roundedRect(startX + cardW + 5, cardY, cardW, cardH, 6, 6, 'FD')
+      // Icon
+      doc.setDrawColor(dkmRose[0], dkmRose[1], dkmRose[2])
+      doc.circle(startX + cardW + 5 + cardW/2, cardY + 11, 4.5, 'D')
+      doc.line(startX + cardW + 5 + cardW/2, cardY + 9, startX + cardW + 5 + cardW/2, cardY + 13)
+      doc.line(startX + cardW + 5 + cardW/2 - 1.5, cardY + 11.5, startX + cardW + 5 + cardW/2, cardY + 13)
+      doc.line(startX + cardW + 5 + cardW/2 + 1.5, cardY + 11.5, startX + cardW + 5 + cardW/2, cardY + 13)
+      
+      doc.setFontSize(7)
+      doc.setTextColor(dkmRose[0], dkmRose[1], dkmRose[2])
+      doc.text('TOTAL PENGELUARAN', startX + cardW + 5 + cardW/2, cardY + 22, { align: 'center' })
+      doc.setFontSize(14)
+      doc.setTextColor(dkmSlate[0], dkmSlate[1], dkmSlate[2])
+      doc.text(`Rp ${data.totalExpense.toLocaleString('id-ID')}`, startX + cardW + 5 + cardW/2, cardY + 31, { align: 'center' })
+
+      // Balance Card
+      doc.setFillColor(dkmLightOrange[0], dkmLightOrange[1], dkmLightOrange[2])
+      doc.setDrawColor(dkmOrange[0], dkmOrange[1], dkmOrange[2], 0.2)
+      doc.roundedRect(startX + (cardW + 5) * 2, cardY, cardW, cardH, 6, 6, 'FD')
+      // Icon
+      doc.setDrawColor(dkmOrange[0], dkmOrange[1], dkmOrange[2])
+      doc.circle(startX + (cardW + 5) * 2 + cardW/2, cardY + 11, 4.5, 'D')
+      doc.rect(startX + (cardW + 5) * 2 + cardW/2 - 2, cardY + 9, 4, 3, 'D')
+      
+      doc.setFontSize(7)
+      doc.setTextColor(dkmOrange[0], dkmOrange[1], dkmOrange[2])
+      doc.text('SALDO AKHIR', startX + (cardW + 5) * 2 + cardW/2, cardY + 22, { align: 'center' })
+      doc.setFontSize(14)
+      doc.setTextColor(dkmSlate[0], dkmSlate[1], dkmSlate[2])
+      doc.text(`Rp ${(data.totalIncome - data.totalExpense).toLocaleString('id-ID')}`, startX + (cardW + 5) * 2 + cardW/2, cardY + 31, { align: 'center' })
+
+      // --- 4. DETAILS SECTION ---
+      let curY = cardY + cardH + 15
+      // Title with Icon
+      doc.setTextColor(dkmSlate[0], dkmSlate[1], dkmSlate[2])
+      doc.setFontSize(11)
+      doc.setFont('helvetica', 'bold')
+      doc.setDrawColor(dkmOrange[0], dkmOrange[1], dkmOrange[2])
+      doc.rect(13, curY - 3, 4, 4, 'D')
+      doc.line(14, curY - 1, 16, curY - 1)
+      doc.text('Rincian Transaksi', 20, curY)
+      curY += 8
+
+      // PEMASUKAN Bar
+      doc.setFillColor(240, 253, 244)
+      doc.roundedRect(10, curY, 190, 8, 2, 2, 'F')
+      doc.setDrawColor(16, 185, 129)
+      doc.circle(13.5, curY + 4, 1.5, 'D')
+      doc.setTextColor(dkmEmerald[0], dkmEmerald[1], dkmEmerald[2])
+      doc.setFontSize(8)
+      doc.text('PEMASUKAN', 17, curY + 5.5)
+      curY += 10
+
+      autoTable(doc, {
+        startY: curY,
+        head: [['No', 'Tanggal', 'Kategori', 'Keterangan', 'Jumlah']],
+        body: txs.income.length > 0 ? txs.income.map((t: any, i: number) => [
+          i + 1, new Date(t.date).toLocaleDateString('id-ID'), t.sourceUnit || 'Donasi', t.description || t.source, `Rp ${t.amount.toLocaleString('id-ID')}`
+        ]) : [['-', '-', 'Status', 'Tidak ada data pemasukan', 'Rp 0']],
+        theme: 'plain',
+        headStyles: { textColor: [148, 163, 184], fontSize: 7, fontStyle: 'bold' },
+        bodyStyles: { fontSize: 8, textColor: [51, 65, 85] },
+        columnStyles: { 4: { halign: 'right', fontStyle: 'bold', textColor: [16, 185, 129] } },
+        margin: { left: 10, right: 10 }
+      })
+
+      curY = (doc as any).lastAutoTable.finalY
+      doc.setFillColor(240, 253, 244)
+      doc.rect(10, curY, 190, 8, 'F')
+      doc.setFontSize(8)
+      doc.setTextColor(dkmEmerald[0], dkmEmerald[1], dkmEmerald[2])
+      doc.setFont('helvetica', 'bold')
+      doc.text(`SUBTOTAL PEMASUKAN: Rp ${data.totalIncome.toLocaleString('id-ID')}`, 195, curY + 5.5, { align: 'right' })
+
+      curY += 15
+      // PENGELUARAN Bar
+      doc.setFillColor(255, 241, 242)
+      doc.roundedRect(10, curY, 190, 8, 2, 2, 'F')
+      doc.setDrawColor(dkmRose[0], dkmRose[1], dkmRose[2])
+      doc.circle(13.5, curY + 4, 1.5, 'D')
+      doc.setTextColor(dkmRose[0], dkmRose[1], dkmRose[2])
+      doc.text('PENGELUARAN', 17, curY + 5.5)
+      curY += 10
+
+      autoTable(doc, {
+        startY: curY,
+        head: [['No', 'Tanggal', 'Kategori', 'Keterangan', 'Jumlah']],
+        body: txs.expense.length > 0 ? txs.expense.map((t: any, i: number) => [
+          i + 1, new Date(t.date).toLocaleDateString('id-ID'), t.category, t.itemName || t.description, `Rp ${t.amount.toLocaleString('id-ID')}`
+        ]) : [['-', '-', 'Status', 'Tidak ada data pengeluaran', 'Rp 0']],
+        theme: 'plain',
+        headStyles: { textColor: [148, 163, 184], fontSize: 7, fontStyle: 'bold' },
+        bodyStyles: { fontSize: 8, textColor: [51, 65, 85] },
+        columnStyles: { 4: { halign: 'right', fontStyle: 'bold', textColor: [dkmRose[0], dkmRose[1], dkmRose[2]] } },
+        margin: { left: 10, right: 10 }
+      })
+
+      curY = (doc as any).lastAutoTable.finalY
+      doc.setFillColor(255, 241, 242)
+      doc.rect(10, curY, 190, 8, 'F')
+      doc.setTextColor(dkmRose[0], dkmRose[1], dkmRose[2])
+      doc.setFont('helvetica', 'bold')
+      doc.text(`SUBTOTAL PENGELUARAN: Rp ${data.totalExpense.toLocaleString('id-ID')}`, 195, curY + 5.5, { align: 'right' })
+
+      // --- 5. FINAL BOX ---
+      curY += 15
+      const bal = data.totalIncome - data.totalExpense
+      doc.setDrawColor(dkmOrange[0], dkmOrange[1], dkmOrange[2], 0.6)
+      doc.setFillColor(dkmLightOrange[0], dkmLightOrange[1], dkmLightOrange[2])
+      doc.roundedRect(10, curY, 190, 24, 4, 4, 'FD')
+      doc.setTextColor(dkmEmerald[0], dkmEmerald[1], dkmEmerald[2])
+      doc.setFontSize(12)
+      doc.text('SALDO AKHIR:', 18, curY + 14)
+      doc.setFontSize(20)
+      doc.text(`Rp ${bal.toLocaleString('id-ID')}`, pageWidth - 18, curY + 14, { align: 'right' })
+      doc.setFontSize(8)
+      doc.setTextColor(180, 83, 9)
+      doc.text(bal >= 0 ? 'Surplus (Pemasukan lebih besar dari Pengeluaran)' : 'Defisit (Pengeluaran lebih besar dari Pemasukan)', 18, curY + 20)
+
+      // --- 6. SIGNATURE ---
+      curY += 45
+      doc.setFontSize(9)
       doc.setTextColor(0)
       doc.setFont('helvetica', 'bold')
-      doc.text('LAPORAN PERTANGGUNGJAWABAN (LPJ) KEUANGAN', 105, 35, { align: 'center' })
-      
-      doc.setFontSize(11)
+      doc.text('Mengetahui,', 55, curY, { align: 'center' })
+      doc.text('Ketua Panitia', 55, curY + 5, { align: 'center' })
+      doc.line(30, curY + 30, 80, curY + 30)
       doc.setFont('helvetica', 'normal')
-      doc.text(`Periode: ${data.startDate} s/d ${data.endDate}`, 105, 42, { align: 'center' })
-      doc.text(`Nama Laporan: ${data.title}`, 20, 55)
-      
-      // Ringkasan
-      autoTable(doc, {
-        startY: 65,
-        head: [['Deskripsi', 'Jumlah']],
-        body: [
-          ['Total Pemasukan', `Rp ${data.totalIncome.toLocaleString('id-ID')}`],
-          ['Total Pengeluaran', `Rp ${data.totalExpense.toLocaleString('id-ID')}`],
-          ['Saldo Akhir', `Rp ${(data.totalIncome - data.totalExpense).toLocaleString('id-ID')}`]
-        ],
-        theme: 'grid',
-        headStyles: { fillColor: [11, 61, 46], textColor: [255, 255, 255] }
-      })
+      doc.text('(..........................)', 55, curY + 36, { align: 'center' })
 
-      // News/Notes
-      if (data.notes) {
-        doc.text('Keterangan Tambahan:', 20, (doc as any).lastAutoTable.finalY + 10)
-        doc.setFontSize(10)
-        doc.text(data.notes, 20, (doc as any).lastAutoTable.finalY + 16, { maxWidth: 170 })
-      }
+      doc.setFont('helvetica', 'bold')
+      doc.text('Hormat kami,', pageWidth - 55, curY, { align: 'center' })
+      doc.text('Bendahara', pageWidth - 55, curY + 5, { align: 'center' })
+      doc.line(pageWidth - 80, curY + 30, pageWidth - 30, curY + 30)
+      doc.setFont('helvetica', 'normal')
+      doc.text(session?.user?.name || 'Budi Bendahara', pageWidth - 55, curY + 36, { align: 'center' })
 
-      // Details Table
-      doc.addPage()
-      doc.setFontSize(12)
-      doc.text('RINCIAN TRANSAKSI', 105, 15, { align: 'center' })
-      
-      const allTxs = [
-        ...txs.income.map((t: any) => [new Date(t.date).toLocaleDateString('id-ID'), t.description || t.source, `Rp ${t.amount.toLocaleString('id-ID')}`, 'Masuk']),
-        ...txs.expense.map((t: any) => [new Date(t.date).toLocaleDateString('id-ID'), t.description || t.category, `Rp ${t.amount.toLocaleString('id-ID')}`, 'Keluar'])
-      ].sort((a, b) => new Date(a[0]).getTime() - new Date(b[0]).getTime())
-
-      autoTable(doc, {
-        startY: 25,
-        head: [['Tanggal', 'Keterangan', 'Nominal', 'Tipe']],
-        body: allTxs,
-        headStyles: { fillColor: [11, 61, 46] }
-      })
+      // Footer
+      doc.setFontSize(7)
+      doc.setTextColor(203, 213, 225)
+      doc.text('Dokumen ini dicetak secara otomatis dari Sistem Informasi Manajemen DKM Al-Muhajirin Ragas', centerX, 285, { align: 'center' })
+      doc.text(`${new Date().toLocaleString('id-ID')}`, centerX, 289, { align: 'center' })
 
       doc.save(`LPJ_${data.title.replace(/\s+/g, '_')}.pdf`)
-      toast.success('PDF berhasil diunduh')
+      toast.success('PDF Premium berhasil diunduh')
     } catch (error) {
       console.error(error)
-      toast.error('Gagal mencetak PDF')
+      toast.error('Gagal mencetak PDF Premium')
     } finally {
       setIsExportingPDF(false)
     }

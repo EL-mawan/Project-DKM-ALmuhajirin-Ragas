@@ -254,25 +254,46 @@ export default function AdminDashboard() {
             <div className="space-y-6">
               <div className="flex items-center justify-between px-2">
                 <h3 className="text-lg font-bold text-[#0b3d2e]">Aktivitas Terupdate</h3>
-                <Button variant="link" className="text-primary font-bold">Lensa Audit</Button>
+                <Link href="/admin/users">
+                  <Button variant="link" className="text-primary font-bold">Lensa Audit</Button>
+                </Link>
               </div>
               <div className="bg-white rounded-[2.5rem] sm:rounded-4xl border border-neutral-100 overflow-hidden shadow-sm">
-                {[1, 2, 3, 4].map((i) => (
-                  <div key={i} className="p-5 flex items-center justify-between border-b border-neutral-50 last:border-0 hover:bg-neutral-50 transition-colors">
-                    <div className="flex items-center space-x-4">
-                      <div className="h-10 w-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-500">
-                        <FileText className="h-5 w-5" />
-                      </div>
-                      <div>
-                        <p className="text-sm font-bold text-[#0b3d2e]">Pembaruan Inventaris Masjid</p>
-                        <p className="text-xs text-neutral-400 uppercase font-bold tracking-wider">Audit Log #{1420 + i}</p>
-                      </div>
+                {!dashboardStats?.activities || dashboardStats.activities.length === 0 ? (
+                  <div className="p-10 text-center text-neutral-400 space-y-2">
+                    <div className="h-16 w-16 bg-neutral-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <FileText className="h-8 w-8 opacity-20" />
                     </div>
-                    <div className="hidden sm:block">
-                      <Badge variant="outline" className="rounded-full border-neutral-200 text-neutral-500">2 jam lalu</Badge>
-                    </div>
+                    <p className="font-bold text-[#0b3d2e]/40">Belum ada aktivitas</p>
+                    <p className="text-xs">Aktivitas sistem akan muncul di sini secara otomatis.</p>
                   </div>
-                ))}
+                ) : (
+                  dashboardStats.activities.map((activity: any, i: number) => (
+                    <div key={activity.id} className="p-5 flex items-center justify-between border-b border-neutral-50 last:border-0 hover:bg-neutral-50 transition-colors">
+                      <div className="flex items-center space-x-4">
+                        <div className={`h-10 w-10 rounded-xl flex items-center justify-center ${
+                          activity.action.includes('Tambah') ? 'bg-emerald-50 text-emerald-500' : 
+                          activity.action.includes('Hapus') ? 'bg-rose-50 text-rose-500' : 'bg-blue-50 text-blue-500'
+                        }`}>
+                          <FileText className="h-5 w-5" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-bold text-[#0b3d2e]">{activity.action}</p>
+                          <p className="text-[10px] text-neutral-400 uppercase font-black tracking-widest mt-0.5">
+                            Oleh: {activity.user?.name || 'Sistem'} • {new Date(activity.createdAt).toLocaleDateString('id-ID', { hour: '2-digit', minute: '2-digit' })}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="hidden sm:block">
+                        <Badge variant="outline" className="rounded-full border-neutral-200 text-neutral-400 font-bold text-[10px]">
+                          {new Date().getTime() - new Date(activity.createdAt).getTime() < 3600000 
+                            ? `${Math.floor((new Date().getTime() - new Date(activity.createdAt).getTime()) / 60000)}m lalu`
+                            : new Date(activity.createdAt).toLocaleDateString('id-ID')}
+                        </Badge>
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
           </div>

@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { db } from '@/lib/db'
 import { authOptions } from '@/lib/auth/config'
 import { checkPermission } from '@/lib/auth/rbac'
+import { createAuditLog } from '@/lib/audit'
 
 export async function DELETE(
   request: NextRequest,
@@ -27,7 +28,13 @@ export async function DELETE(
       if (!checkPermission(user as any, 'keuangan_pemasukan', 'delete')) {
         return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
       }
-      await db.keuanganPemasukan.delete({ where: { id } })
+      const deleted = await db.keuanganPemasukan.delete({ where: { id } })
+      await createAuditLog({
+        userId: user.id,
+        action: 'Hapus Pemasukan: ' + deleted.source,
+        table: 'keuangan_pemasukan',
+        recordId: id
+      })
       return NextResponse.json({ message: 'Income record deleted' })
     }
 
@@ -37,7 +44,13 @@ export async function DELETE(
       if (!checkPermission(user as any, 'keuangan_pengeluaran', 'delete')) {
         return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
       }
-      await db.keuanganPengeluaran.delete({ where: { id } })
+      const deleted = await db.keuanganPengeluaran.delete({ where: { id } })
+      await createAuditLog({
+        userId: user.id,
+        action: 'Hapus Pengeluaran: ' + deleted.itemName,
+        table: 'keuangan_pengeluaran',
+        recordId: id
+      })
       return NextResponse.json({ message: 'Expense record deleted' })
     }
 
@@ -85,6 +98,15 @@ export async function PATCH(
           date: date ? new Date(date) : undefined
         }
       })
+
+      await createAuditLog({
+        userId: user.id,
+        action: 'Update Pemasukan: ' + updated.source,
+        table: 'keuangan_pemasukan',
+        recordId: id,
+        oldValues: income,
+        newValues: updated
+      })
       return NextResponse.json(updated)
     }
 
@@ -106,6 +128,15 @@ export async function PATCH(
           description,
           date: date ? new Date(date) : undefined
         }
+      })
+
+      await createAuditLog({
+        userId: user.id,
+        action: 'Update Pengeluaran: ' + updated.itemName,
+        table: 'keuangan_pengeluaran',
+        recordId: id,
+        oldValues: expense,
+        newValues: updated
       })
       return NextResponse.json(updated)
     }

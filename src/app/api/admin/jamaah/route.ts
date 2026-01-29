@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { db } from '@/lib/db'
 import { authOptions } from '@/lib/auth/config'
 import { checkPermission } from '@/lib/auth/rbac'
+import { createAuditLog } from '@/lib/audit'
 
 export async function GET(request: NextRequest) {
   try {
@@ -14,7 +15,10 @@ export async function GET(request: NextRequest) {
 
     if (type === 'kk') {
       const data = await db.jamaahKepalaKeluarga.findMany({
-        orderBy: { name: 'asc' }
+        orderBy: [
+          { nomor: 'asc' },
+          { name: 'asc' }
+        ]
       })
       return NextResponse.json(data)
     } else {
@@ -100,6 +104,15 @@ export async function POST(request: NextRequest) {
           phone: phone || undefined
         }
       })
+
+      await createAuditLog({
+        userId: user.id,
+        action: 'Tambah Data Keluarga: ' + newItem.name,
+        table: 'jamaah_kepala_keluarga',
+        recordId: newItem.id,
+        newValues: newItem
+      })
+
       return NextResponse.json(newItem, { status: 201 })
     }
  else if (type === 'remaja') {
@@ -116,6 +129,15 @@ export async function POST(request: NextRequest) {
           skills
         }
       })
+
+      await createAuditLog({
+        userId: user.id,
+        action: 'Tambah Data Remaja: ' + newItem.name,
+        table: 'jamaah_remaja',
+        recordId: newItem.id,
+        newValues: newItem
+      })
+
       return NextResponse.json(newItem, { status: 201 })
     }
 

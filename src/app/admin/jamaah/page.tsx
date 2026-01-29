@@ -159,6 +159,10 @@ export default function JamaahAdmin() {
       : true
     
     return matchesSearch && matchesRT
+  }).sort((a, b) => {
+    const numA = parseInt(a.nomor) || 0
+    const numB = parseInt(b.nomor) || 0
+    return numA - numB
   })
 
   // Urutkan data berdasarkan nomor untuk PDF

@@ -7,15 +7,17 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { useSession, signOut } from 'next-auth/react'
 import { cn } from '@/lib/utils'
+import Link from 'next/link'
 
 interface MobileAdminHeaderProps {
   title?: string
   subtitle?: string
   variant?: 'dashboard' | 'simple'
   className?: string
+  notificationCount?: number
 }
 
-export function MobileAdminHeader({ title, subtitle, variant = 'dashboard', className }: MobileAdminHeaderProps) {
+export function MobileAdminHeader({ title, subtitle, variant = 'dashboard', className, notificationCount }: MobileAdminHeaderProps) {
   const { data: session } = useSession()
   const userRole = session?.user?.role || 'User'
 
@@ -54,10 +56,19 @@ export function MobileAdminHeader({ title, subtitle, variant = 'dashboard', clas
       </motion.div>
       
       <div className="flex items-center space-x-2">
-        <button className="h-10 w-10 rounded-full bg-neutral-50 hover:bg-neutral-100 text-neutral-500 border border-neutral-200 flex items-center justify-center relative transition-all shadow-sm">
-          <Bell className="h-4 w-4" />
-          <span className="absolute top-3 right-3 h-2 w-2 bg-rose-500 rounded-full ring-2 ring-white" />
-        </button>
+        <Link href="/admin/kontak">
+          <button className="h-10 w-10 rounded-full bg-neutral-50 hover:bg-neutral-100 text-neutral-500 border border-neutral-200 flex items-center justify-center relative transition-all shadow-sm">
+            <Bell className="h-4 w-4" />
+            {(notificationCount ?? 0) > 0 && (
+              <span className="absolute top-2.5 right-2.5 h-3.5 w-3.5 bg-rose-500 rounded-full ring-2 ring-white flex items-center justify-center text-[8px] text-white font-bold">
+                {notificationCount}
+              </span>
+            )}
+            {(notificationCount ?? 0) === 0 && (
+               <span className="absolute top-3 right-3 h-2 w-2 bg-neutral-300 rounded-full ring-2 ring-white" />
+            )}
+          </button>
+        </Link>
       </div>
     </div>
   )

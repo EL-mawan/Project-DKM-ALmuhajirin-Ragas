@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { db } from '@/lib/db'
 import { authOptions } from '@/lib/auth/config'
 import { checkPermission } from '@/lib/auth/rbac'
+import { createAuditLog } from '@/lib/audit'
 
 // GET /api/admin/keuangan - Get financial summary
 export async function GET(request: NextRequest) {
@@ -149,6 +150,14 @@ export async function POST(request: NextRequest) {
           createdBy: user.id
         }
       })
+
+      await createAuditLog({
+        userId: user.id,
+        action: 'Pemasukan Baru: ' + (result.source),
+        table: 'keuangan_pemasukan',
+        recordId: result.id,
+        newValues: result
+      })
     } else if (type === 'expense') {
       if (!checkPermission(user as any, 'keuangan_pengeluaran', 'create')) {
         return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
@@ -168,6 +177,14 @@ export async function POST(request: NextRequest) {
           date: new Date(date),
           createdBy: user.id
         }
+      })
+
+      await createAuditLog({
+        userId: user.id,
+        action: 'Pengeluaran Baru: ' + (result.itemName),
+        table: 'keuangan_pengeluaran',
+        recordId: result.id,
+        newValues: result
       })
     } else {
       return NextResponse.json({ error: 'Invalid type' }, { status: 400 })

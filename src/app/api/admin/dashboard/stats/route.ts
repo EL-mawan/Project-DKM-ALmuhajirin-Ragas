@@ -56,7 +56,7 @@ export async function GET(request: NextRequest) {
       : (thisMonthNew > 0 ? 100 : 0)
 
     // Generate trend data for the "sticks" (e.g., registrations over last 7 months)
-    const trendData = []
+    const trendData: number[] = []
     for (let i = 6; i >= 0; i--) {
         const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
         const dEnd = new Date(now.getFullYear(), now.getMonth() - i + 1, 0)
@@ -73,6 +73,22 @@ export async function GET(request: NextRequest) {
     const maxTrend = Math.max(...trendData, 1)
     const sticks = trendData.map(val => Math.max(15, (val / maxTrend) * 100))
 
+    // Get latest activities (audit logs)
+    const activities = await db.auditLog.findMany({
+      orderBy: { createdAt: 'desc' },
+      take: 10,
+      include: {
+        user: {
+          select: { name: true, role: { select: { name: true } } }
+        }
+      }
+    })
+
+    // Get unread notifications count
+    const unreadNotifications = await db.kontakMasuk.count({
+      where: { isRead: false }
+    })
+
     return NextResponse.json({
       totalJamaah,
       totalRemaja,
@@ -81,7 +97,9 @@ export async function GET(request: NextRequest) {
       thisMonthExpense: expenseMonth._sum.amount || 0,
       growthPercent: growthPercent.toFixed(1),
       sticks,
-      trendData
+      trendData,
+      activities,
+      unreadNotifications
     })
   } catch (error: any) {
     console.error('Dashboard Stats API Error:', error)

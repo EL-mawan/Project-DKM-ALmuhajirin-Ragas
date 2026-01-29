@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { db } from '@/lib/db'
 import { authOptions } from '@/lib/auth/config'
 import { checkPermission } from '@/lib/auth/rbac'
+import { createAuditLog } from '@/lib/audit'
 
 export async function PATCH(
   request: NextRequest,
@@ -62,6 +63,16 @@ export async function PATCH(
           keterangan
         }
       })
+
+      await createAuditLog({
+        userId: user.id,
+        action: 'Update Data Keluarga: ' + updated.name,
+        table: 'jamaah_kepala_keluarga',
+        recordId: updated.id,
+        oldValues: current,
+        newValues: updated
+      })
+
       return NextResponse.json(updated)
     } else {
       if (!user || !checkPermission(user as any, 'jamaah_remaja', 'update')) {
@@ -78,6 +89,15 @@ export async function PATCH(
           skills
         }
       })
+
+      await createAuditLog({
+        userId: user.id,
+        action: 'Update Data Remaja: ' + updated.name,
+        table: 'jamaah_remaja',
+        recordId: updated.id,
+        newValues: updated
+      })
+
       return NextResponse.json(updated)
     }
   } catch (error: any) {
@@ -106,12 +126,24 @@ export async function DELETE(
       if (!user || !checkPermission(user as any, 'jamaah_kepala_keluarga', 'delete')) {
         return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
       }
-      await db.jamaahKepalaKeluarga.delete({ where: { id } })
+      const deleted = await db.jamaahKepalaKeluarga.delete({ where: { id } })
+      await createAuditLog({
+        userId: user.id,
+        action: 'Hapus Data Keluarga: ' + deleted.name,
+        table: 'jamaah_kepala_keluarga',
+        recordId: id
+      })
     } else {
       if (!user || !checkPermission(user as any, 'jamaah_remaja', 'delete')) {
         return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
       }
-      await db.jamaahRemaja.delete({ where: { id } })
+      const deleted = await db.jamaahRemaja.delete({ where: { id } })
+      await createAuditLog({
+        userId: user.id,
+        action: 'Hapus Data Remaja: ' + deleted.name,
+        table: 'jamaah_remaja',
+        recordId: id
+      })
     }
 
     return NextResponse.json({ message: 'Deleted successfully' })

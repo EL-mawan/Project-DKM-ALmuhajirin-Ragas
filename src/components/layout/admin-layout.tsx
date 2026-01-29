@@ -18,7 +18,8 @@ import {
   FileText,
   Newspaper,
   Image,
-  MessageSquare
+  MessageSquare,
+  Bell
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Layout } from './index'
@@ -42,6 +43,24 @@ export function AdminLayout({ children, title, subtitle }: AdminLayoutProps) {
   const [isVisible, setIsVisible] = useState(true)
   const [lastScrollY, setLastScrollY] = useState(0)
   const scrollRef = useRef<HTMLDivElement>(null)
+  const [notificationCount, setNotificationCount] = useState(0)
+
+  const fetchNotificationCount = async () => {
+    try {
+      const res = await fetch('/api/admin/dashboard/stats')
+      const data = await res.json()
+      if (res.ok) setNotificationCount(data.unreadNotifications || 0)
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
+  useEffect(() => {
+    fetchNotificationCount()
+    // Poll every 1 minute
+    const interval = setInterval(fetchNotificationCount, 60000)
+    return () => clearInterval(interval)
+  }, [])
 
   // Header visibility logic
   useEffect(() => {
@@ -188,6 +207,7 @@ export function AdminLayout({ children, title, subtitle }: AdminLayoutProps) {
               subtitle={subtitle} 
               variant={pathname === '/admin' ? 'dashboard' : 'simple'} 
               className="w-full h-full"
+              notificationCount={notificationCount}
             />
 
             {/* Desktop header */}
@@ -204,6 +224,18 @@ export function AdminLayout({ children, title, subtitle }: AdminLayoutProps) {
                   <UserCheck className="h-4 w-4" />
                   <span className="text-xs font-bold uppercase tracking-tighter">{userRole} AUTHENTICATED</span>
                 </div>
+                
+                <Link href="/admin/kontak">
+                  <Button variant="outline" size="icon" className="rounded-xl border-neutral-200 relative">
+                    <Bell className="h-4 w-4" />
+                    {notificationCount > 0 && (
+                      <span className="absolute -top-1 -right-1 h-4 w-4 bg-rose-500 rounded-full flex items-center justify-center text-[8px] text-white font-bold border-2 border-white">
+                        {notificationCount}
+                      </span>
+                    )}
+                  </Button>
+                </Link>
+
                 <Button variant="outline" size="icon" className="rounded-xl border-neutral-200">
                   <Settings className="h-4 w-4" />
                 </Button>
