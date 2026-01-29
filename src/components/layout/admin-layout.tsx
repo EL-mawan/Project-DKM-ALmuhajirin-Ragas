@@ -1,5 +1,6 @@
 'use client'
 
+import { motion } from 'framer-motion'
 import { useState, useEffect, useRef } from 'react'
 import { signOut, useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
@@ -121,28 +122,34 @@ export function AdminLayout({ children, title, subtitle }: AdminLayoutProps) {
                   <img src="/logo.png" alt="Logo" className="h-full w-full object-contain" />
                 </div>
                 <div>
-                  <h2 className="text-lg font-bold tracking-tight text-white">Al-Muhajirin</h2>
-                  <p className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest leading-none">Masjid Jami' Ragas Grenyang</p>
+                  <h2 className="text-lg font-bold tracking-tight text-white">DKM Al-Muhajirin</h2>
+                  <p className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest leading-none">Kp. RAGAS GRENYANG</p>
                 </div>
               </div>
             </div>
 
             <nav className="flex-1 px-4 py-6 overflow-y-auto space-y-1">
-              {filteredMenuItems.map((item) => {
+              {filteredMenuItems.map((item, index) => {
                 const isActive = pathname === item.href
                 return (
-                  <Link
+                  <motion.div
                     key={item.href}
-                    href={item.href}
-                    className={`flex items-center p-3 rounded-xl text-sm font-semibold transition-all group ${
-                      isActive 
-                        ? 'bg-emerald-500/10 text-emerald-400 border-r-4 border-emerald-500' 
-                        : 'text-emerald-100/60 hover:text-white hover:bg-white/5'
-                    }`}
+                    initial={{ x: -10, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    transition={{ delay: 0.1 + index * 0.05 }}
                   >
-                    <item.icon className={`h-5 w-5 mr-3 transition-transform ${isActive ? 'scale-110 text-emerald-400' : 'group-hover:scale-110'}`} />
-                    {item.label}
-                  </Link>
+                    <Link
+                      href={item.href}
+                      className={`flex items-center p-3 rounded-xl text-sm font-semibold transition-all group ${
+                        isActive 
+                          ? 'bg-emerald-500/10 text-emerald-400 border-r-4 border-emerald-500' 
+                          : 'text-emerald-100/60 hover:text-white hover:bg-white/5'
+                      }`}
+                    >
+                      <item.icon className={`h-5 w-5 mr-3 transition-transform ${isActive ? 'scale-110 text-emerald-400' : 'group-hover:scale-110'}`} />
+                      {item.label}
+                    </Link>
+                  </motion.div>
                 )
               })}
             </nav>
@@ -205,7 +212,13 @@ export function AdminLayout({ children, title, subtitle }: AdminLayoutProps) {
             ref={scrollRef}
             className="flex-1 overflow-y-auto pt-22"
           >
-            {children}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4 }}
+            >
+              {children}
+            </motion.div>
           </div>
         </main>
       </div>

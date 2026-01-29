@@ -72,10 +72,10 @@ export function Header() {
             </div>
             <div className="hidden lg:block leading-tight">
               <h1 className="text-lg font-bold tracking-tight text-foreground">
-                Al-Muhajirin
+                DKM Al-Muhajirin
               </h1>
               <p className="text-[10px] font-medium uppercase tracking-widest text-primary">
-                Masjid Jami' Ragas Grenyang
+                Kp. RAGAS GRENYANG
               </p>
             </div>
           </Link>
@@ -158,9 +158,9 @@ export function Header() {
                         <img src="/logo.png" alt="Logo Al-Muhajirin" className="h-full w-full object-contain" />
                       </div>
                       <div>
-                        <h2 className="text-lg font-bold text-foreground">Al-Muhajirin</h2>
+                        <h2 className="text-lg font-bold text-foreground">DKM Al-Muhajirin</h2>
                         <p className="text-[10px] uppercase tracking-wider text-primary font-semibold">
-                          Masjid Jami' Ragas Grenyang
+                          Kp. RAGAS GRENYANG
                         </p>
                       </div>
                     </Link>

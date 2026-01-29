@@ -23,10 +23,10 @@ export function Footer() {
               </div>
               <div>
                 <h3 className="font-semibold text-foreground">
-                  Al-Muhajirin
+                  DKM Al-Muhajirin
                 </h3>
                 <p className="text-sm text-muted-foreground">
-                  Masjid Jami' Ragas Grenyang
+                  Kp. RAGAS GRENYANG
                 </p>
               </div>
             </div>
@@ -163,7 +163,9 @@ export function Footer() {
         <div className="border-t mt-8 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             <p className="text-sm text-muted-foreground">
-              © {new Date().getFullYear()} Al-Muhajirin Ragas Grenyang. Hak Cipta Dilindungi.
+            <p className="text-sm text-muted-foreground">
+              © {new Date().getFullYear()} DKM Al-Muhajirin Kp. RAGAS GRENYANG. Hak Cipta Dilindungi.
+            </p>
             </p>
             <div className="flex space-x-6">
               <Link href="/privacy" className="text-sm text-muted-foreground hover:text-foreground transition-colors">

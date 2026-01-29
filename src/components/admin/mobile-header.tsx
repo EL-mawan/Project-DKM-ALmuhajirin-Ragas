@@ -24,17 +24,26 @@ export function MobileAdminHeader({ title, subtitle, variant = 'dashboard', clas
       "bg-white text-neutral-900 px-6 h-22 z-50 flex items-center justify-between shadow-sm border-b border-neutral-100 sm:hidden",
       className
     )}>
-      <div className="flex items-center space-x-4">
-        <div className="h-12 w-12 rounded-2xl bg-white p-1 flex items-center justify-center border border-neutral-100 shadow-sm">
+      <motion.div 
+        initial={{ x: -20, opacity: 0 }}
+        animate={{ x: 0, opacity: 1 }}
+        transition={{ delay: 0.2 }}
+        className="flex items-center space-x-4"
+      >
+        <motion.div 
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          className="h-12 w-12 rounded-2xl bg-white p-1 flex items-center justify-center border border-neutral-100 shadow-sm"
+        >
            <img src="/logo.png" alt="Logo" className="h-full w-full object-contain" />
-        </div>
+        </motion.div>
         <div>
-          <h2 className="font-extrabold text-xl tracking-tighter text-neutral-900 leading-none">Al-Muhajirin</h2>
+          <h2 className="font-extrabold text-xl tracking-tighter text-neutral-900 leading-none">DKM Al-Muhajirin</h2>
           <p className="text-emerald-600 text-[8px] font-black uppercase tracking-widest mt-1.5 leading-none">
-            MASJID JAMI' RAGAS GRENYANG
+            Kp. RAGAS GRENYANG
           </p>
         </div>
-      </div>
+      </motion.div>
       
       <div className="flex items-center space-x-2">
         <button className="h-10 w-10 rounded-full bg-neutral-50 hover:bg-neutral-100 text-neutral-500 border border-neutral-200 flex items-center justify-center relative transition-all shadow-sm">

@@ -106,103 +106,32 @@ export const ROLE_CONFIGS = {
   
   TOKOH_MASYARAKAT: {
     name: 'Tokoh Masyarakat',
-    description: 'Akses peninjauan sistem (LPJ, Struktur, Agenda, dll)',
-    permissions: [
-      PERMISSIONS.STRUCTURE_READ,
-      PERMISSIONS.ACTIVITY_READ,
-      PERMISSIONS.FINANCE_REPORT_READ,
-      PERMISSIONS.NEWS_READ,
-      PERMISSIONS.GALLERY_READ,
-      PERMISSIONS.CONTACT_READ
-    ]
+    description: 'Akses penuh untuk peninjauan dan pengelolaan sistem',
+    permissions: Object.values(PERMISSIONS)
   },
   
   KETUA_DKM: {
     name: 'Ketua DKM',
-    description: 'Menyetujui kegiatan dan meninjau laporan',
-    permissions: [
-      PERMISSIONS.STRUCTURE_READ,
-      PERMISSIONS.STRUCTURE_APPROVE,
-      PERMISSIONS.ACTIVITY_READ,
-      PERMISSIONS.ACTIVITY_APPROVE,
-      PERMISSIONS.FINANCE_REPORT_READ,
-      PERMISSIONS.FINANCE_REPORT_APPROVE,
-      PERMISSIONS.NEWS_READ,
-      PERMISSIONS.NEWS_APPROVE,
-      PERMISSIONS.GALLERY_READ,
-      PERMISSIONS.CONTACT_READ
-    ]
+    description: 'Akses penuh untuk pengelolaan dan persetujuan',
+    permissions: Object.values(PERMISSIONS)
   },
   
   SEKRETARIS_DKM: {
     name: 'Sekretaris DKM',
-    description: 'Mengelola jamaah, struktur, agenda, dan konten',
-    permissions: [
-      PERMISSIONS.STRUCTURE_READ,
-      PERMISSIONS.STRUCTURE_CREATE,
-      PERMISSIONS.STRUCTURE_UPDATE,
-      PERMISSIONS.JAMAAH_KK_READ,
-      PERMISSIONS.JAMAAH_KK_CREATE,
-      PERMISSIONS.JAMAAH_KK_UPDATE,
-      PERMISSIONS.JAMAAH_REMAJA_READ,
-      PERMISSIONS.JAMAAH_REMAJA_CREATE,
-      PERMISSIONS.JAMAAH_REMAJA_UPDATE,
-      PERMISSIONS.DHUAFA_READ,
-      PERMISSIONS.DHUAFA_CREATE,
-      PERMISSIONS.DHUAFA_UPDATE,
-      PERMISSIONS.ACTIVITY_READ,
-      PERMISSIONS.ACTIVITY_CREATE,
-      PERMISSIONS.ACTIVITY_UPDATE,
-      PERMISSIONS.FINANCE_REPORT_READ,
-      PERMISSIONS.NEWS_READ,
-      PERMISSIONS.NEWS_CREATE,
-      PERMISSIONS.NEWS_UPDATE,
-      PERMISSIONS.GALLERY_READ,
-      PERMISSIONS.GALLERY_CREATE,
-      PERMISSIONS.GALLERY_UPDATE,
-      PERMISSIONS.CONTACT_READ
-    ]
+    description: 'Akses penuh untuk administrasi dan konten',
+    permissions: Object.values(PERMISSIONS)
   },
   
   BENDAHARA_DKM: {
     name: 'Bendahara DKM',
-    description: 'Mengelola arus kas dan pembuatan LPJ',
-    permissions: [
-      PERMISSIONS.FINANCE_INCOME_READ,
-      PERMISSIONS.FINANCE_INCOME_CREATE,
-      PERMISSIONS.FINANCE_INCOME_UPDATE,
-      PERMISSIONS.FINANCE_EXPENSE_READ,
-      PERMISSIONS.FINANCE_EXPENSE_CREATE,
-      PERMISSIONS.FINANCE_EXPENSE_UPDATE,
-      PERMISSIONS.FINANCE_REPORT_READ,
-      PERMISSIONS.FINANCE_REPORT_CREATE,
-      PERMISSIONS.FINANCE_REPORT_UPDATE,
-      PERMISSIONS.GALLERY_READ,
-      PERMISSIONS.CONTACT_READ
-    ]
+    description: 'Akses penuh untuk keuangan dan laporan',
+    permissions: Object.values(PERMISSIONS)
   },
   
   RISMA: {
     name: 'RISMA (Remaja Islam)',
-    description: 'Mengelola kegiatan, jamaah remaja, dan konten',
-    permissions: [
-      PERMISSIONS.STRUCTURE_READ,
-      PERMISSIONS.JAMAAH_REMAJA_READ,
-      PERMISSIONS.JAMAAH_REMAJA_CREATE,
-      PERMISSIONS.JAMAAH_REMAJA_UPDATE,
-      PERMISSIONS.DHUAFA_READ,
-      PERMISSIONS.ACTIVITY_READ,
-      PERMISSIONS.ACTIVITY_CREATE,
-      PERMISSIONS.ACTIVITY_UPDATE,
-      PERMISSIONS.FINANCE_REPORT_READ,
-      PERMISSIONS.NEWS_READ,
-      PERMISSIONS.NEWS_CREATE,
-      PERMISSIONS.NEWS_UPDATE,
-      PERMISSIONS.GALLERY_READ,
-      PERMISSIONS.GALLERY_CREATE,
-      PERMISSIONS.GALLERY_UPDATE,
-      PERMISSIONS.CONTACT_READ
-    ]
+    description: 'Akses penuh untuk kegiatan dan konten remaja',
+    permissions: Object.values(PERMISSIONS)
   }
 } as const
 

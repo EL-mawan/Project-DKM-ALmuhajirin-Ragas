@@ -57,7 +57,7 @@ export function MobileNav() {
         return [commonItems.PANEL, commonItems.JAMAAH, commonItems.KEUANGAN, commonItems.BERITA, commonItems.LOGOUT]
 
       default:
-        return [commonItems.PANEL, commonItems.LOGOUT]
+        return [commonItems.PANEL, commonItems.JAMAAH, commonItems.KEUANGAN, commonItems.BERITA, commonItems.LOGOUT]
     }
   }
 

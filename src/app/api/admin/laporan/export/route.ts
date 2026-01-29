@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { db } from '@/lib/db'
 import { authOptions } from '@/lib/auth/config'
+import { checkPermission } from '@/lib/auth/rbac'
 
 // GET /api/admin/laporan/export - Export financial report as PDF
 export async function GET(request: NextRequest) {
@@ -11,13 +12,17 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    if (!session || !session.user?.email) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     // Check if user has permission to read reports
     const user = await db.user.findUnique({
       where: { email: session.user.email },
       include: { role: true }
     })
 
-    if (!user || !user.role.permissions.includes('{"resource":"laporan_keuangan","action":"read"}')) {
+    if (!user || !checkPermission(user as any, 'laporan_keuangan', 'read')) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
