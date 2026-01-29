@@ -75,7 +75,7 @@ export default function Home() {
             <div className="space-y-10 fade-in-up">
               <div className="inline-flex items-center space-x-2 px-4 py-2 rounded-full bg-primary/5 border border-primary/10 backdrop-blur-sm">
                 <Building className="h-4 w-4 text-primary" />
-                <span className="text-xs font-bold uppercase tracking-widest text-primary">Masjid Jami' Al-Muhajirin</span>
+                <span className="text-xs font-bold uppercase tracking-widest text-primary">DKM Al-Muhajirin</span>
               </div>
               
               <div className="space-y-6">
