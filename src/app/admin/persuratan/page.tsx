@@ -157,8 +157,8 @@ export default function PersuratanAdmin() {
     doc.setFontSize(9)
     doc.setFont('times', 'italic')
     doc.setTextColor(100, 116, 139)
-    doc.text('Kp. Ragas Grenyang, Desa Bojonegara, Kec. Bojonegara, Serang - Banten 42454', centerX, 33, { align: 'center' })
-    doc.text('Email: dkm_almuhajirin@gmail.com | Website: almuhajirin-ragas.com', centerX, 37, { align: 'center' })
+    doc.text('Kp. Ragas Grenyang, Desa Argawana, Kec. Puloampel, Serang - Banten 42455', centerX, 33, { align: 'center' })
+    doc.text('Email: dkm_almuhajirin@gmail.com | Website: dkm-almuhajirin-ragas.vercel.app', centerX, 37, { align: 'center' })
     
     doc.setDrawColor(dkmEmerald[0], dkmEmerald[1], dkmEmerald[2])
     doc.setLineWidth(1)
