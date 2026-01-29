@@ -194,23 +194,23 @@ export default function KeuanganAdmin() {
     <AdminLayout title="Lalu Lintas Keuangan" subtitle="Kelola arus kas masuk dan keluar Masjid.">
       <div className="p-6 sm:p-8 space-y-8">
         {/* Header Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Card className="rounded-[2.5rem] border-none shadow-sm bg-emerald-50/50">
-            <CardContent className="p-8">
-              <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">Total Pemasukan</p>
-              <h3 className="text-3xl font-black text-[#0b3d2e] mt-1">{formatCurrency(data.income?.total || 0)}</h3>
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-8">
+          <Card className="rounded-[2rem] sm:rounded-[2.5rem] border-none shadow-sm bg-emerald-50/50">
+            <CardContent className="p-5 sm:p-8">
+              <p className="text-[8px] sm:text-[10px] font-black text-emerald-600 uppercase tracking-widest">Total Pemasukan</p>
+              <h3 className="text-xl sm:text-3xl font-black text-[#0b3d2e] mt-1">{formatCurrency(data.income?.total || 0)}</h3>
             </CardContent>
           </Card>
-          <Card className="rounded-[2.5rem] border-none shadow-sm bg-rose-50/50">
-            <CardContent className="p-8">
-              <p className="text-[10px] font-black text-rose-600 uppercase tracking-widest">Total Pengeluaran</p>
-              <h3 className="text-3xl font-black text-[#0b3d2e] mt-1">{formatCurrency(data.expense?.total || 0)}</h3>
+          <Card className="rounded-[2rem] sm:rounded-[2.5rem] border-none shadow-sm bg-rose-50/50">
+            <CardContent className="p-5 sm:p-8">
+              <p className="text-[8px] sm:text-[10px] font-black text-rose-600 uppercase tracking-widest">Total Pengeluaran</p>
+              <h3 className="text-xl sm:text-3xl font-black text-[#0b3d2e] mt-1">{formatCurrency(data.expense?.total || 0)}</h3>
             </CardContent>
           </Card>
-          <Card className="rounded-[2.5rem] border-none shadow-sm bg-indigo-50/50">
-            <CardContent className="p-8">
-              <p className="text-[10px] font-black text-indigo-600 uppercase tracking-widest">Saldo Akhir</p>
-              <h3 className="text-3xl font-black text-[#0b3d2e] mt-1">{formatCurrency(data.balance || 0)}</h3>
+          <Card className="rounded-[2rem] sm:rounded-[2.5rem] border-none shadow-sm bg-indigo-50/50 col-span-2 lg:col-span-1">
+            <CardContent className="p-5 sm:p-8">
+              <p className="text-[8px] sm:text-[10px] font-black text-indigo-600 uppercase tracking-widest">Saldo Akhir</p>
+              <h3 className="text-xl sm:text-3xl font-black text-[#0b3d2e] mt-1">{formatCurrency(data.balance || 0)}</h3>
             </CardContent>
           </Card>
         </div>
