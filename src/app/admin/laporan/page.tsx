@@ -53,25 +53,35 @@ export default function LaporanAdmin() {
       const pageWidth = doc.internal.pageSize.getWidth()
       const centerX = pageWidth / 2
 
-      // --- 1. TOP LOGO PILL ---
-      doc.setFillColor(dkmOrange[0], dkmOrange[1], dkmOrange[2])
-      doc.circle(centerX, 25, 12, 'F')
-      // White wallet-like glyph
-      doc.setDrawColor(255, 255, 255)
-      doc.setLineWidth(1)
-      doc.roundedRect(centerX - 5, 21, 10, 7, 1, 1, 'D')
-      doc.line(centerX, 21, centerX, 28)
+      // --- 1. LOGO & HEADER ---
+      try {
+        const logoImg = new Image()
+        logoImg.src = '/logo.png'
+        await new Promise((resolve) => {
+          logoImg.onload = resolve
+          logoImg.onerror = resolve
+        })
+        if (logoImg.complete && logoImg.naturalWidth > 0) {
+          doc.addImage(logoImg, 'PNG', centerX - 12, 12, 24, 24)
+        } else {
+          // Fallback logo pill if image fails
+          doc.setFillColor(dkmOrange[0], dkmOrange[1], dkmOrange[2])
+          doc.circle(centerX, 25, 12, 'F')
+        }
+      } catch (err) {
+        doc.setFillColor(dkmOrange[0], dkmOrange[1], dkmOrange[2])
+        doc.circle(centerX, 25, 12, 'F')
+      }
 
       // --- 2. HEADER TEXT ---
       doc.setFontSize(18)
       doc.setTextColor(dkmSlate[0], dkmSlate[1], dkmSlate[2])
       doc.setFont('helvetica', 'bold')
-      doc.text('LAPORAN PERTANGGUNGJAWABAN', centerX, 50, { align: 'center' })
+      doc.text('LAPORAN PENANGGUNG JAWABAN', centerX, 50, { align: 'center' })
       
-      doc.setFontSize(14)
+      doc.setFontSize(12)
       doc.setTextColor(dkmOrange[0], dkmOrange[1], dkmOrange[2])
-      // Use standard branding if title is generic
-      doc.text('KEUANGAN PANITIA PHBI NUZULUL QUR\'AN', centerX, 58, { align: 'center' })
+      doc.text('KEUANGAN DKM AL-MUHAJIRIN KP. RAGAS GRENYANG', centerX, 58, { align: 'center' })
       
       doc.setFontSize(10)
       doc.setTextColor(148, 163, 184)
@@ -244,17 +254,18 @@ export default function LaporanAdmin() {
       doc.setTextColor(0)
       doc.setFont('helvetica', 'bold')
       doc.text('Mengetahui,', 55, curY, { align: 'center' })
-      doc.text('Ketua Panitia', 55, curY + 5, { align: 'center' })
+      doc.text('Ketua DKM Al-Muhajirin', 55, curY + 5, { align: 'center' })
       doc.line(30, curY + 30, 80, curY + 30)
       doc.setFont('helvetica', 'normal')
-      doc.text('(..........................)', 55, curY + 36, { align: 'center' })
+      doc.text('(H. Agung Gunawan)', 55, curY + 36, { align: 'center' })
 
       doc.setFont('helvetica', 'bold')
       doc.text('Hormat kami,', pageWidth - 55, curY, { align: 'center' })
-      doc.text('Bendahara', pageWidth - 55, curY + 5, { align: 'center' })
+      doc.text('Bendahara DKM', pageWidth - 55, curY + 5, { align: 'center' })
       doc.line(pageWidth - 80, curY + 30, pageWidth - 30, curY + 30)
       doc.setFont('helvetica', 'normal')
-      doc.text(session?.user?.name || 'Budi Bendahara', pageWidth - 55, curY + 36, { align: 'center' })
+      doc.text('(Lasturi)', pageWidth - 55, curY + 36, { align: 'center' })
+
 
       // Footer
       doc.setFontSize(7)
