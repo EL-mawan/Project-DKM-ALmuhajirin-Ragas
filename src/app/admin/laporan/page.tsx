@@ -273,7 +273,6 @@ export default function LaporanAdmin() {
       doc.line(55 - agungWidth/2, currentY + 36, 55 + agungWidth/2, currentY + 36)
 
       doc.setFont('helvetica', 'bold')
-      doc.text('Hormat kami,', pageWidth - 55, currentY, { align: 'center' })
       doc.text('Bendahara DKM', pageWidth - 55, currentY + 6, { align: 'center' })
       
       const lasturiName = 'Lasturi'
