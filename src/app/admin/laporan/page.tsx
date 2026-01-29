@@ -165,15 +165,19 @@ export default function LaporanAdmin() {
       autoTable(doc, {
         startY: currentY,
         head: [['No', 'Tanggal', 'Sumber Dana', 'Qty', 'Unit', 'Harga Satuan', 'Total']],
-        body: txs.income.length > 0 ? txs.income.map((t: any, i: number) => [
-          i + 1, 
-          new Date(t.date).toLocaleDateString('id-ID'), 
-          t.source || '-',
-          t.qty || 1,
-          t.sourceUnit || '-',
-          `Rp ${(t.unitPrice || t.amount).toLocaleString('id-ID')}`,
-          `Rp ${t.amount.toLocaleString('id-ID')}`
-        ]) : [['-', '-', 'Tidak ada data pemasukan', '-', '-', '-', 'Rp 0']],
+        body: txs.income.length > 0 
+          ? [...txs.income]
+              .sort((a: any, b: any) => new Date(a.date).getTime() - new Date(b.date).getTime())
+              .map((t: any, i: number) => [
+                i + 1, 
+                new Date(t.date).toLocaleDateString('id-ID'), 
+                t.source || '-',
+                t.qty || 1,
+                t.sourceUnit || '-',
+                `Rp ${(t.unitPrice || t.amount).toLocaleString('id-ID')}`,
+                `Rp ${t.amount.toLocaleString('id-ID')}`
+              ]) 
+          : [['-', '-', 'Tidak ada data pemasukan', '-', '-', '-', 'Rp 0']],
         margin: { top: 55, bottom: 25 },
         didDrawPage: (dt) => {
           if (dt.pageNumber > 1) {
@@ -202,16 +206,20 @@ export default function LaporanAdmin() {
       autoTable(doc, {
         startY: currentY,
         head: [['No', 'Tanggal', 'Nama Barang', 'Kategori', 'Qty', 'Satuan', 'Harga', 'Total']],
-        body: txs.expense.length > 0 ? txs.expense.map((t: any, i: number) => [
-          i + 1,
-          new Date(t.date).toLocaleDateString('id-ID'),
-          t.itemName || '-',
-          t.category || '-',
-          t.qty || 1,
-          t.unitType || '-',
-          `Rp ${(t.unitPrice || t.amount).toLocaleString('id-ID')}`,
-          `Rp ${t.amount.toLocaleString('id-ID')}`
-        ]) : [['-', '-', 'Tidak ada data pengeluaran', '-', '-', '-', '-', 'Rp 0']],
+        body: txs.expense.length > 0 
+          ? [...txs.expense]
+              .sort((a: any, b: any) => new Date(a.date).getTime() - new Date(b.date).getTime())
+              .map((t: any, i: number) => [
+                i + 1,
+                new Date(t.date).toLocaleDateString('id-ID'),
+                t.itemName || '-',
+                t.category || '-',
+                t.qty || 1,
+                t.unitType || '-',
+                `Rp ${(t.unitPrice || t.amount).toLocaleString('id-ID')}`,
+                `Rp ${t.amount.toLocaleString('id-ID')}`
+              ]) 
+          : [['-', '-', 'Tidak ada data pengeluaran', '-', '-', '-', '-', 'Rp 0']],
         margin: { top: 55, bottom: 25 },
         didDrawPage: (dt) => {
           drawHeader(doc, logoImg)
