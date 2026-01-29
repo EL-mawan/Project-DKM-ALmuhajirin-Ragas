@@ -314,10 +314,10 @@ export default function JamaahAdmin() {
                     {activeTab === 'kk' ? (
                       <>
                         <div className="space-y-2">
-                          <Label>Nomor* (ID/Urutan)</Label>
+                          <Label>Nomor (ID/Urutan) - Kosongkan untuk Otomatis</Label>
                           <Input 
-                            required
                             className="rounded-xl h-12"
+                            placeholder="Contoh: 001"
                             value={formData.nomor}
                             onChange={e => setFormData({...formData, nomor: e.target.value})}
                           />

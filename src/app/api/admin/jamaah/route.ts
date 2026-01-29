@@ -46,42 +46,52 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
       }
 
-      // Check if nomor+RT combination already exists
-      const existingWithSameNomorRT = await db.jamaahKepalaKeluarga.findFirst({
-        where: {
-          nomor,
-          rt
-        }
-      })
+      let finalNomor = nomor
 
-      // If duplicate nomor+RT exists, increment all records with same or higher nomor in that RT
-      if (existingWithSameNomorRT) {
-        // Get all records with nomor >= current nomor in the same RT, ordered by nomor descending
-        const recordsToUpdate = await db.jamaahKepalaKeluarga.findMany({
-          where: {
-            rt,
-            nomor: {
-              gte: nomor
-            }
-          },
-          orderBy: {
-            nomor: 'desc'
-          }
+      // If nomor is not provided, find the max nomor for the RT and add 1
+      if (!finalNomor) {
+        const lastRecord = await db.jamaahKepalaKeluarga.findFirst({
+          where: { rt },
+          orderBy: { nomor: 'desc' }
+        })
+        
+        if (lastRecord) {
+          const lastNum = parseInt(lastRecord.nomor)
+          finalNomor = (isNaN(lastNum) ? 1 : lastNum + 1).toString().padStart(lastRecord.nomor.length || 3, '0')
+        } else {
+          finalNomor = '001'
+        }
+      } else {
+        // Shifting logic if manual nomor is provided and already exists
+        const existingWithSameNomorRT = await db.jamaahKepalaKeluarga.findFirst({
+          where: { nomor: finalNomor, rt }
         })
 
-        // Update each record's nomor by incrementing it
-        for (const record of recordsToUpdate) {
-          const newNomor = (parseInt(record.nomor) + 1).toString().padStart(record.nomor.length, '0')
-          await db.jamaahKepalaKeluarga.update({
-            where: { id: record.id },
-            data: { nomor: newNomor }
+        if (existingWithSameNomorRT) {
+          const recordsToUpdate = await db.jamaahKepalaKeluarga.findMany({
+            where: {
+              rt,
+              nomor: { gte: finalNomor }
+            },
+            orderBy: { nomor: 'desc' }
           })
+
+          for (const record of recordsToUpdate) {
+            const currentNum = parseInt(record.nomor)
+            if (!isNaN(currentNum)) {
+              const newNomor = (currentNum + 1).toString().padStart(record.nomor.length, '0')
+              await db.jamaahKepalaKeluarga.update({
+                where: { id: record.id },
+                data: { nomor: newNomor }
+              })
+            }
+          }
         }
       }
 
       const newItem = await db.jamaahKepalaKeluarga.create({
         data: {
-          nomor,
+          nomor: finalNomor,
           blok,
           name,
           rt,
@@ -91,7 +101,8 @@ export async function POST(request: NextRequest) {
         }
       })
       return NextResponse.json(newItem, { status: 201 })
-    } else if (type === 'remaja') {
+    }
+ else if (type === 'remaja') {
       if (!user || !checkPermission(user as any, 'jamaah_remaja', 'create')) {
         return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
       }
