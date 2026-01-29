@@ -265,14 +265,21 @@ export default function LaporanAdmin() {
       doc.setFont('helvetica', 'bold')
       doc.text('Mengetahui,', 55, currentY, { align: 'center' })
       doc.text('Ketua DKM Al-Muhajirin', 55, currentY + 6, { align: 'center' })
-      doc.setFont('helvetica', 'underline')
-      doc.text('H. Agung Gunawan', 55, currentY + 35, { align: 'center'})
+      doc.setFont('helvetica', 'bold')
+      const agungName = 'H. Agung Gunawan'
+      const agungWidth = doc.getTextWidth(agungName)
+      doc.text(agungName, 55, currentY + 35, { align: 'center' })
+      doc.setLineWidth(0.3)
+      doc.line(55 - agungWidth/2, currentY + 36, 55 + agungWidth/2, currentY + 36)
 
       doc.setFont('helvetica', 'bold')
       doc.text('Hormat kami,', pageWidth - 55, currentY, { align: 'center' })
       doc.text('Bendahara DKM', pageWidth - 55, currentY + 6, { align: 'center' })
-      doc.setFont('helvetica', 'underline')
-      doc.text('Lasturi', pageWidth - 55, currentY + 35, { align: 'center' })
+      
+      const lasturiName = 'Lasturi'
+      const lasturiWidth = doc.getTextWidth(lasturiName)
+      doc.text(lasturiName, pageWidth - 55, currentY + 35, { align: 'center' })
+      doc.line(pageWidth - 55 - lasturiWidth/2, currentY + 36, pageWidth - 55 + lasturiWidth/2, currentY + 36)
 
       const totalPages = doc.internal.pages.length - 1
       for (let i = 1; i <= totalPages; i++) {
