@@ -12,6 +12,7 @@ import { toast } from 'sonner'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import jsPDF from 'jspdf'
 
 export default function BuatProposalPage() {
   const router = useRouter()
@@ -73,6 +74,82 @@ export default function BuatProposalPage() {
     if (type === 'PROPOSAL') return 'Proposal Digital'
     if (type === 'UNDANGAN') return 'Surat Undangan'
     return 'Surat Resmi'
+  }
+
+  const generatePreviewPDF = () => {
+    const doc = new jsPDF()
+    const pageWidth = doc.internal.pageSize.getWidth()
+    const centerX = pageWidth / 2
+    const mLeft = 20
+
+    // --- KOP SURAT ---
+    doc.setFontSize(14)
+    doc.setFont('times', 'bold')
+    doc.setTextColor(50, 0, 80) // Purple tone
+    // Split long title if necessary
+    const titleLines = doc.splitTextToSize(formData.namaKopSurat || 'PADEPOKAN SATRIA PINAYUNGAN RAGAS GRENYANG', 170)
+    doc.text(titleLines, centerX, 20, { align: 'center' })
+    
+    doc.setFontSize(8)
+    doc.setFont('times', 'normal')
+    doc.setTextColor(100, 100, 100)
+    const addressLines = doc.splitTextToSize(formData.alamatKopSurat || 'KAMPUNG RAGAS GRENYANG DESA ARGAWANA...', 170)
+    doc.text(addressLines, centerX, 30, { align: 'center' })
+
+    const contactY = 30 + (addressLines.length * 4) + 2
+    doc.setFont('times', 'italic')
+    doc.text(formData.kontakKopSurat || 'Jl. Puloampel KM 19...', centerX, contactY, { align: 'center' })
+
+    // Line separator
+    const lineY = contactY + 3
+    doc.setDrawColor(88, 28, 135) // Purple
+    doc.setLineWidth(1)
+    doc.line(mLeft, lineY, pageWidth - mLeft, lineY)
+
+    // --- INFO DOC ---
+    let curY = lineY + 15
+    doc.setTextColor(0, 0, 0)
+    doc.setFontSize(11)
+    doc.setFont('times', 'normal')
+
+    doc.text(`Nomor      : ${formData.nomorSurat || '-'}`, mLeft, curY)
+    doc.text(`Lampiran  : ${formData.lampiran || '-'}`, mLeft, curY + 6)
+    doc.setFont('times', 'bold')
+    doc.text(`Perihal      : ${formData.perihalProposal || '-'}`, mLeft, curY + 12)
+
+    // Date (Right aligned)
+    const dateStr = formData.tanggalSurat ? new Date(formData.tanggalSurat).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : '...'
+    doc.text(`${formData.tempatSurat || 'Serang'}, ${dateStr}`, pageWidth - mLeft, curY, { align: 'right' })
+
+    // --- RECIPIENT ---
+    curY += 25
+    doc.setFont('times', 'normal')
+    doc.text('Kepada Yth.', mLeft, curY)
+    
+    const recipientLines = doc.splitTextToSize(formData.tujuanPenerima || '...', 100)
+    doc.text(recipientLines, mLeft, curY + 6)
+    
+    curY += 6 + (recipientLines.length * 5)
+    doc.text('di -', mLeft, curY)
+    doc.text('Tempat', mLeft + 10, curY + 6)
+
+    // --- CONTENT PLACEHOLDER ---
+    curY += 20
+    doc.text('Menghaturkan,', mLeft, curY)
+    doc.text('Ketua DPD Padepokan', mLeft, curY + 6)
+    doc.text('Kabupaten Serang', mLeft, curY + 12)
+
+    // --- SIGNATURE ---
+    const sigY = curY + 50
+    doc.text('Hormat Kami,', centerX, sigY, { align: 'center' })
+    
+    doc.text('Ketua Padepokan,', centerX - 40, sigY + 20, { align: 'center' })
+    doc.text(formData.ketuaNama || '( ........................ )', centerX - 40, sigY + 50, { align: 'center' })
+    
+    doc.text('Sekretaris,', centerX + 40, sigY + 20, { align: 'center' })
+    doc.text(formData.sekretarisNama || '( ........................ )', centerX + 40, sigY + 50, { align: 'center' })
+
+    doc.save(`Draft_${type}_${new Date().getTime()}.pdf`)
   }
 
   return (
@@ -311,7 +388,11 @@ export default function BuatProposalPage() {
             <div className="max-w-3xl mx-auto">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-black text-gray-800">Digital Preview</h2>
-                <Button className="bg-blue-500 hover:bg-blue-600 rounded-xl" size="sm">
+                <Button 
+                  className="bg-blue-500 hover:bg-blue-600 rounded-xl" 
+                  size="sm"
+                  onClick={generatePreviewPDF}
+                >
                   <Download className="h-4 w-4 mr-2" />
                   Unduh PDF
                 </Button>
