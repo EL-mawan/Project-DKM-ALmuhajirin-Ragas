@@ -38,6 +38,36 @@ export default function LaporanAdmin() {
     notes: ''
   })
 
+  // Helper for Enter key navigation
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement)) {
+      if ((e.target as any).type === 'submit') return;
+      
+      e.preventDefault();
+      const form = (e.target as any).form;
+      if (!form) return;
+      
+      const index = Array.prototype.indexOf.call(form, e.target);
+      let nextIndex = index + 1;
+      let nextElement = form.elements[nextIndex] as HTMLElement;
+      
+      // Skip Batal/Cancel buttons or elements with 'skip-enter' class
+      while (nextElement && (
+        nextElement.tagName === 'BUTTON' && 
+        (nextElement.textContent?.toLowerCase().includes('batal') || 
+         nextElement.textContent?.toLowerCase().includes('cancel') ||
+         nextElement.classList.contains('skip-enter'))
+      )) {
+        nextIndex++;
+        nextElement = form.elements[nextIndex] as HTMLElement;
+      }
+      
+      if (nextElement) {
+        nextElement.focus();
+      }
+    }
+  };
+
   const generatePDF = async (data: any, txs: any) => {
     try {
       setIsExportingPDF(true)
@@ -438,11 +468,12 @@ export default function LaporanAdmin() {
               </Button>
             </DialogTrigger>
             <DialogContent className="w-[95vw] sm:max-w-[550px] p-0 overflow-hidden border-none rounded-4xl shadow-2xl max-h-[90vh] flex flex-col mx-auto">
-              <div className="p-6 sm:p-8 pb-4">
-                <DialogHeader>
-                  <DialogTitle className="text-lg sm:text-xl font-black text-[#0b3d2e] tracking-tight">Buat Laporan Baru</DialogTitle>
-                </DialogHeader>
-              </div>
+              <form onSubmit={handleSubmit} onKeyDown={handleKeyDown} className="flex flex-col h-full overflow-hidden">
+                <div className="p-6 sm:p-8 pb-4">
+                  <DialogHeader>
+                    <DialogTitle className="text-lg sm:text-xl font-black text-[#0b3d2e] tracking-tight">Buat Laporan Baru</DialogTitle>
+                  </DialogHeader>
+                </div>
 
               <div className="px-6 sm:px-8 pb-8 overflow-y-auto space-y-6 flex-1 custom-scrollbar">
                 <div>
@@ -555,30 +586,33 @@ export default function LaporanAdmin() {
                 </div>
               </div>
 
-              <div className="p-6 sm:p-8 pt-4 bg-gray-50/50 border-t flex flex-col sm:flex-row gap-3">
-                <Button 
-                  variant="ghost" 
-                  className="flex-1 h-12 sm:h-14 rounded-2xl font-bold text-neutral-500 hover:bg-white hover:text-neutral-900 border-none order-3 sm:order-1"
-                  onClick={() => setIsModalOpen(false)}
-                >
-                  Batal
-                </Button>
-                <Button 
-                  className="flex-1 h-12 sm:h-14 rounded-2xl font-bold bg-emerald-600 hover:bg-emerald-700 shadow-xl shadow-emerald-100 text-white border-none order-1 sm:order-2"
-                  onClick={() => generatePDF(formData, transactions)}
-                  disabled={isExportingPDF || !formData.startDate}
-                >
-                  {isExportingPDF ? 'Memproses...' : 'Cetak PDF'}
-                </Button>
-                <Button 
-                  className="flex-1 h-12 sm:h-14 rounded-2xl font-bold bg-[#0b3d2e] hover:bg-[#062c21] shadow-xl shadow-emerald-900/10 text-white border-none order-2 sm:order-3"
-                  onClick={handleSubmit}
-                  disabled={isSubmitting}
-                >
-                  {isSubmitting && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-                  {isSubmitting ? 'Menyimpan...' : 'Simpan Draft'}
-                </Button>
-              </div>
+                <div className="p-6 sm:p-8 pt-4 bg-gray-50/50 border-t flex flex-col sm:flex-row gap-3">
+                  <Button 
+                    type="button"
+                    variant="ghost" 
+                    className="flex-1 h-12 sm:h-14 rounded-2xl font-bold text-neutral-500 hover:bg-white hover:text-neutral-900 border-none order-3 sm:order-1"
+                    onClick={() => setIsModalOpen(false)}
+                  >
+                    Batal
+                  </Button>
+                  <Button 
+                    type="button"
+                    className="flex-1 h-12 sm:h-14 rounded-2xl font-bold bg-emerald-600 hover:bg-emerald-700 shadow-xl shadow-emerald-100 text-white border-none order-1 sm:order-2"
+                    onClick={() => generatePDF(formData, transactions)}
+                    disabled={isExportingPDF || !formData.startDate}
+                  >
+                    {isExportingPDF ? 'Memproses...' : 'Cetak PDF'}
+                  </Button>
+                  <Button 
+                    type="submit"
+                    className="flex-1 h-12 sm:h-14 rounded-2xl font-bold bg-[#0b3d2e] hover:bg-[#062c21] shadow-xl shadow-emerald-900/10 text-white border-none order-2 sm:order-3"
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+                    {isSubmitting ? 'Menyimpan...' : 'Simpan Draft'}
+                  </Button>
+                </div>
+              </form>
             </DialogContent>
           </Dialog>
         </div>

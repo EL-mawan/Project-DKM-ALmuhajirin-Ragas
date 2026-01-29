@@ -62,17 +62,29 @@ export default function KegiatanAdmin() {
     target: '',
   })
 
-  // Helper untuk navigasi Enter
+  // Helper for Enter key navigation
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement)) {
-      if (e.target.type === 'submit') return;
+      if ((e.target as any).type === 'submit') return;
       
       e.preventDefault();
       const form = (e.target as any).form;
       if (!form) return;
       
       const index = Array.prototype.indexOf.call(form, e.target);
-      const nextElement = form.elements[index + 1] as HTMLElement;
+      let nextIndex = index + 1;
+      let nextElement = form.elements[nextIndex] as HTMLElement;
+      
+      // Skip Batal/Cancel buttons or elements with 'skip-enter' class
+      while (nextElement && (
+        nextElement.tagName === 'BUTTON' && 
+        (nextElement.textContent?.toLowerCase().includes('batal') || 
+         nextElement.textContent?.toLowerCase().includes('cancel') ||
+         nextElement.classList.contains('skip-enter'))
+      )) {
+        nextIndex++;
+        nextElement = form.elements[nextIndex] as HTMLElement;
+      }
       
       if (nextElement) {
         nextElement.focus();
