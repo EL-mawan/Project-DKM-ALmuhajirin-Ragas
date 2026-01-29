@@ -12,6 +12,7 @@ import {
 } from 'lucide-react'
 
 export const ADMIN_MENU_ITEMS = [
+  { icon: BarChart3, label: 'Dashboard', href: '/admin', roles: ['any'], color: 'text-emerald-500 bg-emerald-50 border-emerald-100' },
   { icon: Users, label: 'Manajemen User', href: '/admin/users', roles: ['Master Admin'], color: 'text-indigo-500 bg-indigo-50 border-indigo-100' },
   { icon: Building, label: 'Struktur DKM', href: '/admin/struktur', roles: ['Master Admin', 'Ketua DKM', 'Sekretaris DKM', 'RISMA (Remaja Islam)', 'Tokoh Masyarakat'], color: 'text-amber-500 bg-amber-50 border-amber-100' },
   { icon: Users, label: 'Data Jamaah', href: '/admin/jamaah', roles: ['Master Admin', 'Ketua DKM', 'Sekretaris DKM', 'RISMA (Remaja Islam)', 'Tokoh Masyarakat'], color: 'text-emerald-500 bg-emerald-50 border-emerald-100' },
