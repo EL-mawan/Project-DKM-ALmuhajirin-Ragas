@@ -100,56 +100,103 @@ export default function LaporanAdmin() {
       drawHeader(doc, logoImg)
 
       // --- 2. SUMMARY SECTION (Only on first page) ---
-      // Add Nama Periode Laporan (Title)
-      doc.setFontSize(14)
+      // Add Nama Periode Laporan (Title) - Reduced size
+      doc.setFontSize(11)
       doc.setTextColor(dkmSlate[0], dkmSlate[1], dkmSlate[2])
       doc.setFont('helvetica', 'bold')
       doc.text(data.title.toUpperCase(), centerX, 58, { align: 'center' })
       
-      doc.setFontSize(9)
+      doc.setFontSize(8)
       doc.setTextColor(148, 163, 184)
       doc.setFont('helvetica', 'normal')
-      doc.text(`Tahun ${new Date().getFullYear()}`, centerX, 65, { align: 'center' })
+      doc.text(`Tahun ${new Date().getFullYear()}`, centerX, 64, { align: 'center' })
       
       const dateStr = new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
-      doc.setFontSize(8)
+      doc.setFontSize(7)
       doc.setTextColor(100, 116, 139)
-      doc.text(`Ditetapkan: ${dateStr}`, centerX, 70, { align: 'center' })
+      doc.text(`Ditetapkan: ${dateStr}`, centerX, 68, { align: 'center' })
 
-      const cardY = 78
+      const cardY = 74
       const cardW = 58
-      const cardH = 30
+      const cardH = 28
       const startX = 13
 
+      // Income Card
       doc.setFillColor(240, 253, 244)
       doc.roundedRect(startX, cardY, cardW, cardH, 4, 4, 'F')
       doc.setFontSize(7)
       doc.setTextColor(16, 185, 129)
       doc.setFont('helvetica', 'bold')
       doc.text('TOTAL PEMASUKAN', startX + cardW/2, cardY + 10, { align: 'center' })
-      doc.setFontSize(12)
+      doc.setFontSize(11)
       doc.setTextColor(dkmEmerald[0], dkmEmerald[1], dkmEmerald[2])
       doc.text(`Rp ${data.totalIncome.toLocaleString('id-ID')}`, startX + cardW/2, cardY + 20, { align: 'center' })
 
+      // Expense Card
       doc.setFillColor(255, 241, 242)
       doc.roundedRect(startX + cardW + 3, cardY, cardW, cardH, 4, 4, 'F')
       doc.setFontSize(7)
       doc.setTextColor(dkmRose[0], dkmRose[1], dkmRose[2])
       doc.text('TOTAL PENGELUARAN', startX + cardW + 3 + cardW/2, cardY + 10, { align: 'center' })
-      doc.setFontSize(12)
+      doc.setFontSize(11)
       doc.setTextColor(dkmSlate[0], dkmSlate[1], dkmSlate[2])
       doc.text(`Rp ${data.totalExpense.toLocaleString('id-ID')}`, startX + cardW + 3 + cardW/2, cardY + 20, { align: 'center' })
 
+      // Balance Card
       doc.setFillColor(255, 251, 235)
       doc.roundedRect(startX + (cardW + 3) * 2, cardY, cardW, cardH, 4, 4, 'F')
       doc.setFontSize(7)
       doc.setTextColor(dkmOrange[0], dkmOrange[1], dkmOrange[2])
       doc.text('SALDO AKHIR', startX + (cardW + 3) * 2 + cardW/2, cardY + 10, { align: 'center' })
-      doc.setFontSize(12)
+      doc.setFontSize(11)
       doc.setTextColor(dkmSlate[0], dkmSlate[1], dkmSlate[2])
       doc.text(`Rp ${(data.totalIncome - data.totalExpense).toLocaleString('id-ID')}`, startX + (cardW + 3) * 2 + cardW/2, cardY + 20, { align: 'center' })
 
-      let currentY = cardY + cardH + 10
+      // --- 3. DETAILS SECTION (AUTO-PAGINATED) ---
+      let currentY = cardY + cardH + 12
+
+      // Section A: Pengeluaran
+      doc.setFontSize(10)
+      doc.setTextColor(dkmSlate[0], dkmSlate[1], dkmSlate[2])
+      doc.setFont('helvetica', 'bold')
+      doc.text('A. DATA PENGELUARAN', 15, currentY - 2)
+
+      // Table for Pengeluaran
+      autoTable(doc, {
+        startY: currentY,
+        head: [['No', 'Tanggal', 'Nama Barang', 'Kategori', 'Qty', 'Satuan', 'Harga', 'Total']],
+        body: txs.expense.length > 0 ? txs.expense.map((t: any, i: number) => [
+          i + 1,
+          new Date(t.date).toLocaleDateString('id-ID'),
+          t.itemName || '-',
+          t.category || '-',
+          t.qty || 1,
+          t.unitType || '-',
+          `Rp ${(t.unitPrice || t.amount).toLocaleString('id-ID')}`,
+          `Rp ${t.amount.toLocaleString('id-ID')}`
+        ]) : [['-', '-', 'Tidak ada data pengeluaran', '-', '-', '-', '-', 'Rp 0']],
+        margin: { top: 55, bottom: 25 },
+        didDrawPage: (dt) => {
+          drawHeader(doc, logoImg)
+        },
+        headStyles: { fillColor: [255, 241, 242], textColor: dkmRose, fontSize: 8, fontStyle: 'bold' },
+        styles: { fontSize: 8, cellPadding: 3 },
+        columnStyles: { 
+          0: { cellWidth: 10 },
+          4: { halign: 'center' },
+          6: { halign: 'right' },
+          7: { halign: 'right', fontStyle: 'bold' } 
+        }
+      })
+
+      currentY = (doc as any).lastAutoTable.finalY + 12
+      
+      // Section B: Pemasukan
+      doc.setFontSize(10)
+      doc.setTextColor(dkmSlate[0], dkmSlate[1], dkmSlate[2])
+      doc.setFont('helvetica', 'bold')
+      doc.text('B. DATA PEMASUKAN', 15, currentY - 2)
+
       // Table for Pemasukan
       autoTable(doc, {
         startY: currentY,
@@ -179,35 +226,13 @@ export default function LaporanAdmin() {
         }
       })
 
-      currentY = (doc as any).lastAutoTable.finalY + 10
-
-      // Table for Pengeluaran
-      autoTable(doc, {
-        startY: currentY,
-        head: [['No', 'Tanggal', 'Nama Barang', 'Kategori', 'Qty', 'Satuan', 'Harga', 'Total']],
-        body: txs.expense.length > 0 ? txs.expense.map((t: any, i: number) => [
-          i + 1,
-          new Date(t.date).toLocaleDateString('id-ID'),
-          t.itemName || '-',
-          t.category || '-',
-          t.qty || 1,
-          t.unitType || '-',
-          `Rp ${(t.unitPrice || t.amount).toLocaleString('id-ID')}`,
-          `Rp ${t.amount.toLocaleString('id-ID')}`
-        ]) : [['-', '-', 'Tidak ada data pengeluaran', '-', '-', '-', '-', 'Rp 0']],
-        margin: { top: 55, bottom: 25 },
-        didDrawPage: () => {
-          drawHeader(doc, logoImg)
-        },
-        headStyles: { fillColor: [255, 241, 242], textColor: dkmRose, fontSize: 8, fontStyle: 'bold' },
-        styles: { fontSize: 8, cellPadding: 3 },
-        columnStyles: { 
-          0: { cellWidth: 10 },
-          4: { halign: 'center' },
-          6: { halign: 'right' },
-          7: { halign: 'right', fontStyle: 'bold' } 
-        }
-      })
+      currentY = (doc as any).lastAutoTable.finalY + 15
+      
+      // Section C: Saldo Akhir Label
+      doc.setFontSize(10)
+      doc.setTextColor(dkmSlate[0], dkmSlate[1], dkmSlate[2])
+      doc.setFont('helvetica', 'bold')
+      doc.text('C. SALDO AKHIR', 15, currentY - 2)
 
       currentY = (doc as any).lastAutoTable.finalY + 15
       
@@ -223,13 +248,13 @@ export default function LaporanAdmin() {
       doc.text('Mengetahui,', 55, currentY, { align: 'center' })
       doc.text('Ketua DKM Al-Muhajirin', 55, currentY + 6, { align: 'center' })
       doc.setFont('helvetica', 'normal')
-      doc.text('(H. Agung Gunawan)', 55, currentY + 35, { align: 'center' })
+      doc.text('H. Agung Gunawan', 55, currentY + 35, { align: 'center' , fontStyle: 'underline'})
 
       doc.setFont('helvetica', 'bold')
       doc.text('Hormat kami,', pageWidth - 55, currentY, { align: 'center' })
       doc.text('Bendahara DKM', pageWidth - 55, currentY + 6, { align: 'center' })
       doc.setFont('helvetica', 'normal')
-      doc.text('(Lasturi)', pageWidth - 55, currentY + 35, { align: 'center' })
+      doc.text('Lasturi', pageWidth - 55, currentY + 35, { align: 'center' , fontStyle: 'underline' })
 
       const totalPages = doc.internal.pages.length - 1
       for (let i = 1; i <= totalPages; i++) {
