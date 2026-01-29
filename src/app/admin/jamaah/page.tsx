@@ -427,15 +427,6 @@ export default function JamaahAdmin() {
                 {activeTab === 'kk' && (
                   <div className="flex gap-2">
                     <Button
-                      variant={rtFilter === 'all' ? 'default' : 'outline'}
-                      size="sm"
-                      className="rounded-xl"
-                      onClick={() => setRtFilter('all')}
-                    >
-                      <Filter className="h-3 w-3 mr-1" />
-                      Semua
-                    </Button>
-                    <Button
                       variant={rtFilter === '015' ? 'default' : 'outline'}
                       size="sm"
                       className="rounded-xl"
@@ -482,7 +473,7 @@ export default function JamaahAdmin() {
                     <tr className="bg-gray-50/50 text-[10px] uppercase tracking-widest font-bold text-gray-400">
                       {activeTab === 'kk' ? (
                         <>
-                          <th className="px-8 py-5">No.</th>
+                          <th className="px-4 py-5 w-12 text-center">No.</th>
                           <th className="px-8 py-5">Nama</th>
                           <th className="px-8 py-5">Blok/Link</th>
                           <th className="px-8 py-5">Keterangan</th>
@@ -503,7 +494,7 @@ export default function JamaahAdmin() {
                       <tr key={item.id} className="hover:bg-gray-50/30 transition-colors group">
                         {activeTab === 'kk' ? (
                           <>
-                            <td className="px-8 py-6">
+                            <td className="px-4 py-6 text-center">
                               <div className="font-bold text-primary">{item.nomor}</div>
                             </td>
                             <td className="px-8 py-6">

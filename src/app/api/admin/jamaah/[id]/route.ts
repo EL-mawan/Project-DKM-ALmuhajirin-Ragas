@@ -127,6 +127,27 @@ export async function DELETE(
         return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
       }
       const deleted = await db.jamaahKepalaKeluarga.delete({ where: { id } })
+      
+      // SHIFT DOWN LOGIC: fill the gap
+      const toShift = await db.jamaahKepalaKeluarga.findMany({
+        where: { 
+          rt: deleted.rt, 
+          nomor: { gt: deleted.nomor } 
+        },
+        orderBy: { nomor: 'asc' }
+      })
+
+      for (const item of toShift) {
+        const currentNum = parseInt(item.nomor)
+        if (!isNaN(currentNum)) {
+          const nextVal = (currentNum - 1).toString().padStart(item.nomor.length || 3, '0')
+          await db.jamaahKepalaKeluarga.update({
+            where: { id: item.id },
+            data: { nomor: nextVal }
+          })
+        }
+      }
+
       await createAuditLog({
         userId: user.id,
         action: 'Hapus Data Keluarga: ' + deleted.name,

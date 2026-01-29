@@ -68,23 +68,137 @@ function BuatPersuratanContent() {
     namaAcara: '',
     penutup: 'Demikian surat undangan ini kami sampaikan, semoga dapat dikabulkan serta dapat dipahami, dan besar harapan kami semoga bapak pimpinan dapat merealisasikan undangan tersebut atas perhatiannya kami ucapkan terimakasih.',
     
-    // RAB (khusus proposal)
-    rabItems: [],
-    
-    // Proposal Specific Details
+    // --- PROPOSAL TABS STATE ---
     isiSuratPengantar: '',
     latarBelakang: '',
-    maksudTujuan: '',
+    maksudTujuanList: [] as string[],
     waktuTempatAktif: false,
+    
+    // Struktur
+    pelindungRW: '',
+    penasehatRT: '',
+    ketuaPemudaStruktur: '',
+    guruBesarStruktur: '',
+    ketuaPadepokanStruktur: '',
+    sekretarisStruktur: '',
+    bendaharaStruktur: '',
+    anggotaList: [] as string[],
 
-    // Tanda Tangan
-    tandaTangan1: 'Ketua Padepokan',
-    tandaTangan1Nama: '',
-    tandaTangan2: 'Sekretaris',
-    tandaTangan2Nama: '',
-    tandaTangan3: 'Guru Besar (Mengetahui)',
-    tandaTangan3Nama: ''
+    // RAB
+    rabItems: [] as { item: string, jumlah: string, harga: number, total: number }[],
+    lampiranFotos: [] as string[],
+    
+    // Penutup / Signatures
+    kalimatPenutup: 'Demikian proposal ini kami sampaikan. Atas perhatian dan kerjasamanya, kami ucapkan terima kasih.',
+    lokasiPenerbitan: 'Serang',
+    
+    // Signatures
+    ttdSekretarisDKM: '',
+    ttdKetuaDKM: '',
+    ttdBendaharaDKM: '',
+    ttdTokohMasyarakat: '',
+    ttdKetuaRT: '',
+    ttdKetuaRW: '',
+    ttdKetuaPemuda: '',
+    ttdGuruBesar: '',
+    ttdKetuaPadepokan: '',
+    ttdKetuaDPDBandrong: ''
   })
+
+  // Helper for RAB calculations
+  const totalRAB = formData.rabItems.reduce((acc, curr) => acc + curr.total, 0)
+
+  const addAnggota = () => {
+    setFormData({ ...formData, anggotaList: [...formData.anggotaList, ''] })
+  }
+
+  const updateAnggota = (index: number, val: string) => {
+    const newList = [...formData.anggotaList]
+    newList[index] = val
+    setFormData({ ...formData, anggotaList: newList })
+  }
+
+  const addRABItem = () => {
+    setFormData({ 
+      ...formData, 
+      rabItems: [...formData.rabItems, { item: '', jumlah: '', harga: 0, total: 0 }] 
+    })
+  }
+
+  const updateRABItem = (index: number, field: string, val: any) => {
+    const newItems = [...formData.rabItems]
+    newItems[index] = { ...newItems[index], [field]: val }
+    if (field === 'jumlah' || field === 'harga') {
+      const qty = parseFloat(newItems[index].jumlah) || 0
+      const price = parseFloat(val) || (field === 'harga' ? val : newItems[index].harga)
+      newItems[index].total = qty * price
+    }
+    setFormData({ ...formData, rabItems: newItems })
+  }
+
+
+  const downloadExcelTemplate = () => {
+    const csvContent = "data:text/csv;charset=utf-8,Nama Penerima,Jabatan / Komisi,Tempat\nFulan bin Fulan,Ketua DPD Bandrong,Serang";
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "template_penerima.csv");
+    document.body.appendChild(link);
+    link.click();
+    toast.info("Template CSV berhasil diunduh.")
+  }
+
+  const handleExcelUpload = () => {
+    // Mock logic for parsing
+    toast.success("File Excel berhasil diunggah (Data Terolah).")
+    setFormData(prev => ({
+      ...prev,
+      penerimaNama: "H. Ahmad Sodik",
+      penerimaJabatan: "Camat Puloampel",
+      penerimaLokasi: "Kecamatan Puloampel"
+    }))
+  }
+
+  const addMaksudTujuan = () => {
+    setFormData(prev => ({ ...prev, maksudTujuanList: [...prev.maksudTujuanList, ''] }))
+  }
+
+  const updateMaksudTujuan = (idx: number, val: string) => {
+    const newList = [...formData.maksudTujuanList]
+    newList[idx] = val
+    setFormData({ ...formData, maksudTujuanList: newList })
+  }
+
+  const removeMaksudTujuan = (idx: number) => {
+    setFormData(prev => ({ ...prev, maksudTujuanList: prev.maksudTujuanList.filter((_, i) => i !== idx) }))
+  }
+
+  const applyPenerimaTemplate = () => {
+    setFormData(prev => ({
+      ...prev,
+      penerimaNama: 'Kepala Desa Argawana',
+      penerimaJabatan: 'Pemerintah Desa',
+      penerimaLokasi: 'Kantor Desa Argawana'
+    }))
+    toast.success("Template Penerima Desa diterapkan!")
+  }
+
+  // --- AI RECOMMENDATION LOGIC ---
+  const applyAIRecommend = (field: string) => {
+    const templates: Record<string, string | string[]> = {
+      isiSuratPengantar: "Bersama dengan surat ini, kami selaku pengurus DKM Al-Muhajirin bermaksud untuk mengajukan permohonan dukungan dan bantuan dana untuk kegiatan yang akan kami laksanakan. Semoga bapak/ibu dapat memberikan dukungan positif demi kelancaran kegiatan tersebut.",
+      latarBelakang: "Sehubungan dengan meningkatnya kebutuhan akan sarana ibadah yang memadai dan upaya untuk meningkatkan ukhuwah islamiyah di lingkungan Kp. Ragas Grenyang, maka kami memandang perlu untuk mengadakan kegiatan/pembangunan ini sebagai bagian dari program kerja tahunan DKM Al-Muhajirin.",
+      maksudTujuan: ["Meningkatkan kualitas sarana ibadah", "Mempererat tali silaturahmi antar jamaah", "Menciptakan lingkungan yang religius dan nyaman"],
+      kalimatPenutup: "Demikian proposal ini kami susun dengan harapan mendapatkan pertimbangan dan dukungan dari Bapak/Ibu. Atas perhatian dan kerjasamanya kami haturkan terima kasih yang sebesar-besarnya. Semoga Allah SWT membalas segala bentuk kebaikan Bapak/Ibu dengan pahala yang berlipat ganda."
+    }
+
+    if (field === 'maksudTujuan') {
+      setFormData(prev => ({ ...prev, maksudTujuanList: templates[field] as string[] }))
+    } else {
+      setFormData(prev => ({ ...prev, [field]: templates[field] }))
+    }
+    toast.success(`Rekomendasi AI untuk ${field} diterapkan!`)
+  }
 
   const handleSubmit = async () => {
     try {
@@ -125,77 +239,142 @@ function BuatPersuratanContent() {
     const centerX = pageWidth / 2
     const mLeft = 20
 
-    // --- KOP SURAT ---
-    doc.setFontSize(14)
-    doc.setFont('times', 'bold')
-    doc.setTextColor(0, 0, 0)
+    // --- KOP SURAT (TIMES NEW ROMAN) ---
+    doc.setFont('times', 'bold').setFontSize(14)
     const titleLines = doc.splitTextToSize(formData.namaKopSurat, 170)
     doc.text(titleLines, centerX, 20, { align: 'center' })
     
-    doc.setFontSize(8)
-    doc.setFont('times', 'normal')
+    doc.setFontSize(8).setFont('times', 'normal')
     const addressLines = doc.splitTextToSize(formData.alamatKopSurat, 170)
     doc.text(addressLines, centerX, 30, { align: 'center' })
 
     const contactY = 30 + (addressLines.length * 4) + 2
-    doc.setFont('times', 'italic')
-    doc.text(formData.kontakKopSurat, centerX, contactY, { align: 'center' })
-
+    doc.setFont('times', 'italic').text(formData.kontakKopSurat, centerX, contactY, { align: 'center' })
     const lineY = contactY + 3
-    doc.setLineWidth(1)
-    doc.line(mLeft, lineY, pageWidth - mLeft, lineY)
+    doc.setLineWidth(0.8).line(mLeft, lineY, pageWidth - mLeft, lineY)
 
-    // --- INFO ---
+    // --- INFO & RECIPIENT ---
     let curY = lineY + 15
-    doc.setFontSize(11)
-    doc.setFont('times', 'normal')
-
+    doc.setFontSize(11).setFont('times', 'normal')
     doc.text(`No      : ${formData.nomorSurat}`, mLeft, curY)
     doc.text(`Perihal : ${formData.perihal}`, mLeft, curY + 6)
     doc.text(`${formData.tempatSurat}, ${new Date(formData.tanggalSurat).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}`, pageWidth - mLeft, curY, { align: 'right' })
 
-    // --- RECIPIENT ---
     curY += 20
     doc.text('Kepada Yth.', mLeft, curY)
-    doc.setFont('times', 'bold')
-    doc.text(formData.penerimaNama, mLeft, curY + 6)
-    doc.setFont('times', 'normal')
-    doc.text('di -', mLeft, curY + 12)
-    doc.text(formData.penerimaLokasi, mLeft + 10, curY + 18)
+    doc.setFont('times', 'bold').text(formData.penerimaNama || '........................', mLeft, curY + 6)
+    doc.setFont('times', 'normal').text('di -', mLeft, curY + 12)
+    doc.text(formData.penerimaLokasi || 'Tempat', mLeft + 10, curY + 18)
+
+    curY += 30
 
     if (type === 'PROPOSAL') {
       // PAGE 1: SURAT PENGANTAR
-      // (Header and Info already there)
-      const pengantarLines = doc.splitTextToSize(formData.isiSuratPengantar || '[Isi Surat Pengantar Belum Diisi]', 170)
+      doc.setFont('times', 'normal')
+      const pengantarLines = doc.splitTextToSize(formData.isiSuratPengantar || '[Isi Surat Pengantar]', 170)
       doc.text(pengantarLines, mLeft, curY)
       
-      // Signature Page 1
-      const sigY1 = 200
-      doc.text(formData.tandaTangan1, mLeft + 20, sigY1, { align: 'center' })
-      doc.text(formData.tandaTangan1Nama || '........................', mLeft + 20, sigY1 + 25, { align: 'center' })
-      doc.text(formData.tandaTangan2, pageWidth - mLeft - 20, sigY1, { align: 'center' })
-      doc.text(formData.tandaTangan2Nama || '........................', pageWidth - mLeft - 20, sigY1 + 25, { align: 'center' })
+      // SIGNATURES ON PAGE 1
+      const sigY1 = 225
+      doc.setFont('times', 'bold').text('Hormat Kami,', mLeft + 40, sigY1 - 10, { align: 'center' })
+      
+      // Sekretaris and Ketua side by side
+      doc.text('Sekretaris DKM', mLeft + 40, sigY1, { align: 'center' })
+      doc.text(formData.ttdSekretarisDKM || '........................', mLeft + 40, sigY1 + 30, { align: 'center' })
+      
+      doc.text('Ketua DKM', pageWidth - mLeft - 40, sigY1, { align: 'center' })
+      doc.text(formData.ttdKetuaDKM || '........................', pageWidth - mLeft - 40, sigY1 + 30, { align: 'center' })
       
       // PAGE 2: PENDAHULUAN
       doc.addPage()
-      // Copy Header to Page 2
-      doc.setFontSize(14).setFont('times', 'bold').text(formData.namaKopSurat, centerX, 20, { align: 'center' })
-      doc.setLineWidth(1).line(mLeft, 35, pageWidth - mLeft, 35)
+      doc.setFont('times', 'bold').setFontSize(14).text(formData.namaKopSurat, centerX, 20, { align: 'center' })
+      doc.setLineWidth(0.5).line(mLeft, 25, pageWidth - mLeft, 25)
       
-      doc.setFontSize(12).text('I. PENDAHULUAN', mLeft, 50)
-      doc.setFontSize(11).setFont('times', 'bold').text('A. Latar Belakang', mLeft, 60)
-      doc.setFont('times', 'normal')
-      const latarLines = doc.splitTextToSize(formData.latarBelakang || '...', 170)
-      doc.text(latarLines, mLeft, 65)
+      let p2Y = 40
+      doc.setFontSize(12).setFont('times', 'bold').text('I. PENDAHULUAN', mLeft, p2Y)
+      doc.setFontSize(11).setFont('times', 'bold').text('A. Latar Belakang', mLeft, p2Y + 10)
+      doc.setFontSize(10).setFont('times', 'normal')
+      const p2LatarLines = doc.splitTextToSize(formData.latarBelakang || '...', 170)
+      doc.text(p2LatarLines, mLeft, p2Y + 16)
       
-      const maksudY = 65 + (latarLines.length * 5) + 10
-      doc.setFont('times', 'bold').text('B. Maksud Dan Tujuan', mLeft, maksudY)
-      doc.setFont('times', 'normal')
-      const maksudLines = doc.splitTextToSize(formData.maksudTujuan || '...', 170)
-      doc.text(maksudLines, mLeft, maksudY + 5)
+      p2Y += 30 + (p2LatarLines.length * 5)
+      doc.setFont('times', 'bold').text('B. Maksud Dan Tujuan', mLeft, p2Y)
+      doc.setFontSize(10).setFont('times', 'normal')
+      
+      formData.maksudTujuanList.forEach((point, idx) => {
+        const pointText = `${idx + 1}. ${point}`
+        const pointLines = doc.splitTextToSize(pointText, 160)
+        doc.text(pointLines, mLeft + 5, p2Y + 10 + (idx * 8))
+      })
+
+      // PAGE 3: STRUKTUR & RAB
+      doc.addPage()
+      doc.setFont('times', 'bold').setFontSize(12).text('II. STRUKTUR ORGANISASI', mLeft, 20)
+      doc.setFontSize(10).setFont('times', 'normal')
+      doc.text(`Pelindung (RW) : ${formData.pelindungRW}`, mLeft + 5, 30)
+      doc.text(`Penasehat (RT) : ${formData.penasehatRT}`, mLeft + 5, 35)
+      doc.text(`Ketua Pemuda   : ${formData.ketuaPemudaStruktur}`, mLeft + 5, 40)
+      
+      doc.setFont('times', 'bold').text('III. ANGGARAN BIAYA (RAB)', mLeft, 60)
+      let tableY = 70
+      doc.setFont('times', 'bold').text('Item', mLeft, tableY)
+      doc.text('Total', pageWidth - mLeft, tableY, { align: 'right' })
+      doc.line(mLeft, tableY + 2, pageWidth - mLeft, tableY + 2)
+      
+      formData.rabItems.forEach((item) => {
+        tableY += 8
+        doc.setFont('times', 'normal').text(item.item || '-', mLeft, tableY)
+        doc.text(`Rp ${item.total.toLocaleString('id-ID')}`, pageWidth - mLeft, tableY, { align: 'right' })
+      })
+      doc.line(mLeft, tableY + 2, pageWidth - mLeft, tableY + 2)
+      doc.setFont('times', 'bold').text('Total Estimasi', mLeft, tableY + 10)
+      doc.text(`Rp ${totalRAB.toLocaleString('id-ID')}`, pageWidth - mLeft, tableY + 10, { align: 'right' })
+
+      // PAGE 4: PENUTUP & SIGNATURES
+      doc.addPage()
+      doc.setFont('times', 'bold').setFontSize(12).text('IV. PENUTUP', mLeft, 20)
+      doc.setFontSize(11).setFont('times', 'normal')
+      const penutupLines = doc.splitTextToSize(formData.kalimatPenutup, 170)
+      doc.text(penutupLines, mLeft, 30)
+      
+      let sigStartYa = 60
+      doc.text(`${formData.lokasiPenerbitan}, ${new Date(formData.tanggalSurat).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}`, pageWidth - mLeft, sigStartYa, { align: 'right' })
+      
+      sigStartYa += 15
+      // Row 1: Sekretaris & Ketua
+      doc.setFont('times', 'bold')
+      doc.text('Sekretaris DKM', mLeft + 40, sigStartYa, { align: 'center' })
+      doc.text(formData.ttdSekretarisDKM || '........................', mLeft + 40, sigStartYa + 30, { align: 'center' })
+      
+      doc.text('Ketua DKM', pageWidth - mLeft - 40, sigStartYa, { align: 'center' })
+      doc.text(formData.ttdKetuaDKM || '........................', pageWidth - mLeft - 40, sigStartYa + 30, { align: 'center' })
+      
+      sigStartYa += 50
+      // Row 2: Bendahara & optional Tokoh Masyarakat
+      doc.text('Bendahara DKM', mLeft + 40, sigStartYa, { align: 'center' })
+      doc.text(formData.ttdBendaharaDKM || '........................', mLeft + 40, sigStartYa + 30, { align: 'center' })
+      
+      if (formData.ttdTokohMasyarakat) {
+        doc.text('Mengetahui,', pageWidth - mLeft - 40, sigStartYa - 8, { align: 'center' })
+        doc.setFontSize(9).text('Tokoh Masyarakat Masjid Al-Muhajirin', pageWidth - mLeft - 40, sigStartYa, { align: 'center' })
+        doc.setFontSize(11).text(formData.ttdTokohMasyarakat, pageWidth - mLeft - 40, sigStartYa + 30, { align: 'center' })
+      }
+
+      // Row 3: Optional RT/RW/Pemuda
+      sigStartYa += 50
+      if (formData.ttdKetuaRW || formData.ttdKetuaRT) {
+        if (formData.ttdKetuaRW) {
+          doc.text('Ketua RW', mLeft + 40, sigStartYa, { align: 'center' })
+          doc.text(formData.ttdKetuaRW, mLeft + 40, sigStartYa + 30, { align: 'center' })
+        }
+        if (formData.ttdKetuaRT) {
+          doc.text('Ketua RT', pageWidth - mLeft - 40, sigStartYa, { align: 'center' })
+          doc.text(formData.ttdKetuaRT, pageWidth - mLeft - 40, sigStartYa + 30, { align: 'center' })
+        }
+      }
+
     } else {
-      // ... existing content for UNDANGAN/SURAT ...
-      curY += 30
+      doc.setFont('times', 'normal')
       const pembukaLines = doc.splitTextToSize(formData.pembuka, 170)
       doc.text(pembukaLines, mLeft, curY)
       curY += (pembukaLines.length * 5) + 5
@@ -212,18 +391,26 @@ function BuatPersuratanContent() {
       doc.text(penutupLines, mLeft, curY)
       curY += (penutupLines.length * 5) + 20
 
-      // --- SIGNATURES ---
+      // SIGNATURES for Undangan/Official
       const sigY = curY
-      doc.text(formData.tandaTangan1, mLeft + 20, sigY, { align: 'center' })
-      doc.text(formData.tandaTangan1Nama || '........................', mLeft + 20, sigY + 25, { align: 'center' })
+      doc.setFont('times', 'bold')
+      doc.text('Sekretaris DKM', mLeft + 40, sigY, { align: 'center' })
+      doc.text(formData.ttdSekretarisDKM || '........................', mLeft + 40, sigY + 25, { align: 'center' })
       
-      doc.text(formData.tandaTangan2, pageWidth - mLeft - 20, sigY, { align: 'center' })
-      doc.text(formData.tandaTangan2Nama || '........................', pageWidth - mLeft - 20, sigY + 25, { align: 'center' })
-
-      if (formData.tandaTangan3Nama) {
-        doc.text('Mengetahui,', centerX, sigY + 35, { align: 'center' })
-        doc.text(formData.tandaTangan3, centerX, sigY + 41, { align: 'center' })
-        doc.text(formData.tandaTangan3Nama, centerX, sigY + 65, { align: 'center' })
+      doc.text('Ketua DKM', pageWidth - mLeft - 40, sigY, { align: 'center' })
+      doc.text(formData.ttdKetuaDKM || '........................', pageWidth - mLeft - 40, sigY + 25, { align: 'center' })
+      
+      if (formData.ttdBendaharaDKM || formData.ttdTokohMasyarakat) {
+        const sigY2 = sigY + 45
+        if (formData.ttdBendaharaDKM) {
+          doc.text('Bendahara DKM', mLeft + 40, sigY2, { align: 'center' })
+          doc.text(formData.ttdBendaharaDKM, mLeft + 40, sigY2 + 25, { align: 'center' })
+        }
+        if (formData.ttdTokohMasyarakat) {
+          doc.text('Mengetahui,', pageWidth - mLeft - 40, sigY2 - 8, { align: 'center' })
+          doc.setFontSize(9).text('Tokoh Masyarakat Masjid Al-Muhajirin', pageWidth - mLeft - 40, sigY2, { align: 'center' })
+          doc.setFontSize(11).text(formData.ttdTokohMasyarakat, pageWidth - mLeft - 40, sigY2 + 25, { align: 'center' })
+        }
       }
     }
 
@@ -322,28 +509,32 @@ function BuatPersuratanContent() {
                         <h3 className="text-sm font-black text-purple-900 uppercase tracking-widest">Tujuan / Penerima Proposal</h3>
                       </div>
 
-                      <div className="p-6 rounded-2xl bg-slate-50/50 border border-slate-100 mb-6 flex flex-col items-center justify-center text-center">
-                        <p className="text-[10px] font-bold text-slate-500 uppercase mb-4">Import Data Penerima (Excel)</p>
+                      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-100 pb-6 mb-8">
+                        <div>
+                          <p className="text-[10px] font-black text-slate-500 uppercase">Import Data Penerima</p>
+                          <p className="text-[9px] text-slate-400 mt-0.5">Automasi pengisian data penerima dari Excel/Template.</p>
+                        </div>
                         <div className="flex gap-2">
-                          <Button variant="outline" size="sm" className="h-9 rounded-xl border-slate-200 text-slate-600 text-[10px] font-bold uppercase"><Layout className="h-3 w-3 mr-2" /> Template</Button>
-                          <Button size="sm" className="h-9 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-[10px] font-bold uppercase"><Upload className="h-3 w-3 mr-2" /> Upload Excel</Button>
+                          <Button onClick={downloadExcelTemplate} variant="outline" size="sm" className="h-9 rounded-xl border-slate-200 text-slate-600 text-[10px] font-black uppercase"><Layout className="h-3 w-3 mr-2" /> Template</Button>
+                          <Button onClick={applyPenerimaTemplate} variant="outline" size="sm" className="h-9 rounded-xl border-purple-200 text-purple-600 text-[10px] font-black uppercase"><Users className="h-3 w-3 mr-2" /> Pakai Template DKM</Button>
+                          <Button onClick={handleExcelUpload} size="sm" className="h-9 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-[10px] font-black uppercase shadow-lg shadow-emerald-100"><Upload className="h-3 w-3 mr-2" /> Upload Excel</Button>
                         </div>
                       </div>
 
-                      <div className="space-y-4">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div className="space-y-2">
-                            <Label className="text-[9px] uppercase font-bold text-slate-400">Nama Penerima</Label>
-                            <Input className="h-11 rounded-xl bg-slate-50 border-slate-100" value={formData.penerimaNama} onChange={e => setFormData({...formData, penerimaNama: e.target.value})} />
-                          </div>
-                          <div className="space-y-2">
-                            <Label className="text-[9px] uppercase font-bold text-slate-400">Jabatan / Komisi</Label>
-                            <Input className="h-11 rounded-xl bg-slate-50 border-slate-100" value={formData.penerimaJabatan} onChange={e => setFormData({...formData, penerimaJabatan: e.target.value})} />
-                          </div>
+                      <div className="space-y-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                           <div className="space-y-2">
+                             <Label className="text-[9px] uppercase font-black text-slate-400 tracking-widest">Nama / Instansi Penerima</Label>
+                             <Input placeholder="Yth. Bapak Kepala Desa..." className="h-12 rounded-xl bg-slate-50/50 border-slate-100 font-bold focus:bg-white transition-colors" value={formData.penerimaNama} onChange={e => setFormData({...formData, penerimaNama: e.target.value})} />
+                           </div>
+                           <div className="space-y-2">
+                             <Label className="text-[9px] uppercase font-black text-slate-400 tracking-widest">Jabatan / Komisi</Label>
+                             <Input placeholder="Ketua Panitia / Kepala Bagian..." className="h-12 rounded-xl bg-slate-50/50 border-slate-100 font-bold focus:bg-white transition-colors" value={formData.penerimaJabatan} onChange={e => setFormData({...formData, penerimaJabatan: e.target.value})} />
+                           </div>
                         </div>
                         <div className="space-y-2">
-                          <Label className="text-[9px] uppercase font-bold text-slate-400">Tempat / Domisili</Label>
-                          <Input className="h-11 rounded-xl bg-slate-50 border-slate-100" value={formData.penerimaLokasi} onChange={e => setFormData({...formData, penerimaLokasi: e.target.value})} />
+                          <Label className="text-[9px] uppercase font-black text-slate-400 tracking-widest">Tempat / Alamat Tujuan</Label>
+                          <Input placeholder="Kp. Ragas Grenyang, Argawana..." className="h-12 rounded-xl bg-slate-50/50 border-slate-100 font-bold focus:bg-white transition-colors text-xs" value={formData.penerimaLokasi} onChange={e => setFormData({...formData, penerimaLokasi: e.target.value})} />
                         </div>
                       </div>
                     </Card>
@@ -376,7 +567,7 @@ function BuatPersuratanContent() {
                     <div className="space-y-4">
                       <div className="flex items-center justify-between">
                         <Label className="text-xs font-black uppercase text-slate-600">Isi Surat Pengantar</Label>
-                        <Button variant="ghost" size="sm" className="h-7 text-purple-600 font-bold text-[10px] uppercase hover:bg-purple-50"><MessageSquare className="h-3 w-3 mr-2" /> Rekomendasi AI</Button>
+                        <Button onClick={() => applyAIRecommend('isiSuratPengantar')} variant="ghost" size="sm" className="h-7 text-purple-600 font-bold text-[10px] uppercase hover:bg-purple-50"><MessageSquare className="h-3 w-3 mr-2" /> Rekomendasi AI</Button>
                       </div>
                       <Textarea placeholder="Tulislah isi surat pengantar..." className="min-h-[160px] rounded-[1.5rem] border-slate-200 p-6" value={formData.isiSuratPengantar} onChange={e => setFormData({...formData, isiSuratPengantar: e.target.value})} />
                     </div>
@@ -385,7 +576,7 @@ function BuatPersuratanContent() {
                     <div className="space-y-4">
                       <div className="flex items-center justify-between">
                         <Label className="text-xs font-black uppercase text-slate-600">Narasi Latar Belakang</Label>
-                        <Button variant="ghost" size="sm" className="h-7 text-purple-600 font-bold text-[10px] uppercase hover:bg-purple-50"><MessageSquare className="h-3 w-3 mr-2" /> Rekomendasi AI</Button>
+                        <Button onClick={() => applyAIRecommend('latarBelakang')} variant="ghost" size="sm" className="h-7 text-purple-600 font-bold text-[10px] uppercase hover:bg-purple-50"><MessageSquare className="h-3 w-3 mr-2" /> Rekomendasi AI</Button>
                       </div>
                       <Textarea placeholder="Tulislah alasan permohonan ini diajukan..." className="min-h-[120px] rounded-[1.5rem] border-slate-200 p-6" value={formData.latarBelakang} onChange={e => setFormData({...formData, latarBelakang: e.target.value})} />
                     </div>
@@ -395,12 +586,29 @@ function BuatPersuratanContent() {
                       <div className="flex items-center justify-between">
                         <Label className="text-xs font-black uppercase text-slate-600">Maksud dan Tujuan (Poin Ringkas)</Label>
                         <div className="flex gap-2">
-                          <Button variant="ghost" size="sm" className="h-7 text-purple-600 font-bold text-[10px] uppercase hover:bg-purple-50"><MessageSquare className="h-3 w-3 mr-2" /> AI Suggesi</Button>
-                          <Button variant="ghost" size="sm" className="h-7 text-emerald-600 font-bold text-[10px] uppercase hover:bg-emerald-50"><Plus className="h-3 w-3 mr-2" /> Tambah Manual</Button>
+                          <Button onClick={() => applyAIRecommend('maksudTujuan')} variant="ghost" size="sm" className="h-7 text-purple-600 font-bold text-[10px] uppercase hover:bg-purple-50"><MessageSquare className="h-3 w-3 mr-2" /> AI Suggesi</Button>
+                          <Button onClick={addMaksudTujuan} variant="ghost" size="sm" className="h-7 text-emerald-600 font-bold text-[10px] uppercase hover:bg-emerald-50"><Plus className="h-3 w-3 mr-2" /> Tambah Manual</Button>
                         </div>
                       </div>
-                      <div className="h-12 border-2 border-dashed border-slate-200 rounded-xl flex items-center justify-center text-slate-400 text-[10px] font-bold uppercase italic">
-                        Belum ada poin ditambahkan
+                      <div className="space-y-3">
+                        {formData.maksudTujuanList.map((item, idx) => (
+                           <div key={idx} className="flex gap-2 animate-in fade-in slide-in-from-top-1">
+                              <Input 
+                                 className="h-10 rounded-xl bg-white border-slate-100 text-xs font-bold" 
+                                 placeholder={`Poin ${idx + 1}...`}
+                                 value={item}
+                                 onChange={(e) => updateMaksudTujuan(idx, e.target.value)}
+                              />
+                              <Button onClick={() => removeMaksudTujuan(idx)} variant="ghost" size="icon" className="h-10 w-10 text-rose-500 hover:bg-rose-50 rounded-xl">
+                                 <Plus className="h-4 w-4 rotate-45" />
+                              </Button>
+                           </div>
+                        ))}
+                        {formData.maksudTujuanList.length === 0 && (
+                          <div className="h-20 border-2 border-dashed border-slate-100 rounded-[2rem] flex items-center justify-center text-slate-300 text-[10px] font-black uppercase italic tracking-widest bg-slate-50/50">
+                            Belum ada poin ditambahkan
+                          </div>
+                        )}
                       </div>
                     </div>
 
@@ -432,8 +640,332 @@ function BuatPersuratanContent() {
                       </Button>
                     </div>
                   </TabsContent>
+
+                  {/* TAB: Struktur */}
+                  <TabsContent value="struktur" className="mt-6 space-y-12">
+                    {/* Section: Board of Directors / Pimpinan Utama */}
+                    <div className="relative">
+                      <div className="absolute left-1/2 top-0 bottom-0 w-px bg-slate-100 hidden md:block" />
+                      
+                      <div className="space-y-8 relative">
+                        <div className="flex flex-col items-center mb-10">
+                          <div className="h-12 w-12 rounded-[1.5rem] bg-indigo-600 text-white flex items-center justify-center shadow-lg shadow-indigo-100 mb-4 animate-bounce">
+                            <Users className="h-6 w-6" />
+                          </div>
+                          <h3 className="text-xl font-black text-slate-800 tracking-tight uppercase tracking-[0.2em] text-center">Pimpinan Utama</h3>
+                          <p className="text-[10px] text-slate-400 font-bold uppercase mt-1">Penanggung Jawab & Penasehat</p>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                          <div className="p-8 rounded-[2.5rem] bg-white border-2 border-slate-50 shadow-sm hover:border-indigo-100 transition-colors group">
+                             <div className="flex items-center gap-4 mb-6">
+                               <div className="h-10 w-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+                                 <CheckSquare className="h-5 w-5" />
+                               </div>
+                               <div>
+                                 <Label className="text-[10px] uppercase font-black text-slate-400 tracking-widest block">Pelindung</Label>
+                                 <span className="text-[9px] font-bold text-indigo-400 uppercase tracking-wider">Ketua RW 03</span>
+                               </div>
+                             </div>
+                             <Input className="h-14 rounded-2xl bg-slate-50/50 border-none font-black text-sm px-6 focus:bg-white" placeholder="Nama Pelindung (RW)..." value={formData.pelindungRW} onChange={e => setFormData({...formData, pelindungRW: e.target.value})} />
+                          </div>
+
+                          <div className="p-8 rounded-[2.5rem] bg-white border-2 border-slate-50 shadow-sm hover:border-indigo-100 transition-colors group">
+                             <div className="flex items-center gap-4 mb-6">
+                               <div className="h-10 w-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center group-hover:bg-amber-600 group-hover:text-white transition-colors">
+                                 <PenTool className="h-5 w-5" />
+                               </div>
+                               <div>
+                                 <Label className="text-[10px] uppercase font-black text-slate-400 tracking-widest block">Penasehat</Label>
+                                 <span className="text-[9px] font-bold text-amber-400 uppercase tracking-wider">Ketua RT 02</span>
+                               </div>
+                             </div>
+                             <Input className="h-14 rounded-2xl bg-slate-50/50 border-none font-black text-sm px-6 focus:bg-white" placeholder="Nama Penasehat (RT)..." value={formData.penasehatRT} onChange={e => setFormData({...formData, penasehatRT: e.target.value})} />
+                          </div>
+                        </div>
+
+                        <div className="max-w-md mx-auto p-8 rounded-[2.5rem] bg-white border-2 border-slate-50 shadow-sm hover:border-emerald-100 transition-colors group">
+                           <div className="flex items-center gap-4 mb-6">
+                             <div className="h-10 w-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:bg-emerald-600 group-hover:text-white transition-colors">
+                               <Users className="h-5 w-5" />
+                             </div>
+                             <div>
+                               <Label className="text-[10px] uppercase font-black text-slate-400 tracking-widest block">Ketua Pemuda</Label>
+                               <span className="text-[9px] font-bold text-emerald-400 uppercase tracking-wider">Koordinator Lapangan</span>
+                             </div>
+                           </div>
+                           <Input className="h-14 rounded-2xl bg-slate-50/50 border-none font-black text-sm px-6 focus:bg-white" placeholder="Nama Ketua Pemuda..." value={formData.ketuaPemudaStruktur} onChange={e => setFormData({...formData, ketuaPemudaStruktur: e.target.value})} />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Section: Operational Core / Pengurus Harian */}
+                    <div className="pt-12 border-t-2 border-dashed border-slate-100">
+                      <div className="flex flex-col items-center mb-10">
+                        <div className="h-12 w-12 rounded-[1.5rem] bg-blue-600 text-white flex items-center justify-center shadow-lg shadow-blue-100 mb-4">
+                          <Layout className="h-6 w-6" />
+                        </div>
+                        <h3 className="text-xl font-black text-slate-800 tracking-tight uppercase tracking-[0.2em] text-center">Pengurus Harian</h3>
+                        <p className="text-[10px] text-slate-400 font-bold uppercase mt-1">Administrasi & Keuangan</p>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="p-6 rounded-[2rem] bg-white border border-slate-100 shadow-sm space-y-4">
+                           <Label className="text-[9px] uppercase font-black text-slate-300 tracking-[0.3em] block text-center italic">Sekretaris Utama</Label>
+                           <Input className="h-12 rounded-2xl bg-slate-50/80 border-none font-bold text-center text-xs" placeholder="Nama Sekretaris..." value={formData.sekretarisStruktur} onChange={e => setFormData({...formData, sekretarisStruktur: e.target.value})} />
+                        </div>
+                        <div className="p-6 rounded-[2rem] bg-white border border-slate-100 shadow-sm space-y-4">
+                           <Label className="text-[9px] uppercase font-black text-slate-300 tracking-[0.3em] block text-center italic">Bendahara Utama</Label>
+                           <Input className="h-12 rounded-2xl bg-slate-50/80 border-none font-bold text-center text-xs" placeholder="Nama Bendahara..." value={formData.bendaharaStruktur} onChange={e => setFormData({...formData, bendaharaStruktur: e.target.value})} />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Section: Divisi Operasional (Anggota) */}
+                    <div className="pt-12 space-y-8">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="h-10 w-10 rounded-[1.2rem] bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                            <Plus className="h-5 w-5" />
+                          </div>
+                          <div>
+                            <h3 className="text-lg font-black text-slate-800 tracking-tight">Divisi Operasional</h3>
+                            <p className="text-[10px] text-slate-400 font-bold uppercase italic">Anggota Pelaksana Lapangan</p>
+                          </div>
+                        </div>
+                        <Button variant="outline" size="sm" onClick={addAnggota} className="rounded-full border-emerald-100 text-emerald-600 font-black uppercase text-[9px] px-6 h-9 hover:bg-emerald-50">
+                          <Plus className="h-3 w-3 mr-2" /> Tambah Anggota
+                        </Button>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                        {formData.anggotaList.map((item, idx) => (
+                           <div key={idx} className="relative group animate-in zoom-in-95 duration-200">
+                             <Input 
+                                placeholder={`Anggota ${idx + 1}`} 
+                                className="bg-white rounded-2xl h-12 border-slate-100 shadow-sm font-bold text-xs pl-12 focus:ring-2 focus:ring-emerald-500/20"
+                                value={item}
+                                onChange={(e) => updateAnggota(idx, e.target.value)}
+                             />
+                             <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-200 font-black italic text-sm group-hover:text-emerald-500 transition-colors">
+                               {String(idx + 1).padStart(2, '0')}
+                             </div>
+                           </div>
+                        ))}
+                        {formData.anggotaList.length === 0 && (
+                          <div className="col-span-full h-24 border-2 border-dashed border-slate-100 rounded-[2.5rem] flex items-center justify-center text-slate-300 text-[10px] font-black uppercase italic tracking-widest bg-slate-50/50">
+                            Belum ada anggota divisi ditambahkan
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="flex justify-between pt-10 border-t border-slate-100">
+                      <Button variant="ghost" onClick={() => setActiveTab('umum')} className="text-slate-400 group font-black uppercase text-[10px] tracking-widest">
+                        <ArrowLeft className="h-4 w-4 mr-2 group-hover:-translate-x-1 transition-transform" /> Kembali
+                      </Button>
+                      <Button onClick={() => setActiveTab('rab')} className="h-12 px-10 rounded-full bg-linear-to-r from-indigo-600 to-blue-600 text-white font-black uppercase tracking-widest text-[10px] hover:shadow-xl hover:shadow-indigo-100 group transition-all">
+                        Lanjut ke RAB <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                      </Button>
+                    </div>
+                  </TabsContent>
+
+                  {/* TAB: RAB */}
+                  <TabsContent value="rab" className="mt-6 space-y-12">
+                     {/* Summary Card */}
+                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <Card className="col-span-2 rounded-[2.5rem] bg-indigo-600 p-8 shadow-xl shadow-indigo-100 flex items-center justify-between text-white overflow-hidden relative">
+                           <div className="absolute top-0 right-0 h-full w-48 bg-white/10 skew-x-[30deg] translate-x-12" />
+                           <div className="relative">
+                              <p className="text-[10px] font-black uppercase tracking-[0.3em] opacity-70 mb-2">Total Estimasi Anggaran</p>
+                              <h2 className="text-4xl font-black tracking-tight">IDR {totalRAB.toLocaleString('id-ID')}</h2>
+                           </div>
+                           <div className="h-16 w-16 rounded-[1.5rem] bg-white/20 flex items-center justify-center relative backdrop-blur-md">
+                              <DollarSign className="h-8 w-8" />
+                           </div>
+                        </Card>
+                        <div className="p-8 rounded-[2.5rem] bg-emerald-50 border-2 border-emerald-100 flex flex-col justify-center items-center text-center space-y-2">
+                           <p className="text-[10px] font-black text-emerald-800 uppercase tracking-widest">Jumlah Item</p>
+                           <h3 className="text-3xl font-black text-emerald-600">{formData.rabItems.length}</h3>
+                           <p className="text-[9px] text-emerald-400 font-bold uppercase tracking-widest">Keperluan Terdata</p>
+                        </div>
+                     </div>
+
+                     <div className="space-y-6">
+                        <div className="flex items-center justify-between">
+                           <div className="flex items-center gap-3">
+                              <div className="h-10 w-10 rounded-[1.2rem] bg-slate-900 text-white flex items-center justify-center">
+                                 <Plus className="h-5 w-5" />
+                              </div>
+                              <h3 className="text-xl font-black text-slate-800 tracking-tight uppercase tracking-wider">Daftar Kebutuhan</h3>
+                           </div>
+                           <Button onClick={addRABItem} className="h-11 px-8 rounded-full bg-slate-900 hover:bg-black text-white font-black uppercase tracking-widest text-[10px] transition-all hover:scale-105 active:scale-95 shadow-xl shadow-slate-200">
+                              <Plus className="h-3 w-3 mr-2" /> Tambah Barang / Jasa
+                           </Button>
+                        </div>
+
+                        <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden">
+                           <div className="p-8 pb-0">
+                             <div className="grid grid-cols-12 gap-6 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-4 px-4">
+                                <div className="col-span-5">Deskripsi Item & Spesifikasi</div>
+                                <div className="col-span-2 text-center">Kuantitas</div>
+                                <div className="col-span-2 text-right">Biaya Satuan</div>
+                                <div className="col-span-3 text-right">Subtotal</div>
+                             </div>
+                           </div>
+                           
+                           <div className="p-4 space-y-3">
+                              {formData.rabItems.map((item, idx) => (
+                                <div key={idx} className="grid grid-cols-12 gap-6 items-center p-4 rounded-2xl bg-white hover:bg-slate-50 border border-transparent hover:border-slate-100 transition-all duration-200 group">
+                                  <div className="col-span-5 flex items-center gap-4">
+                                    <div className="h-8 w-8 rounded-lg bg-slate-100 text-slate-400 flex items-center justify-center font-black italic text-xs group-hover:bg-indigo-50 group-hover:text-indigo-600 transition-colors">
+                                      {idx + 1}
+                                    </div>
+                                    <Input className="h-12 border-none bg-transparent font-bold text-sm focus:ring-0 placeholder:font-normal placeholder:italic" placeholder="Contoh: ATK & Dokumentasi" value={item.item} onChange={e => updateRABItem(idx, 'item', e.target.value)} />
+                                  </div>
+                                  <div className="col-span-2">
+                                    <div className="relative">
+                                      <Input className="h-12 rounded-xl bg-slate-50/50 border-none text-center font-black text-xs pr-8" placeholder="0" value={item.jumlah} onChange={e => updateRABItem(idx, 'jumlah', e.target.value)} />
+                                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-slate-300 font-bold uppercase tracking-tighter">QTY</span>
+                                    </div>
+                                  </div>
+                                  <div className="col-span-2">
+                                    <div className="relative">
+                                      <Input className="h-12 rounded-xl bg-slate-50/50 border-none text-right font-black text-xs pl-8" placeholder="0" type="number" value={item.harga} onChange={e => updateRABItem(idx, 'harga', e.target.value)} />
+                                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[10px] text-slate-300 font-bold uppercase tracking-tighter">IDR</span>
+                                    </div>
+                                  </div>
+                                  <div className="col-span-3 flex items-center justify-end gap-3">
+                                    <div className="text-right">
+                                      <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest leading-none mb-1">Total</p>
+                                      <p className="font-black text-indigo-900 text-sm">IDR {item.total.toLocaleString('id-ID')}</p>
+                                    </div>
+                                    <Button onClick={() => setFormData(prev => ({ ...prev, rabItems: prev.rabItems.filter((_, i) => i !== idx) }))} variant="ghost" size="icon" className="h-10 w-10 text-rose-500 hover:bg-rose-50 hover:text-rose-600 rounded-xl transition-all">
+                                      <Plus className="h-4 w-4 rotate-45" />
+                                    </Button>
+                                  </div>
+                                </div>
+                              ))}
+                              
+                              {formData.rabItems.length === 0 && (
+                                <div className="h-48 border-2 border-dashed border-slate-50 rounded-[2rem] flex flex-col items-center justify-center space-y-4 bg-slate-50/20">
+                                   <div className="h-12 w-12 rounded-full bg-slate-50 flex items-center justify-center text-slate-200">
+                                      <DollarSign className="h-6 w-6" />
+                                   </div>
+                                   <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.3em] italic">Daftar Anggaran Masih Kosong</p>
+                                </div>
+                              )}
+                           </div>
+                        </div>
+                     </div>
+
+                     {/* Lampiran Photo Section */}
+                     <div className="pt-12 space-y-6">
+                        <div className="flex items-center justify-between">
+                           <div className="flex items-center gap-3">
+                              <div className="h-10 w-10 rounded-[1.2rem] bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                                 <FileText className="h-5 w-5" />
+                              </div>
+                              <h3 className="text-xl font-black text-slate-800 tracking-tight uppercase tracking-wider">Lampiran Pendukung</h3>
+                           </div>
+                           <Button variant="outline" className="h-10 px-6 rounded-full border-indigo-100 text-indigo-600 font-black uppercase text-[9px] tracking-widest hover:bg-indigo-50">
+                              <Upload className="h-3 w-3 mr-2" /> Upload Dokumen/Foto
+                           </Button>
+                        </div>
+                        <Card className="rounded-[2.5rem] bg-slate-50/50 border-2 border-dashed border-slate-100 p-16 text-center group cursor-pointer hover:bg-white hover:border-indigo-200 transition-all duration-300">
+                           <div className="flex flex-col items-center space-y-4">
+                              <div className="h-14 w-14 rounded-full bg-white shadow-xl shadow-slate-100 flex items-center justify-center text-slate-300 group-hover:text-indigo-500 transition-colors">
+                                 <Plus className="h-8 w-8" />
+                              </div>
+                              <div className="space-y-1">
+                                 <p className="text-xs font-black text-slate-400 group-hover:text-slate-800 transition-colors">SERET & LEPAS FILE DISINI</p>
+                                 <p className="text-[9px] text-slate-300 font-bold uppercase tracking-widest">Maksimal 5MB per file (JPG, PNG, PDF)</p>
+                              </div>
+                           </div>
+                        </Card>
+                     </div>
+
+                    <div className="flex justify-between pt-10 border-t border-slate-100">
+                      <Button variant="ghost" onClick={() => setActiveTab('struktur')} className="text-slate-400 group font-black uppercase text-[10px] tracking-widest">
+                        <ArrowLeft className="h-4 w-4 mr-2 group-hover:-translate-x-1 transition-transform" /> Kembali
+                      </Button>
+                      <Button onClick={() => setActiveTab('penutup')} className="h-12 px-10 rounded-full bg-linear-to-r from-purple-600 to-indigo-600 text-white font-black uppercase tracking-widest text-[10px] hover:shadow-xl hover:shadow-purple-100 group transition-all">
+                        Lanjut ke Penutup <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                      </Button>
+                    </div>
+                  </TabsContent>
+
+                  {/* TAB: Penutup */}
+                  <TabsContent value="penutup" className="mt-6 space-y-8">
+                     <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                           <Label className="text-xs font-black uppercase text-slate-600 tracking-widest">Kalimat Penutup</Label>
+                           <Button onClick={() => applyAIRecommend('kalimatPenutup')} variant="ghost" className="text-purple-600 font-bold text-[10px] uppercase"><MessageSquare className="h-3 w-3 mr-2" /> Rekomendasi AI</Button>
+                        </div>
+                        <Textarea className="min-h-[160px] rounded-3xl border-slate-200 p-6 shadow-sm bg-white font-serif" placeholder="Tuliskan kalimat penutup..." value={formData.kalimatPenutup} onChange={e => setFormData({...formData, kalimatPenutup: e.target.value})} />
+                     </div>
+
+                     <div className="grid grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                           <Label className="text-xs font-black uppercase text-slate-500 tracking-widest">Lokasi Penerbitan</Label>
+                           <Input className="h-14 rounded-2xl bg-white border-slate-100 shadow-sm" value={formData.lokasiPenerbitan} onChange={e => setFormData({...formData, lokasiPenerbitan: e.target.value})} />
+                        </div>
+                        <div className="space-y-2">
+                           <Label className="text-xs font-black uppercase text-slate-500 tracking-widest">Tanggal Surat</Label>
+                           <Input className="h-14 rounded-2xl bg-white border-slate-100 shadow-sm" value={new Date(formData.tanggalSurat).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })} readOnly />
+                        </div>
+                     </div>
+
+                     <div className="space-y-8 pt-6">
+                        <div className="flex items-center gap-2">
+                           <div className="h-8 w-2 bg-purple-600 rounded-full" />
+                           <h3 className="text-lg font-black text-slate-800 tracking-tight">Nama Penandatangan (Dibuat & Mengetahui)</h3>
+                        </div>
+
+                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                           {[
+                             { label: 'Sekretaris DKM', field: 'ttdSekretarisDKM', required: true, icon: <Layout className="h-4 w-4" /> },
+                             { label: 'Ketua DKM', field: 'ttdKetuaDKM', required: true, icon: <Layout className="h-4 w-4" /> },
+                             { label: 'Bendahara DKM', field: 'ttdBendaharaDKM', required: true, icon: <DollarSign className="h-4 w-4" /> },
+                             { label: 'Tokoh Masyarakat', field: 'ttdTokohMasyarakat', subLabel: 'Masjid Al-Muhajirin', icon: <Users className="h-4 w-4" /> },
+                             { label: 'Ketua RW', field: 'ttdKetuaRW', icon: <Users className="h-4 w-4" /> },
+                             { label: 'Ketua RT', field: 'ttdKetuaRT', icon: <Users className="h-4 w-4" /> },
+                             { label: 'Ketua Pemuda', field: 'ttdKetuaPemuda', icon: <Users className="h-4 w-4" /> },
+                             { label: 'Guru Besar', field: 'ttdGuruBesar', icon: <PenTool className="h-4 w-4" /> },
+                             { label: 'Ketua Padepokan', field: 'ttdKetuaPadepokan', icon: <PenTool className="h-4 w-4" /> },
+                             { label: 'Ketua DPD Bandrong', field: 'ttdKetuaDPDBandrong', icon: <PenTool className="h-4 w-4" /> },
+                           ].map((item, idx) => (
+                             <div key={idx} className="p-6 rounded-[2rem] bg-white border border-slate-100 shadow-sm hover:shadow-md transition-shadow group">
+                               <div className="flex items-center gap-2 mb-4">
+                                  <div className={`h-8 w-8 rounded-lg flex items-center justify-center ${(item as any).required ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-50 text-slate-400 opacity-50 group-hover:opacity-100'}`}>
+                                    {(item as any).icon}
+                                  </div>
+                                  <div>
+                                    <Label className="text-[10px] uppercase font-black text-slate-400 block tracking-wider">{item.label}</Label>
+                                    {(item as any).subLabel && <span className="text-[8px] text-slate-300 uppercase block font-bold leading-none">{(item as any).subLabel}</span>}
+                                  </div>
+                               </div>
+                               <Input 
+                                 className="h-12 rounded-2xl border-none bg-slate-50/50 focus:bg-white text-center font-black text-xs tracking-tight placeholder:italic placeholder:font-normal" 
+                                 placeholder={`Nama ${(item as any).label}...`}
+                                 value={(formData as any)[item.field]} 
+                                 onChange={e => setFormData({...formData, [item.field]: e.target.value})} 
+                               />
+                             </div>
+                           ))}
+                         </div>
+                     </div>
+
+                     <div className="flex justify-between pt-10">
+                        <Button variant="ghost" onClick={() => setActiveTab('rab')} className="text-slate-400 group">
+                          <ArrowLeft className="h-4 w-4 mr-2 group-hover:-translate-x-1 transition-transform" /> Kembali
+                        </Button>
+                        <Button onClick={handleSubmit} className="h-14 px-12 rounded-2xl bg-linear-to-r from-purple-600 to-indigo-600 text-white font-black uppercase tracking-[0.2em] shadow-xl shadow-purple-100 animate-pulse">
+                           Ajukan Proposal <ArrowRight className="h-4 w-4 ml-3" />
+                        </Button>
+                     </div>
+                  </TabsContent>
                   
-                  {/* ... Tambahkan tab lainnya jika perlu ... */}
                 </Tabs>
               ) : (
                 /* UNDANGAN/SURAT STACKED CARDS UI */
@@ -580,19 +1112,29 @@ function BuatPersuratanContent() {
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="p-6 space-y-4">
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label className="text-[10px] font-bold uppercase text-gray-500">Ketua Padepokan</Label>
-                          <Input className="rounded-xl border-gray-100 bg-gray-50/50" placeholder="Nama Ketua" value={formData.tandaTangan1Nama} onChange={e => setFormData({...formData, tandaTangan1Nama: e.target.value})} />
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div className="p-6 rounded-3xl bg-white border border-slate-100 space-y-3 shadow-sm">
+                          <Label className="text-[10px] uppercase font-black text-emerald-600 tracking-widest block">Sekretaris DKM</Label>
+                          <Input className="h-12 rounded-2xl bg-slate-50 border-none font-bold text-center" placeholder="Nama Sekretaris" value={formData.ttdSekretarisDKM} onChange={e => setFormData({...formData, ttdSekretarisDKM: e.target.value})} />
                         </div>
-                        <div className="space-y-2">
-                          <Label className="text-[10px] font-bold uppercase text-gray-500">Sekretaris</Label>
-                          <Input className="rounded-xl border-gray-100 bg-gray-50/50" placeholder="Nama Sekretaris" value={formData.tandaTangan2Nama} onChange={e => setFormData({...formData, tandaTangan2Nama: e.target.value})} />
+                        <div className="p-6 rounded-3xl bg-white border border-slate-100 space-y-3 shadow-sm">
+                          <Label className="text-[10px] uppercase font-black text-emerald-600 tracking-widest block">Ketua DKM</Label>
+                          <Input className="h-12 rounded-2xl bg-slate-50 border-none font-bold text-center" placeholder="Nama Ketua" value={formData.ttdKetuaDKM} onChange={e => setFormData({...formData, ttdKetuaDKM: e.target.value})} />
+                        </div>
+                        <div className="p-6 rounded-3xl bg-white border border-slate-100 space-y-3 shadow-sm">
+                          <Label className="text-[10px] uppercase font-black text-emerald-600 tracking-widest block">Bendahara DKM</Label>
+                          <Input className="h-12 rounded-2xl bg-slate-50 border-none font-bold text-center" placeholder="Nama Bendahara" value={formData.ttdBendaharaDKM} onChange={e => setFormData({...formData, ttdBendaharaDKM: e.target.value})} />
                         </div>
                       </div>
-                      <div className="space-y-2">
-                        <Label className="text-[10px] font-bold uppercase text-gray-500">Guru Besar (Mengetahui)</Label>
-                        <Input className="rounded-xl border-gray-100 bg-gray-50/50" placeholder="Nama Guru Besar" value={formData.tandaTangan3Nama} onChange={e => setFormData({...formData, tandaTangan3Nama: e.target.value})} />
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-end">
+                        <div className="p-6 rounded-3xl bg-white border border-slate-100 space-y-3 shadow-sm">
+                          <Label className="text-[10px] uppercase font-black text-blue-600 tracking-widest block">Mengetahui (Tokoh Masyarakat)</Label>
+                          <Input className="h-12 rounded-2xl bg-slate-50 border-none font-bold text-center" placeholder="Nama Tokoh" value={formData.ttdTokohMasyarakat} onChange={e => setFormData({...formData, ttdTokohMasyarakat: e.target.value})} />
+                        </div>
+                        <div className="p-6 rounded-3xl bg-slate-50/50 border border-dashed border-slate-200 space-y-3">
+                           <Label className="text-[9px] uppercase font-bold text-slate-400 block tracking-widest italic text-center">Tanda Tangan Lainnya bisa diatur di tab Penutup pada tipe Proposal</Label>
+                        </div>
                       </div>
                     </CardContent>
                   </Card>
@@ -652,7 +1194,7 @@ function BuatPersuratanContent() {
                 </div>
 
                 {/* CONTENT */}
-                <div className="text-[10px] space-y-4 text-slate-900 leading-relaxed">
+                <div className="text-[10px] space-y-4 text-slate-900 leading-relaxed font-serif">
                   {type === 'PROPOSAL' ? (
                     <p className="whitespace-pre-wrap">{formData.isiSuratPengantar || '[Isi Surat Pengantar Belum Diisi]'}</p>
                   ) : (
@@ -661,11 +1203,11 @@ function BuatPersuratanContent() {
                       <p className="whitespace-pre-wrap">{formData.pembuka}</p>
 
                       {type === 'UNDANGAN' && formData.namaAcara && (
-                        <div className="ml-8 space-y-1 py-4 text-slate-900">
-                          <p><span className="w-24 inline-block">Hari / Tanggal</span> : {formData.hariAcara}, {formData.tanggalAcara}</p>
-                          <p><span className="w-24 inline-block">Waktu</span> : {formData.waktuAcara}</p>
-                          <p><span className="w-24 inline-block">Tempat</span> : {formData.lokasiAcara}</p>
-                          <p><span className="w-24 inline-block font-bold">Acara</span> : <span className="font-bold underline">{formData.namaAcara}</span></p>
+                        <div className="ml-8 space-y-1 py-4 text-slate-900 font-serif italic border-l-2 border-slate-100 pl-4 bg-slate-50/30 rounded-r-xl">
+                          <p><span className="w-24 inline-block font-bold">Hari / Tanggal</span> : {formData.hariAcara}, {formData.tanggalAcara}</p>
+                          <p><span className="w-24 inline-block font-bold">Waktu</span> : {formData.waktuAcara}</p>
+                          <p><span className="w-24 inline-block font-bold">Tempat</span> : {formData.lokasiAcara}</p>
+                          <p><span className="w-24 inline-block font-bold uppercase">Acara</span> : <span className="font-black underline decoration-slate-400 decoration-2">{formData.namaAcara}</span></p>
                         </div>
                       )}
 
@@ -676,58 +1218,138 @@ function BuatPersuratanContent() {
                 </div>
 
                 {/* SIGNATURES */}
-                <div className="mt-16 grid grid-cols-2 gap-8 text-[10px] text-center font-bold">
-                  <div className="space-y-16">
-                    <p className="uppercase">{formData.tandaTangan1}</p>
-                    <div>
-                      <p className="underline uppercase font-black">{formData.tandaTangan1Nama || '............................'}</p>
-                    </div>
-                  </div>
-                  <div className="space-y-16">
-                    <p className="uppercase">{formData.tandaTangan2}</p>
-                    <div>
-                      <p className="underline uppercase font-black">{formData.tandaTangan2Nama || '............................'}</p>
-                    </div>
-                  </div>
-                </div>
+                <div className="mt-16 space-y-12">
+                   <div className="grid grid-cols-2 gap-8 text-[10px] text-center font-bold font-serif">
+                     <div className="space-y-16">
+                       <p className="uppercase tracking-widest text-[#0b3d2e] border-b border-slate-100 pb-1">Sekretaris DKM</p>
+                       <div>
+                         <p className="underline uppercase font-black decoration-slate-900">{formData.ttdSekretarisDKM || '............................'}</p>
+                       </div>
+                     </div>
+                     <div className="space-y-16">
+                       <p className="uppercase tracking-widest text-[#0b3d2e] border-b border-slate-100 pb-1">Ketua DKM</p>
+                       <div>
+                         <p className="underline uppercase font-black decoration-slate-900">{formData.ttdKetuaDKM || '............................'}</p>
+                       </div>
+                     </div>
+                   </div>
 
-                {formData.tandaTangan3Nama && (
-                  <div className="mt-8 text-center text-[10px] font-bold space-y-12 border-t pt-4">
-                    <div className="space-y-0.5">
-                      <p className="uppercase font-bold">Mengetahui,</p>
-                      <p className="uppercase">{formData.tandaTangan3}</p>
-                    </div>
-                    <p className="underline uppercase font-black">{formData.tandaTangan3Nama}</p>
-                  </div>
-                )}
+                   <div className={`grid ${formData.ttdTokohMasyarakat ? 'grid-cols-2' : 'grid-cols-1 justify-items-center'} gap-8 text-[10px] text-center font-bold font-serif`}>
+                      <div className="space-y-16">
+                        <p className="uppercase tracking-widest text-[#0b3d2e] border-b border-slate-100 pb-1">Bendahara DKM</p>
+                        <div>
+                          <p className="underline uppercase font-black decoration-slate-900">{formData.ttdBendaharaDKM || '............................'}</p>
+                        </div>
+                      </div>
+                      
+                      {formData.ttdTokohMasyarakat && (
+                        <div className="space-y-16">
+                          <div>
+                            <p className="uppercase font-black text-slate-400 text-[8px]">Mengetahui,</p>
+                            <p className="uppercase tracking-widest text-[#0b3d2e] border-b border-slate-100 pb-1">Tokoh Masyarakat</p>
+                          </div>
+                          <div>
+                            <p className="underline uppercase font-black decoration-slate-900">{formData.ttdTokohMasyarakat}</p>
+                          </div>
+                        </div>
+                      )}
+                   </div>
+
+                   {(formData.ttdKetuaRW || formData.ttdKetuaRT) && (
+                     <div className="grid grid-cols-2 gap-8 text-[10px] text-center font-bold font-serif border-t border-slate-50 pt-8">
+                        {formData.ttdKetuaRW && (
+                          <div className="space-y-16">
+                            <p className="uppercase tracking-widest text-slate-500">Ketua RW</p>
+                            <p className="underline uppercase font-black">{formData.ttdKetuaRW}</p>
+                          </div>
+                        )}
+                        {formData.ttdKetuaRT && (
+                          <div className="space-y-16">
+                            <p className="uppercase tracking-widest text-slate-500">Ketua RT</p>
+                            <p className="underline uppercase font-black">{formData.ttdKetuaRT}</p>
+                          </div>
+                        )}
+                     </div>
+                   )}
+                </div>
               </div>
 
               {/* PAPER PREVIEW - PAGE 2 (PENDALUAN - Only for PROPOSAL) */}
               {type === 'PROPOSAL' && (
-                <div className="bg-white shadow-2xl rounded-[2.5rem] p-8 lg:p-12 min-h-[842px] relative overflow-hidden">
-                  <div className="flex justify-between items-center border-b-2 border-slate-900 pb-4 mb-10">
-                    <div className="text-center flex-1 px-4">
-                      <h1 className="font-black text-slate-900 text-sm leading-tight uppercase tracking-tight">{formData.namaKopSurat}</h1>
+                <>
+                  <div className="bg-white shadow-2xl rounded-[2.5rem] p-8 lg:p-12 min-h-[842px] relative overflow-hidden mb-8">
+                    <div className="flex justify-between items-center border-b-2 border-slate-900 pb-4 mb-10">
+                      <div className="text-center flex-1 px-4">
+                        <h1 className="font-black text-slate-900 text-sm leading-tight uppercase tracking-tight">{formData.namaKopSurat}</h1>
+                      </div>
+                      <div className="h-10 w-10 bg-slate-50 rounded-full flex items-center justify-center border border-slate-200 text-[6px] font-bold text-slate-300 uppercase">Logo</div>
                     </div>
-                    <div className="h-10 w-10 bg-slate-50 rounded-full flex items-center justify-center border border-slate-200 text-[6px] font-bold text-slate-300 uppercase">Logo</div>
-                  </div>
 
-                  <div className="space-y-8 text-[11px] text-slate-900">
+                  <div className="space-y-8 text-[11px] text-slate-900 font-serif">
                     <div>
                       <h2 className="text-sm font-black mb-4">I. PENDAHULUAN</h2>
-                      <div className="space-y-4">
+                      <div className="space-y-6">
                         <div>
                           <h3 className="font-bold mb-2">A. Latar Belakang</h3>
                           <p className="whitespace-pre-wrap leading-relaxed">{formData.latarBelakang || '..............................................'}</p>
                         </div>
                         <div>
                           <h3 className="font-bold mb-2">B. Maksud Dan Tujuan</h3>
-                          <p className="whitespace-pre-wrap leading-relaxed">{formData.maksudTujuan || '..............................................'}</p>
+                          <div className="space-y-2 ml-4">
+                             {formData.maksudTujuanList.map((item, idx) => (
+                               <p key={idx} className="leading-relaxed">{idx + 1}. {item}</p>
+                             ))}
+                             {formData.maksudTujuanList.length === 0 && <p>..............................................</p>}
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
-                </div>
+                  </div>
+
+                  <div id="proposal-page-3" className="bg-white shadow-2xl rounded-[2.5rem] p-8 lg:p-12 min-h-[842px] relative overflow-hidden">
+                    <div className="flex justify-between items-center border-b-2 border-slate-900 pb-4 mb-10">
+                      <div className="text-center flex-1 px-4">
+                        <h1 className="font-black text-slate-900 text-sm leading-tight uppercase tracking-tight">{formData.namaKopSurat}</h1>
+                      </div>
+                    </div>
+                  <div className="space-y-8 text-[11px] text-slate-900 font-serif">
+                    <div>
+                      <h2 className="text-sm font-black mb-4 uppercase">II. Struktur Organisasi</h2>
+                      <div className="grid grid-cols-2 gap-4 italic text-slate-600">
+                        <p>Pelindung (RW): {formData.pelindungRW || '...'}</p>
+                        <p>Penasehat (RT): {formData.penasehatRT || '...'}</p>
+                        <p>Ketua Pemuda: {formData.ketuaPemudaStruktur || '...'}</p>
+                      </div>
+                    </div>
+                    <div>
+                      <h2 className="text-sm font-black mb-4 uppercase">III. Anggaran Biaya (RAB)</h2>
+                      <table className="w-full border-collapse">
+                         <thead>
+                            <tr className="border-b border-slate-200 text-left text-[9px] uppercase tracking-widest text-slate-400">
+                              <th className="py-2">Item</th>
+                              <th className="py-2 text-right">Total</th>
+                            </tr>
+                         </thead>
+                         <tbody className="divide-y divide-slate-50">
+                            {formData.rabItems.map((item, idx) => (
+                              <tr key={idx}>
+                                <td className="py-2">{item.item || '...'}</td>
+                                <td className="py-2 text-right font-bold text-slate-900">Rp {item.total.toLocaleString('id-ID')}</td>
+                              </tr>
+                            ))}
+                         </tbody>
+                         <tfoot>
+                            <tr className="border-t-2 border-slate-900 font-bold">
+                              <td className="py-4 uppercase">Total Estimasi</td>
+                              <td className="py-4 text-right underline underline-offset-4">Rp {totalRAB.toLocaleString('id-ID')}</td>
+                            </tr>
+                         </tfoot>
+                      </table>
+                    </div>
+                  </div>
+                  </div>
+                </>
               )}
             </div>
           </div>
