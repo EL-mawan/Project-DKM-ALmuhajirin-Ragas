@@ -265,20 +265,22 @@ model HomepageContent {
 
 // Official Documents (Persuratan)
 model DokumenResmi {
-  id          String   @id @default(cuid())
-  nomorSurat  String?  // Optional for Proposal, required for others
-  type        String   // PROPOSAL, UNDANGAN, SURAT_RESMI
-  title       String
-  date        DateTime
-  content     String?  @db.Text // Content body or JSON string
-  recipient   String?  // For Undangan/Surat Resmi
-  location    String?  // For Undangan
-  status      String   @default("draft") // draft, sent, archived
-  fileUrl     String?
-  createdBy   String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id            String   @id @default(cuid())
+  nomorSurat    String?  // Optional for Proposal, required for others
+  type          String   // PROPOSAL, UNDANGAN, SURAT_RESMI
+  title         String
+  date          DateTime
+  content       String?  @db.Text // Content body or JSON string
+  recipient     String?  // For Undangan/Surat Resmi
+  location      String?  // For Undangan
+  status        String   @default("pending") // pending, validated, rejected
+  fileUrl       String?
+  createdBy     String
+  validatedBy   String?  // User ID who validated
+  validatedAt   DateTime? // When it was validated
+  rejectionNote String?  @db.Text // Reason if rejected
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   @@map("dokumen_resmi")
 }
-

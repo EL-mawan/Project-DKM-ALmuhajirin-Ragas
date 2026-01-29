@@ -9,7 +9,7 @@ import {
   Plus, 
   Search, 
   Edit2, 
-  Trash2, 
+  Trash2,
   FileText,
   Mail,
   Loader2,
@@ -18,10 +18,14 @@ import {
   Send,
   Download,
   CheckCircle2,
-  History
+  History,
+  CheckCircle,
+  XCircle,
+  Clock
 } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { AdminLayout } from '@/components/layout/admin-layout'
+import { useSession } from 'next-auth/react'
 import { 
   Dialog, 
   DialogContent, 
@@ -36,6 +40,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import jsPDF from 'jspdf'
 
 export default function PersuratanAdmin() {
+  const { data: session } = useSession()
   const [loading, setLoading] = useState(true)
   const [data, setData] = useState<any[]>([])
   const [search, setSearch] = useState('')
@@ -43,7 +48,10 @@ export default function PersuratanAdmin() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingItem, setEditingItem] = useState<any>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const { statusProps, showSuccess, showError } = useStatusPopup()
+  const { statusProps, showSuccess, showError} = useStatusPopup()
+  
+  // Check if user can validate documents
+  const canValidate = session?.user?.role && ['Master Admin', 'Ketua DKM', 'Tokoh Masyarakat'].includes(session.user.role)
 
   const [formData, setFormData] = useState<any>({
     title: '',
@@ -117,13 +125,38 @@ export default function PersuratanAdmin() {
     })
   }
 
+  const handleValidate = async (id: string, action: 'validate' | 'reject') => {
+    try {
+      const rejectionNote = action === 'reject' ? prompt('Alasan penolakan:') : null
+      if (action === 'reject' && !rejectionNote) return
+
+      const res = await fetch(`/api/admin/persuratan/${id}/validate`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action, rejectionNote })
+      })
+
+      if (res.ok) {
+        showSuccess('Berhasil!', `Dokumen berhasil ${action === 'validate' ? 'divalidasi' : 'ditolak'}.`)
+        fetchData()
+      } else {
+        showError('Gagal', `Gagal ${action === 'validate' ? 'memvalidasi' : 'menolak'} dokumen.`)
+      }
+    } catch (error) {
+      showError('Error', 'Terjadi kesalahan sistem.')
+    }
+  }
+
   const handleDelete = async (id: string) => {
-    if (!confirm('Hapus dokumen ini secara permanen?')) return
+    if (!confirm('Apakah Anda yakin ingin menghapus dokumen ini?')) return
+    
     try {
       const res = await fetch(`/api/admin/persuratan/${id}`, { method: 'DELETE' })
       if (res.ok) {
-        showSuccess('Dihapus', 'Dokumen telah dihapus dari database.')
+        showSuccess('Berhasil!', 'Dokumen berhasil dihapus.')
         fetchData()
+      } else {
+        showError('Gagal', 'Gagal menghapus dokumen.')
       }
     } catch (error) {
       showError('Gagal', 'Gagal menghapus dokumen.')
@@ -411,47 +444,69 @@ export default function PersuratanAdmin() {
                           </div>
                         </td>
                         <td className="px-10 py-8">
-                          <Badge className="rounded-full px-4 py-1.5 font-black text-[9px] uppercase tracking-widest bg-emerald-50 text-emerald-600 border-none">
-                            Tersimpan
-                          </Badge>
+                          {item.status === 'validated' ? (
+                            <Badge className="rounded-full px-4 py-1.5 font-black text-[9px] uppercase tracking-widest bg-emerald-50 text-emerald-600 border-none">
+                              <CheckCircle className="h-3 w-3 mr-1 inline" />
+                              Tervalidasi
+                            </Badge>
+                          ) : item.status === 'rejected' ? (
+                            <Badge className="rounded-full px-4 py-1.5 font-black text-[9px] uppercase tracking-widest bg-red-50 text-red-600 border-none">
+                              <XCircle className="h-3 w-3 mr-1 inline" />
+                              Ditolak
+                            </Badge>
+                          ) : (
+                            <Badge className="rounded-full px-4 py-1.5 font-black text-[9px] uppercase tracking-widest bg-amber-50 text-amber-600 border-none">
+                              <Clock className="h-3 w-3 mr-1 inline" />
+                              Menunggu Validasi
+                            </Badge>
+                          )}
                         </td>
                         <td className="px-10 py-8 text-right">
-                          <div className="flex justify-end space-x-3 opacity-0 group-hover:opacity-100 transition-all -translate-x-2 group-hover:translate-x-0">
+                          <div className="flex justify-end space-x-2 opacity-0 group-hover:opacity-100 transition-all -translate-x-2 group-hover:translate-x-0">
+                            {/* Download button - only enabled if validated */}
                             <Button 
                               variant="ghost" 
                               size="icon" 
-                              className="rounded-2xl h-12 w-12 text-blue-500 hover:bg-blue-50"
-                              onClick={() => generatePDF(item)}
+                              className={`rounded-2xl h-10 w-10 ${item.status === 'validated' ? 'text-blue-500 hover:bg-blue-50' : 'text-gray-300 cursor-not-allowed'}`}
+                              onClick={() => item.status === 'validated' && generatePDF(item)}
+                              disabled={item.status !== 'validated'}
+                              title={item.status !== 'validated' ? 'Dokumen harus divalidasi terlebih dahulu' : 'Download PDF'}
                             >
-                              <Download className="h-5 w-5" />
+                              <Download className="h-4 w-4" />
                             </Button>
+                            
+                            {/* Validation buttons - only for authorized roles and pending documents */}
+                            {canValidate && item.status === 'pending' && (
+                              <>
+                                <Button 
+                                  variant="ghost" 
+                                  size="icon" 
+                                  className="rounded-2xl h-10 w-10 text-emerald-600 hover:bg-emerald-50"
+                                  onClick={() => handleValidate(item.id, 'validate')}
+                                  title="Validasi Dokumen"
+                                >
+                                  <CheckCircle className="h-4 w-4" />
+                                </Button>
+                                <Button 
+                                  variant="ghost" 
+                                  size="icon" 
+                                  className="rounded-2xl h-10 w-10 text-red-500 hover:bg-red-50"
+                                  onClick={() => handleValidate(item.id, 'reject')}
+                                  title="Tolak Dokumen"
+                                >
+                                  <XCircle className="h-4 w-4" />
+                                </Button>
+                              </>
+                            )}
+                            
                             <Button 
                               variant="ghost" 
                               size="icon" 
-                              className="rounded-2xl h-12 w-12 text-emerald-600 hover:bg-emerald-50"
-                              onClick={() => {
-                                setEditingItem(item)
-                                setFormData({
-                                  title: item.title,
-                                  type: item.type,
-                                  date: item.date,
-                                  content: item.content || '',
-                                  recipient: item.recipient || '',
-                                  location: item.location || '',
-                                  nomorSurat: item.nomorSurat || ''
-                                })
-                                setIsModalOpen(true)
-                              }}
-                            >
-                              <Edit2 className="h-5 w-5" />
-                            </Button>
-                            <Button 
-                              variant="ghost" 
-                              size="icon" 
-                              className="rounded-2xl h-12 w-12 text-rose-400 hover:bg-rose-50"
+                              className="rounded-2xl h-10 w-10 text-rose-500 hover:bg-rose-50"
                               onClick={() => handleDelete(item.id)}
+                              title="Hapus Dokumen"
                             >
-                              <Trash2 className="h-5 w-5" />
+                              <Trash2 className="h-4 w-4" />
                             </Button>
                           </div>
                         </td>
