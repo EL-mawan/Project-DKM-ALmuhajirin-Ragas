@@ -265,7 +265,7 @@ export default function LaporanAdmin() {
       doc.setFont('helvetica', 'bold')
       doc.text('Mengetahui,', 55, currentY, { align: 'center' })
       doc.text('Ketua DKM Al-Muhajirin', 55, currentY + 6, { align: 'center' })
-      doc.setFont('helvetica', 'bold')
+      doc.setFont('helvetica', 'normal')
       const agungName = 'H. Agung Gunawan'
       const agungWidth = doc.getTextWidth(agungName)
       doc.text(agungName, 55, currentY + 35, { align: 'center' })
@@ -275,6 +275,7 @@ export default function LaporanAdmin() {
       doc.setFont('helvetica', 'bold')
       doc.text('Bendahara DKM', pageWidth - 55, currentY + 6, { align: 'center' })
       
+      doc.setFont('helvetica', 'normal')
       const lasturiName = 'Lasturi'
       const lasturiWidth = doc.getTextWidth(lasturiName)
       doc.text(lasturiName, pageWidth - 55, currentY + 35, { align: 'center' })
