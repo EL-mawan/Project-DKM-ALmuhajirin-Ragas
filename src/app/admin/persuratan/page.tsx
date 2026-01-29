@@ -267,42 +267,42 @@ export default function PersuratanAdmin() {
     <AdminLayout title="Administrasi & Persuratan" subtitle="Pembuatan Proposal, Undangan, dan Surat Resmi DKM.">
       <div className="p-6 sm:p-8 space-y-8">
         {/* Header Stats / Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Card className="rounded-[2.5rem] border-none shadow-sm bg-gradient-to-br from-blue-50 to-indigo-50/30">
-            <CardContent className="p-8">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest">Total Proposal</p>
-                  <h3 className="text-3xl font-black text-[#0b3d2e] mt-1">{data.filter(d => d.type === 'PROPOSAL').length}</h3>
+        <div className="grid grid-cols-3 gap-3 md:gap-6">
+          <Card className="rounded-2xl md:rounded-[2.5rem] border-none shadow-sm bg-gradient-to-br from-blue-50 to-indigo-50/30">
+            <CardContent className="p-3 md:p-8">
+              <div className="flex flex-col md:flex-row items-center justify-between gap-2 md:gap-0">
+                <div className="text-center md:text-left">
+                  <p className="text-[8px] md:text-[10px] font-black text-blue-600 uppercase tracking-widest">Total Proposal</p>
+                  <h3 className="text-xl md:text-3xl font-black text-[#0b3d2e] mt-0.5 md:mt-1">{data.filter(d => d.type === 'PROPOSAL').length}</h3>
                 </div>
-                <div className="h-12 w-12 rounded-2xl bg-white shadow-sm flex items-center justify-center text-blue-500">
-                  <FileText className="h-6 w-6" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card className="rounded-[2.5rem] border-none shadow-sm bg-gradient-to-br from-emerald-50 to-teal-50/30">
-            <CardContent className="p-8">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">Surat Undangan</p>
-                  <h3 className="text-3xl font-black text-[#0b3d2e] mt-1">{data.filter(d => d.type === 'UNDANGAN').length}</h3>
-                </div>
-                <div className="h-12 w-12 rounded-2xl bg-white shadow-sm flex items-center justify-center text-emerald-500">
-                  <Mail className="h-6 w-6" />
+                <div className="h-8 w-8 md:h-12 md:w-12 rounded-xl md:rounded-2xl bg-white shadow-sm flex items-center justify-center text-blue-500">
+                  <FileText className="h-4 w-4 md:h-6 md:w-6" />
                 </div>
               </div>
             </CardContent>
           </Card>
-          <Card className="rounded-[2.5rem] border-none shadow-sm bg-gradient-to-br from-amber-50 to-orange-50/30">
-            <CardContent className="p-8">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-[10px] font-black text-amber-600 uppercase tracking-widest">Surat Resmi</p>
-                  <h3 className="text-3xl font-black text-[#0b3d2e] mt-1">{data.filter(d => d.type === 'SURAT_RESMI').length}</h3>
+          <Card className="rounded-2xl md:rounded-[2.5rem] border-none shadow-sm bg-gradient-to-br from-emerald-50 to-teal-50/30">
+            <CardContent className="p-3 md:p-8">
+              <div className="flex flex-col md:flex-row items-center justify-between gap-2 md:gap-0">
+                <div className="text-center md:text-left">
+                  <p className="text-[8px] md:text-[10px] font-black text-emerald-600 uppercase tracking-widest">Surat Undangan</p>
+                  <h3 className="text-xl md:text-3xl font-black text-[#0b3d2e] mt-0.5 md:mt-1">{data.filter(d => d.type === 'UNDANGAN').length}</h3>
                 </div>
-                <div className="h-12 w-12 rounded-2xl bg-white shadow-sm flex items-center justify-center text-amber-500">
-                  <CheckCircle2 className="h-6 w-6" />
+                <div className="h-8 w-8 md:h-12 md:w-12 rounded-xl md:rounded-2xl bg-white shadow-sm flex items-center justify-center text-emerald-500">
+                  <Mail className="h-4 w-4 md:h-6 md:w-6" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="rounded-2xl md:rounded-[2.5rem] border-none shadow-sm bg-gradient-to-br from-amber-50 to-orange-50/30">
+            <CardContent className="p-3 md:p-8">
+              <div className="flex flex-col md:flex-row items-center justify-between gap-2 md:gap-0">
+                <div className="text-center md:text-left">
+                  <p className="text-[8px] md:text-[10px] font-black text-amber-600 uppercase tracking-widest">Surat Resmi</p>
+                  <h3 className="text-xl md:text-3xl font-black text-[#0b3d2e] mt-0.5 md:mt-1">{data.filter(d => d.type === 'SURAT_RESMI').length}</h3>
+                </div>
+                <div className="h-8 w-8 md:h-12 md:w-12 rounded-xl md:rounded-2xl bg-white shadow-sm flex items-center justify-center text-amber-500">
+                  <CheckCircle2 className="h-4 w-4 md:h-6 md:w-6" />
                 </div>
               </div>
             </CardContent>
