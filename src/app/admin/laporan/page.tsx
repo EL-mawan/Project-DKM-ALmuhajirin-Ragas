@@ -155,11 +155,48 @@ export default function LaporanAdmin() {
       // --- 3. DETAILS SECTION (AUTO-PAGINATED) ---
       let currentY = cardY + cardH + 12
 
-      // Section A: Pengeluaran
+      // Section A: Pemasukan
       doc.setFontSize(10)
       doc.setTextColor(dkmSlate[0], dkmSlate[1], dkmSlate[2])
       doc.setFont('helvetica', 'bold')
-      doc.text('A. DATA PENGELUARAN', 15, currentY - 2)
+      doc.text('A. DATA PEMASUKAN', 15, currentY - 2)
+
+      // Table for Pemasukan
+      autoTable(doc, {
+        startY: currentY,
+        head: [['No', 'Tanggal', 'Sumber Dana', 'Qty', 'Unit', 'Harga Satuan', 'Total']],
+        body: txs.income.length > 0 ? txs.income.map((t: any, i: number) => [
+          i + 1, 
+          new Date(t.date).toLocaleDateString('id-ID'), 
+          t.source || '-',
+          t.qty || 1,
+          t.sourceUnit || '-',
+          `Rp ${(t.unitPrice || t.amount).toLocaleString('id-ID')}`,
+          `Rp ${t.amount.toLocaleString('id-ID')}`
+        ]) : [['-', '-', 'Tidak ada data pemasukan', '-', '-', '-', 'Rp 0']],
+        margin: { top: 55, bottom: 25 },
+        didDrawPage: (dt) => {
+          if (dt.pageNumber > 1) {
+            drawHeader(doc, logoImg)
+          }
+        },
+        headStyles: { fillColor: [240, 253, 244], textColor: dkmEmerald, fontSize: 8, fontStyle: 'bold' },
+        styles: { fontSize: 8, cellPadding: 3 },
+        columnStyles: { 
+          0: { cellWidth: 10 },
+          3: { halign: 'center' },
+          5: { halign: 'right' },
+          6: { halign: 'right', fontStyle: 'bold' } 
+        }
+      })
+
+      currentY = (doc as any).lastAutoTable.finalY + 12
+      
+      // Section B: Pengeluaran
+      doc.setFontSize(10)
+      doc.setTextColor(dkmSlate[0], dkmSlate[1], dkmSlate[2])
+      doc.setFont('helvetica', 'bold')
+      doc.text('B. DATA PENGELUARAN', 15, currentY - 2)
 
       // Table for Pengeluaran
       autoTable(doc, {
@@ -191,48 +228,29 @@ export default function LaporanAdmin() {
 
       currentY = (doc as any).lastAutoTable.finalY + 12
       
-      // Section B: Pemasukan
-      doc.setFontSize(10)
-      doc.setTextColor(dkmSlate[0], dkmSlate[1], dkmSlate[2])
-      doc.setFont('helvetica', 'bold')
-      doc.text('B. DATA PEMASUKAN', 15, currentY - 2)
-
-      // Table for Pemasukan
-      autoTable(doc, {
-        startY: currentY,
-        head: [['No', 'Tanggal', 'Sumber Dana', 'Qty', 'Unit', 'Harga Satuan', 'Total']],
-        body: txs.income.length > 0 ? txs.income.map((t: any, i: number) => [
-          i + 1, 
-          new Date(t.date).toLocaleDateString('id-ID'), 
-          t.source || '-',
-          t.qty || 1,
-          t.sourceUnit || '-',
-          `Rp ${(t.unitPrice || t.amount).toLocaleString('id-ID')}`,
-          `Rp ${t.amount.toLocaleString('id-ID')}`
-        ]) : [['-', '-', 'Tidak ada data pemasukan', '-', '-', '-', 'Rp 0']],
-        margin: { top: 55, bottom: 25 },
-        didDrawPage: (dt) => {
-          if (dt.pageNumber > 1) {
-            drawHeader(doc, logoImg)
-          }
-        },
-        headStyles: { fillColor: [240, 253, 244], textColor: dkmEmerald, fontSize: 8, fontStyle: 'bold' },
-        styles: { fontSize: 8, cellPadding: 3 },
-        columnStyles: { 
-          0: { cellWidth: 10 },
-          3: { halign: 'center' },
-          5: { halign: 'right' },
-          6: { halign: 'right', fontStyle: 'bold' } 
-        }
-      })
-
-      currentY = (doc as any).lastAutoTable.finalY + 15
-      
-      // Section C: Saldo Akhir Label
+      // Section C: Saldo Akhir Summary Table
       doc.setFontSize(10)
       doc.setTextColor(dkmSlate[0], dkmSlate[1], dkmSlate[2])
       doc.setFont('helvetica', 'bold')
       doc.text('C. SALDO AKHIR', 15, currentY - 2)
+
+      autoTable(doc, {
+        startY: currentY,
+        head: [['Total Pemasukan', 'Total Pengeluaran', 'Saldo Akhir']],
+        body: [[
+           `Rp ${data.totalIncome.toLocaleString('id-ID')}`,
+           `Rp ${data.totalExpense.toLocaleString('id-ID')}`,
+           `Rp ${(data.totalIncome - data.totalExpense).toLocaleString('id-ID')}`
+        ]],
+        margin: { top: 55, bottom: 25 },
+        headStyles: { fillColor: [255, 251, 235], textColor: [180, 83, 9], fontSize: 9, fontStyle: 'bold', halign: 'center' },
+        styles: { fontSize: 9, cellPadding: 5, halign: 'center' },
+        columnStyles: {
+          0: { fontStyle: 'bold', textColor: dkmEmerald },
+          1: { fontStyle: 'bold', textColor: dkmRose },
+          2: { fontStyle: 'bold', textColor: dkmSlate, fillColor: [248, 250, 252] }
+        }
+      })
 
       currentY = (doc as any).lastAutoTable.finalY + 15
       
