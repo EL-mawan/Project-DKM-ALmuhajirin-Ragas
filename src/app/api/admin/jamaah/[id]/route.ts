@@ -56,7 +56,7 @@ export async function PATCH(
           nomor,
           blok,
           name,
-          phone,
+          phone: phone || undefined,
           rt,
           rw,
           keterangan

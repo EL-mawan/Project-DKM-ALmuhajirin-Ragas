@@ -13,13 +13,13 @@ datasource db {
 
 // Roles for RBAC System
 model Role {
-  id          String @id @default(cuid())
-  name        String @unique
+  id          String   @id @default(cuid())
+  name        String   @unique
   description String?
   permissions String // JSON string of permissions
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  
+
   users User[]
 }
 
@@ -36,10 +36,10 @@ model User {
   roleId    String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  
-  role         Role @relation(fields: [roleId], references: [id])
-  auditLogs    AuditLog[]
-  
+
+  role      Role       @relation(fields: [roleId], references: [id])
+  auditLogs AuditLog[]
+
   @@map("users")
 }
 
@@ -54,147 +54,147 @@ model StrukturOrganisasi {
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  
+
   @@map("struktur_organisasi")
 }
 
 // Family Heads (Kepala Keluarga)
 model JamaahKepalaKeluarga {
-  id          String   @id @default(cuid())
-  nomor       String   // Nomor KK or ID
-  blok        String   // Blok / Link
-  name        String   // Nama Lengkap
-  phone       String?  // Nomor HP/WA
-  rt          String?
-  rw          String?
-  keterangan  String?
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  
+  id         String   @id @default(cuid())
+  nomor      String // Nomor KK or ID
+  blok       String // Blok / Link
+  name       String // Nama Lengkap
+  phone      String? // Nomor HP/WA
+  rt         String?
+  rw         String?
+  keterangan String?
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
   @@map("jamaah_kepala_keluarga")
 }
 
 // Youth Members (Remaja)
 model JamaahRemaja {
-  id          String   @id @default(cuid())
-  name        String
-  address     String
-  phone       String?
-  birthDate   DateTime?
-  education   String?
-  skills      String?
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  
+  id        String    @id @default(cuid())
+  name      String
+  address   String
+  phone     String?
+  birthDate DateTime?
+  education String?
+  skills    String?
+  isActive  Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
   @@map("jamaah_remaja")
 }
 
 // Needy Groups (Kaum Dhuafa)
 model KaumDhuafa {
-  id          String   @id @default(cuid())
-  nomor       String?   // Nomor
-  name        String   // Nama Lengkap
-  type        String   // Kategori: janda, guru_ngaji, fakir_miskin, yatim, yatim_piatu, fisabilillah
-  keterangan  String?  // Keterangan
-  address     String?
-  phone       String?
-  nik         String?
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  
+  id         String   @id @default(cuid())
+  nomor      String? // Nomor
+  name       String // Nama Lengkap
+  type       String // Kategori: janda, guru_ngaji, fakir_miskin, yatim, yatim_piatu, fisabilillah
+  keterangan String? // Keterangan
+  address    String?
+  phone      String?
+  nik        String?
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
   @@map("kaum_dhuafa")
 }
 
 // Activities
 model Kegiatan {
-  id          String   @id @default(cuid())
+  id          String    @id @default(cuid())
   title       String
-  category    String   // PHBI, Pengajian Rutin, Pendidikan, Lainnya
+  category    String // PHBI, Pengajian Rutin, Pendidikan, Lainnya
   description String
   date        DateTime
   location    String?
   image       String?
-  status      String   @default("pending") // pending, approved, rejected
+  status      String    @default("pending") // pending, approved, rejected
   createdBy   String
   approvedBy  String?
   approvedAt  DateTime?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
   @@map("kegiatan")
 }
 
 // Income (Pemasukan)
 model KeuanganPemasukan {
   id          String   @id @default(cuid())
-  amount      Float    // Total Jumlah
-  source      String   // Sumber Dana (infak, zakat, dll)
-  sourceUnit  String?  // Unit Sumber (misal: Dus, Box)
+  amount      Float // Total Jumlah
+  source      String // Sumber Dana (infak, zakat, dll)
+  sourceUnit  String? // Unit Sumber (misal: Dus, Box)
   qty         Float    @default(1)
-  unitPrice   Float    // Nominal per unit
-  description String?  // Keterangan
+  unitPrice   Float // Nominal per unit
+  description String? // Keterangan
   date        DateTime
   createdBy   String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  
+
   @@map("keuangan_pemasukan")
 }
 
 // Expenses (Pengeluaran)
 model KeuanganPengeluaran {
   id          String   @id @default(cuid())
-  itemName    String   // Nama Barang / Jenis Pengeluaran
-  amount      Float    // Total
-  unitPrice   Float    // Satuan Harga
+  itemName    String // Nama Barang / Jenis Pengeluaran
+  amount      Float // Total
+  unitPrice   Float // Satuan Harga
   qty         Float    @default(1)
-  unitType    String?  // Satuan (kg, pcs, dll)
-  category    String   // Kategori (operasional, kegiatan, dll)
-  description String?  // Keterangan
+  unitType    String? // Satuan (kg, pcs, dll)
+  category    String // Kategori (operasional, kegiatan, dll)
+  description String? // Keterangan
   date        DateTime
   createdBy   String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  
+
   @@map("keuangan_pengeluaran")
 }
 
 // Financial Reports
 model LaporanKeuangan {
-  id          String   @id @default(cuid())
-  title       String
-  period      String // monthly, yearly, custom
-  startDate   DateTime
-  endDate     DateTime
-  totalIncome Float
+  id           String    @id @default(cuid())
+  title        String
+  period       String // monthly, yearly, custom
+  startDate    DateTime
+  endDate      DateTime
+  totalIncome  Float
   totalExpense Float
-  fileUrl     String?
-  status      String   @default("pending") // pending, approved, rejected
-  createdBy   String
-  approvedBy  String?
-  approvedAt  DateTime?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  
+  fileUrl      String?
+  status       String    @default("pending") // pending, approved, rejected
+  createdBy    String
+  approvedBy   String?
+  approvedAt   DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
   @@map("laporan_keuangan")
 }
 
 // News/Announcements
 model Berita {
-  id          String   @id @default(cuid())
-  title       String
-  content     String
-  image       String?
-  status      String   @default("pending") // pending, approved, rejected
-  createdBy   String
-  approvedBy  String?
-  approvedAt  DateTime?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  
+  id         String    @id @default(cuid())
+  title      String
+  content    String
+  image      String?
+  status     String    @default("pending") // pending, approved, rejected
+  createdBy  String
+  approvedBy String?
+  approvedAt DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
   @@map("berita")
 }
 
@@ -209,7 +209,7 @@ model Galeri {
   createdBy   String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  
+
   @@map("galeri")
 }
 
@@ -224,25 +224,25 @@ model KontakMasuk {
   isRead    Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  
+
   @@map("kontak_masuk")
 }
 
 // Audit Logs
 model AuditLog {
-  id          String   @id @default(cuid())
-  userId      String
-  action      String
-  table       String?
-  recordId    String?
-  oldValues   String? // JSON
-  newValues   String? // JSON
-  ipAddress   String?
-  userAgent   String?
-  createdAt   DateTime @default(now())
-  
+  id        String   @id @default(cuid())
+  userId    String
+  action    String
+  table     String?
+  recordId  String?
+  oldValues String? // JSON
+  newValues String? // JSON
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
   user User @relation(fields: [userId], references: [id])
-  
+
   @@map("audit_logs")
 }
 
@@ -253,12 +253,12 @@ model HomepageContent {
   title       String?
   subtitle    String?
   description String?
-  content     String?  // JSON string for complex data
+  content     String? // JSON string for complex data
   imageUrl    String?
   isActive    Boolean  @default(true)
   order       Int      @default(0)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  
+
   @@map("homepage_content")
 }

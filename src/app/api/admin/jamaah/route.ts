@@ -97,7 +97,7 @@ export async function POST(request: NextRequest) {
           rt,
           rw,
           keterangan,
-          phone
+          phone: phone || undefined
         }
       })
       return NextResponse.json(newItem, { status: 201 })
