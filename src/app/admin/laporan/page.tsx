@@ -85,9 +85,13 @@ export default function LaporanAdmin() {
       
       const pageWidth = doc.internal.pageSize.getWidth()
       const centerX = pageWidth / 2
+      const headerDrawnPages = new Set()
 
       // Function to draw header (Kop) on every page
       const drawHeader = (docObj: jsPDF, logo: HTMLImageElement | null) => {
+        const currentPage = docObj.getNumberOfPages()
+        if (headerDrawnPages.has(currentPage)) return
+
         // --- 1. LOGO & HEADER ---
         if (logo && logo.complete && logo.naturalWidth > 0) {
           docObj.addImage(logo, 'PNG', centerX - 10, 10, 20, 20)
@@ -110,6 +114,8 @@ export default function LaporanAdmin() {
         docObj.line(15, 48, pageWidth - 15, 48)
         docObj.setLineWidth(0.2)
         docObj.line(15, 49.5, pageWidth - 15, 49.5)
+
+        headerDrawnPages.add(currentPage)
       }
 
       // Pre-load logo
