@@ -144,17 +144,19 @@ export default function LaporanAdmin() {
       doc.text(`Rp ${(data.totalIncome - data.totalExpense).toLocaleString('id-ID')}`, startX + (cardW + 3) * 2 + cardW/2, cardY + 20, { align: 'center' })
 
       let currentY = cardY + cardH + 10
-
+      // Table for Pemasukan
       autoTable(doc, {
         startY: currentY,
-        head: [['No', 'Tanggal', 'Keterangan Pemasukan', 'Penerima', 'Jumlah']],
+        head: [['No', 'Tanggal', 'Sumber Dana', 'Qty', 'Unit', 'Harga Satuan', 'Total']],
         body: txs.income.length > 0 ? txs.income.map((t: any, i: number) => [
           i + 1, 
           new Date(t.date).toLocaleDateString('id-ID'), 
-          t.description || t.source,
-          t.sourceUnit || 'Donasi',
+          t.source || '-',
+          t.qty || 1,
+          t.sourceUnit || '-',
+          `Rp ${(t.unitPrice || t.amount).toLocaleString('id-ID')}`,
           `Rp ${t.amount.toLocaleString('id-ID')}`
-        ]) : [['-', '-', 'Tidak ada data pemasukan', '-', 'Rp 0']],
+        ]) : [['-', '-', 'Tidak ada data pemasukan', '-', '-', '-', 'Rp 0']],
         margin: { top: 55, bottom: 25 },
         didDrawPage: (dt) => {
           if (dt.pageNumber > 1) {
@@ -163,28 +165,42 @@ export default function LaporanAdmin() {
         },
         headStyles: { fillColor: [240, 253, 244], textColor: dkmEmerald, fontSize: 8, fontStyle: 'bold' },
         styles: { fontSize: 8, cellPadding: 3 },
-        columnStyles: { 4: { halign: 'right', fontStyle: 'bold' } }
+        columnStyles: { 
+          0: { cellWidth: 10 },
+          3: { halign: 'center' },
+          5: { halign: 'right' },
+          6: { halign: 'right', fontStyle: 'bold' } 
+        }
       })
 
       currentY = (doc as any).lastAutoTable.finalY + 10
 
+      // Table for Pengeluaran
       autoTable(doc, {
         startY: currentY,
-        head: [['No', 'Tanggal', 'Keterangan Pengeluaran', 'Kategori', 'Jumlah']],
+        head: [['No', 'Tanggal', 'Nama Barang', 'Kategori', 'Qty', 'Satuan', 'Harga', 'Total']],
         body: txs.expense.length > 0 ? txs.expense.map((t: any, i: number) => [
           i + 1,
           new Date(t.date).toLocaleDateString('id-ID'),
-          t.itemName || t.description,
-          t.category,
+          t.itemName || '-',
+          t.category || '-',
+          t.qty || 1,
+          t.unitType || '-',
+          `Rp ${(t.unitPrice || t.amount).toLocaleString('id-ID')}`,
           `Rp ${t.amount.toLocaleString('id-ID')}`
-        ]) : [['-', '-', 'Tidak ada data pengeluaran', '-', 'Rp 0']],
+        ]) : [['-', '-', 'Tidak ada data pengeluaran', '-', '-', '-', '-', 'Rp 0']],
         margin: { top: 55, bottom: 25 },
         didDrawPage: () => {
           drawHeader(doc, logoImg)
         },
         headStyles: { fillColor: [255, 241, 242], textColor: dkmRose, fontSize: 8, fontStyle: 'bold' },
         styles: { fontSize: 8, cellPadding: 3 },
-        columnStyles: { 4: { halign: 'right', fontStyle: 'bold' } }
+        columnStyles: { 
+          0: { cellWidth: 10 },
+          4: { halign: 'center' },
+          6: { halign: 'right' },
+          7: { halign: 'right', fontStyle: 'bold' } 
+        }
       })
 
       currentY = (doc as any).lastAutoTable.finalY + 15
