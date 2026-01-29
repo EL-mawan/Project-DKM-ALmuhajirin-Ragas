@@ -59,8 +59,7 @@ export default function LoginPage() {
         // Show success popup
         showSuccess(
           'Login Berhasil',
-          'Selamat datang kembali di Panel Administrasi DKM Al-Muhajirin.',
-          'Oke'
+          'Selamat datang kembali di Panel Administrasi Al-Muhajirin.'
         )
 
         // Small delay then redirect
@@ -101,7 +100,7 @@ export default function LoginPage() {
             </div>
             <CardTitle className="text-3xl font-black tracking-tight text-white mb-2">Assalamualaikum</CardTitle>
             <CardDescription className="text-emerald-100/60 font-medium">
-              Panel Administrasi DKM Al-Muhajirin
+              Panel Administrasi Al-Muhajirin
             </CardDescription>
           </CardHeader>
           
@@ -199,7 +198,7 @@ export default function LoginPage() {
         </Card>
         
         <p className="mt-8 text-center text-emerald-100/20 text-[10px] font-black uppercase tracking-[0.3em]">
-          &copy; 2026 DKM AL-MUHAJIRIN • ECO-SYSTEM SECURE
+          &copy; 2026 Al-Muhajirin Ragas Grenyang
         </p>
       </motion.div>
       <StatusPopup {...statusProps} />

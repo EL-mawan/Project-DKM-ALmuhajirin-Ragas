@@ -15,23 +15,23 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "DKM Al-Muhajirin Ragas Grenyang - Masjid Jami' Al-Muhajirin",
-  description: "DKM Masjid Jami' Al-Muhajirin Ragas Grenyang - Pusat kegiatan spiritual, pendidikan, dan sosial untuk masyarakat. Informasi jadwal, kegiatan, laporan keuangan, dan layanan jamaah.",
-  keywords: ["DKM Al-Muhajirin", "Masjid Jami' Al-Muhajirin", "Ragas Grenyang", "Masjid Bogor", "DKM", "Islam", "Jamaah", "Kegiatan Sosial"],
-  authors: [{ name: "DKM Al-Muhajirin Ragas Grenyang" }],
+  title: "Al-Muhajirin - Masjid Jami' Ragas Grenyang",
+  description: "Masjid Jami' Al-Muhajirin Ragas Grenyang - Pusat kegiatan spiritual, pendidikan, dan sosial untuk masyarakat. Informasi jadwal, kegiatan, laporan keuangan, dan layanan jamaah.",
+  keywords: ["Al-Muhajirin", "Masjid Jami' Al-Muhajirin", "Ragas Grenyang", "Masjid Ragas", "DKM", "Islam", "Jamaah", "Kegiatan Sosial"],
+  authors: [{ name: "Masjid Jami' Al-Muhajirin Ragas Grenyang" }],
   icons: {
     icon: "/logo.png",
   },
   openGraph: {
-    title: "DKM Al-Muhajirin Ragas Grenyang",
+    title: "Al-Muhajirin - Masjid Jami' Ragas Grenyang",
     description: "Pusat kegiatan spiritual, pendidikan, dan sosial untuk masyarakat Ragas Grenyang",
     url: "https://almuhajirin.com",
-    siteName: "DKM Al-Muhajirin",
+    siteName: "Al-Muhajirin",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "DKM Al-Muhajirin Ragas Grenyang",
+    title: "Al-Muhajirin - Masjid Jami' Ragas Grenyang",
     description: "Pusat kegiatan spiritual, pendidikan, dan sosial untuk masyarakat",
   },
 };

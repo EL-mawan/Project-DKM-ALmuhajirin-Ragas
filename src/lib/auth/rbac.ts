@@ -1,4 +1,4 @@
-// Role definitions and permissions for DKM Al-Muhajirin
+// Role definitions and permissions for Al-Muhajirin
 
 export interface Permission {
   resource: string

@@ -27,7 +27,7 @@ const navigation = [
     icon: Building,
     submenu: [
       { name: 'Tentang Kami', href: '#profil', description: 'Sejarah dan visi misi masjid' },
-      { name: 'Struktur Organisasi', href: '#profil', description: 'Pengurus DKM Al-Muhajirin' },
+      { name: 'Struktur Organisasi', href: '#profil', description: 'Pengurus Masjid Al-Muhajirin' },
     ]
   },
   { 

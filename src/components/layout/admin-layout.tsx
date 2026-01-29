@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { signOut, useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
@@ -38,6 +38,32 @@ export function AdminLayout({ children, title, subtitle }: AdminLayoutProps) {
   const pathname = usePathname()
   const router = useRouter()
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [isVisible, setIsVisible] = useState(true)
+  const [lastScrollY, setLastScrollY] = useState(0)
+  const scrollRef = useRef<HTMLDivElement>(null)
+
+  // Header visibility logic
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = scrollRef.current?.scrollTop || 0
+      
+      if (currentScrollY > lastScrollY && currentScrollY > 80) {
+        // Scrolling down and past header
+        setIsVisible(false)
+      } else {
+        // Scrolling up or at top
+        setIsVisible(true)
+      }
+      
+      setLastScrollY(currentScrollY)
+    }
+
+    const container = scrollRef.current
+    if (container) {
+      container.addEventListener('scroll', handleScroll, { passive: true })
+      return () => container.removeEventListener('scroll', handleScroll)
+    }
+  }, [lastScrollY])
   
   // Protect all admin routes
   useEffect(() => {
@@ -95,8 +121,8 @@ export function AdminLayout({ children, title, subtitle }: AdminLayoutProps) {
                   <img src="/logo.png" alt="Logo" className="h-full w-full object-contain" />
                 </div>
                 <div>
-                  <h2 className="text-lg font-bold tracking-tight text-white">Admin DKM</h2>
-                  <p className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest leading-none">Al-Muhajirin</p>
+                  <h2 className="text-lg font-bold tracking-tight text-white">Al-Muhajirin</h2>
+                  <p className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest leading-none">Masjid Jami' Ragas Grenyang</p>
                 </div>
               </div>
             </div>
@@ -143,38 +169,42 @@ export function AdminLayout({ children, title, subtitle }: AdminLayoutProps) {
           </div>
         </aside>
 
-        {/* Main Body */}
-        <main className="flex-1 flex flex-col min-w-0">
-          {/* Mobile Header */}
-          <MobileAdminHeader 
-            title={title} 
-            subtitle={subtitle} 
-            variant={pathname === '/admin' ? 'dashboard' : 'simple'} 
-          />
-          {/* Spacer for fixed header on mobile */}
-          <div className="h-20 sm:hidden" />
+        <main className="flex-1 flex flex-col min-w-0 relative">
+          {/* Header Container (Fixed) */}
+          <div className={`fixed top-0 right-0 z-40 h-22 transition-transform duration-300 left-0 md:left-72 ${isVisible ? 'translate-y-0' : '-translate-y-full'}`}>
+            {/* Mobile Header */}
+            <MobileAdminHeader 
+              title={title} 
+              subtitle={subtitle} 
+              variant={pathname === '/admin' ? 'dashboard' : 'simple'} 
+              className="w-full h-full"
+            />
 
-          {/* Desktop header */}
-          <header className="h-20 border-b border-neutral-200 bg-white/70 backdrop-blur-xl sticky top-0 z-30 px-8 hidden sm:flex items-center justify-between">
-            <div className="flex items-center">
-              <div>
-                <h1 className="text-xl font-bold tracking-tight text-neutral-900 leading-none">{title}</h1>
-                <p className="text-xs text-neutral-500 mt-1">{subtitle}</p>
+            {/* Desktop header */}
+            <header className="h-22 border-b border-neutral-200 bg-white/70 backdrop-blur-xl hidden sm:flex items-center justify-between px-8 w-full">
+              <div className="flex items-center">
+                <div>
+                  <h1 className="text-xl font-bold tracking-tight text-neutral-900 leading-none">{title}</h1>
+                  <p className="text-xs text-neutral-500 mt-1">{subtitle}</p>
+                </div>
               </div>
-            </div>
 
-            <div className="flex items-center space-x-4">
-              <div className="hidden lg:flex items-center space-x-2 bg-emerald-50 text-emerald-700 px-4 py-2 rounded-full border border-emerald-100">
-                <UserCheck className="h-4 w-4" />
-                <span className="text-xs font-bold uppercase tracking-tighter">{userRole} AUTHENTICATED</span>
+              <div className="flex items-center space-x-4">
+                <div className="hidden lg:flex items-center space-x-2 bg-emerald-50 text-emerald-700 px-4 py-2 rounded-full border border-emerald-100">
+                  <UserCheck className="h-4 w-4" />
+                  <span className="text-xs font-bold uppercase tracking-tighter">{userRole} AUTHENTICATED</span>
+                </div>
+                <Button variant="outline" size="icon" className="rounded-xl border-neutral-200">
+                  <Settings className="h-4 w-4" />
+                </Button>
               </div>
-              <Button variant="outline" size="icon" className="rounded-xl border-neutral-200">
-                <Settings className="h-4 w-4" />
-              </Button>
-            </div>
-          </header>
+            </header>
+          </div>
 
-          <div className="flex-1 overflow-y-auto pt-(--header-height,0px) sm:pt-0">
+          <div 
+            ref={scrollRef}
+            className="flex-1 overflow-y-auto pt-22"
+          >
             {children}
           </div>
         </main>

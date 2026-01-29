@@ -84,7 +84,7 @@ export async function GET(request: NextRequest) {
 
     // Generate report data
     const reportData = {
-      title: `Laporan Keuangan DKM Al-Muhajirin`,
+      title: `Laporan Keuangan Al-Muhajirin`,
       period: period === 'yearly' ? `Tahun ${year}` : `Bulan ${month} ${year}`,
       startDate: startDate.toISOString().split('T')[0],
       endDate: endDate.toISOString().split('T')[0],
@@ -350,8 +350,8 @@ function generatePDFHTML(data: any): string {
     </div>
 
     <div class="footer">
-        <p>Laporan ini dibuat secara otomatis oleh sistem DKM Al-Muhajirin</p>
-        <p>DKM Masjid Jami' Al-Muhajirin Ragas Grenyang</p>
+        <p>Laporan ini dibuat secara otomatis oleh sistem administrasi Al-Muhajirin</p>
+        <p>Masjid Jami' Al-Muhajirin Ragas Grenyang</p>
     </div>
 </body>
 </html>

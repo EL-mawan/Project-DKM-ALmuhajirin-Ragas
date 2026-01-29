@@ -12,32 +12,34 @@ interface MobileAdminHeaderProps {
   title?: string
   subtitle?: string
   variant?: 'dashboard' | 'simple'
+  className?: string
 }
 
-export function MobileAdminHeader({ title, subtitle, variant = 'dashboard' }: MobileAdminHeaderProps) {
+export function MobileAdminHeader({ title, subtitle, variant = 'dashboard', className }: MobileAdminHeaderProps) {
   const { data: session } = useSession()
   const userRole = session?.user?.role || 'User'
 
   return (
-    <div className="bg-[#062c21] text-white px-6 h-20 fixed top-0 left-0 right-0 z-50 flex items-center justify-between shadow-2xl shadow-black/40 sm:hidden">
-      <div className="flex items-center space-x-3">
-        <div className="h-10 w-10 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center">
-           <div className="h-7 w-7 rounded-lg bg-white p-0.5 overflow-hidden flex items-center justify-center">
-             <img src="/logo.png" alt="Logo" className="h-full w-full object-contain" />
-           </div>
+    <div className={cn(
+      "bg-white text-neutral-900 px-6 h-22 z-50 flex items-center justify-between shadow-sm border-b border-neutral-100 sm:hidden",
+      className
+    )}>
+      <div className="flex items-center space-x-4">
+        <div className="h-12 w-12 rounded-2xl bg-white p-1 flex items-center justify-center border border-neutral-100 shadow-sm">
+           <img src="/logo.png" alt="Logo" className="h-full w-full object-contain" />
         </div>
         <div>
-          <p className="text-white/40 text-[8px] font-black uppercase tracking-widest leading-none mb-1">Al-Muhajirin</p>
-          <p className="font-bold text-sm tracking-tight text-white line-clamp-1">
-            {variant === 'dashboard' ? (session?.user?.name || 'Dashboard') : (title || 'Panel')}
+          <h2 className="font-extrabold text-xl tracking-tighter text-neutral-900 leading-none">Al-Muhajirin</h2>
+          <p className="text-emerald-600 text-[8px] font-black uppercase tracking-widest mt-1.5 leading-none">
+            MASJID JAMI' RAGAS GRENYANG
           </p>
         </div>
       </div>
       
       <div className="flex items-center space-x-2">
-        <button className="h-9 w-9 rounded-full bg-white/10 hover:bg-white/20 text-white backdrop-blur-lg border border-white/10 flex items-center justify-center relative transition-all">
+        <button className="h-10 w-10 rounded-full bg-neutral-50 hover:bg-neutral-100 text-neutral-500 border border-neutral-200 flex items-center justify-center relative transition-all shadow-sm">
           <Bell className="h-4 w-4" />
-          <span className="absolute top-2 right-2 h-1.5 w-1.5 bg-rose-500 rounded-full ring-2 ring-[#062c21]" />
+          <span className="absolute top-3 right-3 h-2 w-2 bg-rose-500 rounded-full ring-2 ring-white" />
         </button>
       </div>
     </div>

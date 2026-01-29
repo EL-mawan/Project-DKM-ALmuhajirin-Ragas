@@ -76,7 +76,7 @@ export default function AdminDashboard() {
       case 'Master Admin':
         return {
           title: 'Sistem Kendali Utama',
-          welcome: 'Kelola seluruh aspek sistem DKM Al-Muhajirin.',
+          welcome: 'Kelola seluruh aspek sistem Al-Muhajirin.',
           stats: [
             { label: 'Total User', value: '12', icon: Users, color: 'text-blue-500' },
             { label: 'Audit Log', value: '128', icon: FileText, color: 'text-gray-500' },

@@ -90,7 +90,7 @@ export default function StrukturAdmin() {
       if (res.ok) {
         showSuccess(
           editingItem ? 'Data Diperbarui' : 'Berhasil Menambah',
-          editingItem ? 'Informasi pengurus DKM telah berhasil diperbarui.' : 'Pengurus baru telah resmi terdaftar di sistem.'
+          editingItem ? 'Informasi pengurus telah berhasil diperbarui.' : 'Pengurus baru telah resmi terdaftar di sistem.'
         )
         setIsModalOpen(false)
         setEditingItem(null)
@@ -126,7 +126,7 @@ export default function StrukturAdmin() {
   )
 
   return (
-    <AdminLayout title="Struktur Organisasi" subtitle="Kelola susunan pengurus DKM Al-Muhajirin.">
+    <AdminLayout title="Struktur Organisasi" subtitle="Kelola susunan pengurus Al-Muhajirin.">
       <div className="p-6 sm:p-8 space-y-6">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
