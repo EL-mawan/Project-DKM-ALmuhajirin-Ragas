@@ -72,15 +72,51 @@ export default function AdminDashboard() {
 
   // Role-specific stats and welcome text
   const getDashboardConfig = () => {
-    return {
-      title: 'Sistem Kendali Utama DKM',
-      welcome: 'Monitoring dan pengelolaan terpadu kegiatan Masjid DKM Al-Muhajirin Kp. Ragas Grenyang.',
-      stats: [
-        { label: 'Total Jamaah', value: '250+', icon: Users, color: 'text-primary' },
-        { label: 'Saldo Aktif', value: formatCurrency(142500000), icon: DollarSign, color: 'text-emerald-500' },
-        { label: 'Agenda Masjid', value: '12', icon: Calendar, color: 'text-blue-500' },
-        { label: 'Pesan Masuk', value: '14', icon: MessageSquare, color: 'text-indigo-500' }
-      ]
+    switch(userRole) {
+      case 'Master Admin':
+        return {
+          title: 'Sistem Kendali Utama',
+          welcome: 'Kelola seluruh aspek sistem Al-Muhajirin.',
+          stats: [
+            { label: 'Total User', value: '12', icon: Users, color: 'text-blue-500' },
+            { label: 'Audit Log', value: '128', icon: FileText, color: 'text-gray-500' },
+            { label: 'Uptime Sistem', value: '99.9%', icon: TrendingUp, color: 'text-emerald-500' },
+            { label: 'Database Size', value: '2.4MB', icon: Building, color: 'text-amber-500' }
+          ]
+        }
+      case 'Bendahara DKM':
+        return {
+          title: 'Manajemen Perbendaharaan',
+          welcome: 'Pantau arus kas dan transparansi dana umat.',
+          stats: [
+            { label: 'Pemasukan/Bln', value: formatCurrency(45200000), icon: ArrowUpRight, color: 'text-emerald-500' },
+            { label: 'Pengeluaran/Bln', value: formatCurrency(32800000), icon: ArrowDownRight, color: 'text-rose-500' },
+            { label: 'Saldo Aktif', value: formatCurrency(142500000), icon: DollarSign, color: 'text-primary' },
+            { label: 'Laporan Pending', value: '2', icon: AlertCircle, color: 'text-amber-500' }
+          ]
+        }
+      case 'Ketua DKM':
+        return {
+          title: 'Dashboard Kebijakan',
+          welcome: 'Tinjau dan setujui program kerja serta laporan.',
+          stats: [
+            { label: 'Persetujuan Baru', value: '5', icon: AlertCircle, color: 'text-amber-500' },
+            { label: 'Kegiatan Aktif', value: '8', icon: Calendar, color: 'text-blue-500' },
+            { label: 'Total Jamaah', value: '250+', icon: Users, color: 'text-primary' },
+            { label: 'Pesan Masuk', value: '14', icon: MessageSquare, color: 'text-indigo-500' }
+          ]
+        }
+      default:
+        return {
+          title: 'Panel Kendali Konten',
+          welcome: 'Selamat datang kembali di sistem kolaborasi DKM.',
+          stats: [
+            { label: 'Data Jamaah', value: '250', icon: Users, color: 'text-blue-500' },
+            { label: 'Agenda Masjid', value: '12', icon: Calendar, color: 'text-emerald-500' },
+            { label: 'Galeri Baru', value: '45', icon: Image, color: 'text-purple-500' },
+            { label: 'Pesan', value: '3', icon: MessageSquare, color: 'text-indigo-500' }
+          ]
+        }
     }
   }
 

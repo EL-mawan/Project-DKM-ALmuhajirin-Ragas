@@ -42,6 +42,9 @@ export function MobileAdminHeader({ title, subtitle, variant = 'dashboard', clas
           <p className="text-emerald-600 text-[8px] font-black uppercase tracking-widest mt-1.5 leading-none">
             Kp. Ragas Grenyang
           </p>
+          <p className="text-neutral-400 text-[8px] font-bold mt-1 leading-none">
+            {userRole} | {session?.user?.name || 'Administrator'}
+          </p>
         </div>
       </motion.div>
       

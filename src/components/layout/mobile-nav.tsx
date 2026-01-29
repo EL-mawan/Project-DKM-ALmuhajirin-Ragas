@@ -41,13 +41,24 @@ export function MobileNav() {
       KONTAK: { icon: MessageSquare, label: 'Pesan', href: '/admin/kontak' },
     }
 
-    return [
-      commonItems.PANEL,
-      commonItems.JAMAAH,
-      commonItems.KEUANGAN,
-      commonItems.AGENDA,
-      commonItems.LOGOUT
-    ]
+    switch(userRole) {
+      case 'Ketua DKM':
+      case 'Tokoh Masyarakat':
+        return [commonItems.PANEL, commonItems.STRUKTUR, commonItems.AGENDA, commonItems.BERITA, commonItems.LOGOUT]
+      
+      case 'Sekretaris DKM':
+      case 'RISMA (Remaja Islam)':
+        return [commonItems.PANEL, commonItems.JAMAAH, commonItems.AGENDA, commonItems.BERITA, commonItems.LOGOUT]
+      
+      case 'Bendahara DKM':
+        return [commonItems.PANEL, commonItems.KEUANGAN, commonItems.LPJ, commonItems.KONTAK, commonItems.LOGOUT]
+      
+      case 'Master Admin':
+        return [commonItems.PANEL, commonItems.JAMAAH, commonItems.KEUANGAN, commonItems.BERITA, commonItems.LOGOUT]
+
+      default:
+        return [commonItems.PANEL, commonItems.JAMAAH, commonItems.KEUANGAN, commonItems.BERITA, commonItems.LOGOUT]
+    }
   }
 
   const navItems = getNavItems()

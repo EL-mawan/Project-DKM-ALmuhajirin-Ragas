@@ -124,6 +124,9 @@ export function AdminLayout({ children, title, subtitle }: AdminLayoutProps) {
                 <div>
                   <h2 className="text-lg font-bold tracking-tight text-white">DKM Al-Muhajirin</h2>
                   <p className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest leading-none">Kp. Ragas Grenyang</p>
+                  <p className="text-[9px] font-bold text-emerald-100/40 mt-1.5 leading-none">
+                    {userRole} | {session?.user?.name || 'Administrator'}
+                  </p>
                 </div>
               </div>
             </div>
