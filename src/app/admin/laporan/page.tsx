@@ -96,21 +96,27 @@ export default function LaporanAdmin() {
         logoImg = null
       }
 
-      // Initial Header
+      // Initial Header for first page
       drawHeader(doc, logoImg)
 
-      // --- 2. SUMMARY SECTION ---
+      // --- 2. SUMMARY SECTION (Only on first page) ---
+      // Add Nama Periode Laporan (Title)
+      doc.setFontSize(14)
+      doc.setTextColor(dkmSlate[0], dkmSlate[1], dkmSlate[2])
+      doc.setFont('helvetica', 'bold')
+      doc.text(data.title.toUpperCase(), centerX, 58, { align: 'center' })
+      
       doc.setFontSize(9)
       doc.setTextColor(148, 163, 184)
       doc.setFont('helvetica', 'normal')
-      doc.text(`Tahun ${new Date().getFullYear()}`, centerX, 56, { align: 'center' })
+      doc.text(`Tahun ${new Date().getFullYear()}`, centerX, 65, { align: 'center' })
       
       const dateStr = new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
       doc.setFontSize(8)
       doc.setTextColor(100, 116, 139)
-      doc.text(`Ditetapkan: ${dateStr}`, centerX, 61, { align: 'center' })
+      doc.text(`Ditetapkan: ${dateStr}`, centerX, 70, { align: 'center' })
 
-      const cardY = 68
+      const cardY = 78
       const cardW = 58
       const cardH = 30
       const startX = 13
