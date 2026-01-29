@@ -123,7 +123,7 @@ export function AdminLayout({ children, title, subtitle }: AdminLayoutProps) {
                 </div>
                 <div>
                   <h2 className="text-lg font-bold tracking-tight text-white">DKM Al-Muhajirin</h2>
-                  <p className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest leading-none">Kp. RAGAS GRENYANG</p>
+                  <p className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest leading-none">Kp. Ragas Grenyang</p>
                 </div>
               </div>
             </div>

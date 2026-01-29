@@ -70,12 +70,12 @@ export function Header() {
             <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white p-1.5 overflow-hidden shadow-lg shadow-primary/20 group-hover:scale-105 transition-transform">
               <img src="/logo.png" alt="Logo Al-Muhajirin" className="h-full w-full object-contain" />
             </div>
-            <div className="hidden lg:block leading-tight">
+            <div className="flex flex-col leading-tight">
               <h1 className="text-lg font-bold tracking-tight text-foreground">
                 DKM Al-Muhajirin
               </h1>
               <p className="text-[10px] font-medium uppercase tracking-widest text-primary">
-                Kp. RAGAS GRENYANG
+                Kp. Ragas Grenyang
               </p>
             </div>
           </Link>
@@ -160,7 +160,7 @@ export function Header() {
                       <div>
                         <h2 className="text-lg font-bold text-foreground">DKM Al-Muhajirin</h2>
                         <p className="text-[10px] uppercase tracking-wider text-primary font-semibold">
-                          Kp. RAGAS GRENYANG
+                          Kp. Ragas Grenyang
                         </p>
                       </div>
                     </Link>

@@ -40,7 +40,7 @@ export function MobileAdminHeader({ title, subtitle, variant = 'dashboard', clas
         <div>
           <h2 className="font-extrabold text-xl tracking-tighter text-neutral-900 leading-none">DKM Al-Muhajirin</h2>
           <p className="text-emerald-600 text-[8px] font-black uppercase tracking-widest mt-1.5 leading-none">
-            Kp. RAGAS GRENYANG
+            Kp. Ragas Grenyang
           </p>
         </div>
       </motion.div>

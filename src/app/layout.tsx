@@ -15,10 +15,10 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "DKM Al-Muhajirin - Kp. RAGAS GRENYANG",
-  description: "DKM Al-Muhajirin Kp. RAGAS GRENYANG - Pusat kegiatan spiritual, pendidikan, dan sosial untuk masyarakat. Informasi jadwal, kegiatan, laporan keuangan, dan layanan jamaah.",
+  title: "DKM Al-Muhajirin - Kp. Ragas Grenyang",
+  description: "DKM Al-Muhajirin Kp. Ragas Grenyang - Pusat kegiatan spiritual, pendidikan, dan sosial untuk masyarakat. Informasi jadwal, kegiatan, laporan keuangan, dan layanan jamaah.",
   keywords: ["Al-Muhajirin", "Masjid Jami' Al-Muhajirin", "Ragas Grenyang", "Masjid Ragas", "DKM", "Islam", "Jamaah", "Kegiatan Sosial"],
-  authors: [{ name: "DKM Al-Muhajirin Kp. RAGAS GRENYANG" }],
+  authors: [{ name: "DKM Al-Muhajirin Kp. Ragas Grenyang" }],
   icons: {
     icon: "/logo.png",
   },
