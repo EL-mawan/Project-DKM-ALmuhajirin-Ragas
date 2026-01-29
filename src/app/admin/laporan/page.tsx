@@ -226,11 +226,13 @@ export default function LaporanAdmin() {
                 `Rp ${t.amount.toLocaleString('id-ID')}`
               ]) 
           : [['-', '-', 'Tidak ada data pemasukan', '-', '-', '-', 'Rp 0']],
+        foot: [['', '', 'TOTAL PEMASUKAN', '', '', '', `Rp ${data.totalIncome.toLocaleString('id-ID')}`]],
         margin: { top: 55, bottom: 25 },
         didDrawPage: (dt) => {
           if (dt.pageNumber > 1) drawHeader(doc, logoImg)
         },
         headStyles: { fillColor: [240, 253, 244], textColor: dkmEmerald, fontSize: 8, fontStyle: 'bold' },
+        footStyles: { fillColor: [240, 253, 244], textColor: dkmEmerald, fontSize: 8, fontStyle: 'bold' },
         styles: { fontSize: 8, cellPadding: 3 },
         columnStyles: { 
           0: { cellWidth: 10 },
@@ -267,11 +269,13 @@ export default function LaporanAdmin() {
                 `Rp ${t.amount.toLocaleString('id-ID')}`
               ]) 
           : [['-', '-', 'Tidak ada data pengeluaran', '-', '-', '-', '-', 'Rp 0']],
+        foot: [['', '', 'TOTAL PENGELUARAN', '', '', '', '', `Rp ${data.totalExpense.toLocaleString('id-ID')}`]],
         margin: { top: 55, bottom: 25 },
         didDrawPage: (dt) => {
           if (dt.pageNumber > 1) drawHeader(doc, logoImg)
         },
         headStyles: { fillColor: [255, 241, 242], textColor: dkmRose, fontSize: 8, fontStyle: 'bold' },
+        footStyles: { fillColor: [255, 241, 242], textColor: dkmRose, fontSize: 8, fontStyle: 'bold' },
         styles: { fontSize: 8, cellPadding: 3 },
         columnStyles: { 
           0: { cellWidth: 10 },
