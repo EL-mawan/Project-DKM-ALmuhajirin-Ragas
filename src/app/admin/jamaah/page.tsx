@@ -474,17 +474,17 @@ export default function JamaahAdmin() {
                       {activeTab === 'kk' ? (
                         <>
                           <th className="px-4 py-5 w-12 text-center">No.</th>
-                          <th className="px-8 py-5">Nama</th>
-                          <th className="px-8 py-5">Blok/Link</th>
-                          <th className="px-8 py-5">Keterangan</th>
-                          <th className="px-8 py-5 text-right">Aksi</th>
+                          <th className="px-6 py-5 min-w-[250px]">Nama Lengkap</th>
+                          <th className="px-6 py-5">Blok/Link</th>
+                          <th className="px-6 py-5">Keterangan</th>
+                          <th className="px-6 py-5 text-right w-24">Aksi</th>
                         </>
                       ) : (
                         <>
-                          <th className="px-8 py-5">Nama & Detail</th>
-                          <th className="px-8 py-5">Lokasi / Alamat</th>
-                          <th className="px-8 py-5">Info Lain</th>
-                          <th className="px-8 py-5 text-right">Aksi</th>
+                          <th className="px-6 py-5 min-w-[250px]">Nama & Detail</th>
+                          <th className="px-6 py-5">Lokasi / Alamat</th>
+                          <th className="px-6 py-5">Info Lain</th>
+                          <th className="px-6 py-5 text-right w-24">Aksi</th>
                         </>
                       )}
                     </tr>
@@ -495,49 +495,49 @@ export default function JamaahAdmin() {
                         {activeTab === 'kk' ? (
                           <>
                             <td className="px-4 py-6 text-center">
-                              <div className="font-bold text-primary">{item.nomor}</div>
+                              <div className="font-bold text-emerald-600">{item.nomor}</div>
                             </td>
-                            <td className="px-8 py-6">
-                              <div className="font-bold text-[#0b3d2e]">{item.name}</div>
+                            <td className="px-6 py-6">
+                              <div className="font-black text-lg text-[#0b3d2e] tracking-tight">{item.name}</div>
                               {item.phone && (
-                                <div className="text-xs text-neutral-400 flex items-center mt-1">
-                                  <Phone className="h-3 w-3 mr-1 text-primary shrink-0" /> {item.phone}
+                                <div className="text-[10px] text-slate-400 font-bold flex items-center mt-1 uppercase tracking-widest">
+                                  <Phone className="h-2.5 w-2.5 mr-1.5 text-emerald-500 shrink-0" /> {item.phone}
                                 </div>
                               )}
                             </td>
-                            <td className="px-8 py-6">
-                              <div className="font-medium text-neutral-700">{item.blok}</div>
-                              <Badge variant="outline" className="text-[9px] uppercase font-bold bg-neutral-50 border-emerald-100 mt-1">
+                            <td className="px-6 py-6">
+                              <div className="font-bold text-slate-700 text-sm">{item.blok}</div>
+                              <Badge variant="outline" className="text-[9px] uppercase font-black bg-slate-50 border-emerald-100 mt-1 px-2 py-0">
                                 RT {item.rt}
                               </Badge>
                             </td>
-                            <td className="px-8 py-6">
-                              <div className="text-xs text-muted-foreground italic max-w-xs line-clamp-2">
+                            <td className="px-6 py-6">
+                              <div className="text-xs text-slate-500 font-medium italic max-w-xs line-clamp-2 leading-relaxed">
                                 {item.keterangan || '-'}
                               </div>
                             </td>
                           </>
                         ) : (
                           <>
-                            <td className="px-8 py-6">
-                              <div className="font-bold text-[#0b3d2e]">{item.name}</div>
-                              <div className="text-xs text-muted-foreground mt-0.5 flex items-center">
-                                <GraduationCap className="h-3 w-3 mr-1" /> {item.education || '-'}
+                            <td className="px-6 py-6">
+                              <div className="font-black text-lg text-[#0b3d2e] tracking-tight">{item.name}</div>
+                              <div className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1 flex items-center">
+                                <GraduationCap className="h-3 w-3 mr-1.5 text-emerald-500" /> {item.education || '-'}
                               </div>
                             </td>
-                            <td className="px-8 py-6">
-                              <div className="text-xs text-neutral-600 flex items-center">
-                                <MapPin className="h-3 w-3 mr-1 text-primary shrink-0" /> 
+                            <td className="px-6 py-6 font-medium">
+                              <div className="text-xs text-slate-600 flex items-center">
+                                <MapPin className="h-3 w-3 mr-1.5 text-emerald-500 shrink-0" /> 
                                 <span className="line-clamp-1">{item.address}</span>
                               </div>
                               {item.phone && (
-                                <div className="text-xs text-neutral-400 flex items-center mt-1">
-                                  <Phone className="h-3 w-3 mr-1 text-primary shrink-0" /> {item.phone}
+                                <div className="text-[10px] text-slate-400 font-bold uppercase tracking-widest flex items-center mt-1">
+                                  <Phone className="h-2.5 w-2.5 mr-1.5 text-emerald-500 shrink-0" /> {item.phone}
                                 </div>
                               )}
                             </td>
-                            <td className="px-8 py-6">
-                              <div className="text-xs font-medium text-neutral-500 line-clamp-1">
+                            <td className="px-6 py-6">
+                              <div className="text-xs font-bold text-slate-500 line-clamp-2 italic">
                                 {item.skills || 'Tidak ada info skill'}
                               </div>
                             </td>
