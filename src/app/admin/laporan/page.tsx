@@ -204,6 +204,7 @@ export default function LaporanAdmin() {
 
       // Section A: Pemasukan
       ensureSpace(40) // Check space for Title + 2-3 rows of table
+      const startPageA = doc.getNumberOfPages()
       doc.setFontSize(10)
       doc.setTextColor(dkmSlate[0], dkmSlate[1], dkmSlate[2])
       doc.setFont('helvetica', 'bold')
@@ -229,7 +230,13 @@ export default function LaporanAdmin() {
         foot: [['', '', 'TOTAL PEMASUKAN', '', '', '', `Rp ${data.totalIncome.toLocaleString('id-ID')}`]],
         margin: { top: 55, bottom: 25 },
         didDrawPage: (dt) => {
-          if (dt.pageNumber > 1) drawHeader(doc, logoImg)
+          drawHeader(doc, logoImg)
+          if (dt.pageNumber > startPageA) {
+            doc.setFontSize(9)
+            doc.setTextColor(dkmSlate[0], dkmSlate[1], dkmSlate[2])
+            doc.setFont('helvetica', 'bold')
+            doc.text(`A. DATA PEMASUKAN (Hal. ${dt.pageNumber})`, 15, 53)
+          }
         },
         headStyles: { fillColor: [240, 253, 244], textColor: dkmEmerald, fontSize: 8, fontStyle: 'bold' },
         footStyles: { fillColor: [240, 253, 244], textColor: dkmEmerald, fontSize: 8, fontStyle: 'bold' },
@@ -246,6 +253,7 @@ export default function LaporanAdmin() {
       
       // Section B: Pengeluaran
       ensureSpace(40)
+      const startPageB = doc.getNumberOfPages()
       doc.setFontSize(10)
       doc.setTextColor(dkmSlate[0], dkmSlate[1], dkmSlate[2])
       doc.setFont('helvetica', 'bold')
@@ -272,7 +280,13 @@ export default function LaporanAdmin() {
         foot: [['', '', 'TOTAL PENGELUARAN', '', '', '', '', `Rp ${data.totalExpense.toLocaleString('id-ID')}`]],
         margin: { top: 55, bottom: 25 },
         didDrawPage: (dt) => {
-          if (dt.pageNumber > 1) drawHeader(doc, logoImg)
+          drawHeader(doc, logoImg)
+          if (dt.pageNumber > startPageB) {
+            doc.setFontSize(9)
+            doc.setTextColor(dkmSlate[0], dkmSlate[1], dkmSlate[2])
+            doc.setFont('helvetica', 'bold')
+            doc.text(`B. DATA PENGELUARAN (Hal. ${dt.pageNumber})`, 15, 53)
+          }
         },
         headStyles: { fillColor: [255, 241, 242], textColor: dkmRose, fontSize: 8, fontStyle: 'bold' },
         footStyles: { fillColor: [255, 241, 242], textColor: dkmRose, fontSize: 8, fontStyle: 'bold' },
