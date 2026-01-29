@@ -133,6 +133,8 @@ export default function LaporanAdmin() {
           totalExpense: data.expense?.total || 0
         }))
         toast.success('Data keuangan berhasil ditarik')
+      } else {
+        toast.error(data.error || 'Gagal menarik data keuangan')
       }
     } catch (error) {
       toast.error('Gagal menarik data keuangan')
@@ -146,7 +148,11 @@ export default function LaporanAdmin() {
       setLoading(true)
       const res = await fetch('/api/admin/laporan')
       const json = await res.json()
-      setReports(json.reports || [])
+      if (res.ok) {
+        setReports(Array.isArray(json) ? json : json.reports || [])
+      } else {
+        toast.error(json.error || 'Gagal mengambil data laporan')
+      }
     } catch (error) {
       toast.error('Gagal mengambil data laporan')
     } finally {
@@ -205,7 +211,9 @@ export default function LaporanAdmin() {
   const reprintReport = async (report: any) => {
     try {
       toast.info('Menyiapkan dokumen LPJ...')
-      const res = await fetch(`/api/admin/keuangan?type=all&startDate=${report.startDate.split('T')[0]}&endDate=${report.endDate.split('T')[0]}`)
+      const sDate = report.startDate?.includes('T') ? report.startDate.split('T')[0] : report.startDate
+      const eDate = report.endDate?.includes('T') ? report.endDate.split('T')[0] : report.endDate
+      const res = await fetch(`/api/admin/keuangan?type=all&startDate=${sDate}&endDate=${eDate}`)
       const data = await res.json()
       
       if (res.ok) {
