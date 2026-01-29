@@ -245,7 +245,7 @@ export default function KeuanganAdmin() {
               </div>
 
               <form onSubmit={handleSubmit} onKeyDown={handleKeyDown} className="p-8 space-y-6 max-h-[75vh] overflow-y-auto bg-white">
-                <div className="grid grid-cols-2 gap-2 p-1.5 bg-neutral-100 rounded-[1.5rem]">
+                <div className="grid grid-cols-2 gap-2 p-1.5 bg-neutral-100 rounded-3xl">
                   <button 
                     type="button"
                     className={cn("py-3.5 rounded-2xl font-black text-xs uppercase tracking-widest transition-all", formData.type === 'income' ? "bg-white text-emerald-600 shadow-sm" : "text-neutral-400")}
@@ -319,7 +319,7 @@ export default function KeuanganAdmin() {
                           />
                         </div>
                       </div>
-                      <div className="space-y-2 bg-emerald-50 p-6 rounded-[2rem] border border-emerald-100 md:col-span-2">
+                      <div className="space-y-2 bg-emerald-50 p-6 rounded-4xl border border-emerald-100 md:col-span-2">
                         <Label className="text-[10px] font-black uppercase tracking-widest text-emerald-700">Total Jumlah Pemasukan</Label>
                         <div className="text-3xl font-black text-[#0b3d2e] mt-1">
                           Rp {parseFloat(formData.amount).toLocaleString('id-ID')}
@@ -388,7 +388,7 @@ export default function KeuanganAdmin() {
                           </SelectContent>
                         </Select>
                       </div>
-                      <div className="space-y-2 bg-rose-50 p-6 rounded-[2rem] border border-rose-100 md:col-span-2">
+                      <div className="space-y-2 bg-rose-50 p-6 rounded-4xl border border-rose-100 md:col-span-2">
                         <Label className="text-[10px] font-black uppercase tracking-widest text-rose-700">Total Jumlah Pengeluaran</Label>
                         <div className="text-3xl font-black text-rose-900 mt-1">
                           Rp {parseFloat(formData.amount).toLocaleString('id-ID')}
@@ -399,12 +399,12 @@ export default function KeuanganAdmin() {
 
                   <div className="space-y-2 md:col-span-2">
                     <Label className="text-[10px] font-black uppercase tracking-widest text-neutral-400">Keterangan / Catatan</Label>
-                    <textarea 
-                      placeholder="Tambahkan detail rincian transaksi di sini..." 
-                      className="w-full min-h-[100px] p-6 rounded-[1.5rem] border-neutral-100 bg-neutral-50/50 text-sm focus:outline-none focus:ring-4 focus:ring-emerald-500/5 transition-all"
-                      value={formData.description}
-                      onChange={e => setFormData({...formData, description: e.target.value})}
-                    />
+                      <textarea 
+                        placeholder="Tambahkan detail rincian transaksi di sini..." 
+                        className="w-full min-h-[100px] p-6 rounded-3xl border-neutral-100 bg-neutral-50/50 text-sm focus:outline-none focus:ring-4 focus:ring-emerald-500/5 transition-all"
+                        value={formData.description}
+                        onChange={e => setFormData({...formData, description: e.target.value})}
+                      />
                   </div>
                 </div>
 
@@ -412,7 +412,7 @@ export default function KeuanganAdmin() {
                   <Button 
                     type="button"
                     variant="ghost" 
-                    className="flex-1 h-16 rounded-[1.5rem] font-bold bg-neutral-50 text-neutral-400 hover:text-neutral-900"
+                    className="flex-1 h-16 rounded-3xl font-bold bg-neutral-50 text-neutral-400 hover:text-neutral-900"
                     onClick={() => setIsModalOpen(false)}
                   >
                     Batal
@@ -420,7 +420,7 @@ export default function KeuanganAdmin() {
                   <Button 
                     type="submit" 
                     disabled={isSubmitting}
-                    className="flex-[2] h-16 rounded-[1.5rem] font-black bg-[#0b3d2e] hover:bg-[#062c21] shadow-2xl shadow-emerald-900/10 text-white uppercase tracking-widest"
+                    className="flex-2 h-16 rounded-3xl font-black bg-[#0b3d2e] hover:bg-[#062c21] shadow-2xl shadow-emerald-900/10 text-white uppercase tracking-widest"
                   >
                     {isSubmitting ? (
                       <Loader2 className="h-5 w-5 animate-spin mr-2" />

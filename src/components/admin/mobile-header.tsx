@@ -38,6 +38,11 @@ export function MobileAdminHeader({ title, subtitle, variant = 'dashboard', clas
            <img src="/logo.png" alt="Logo" className="h-full w-full object-contain" />
         </motion.div>
         <div>
+          {title && (
+            <p className="text-[10px] font-black text-emerald-600 uppercase tracking-[0.2em] mb-1 leading-none">
+              {title}
+            </p>
+          )}
           <h2 className="font-extrabold text-xl tracking-tighter text-neutral-900 leading-none">DKM Al-Muhajirin</h2>
           <p className="text-emerald-600 text-[8px] font-black uppercase tracking-widest mt-1.5 leading-none">
             Kp. Ragas Grenyang
