@@ -255,22 +255,16 @@ export default function AdminDashboard() {
                 Butuh bantuan pengelolaan? Akses modul utama dengan cepat melalui tombol dibawah ini sesuai kewenangan Anda.
               </p>
               <div className="grid grid-cols-2 gap-3">
-                <Button variant="secondary" className="bg-white/10 border-white/20 text-white rounded-2xl h-24 flex-col hover:bg-white hover:text-primary transition-all">
-                  <Calendar className="h-6 w-6 mb-2" />
-                  <span className="text-[10px] font-bold uppercase tracking-widest">Acara</span>
-                </Button>
-                <Button variant="secondary" className="bg-white/10 border-white/20 text-white rounded-2xl h-24 flex-col hover:bg-white hover:text-primary transition-all">
-                  <Users className="h-6 w-6 mb-2" />
-                  <span className="text-[10px] font-bold uppercase tracking-widest">Jamaah</span>
-                </Button>
-                <Button variant="secondary" className="bg-white/10 border-white/20 text-white rounded-2xl h-24 flex-col hover:bg-white hover:text-primary transition-all">
-                  <DollarSign className="h-6 w-6 mb-2" />
-                  <span className="text-[10px] font-bold uppercase tracking-widest">Kas</span>
-                </Button>
-                <Button variant="secondary" className="bg-white/10 border-white/20 text-white rounded-2xl h-24 flex-col hover:bg-white hover:text-primary transition-all">
-                  <Newspaper className="h-6 w-6 mb-2" />
-                  <span className="text-[10px] font-bold uppercase tracking-widest">Berita</span>
-                </Button>
+                {filteredMenuItems.slice(0, 4).map((item, i) => (
+                  <Link key={i} href={item.href}>
+                    <Button variant="secondary" className="w-full bg-white/10 border-white/20 text-white rounded-2xl h-24 flex-col hover:bg-white hover:text-primary transition-all">
+                      <item.icon className="h-6 w-6 mb-2" />
+                      <span className="text-[10px] font-bold uppercase tracking-widest text-center truncate w-full px-2">
+                        {item.label.replace('Manajemen ', '').replace('Data ', '').replace('Agenda ', '')}
+                      </span>
+                    </Button>
+                  </Link>
+                ))}
               </div>
             </div>
           </div>

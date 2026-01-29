@@ -44,20 +44,20 @@ export function MobileNav() {
     switch(userRole) {
       case 'Ketua DKM':
       case 'Tokoh Masyarakat':
-        return [commonItems.PANEL, commonItems.STRUKTUR, commonItems.AGENDA, commonItems.BERITA, commonItems.LOGOUT]
+        return [commonItems.STRUKTUR, commonItems.AGENDA, commonItems.BERITA, commonItems.LOGOUT]
       
       case 'Sekretaris DKM':
       case 'RISMA (Remaja Islam)':
-        return [commonItems.PANEL, commonItems.JAMAAH, commonItems.AGENDA, commonItems.BERITA, commonItems.LOGOUT]
+        return [commonItems.JAMAAH, commonItems.AGENDA, commonItems.BERITA, commonItems.LOGOUT]
       
       case 'Bendahara DKM':
-        return [commonItems.PANEL, commonItems.KEUANGAN, commonItems.LPJ, commonItems.KONTAK, commonItems.LOGOUT]
+        return [commonItems.KEUANGAN, commonItems.LPJ, commonItems.KONTAK, commonItems.LOGOUT]
       
       case 'Master Admin':
-        return [commonItems.PANEL, commonItems.JAMAAH, commonItems.KEUANGAN, commonItems.BERITA, commonItems.LOGOUT]
+        return [commonItems.JAMAAH, commonItems.KEUANGAN, commonItems.BERITA, commonItems.LOGOUT]
 
       default:
-        return [commonItems.PANEL, commonItems.JAMAAH, commonItems.KEUANGAN, commonItems.BERITA, commonItems.LOGOUT]
+        return [commonItems.JAMAAH, commonItems.KEUANGAN, commonItems.BERITA, commonItems.LOGOUT]
     }
   }
 
