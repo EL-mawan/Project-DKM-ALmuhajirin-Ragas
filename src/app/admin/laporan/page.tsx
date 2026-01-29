@@ -262,7 +262,7 @@ export default function LaporanAdmin() {
       // Table for Pengeluaran
       autoTable(doc, {
         startY: currentY,
-        head: [['No', 'Tanggal', 'Nama Barang', 'Kategori', 'Qty', 'Satuan', 'Harga', 'Total']],
+        head: [['No', 'Tanggal', 'Nama Barang | Unit', 'Kategori', 'Qty', 'Satuan', 'Harga', 'Total']],
         body: txs.expense.length > 0 
           ? [...txs.expense]
               .sort((a: any, b: any) => new Date(a.date).getTime() - new Date(b.date).getTime())

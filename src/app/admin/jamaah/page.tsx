@@ -34,7 +34,7 @@ export default function JamaahAdmin() {
   const [data, setData] = useState<any[]>([])
   const [search, setSearch] = useState('')
   const [activeTab, setActiveTab] = useState('kk')
-  const [rtFilter, setRtFilter] = useState<string>('all') // Filter RT
+  const [rtFilter, setRtFilter] = useState<string>('015') // Filter RT
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingItem, setEditingItem] = useState<any>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -183,39 +183,85 @@ export default function JamaahAdmin() {
   // PDF Generation for Kepala Keluarga
   const generatePDF = () => {
     const doc = new jsPDF()
-    doc.setFontSize(16)
-    doc.setFont('helvetica', 'bold')
-    doc.text('Data Masyarakat Kp. Ragas Grenyang Masjid Al-Muhajirin', 105, 15, { align: 'center' })
-    
-    doc.setFontSize(12)
     const rtLabel = rtFilter === 'all' ? '015 & 016' : rtFilter
-    doc.text(`RT. ${rtLabel}`, 105, 22, { align: 'center' })
+    const itemsPerPage = 60
+    const itemsPerColumn = 30
 
-    const tableColumn = ["No", "Nama", "Blok/Link", "Keterangan", "Nominal (Rp)"]
-    const tableRows = sortedDataForPDF.map((item) => [
-      item.nomor,
-      item.name,
-      item.blok,
-      item.keterangan || '-',
-      ""
-    ])
+    // Split data into chunks of 60 (one page per chunk)
+    for (let i = 0; i < sortedDataForPDF.length; i += itemsPerPage) {
+      if (i > 0) doc.addPage()
 
-    autoTable(doc, {
-      head: [tableColumn],
-      body: tableRows,
-      startY: 30,
-      theme: 'grid',
-      headStyles: { fillColor: [11, 61, 46], textColor: [255, 255, 255], fontStyle: 'bold', halign: 'center' },
-      styles: { fontSize: 10, cellPadding: 3 },
-      columnStyles: {
-        0: { halign: 'center', cellWidth: 15 },
-        1: { cellWidth: 50 },
-        2: { cellWidth: 40 },
-        3: { cellWidth: 50 },
-        4: { cellWidth: 35 }
+      // HEADER
+      doc.setFontSize(14)
+      doc.setFont('helvetica', 'bold')
+      doc.text('Data Masyarakat Kp. Ragas Grenyang Masjid Al-Muhajirin', 105, 12, { align: 'center' })
+      
+      doc.setFontSize(12)
+      doc.text(`RT. ${rtLabel}`, 105, 18, { align: 'center' })
+
+      const chunk = sortedDataForPDF.slice(i, i + itemsPerPage)
+      const leftHalf = chunk.slice(0, itemsPerColumn)
+      const rightHalf = chunk.slice(itemsPerColumn, itemsPerPage)
+
+      const tableColumn = ["No", "Nama", "Blok/Link", "Ket.", "Nominal (Rp)"]
+      const tableStyles = {
+        theme: 'grid' as const,
+        headStyles: { 
+          fillColor: [11, 61, 46] as [number, number, number], 
+          textColor: [255, 255, 255] as [number, number, number], 
+          fontStyle: 'bold' as const, 
+          halign: 'center' as const, 
+          fontSize: 8 
+        },
+        styles: { 
+          fontSize: 7.5, 
+          cellPadding: 1.5, 
+          lineColor: [180, 180, 180] as [number, number, number], 
+          lineWidth: 0.1 
+        },
+        columnStyles: {
+          0: { halign: 'center' as const, cellWidth: 8 },
+          1: { cellWidth: 32 },
+          2: { cellWidth: 25 },
+          3: { cellWidth: 15 },
+          4: { cellWidth: 15 }
+        }
       }
-    })
-    doc.save(`Data_Jamaah_RT_${rtLabel}_${new Date().toLocaleDateString()}.pdf`)
+
+      // Draw Left Table
+      autoTable(doc, {
+        ...tableStyles,
+        head: [tableColumn],
+        body: leftHalf.map((item) => [
+          item.nomor,
+          item.name,
+          item.blok,
+          item.keterangan || '-',
+          ""
+        ]),
+        startY: 25,
+        margin: { right: 107, left: 10 },
+      })
+
+      // Draw Right Table
+      if (rightHalf.length > 0) {
+        autoTable(doc, {
+          ...tableStyles,
+          head: [tableColumn],
+          body: rightHalf.map((item) => [
+            item.nomor,
+            item.name,
+            item.blok,
+            item.keterangan || '-',
+            ""
+          ]),
+          startY: 25,
+          margin: { left: 107, right: 10 },
+        })
+      }
+    }
+
+    doc.save(`Data_Jamaah_RT_${rtLabel}_${new Date().toLocaleDateString('id-ID')}.pdf`)
   }
 
   // PDF Generation for Remaja Masjid
