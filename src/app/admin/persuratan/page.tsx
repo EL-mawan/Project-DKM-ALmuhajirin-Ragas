@@ -137,51 +137,130 @@ export default function PersuratanAdmin() {
 
   const generatePDF = (item: any) => {
     const doc = new jsPDF()
+    const dkmEmerald = [11, 61, 46] // #0b3d2e
+    const dkmSlate = [15, 23, 42] // #0f172a
     
-    // Kop Surat
+    const pageWidth = doc.internal.pageSize.getWidth()
+    const centerX = pageWidth / 2
+
+    // --- 1. KOPSURAT (PREMIUM STYLE) ---
+    doc.setFillColor(dkmEmerald[0], dkmEmerald[1], dkmEmerald[2])
+    doc.roundedRect(centerX - 40, 10, 80, 2, 1, 1, 'F')
+    
     doc.setFontSize(14)
-    doc.setFont('helvetica', 'bold')
-    doc.text('DEWAN KEMAKMURAN MASJID (DKM) AL-MUHAJIRIN', 105, 15, { align: 'center' })
-    doc.setFontSize(10)
-    doc.setFont('helvetica', 'normal')
-    doc.text('Kp. Ragas Grenyang, Desa Bojonegara, Kec. Bojonegara, Serang - Banten', 105, 20, { align: 'center' })
-    doc.line(20, 25, 190, 25)
+    doc.setFont('times', 'bold')
+    doc.setTextColor(dkmEmerald[0], dkmEmerald[1], dkmEmerald[2])
+    doc.text('DEWAN KEMAKMURAN MASJID (DKM)', centerX, 20, { align: 'center' })
+    doc.setFontSize(18)
+    doc.text('AL-MUHAJIRIN RAGAS GRENYANG', centerX, 28, { align: 'center' })
+    
+    doc.setFontSize(9)
+    doc.setFont('times', 'italic')
+    doc.setTextColor(100, 116, 139)
+    doc.text('Kp. Ragas Grenyang, Desa Bojonegara, Kec. Bojonegara, Serang - Banten 42454', centerX, 33, { align: 'center' })
+    doc.text('Email: dkm_almuhajirin@gmail.com | Website: almuhajirin-ragas.com', centerX, 37, { align: 'center' })
+    
+    doc.setDrawColor(dkmEmerald[0], dkmEmerald[1], dkmEmerald[2])
+    doc.setLineWidth(1)
+    doc.line(15, 41, 195, 41)
+    doc.setLineWidth(0.2)
+    doc.line(15, 42.5, 195, 42.5)
 
-    // Data Surat
-    doc.setFontSize(12)
-    doc.setFont('helvetica', 'bold')
-    doc.text(item.title.toUpperCase(), 105, 35, { align: 'center' })
-    
+    let curY = 55
+    doc.setFont('times', 'normal')
+    doc.setTextColor(dkmSlate[0], dkmSlate[1], dkmSlate[2])
     doc.setFontSize(11)
-    doc.setFont('helvetica', 'normal')
-    if (item.nomorSurat) doc.text(`Nomor: ${item.nomorSurat}`, 20, 45)
-    doc.text(`Tanggal: ${new Date(item.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}`, 20, 52)
-    
-    if (item.recipient) {
-      doc.text('Kepada Yth,', 20, 65)
-      doc.text(item.recipient, 20, 72)
+
+    if (item.type === 'PROPOSAL') {
+      // --- PROPOSAL LAYOUT ---
+      doc.setFontSize(18)
+      doc.setFont('times', 'bold')
+      doc.text('PROPOSAL KEGIATAN', centerX, curY + 10, { align: 'center' })
+      doc.setFontSize(14)
+      doc.text(item.title.toUpperCase(), centerX, curY + 20, { align: 'center' })
+      
+      doc.setFontSize(11)
+      doc.setFont('times', 'normal')
+      doc.text(`Bojonegara, ${new Date(item.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}`, 195, curY + 35, { align: 'right' })
+      
+      curY += 50
+    } else {
+      // --- LETTER LAYOUT ---
+      const dateStr = new Date(item.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })
+      doc.text(`Bojonegara, ${dateStr}`, 195, curY, { align: 'right' })
+      
+      doc.text(`Nomor      : ${item.nomorSurat || '-'}`, 15, curY)
+      doc.text(`Lampiran  : -`, 15, curY + 6)
+      doc.setFont('times', 'bold')
+      doc.text(`Perihal      : ${item.title.toUpperCase()}`, 15, curY + 12)
+      
+      curY += 25
+
+      if (item.recipient) {
+        doc.setFont('times', 'normal')
+        doc.text('Kepada Yth.', 15, curY)
+        doc.setFont('times', 'bold')
+        doc.text(item.recipient, 15, curY + 6)
+        doc.setFont('times', 'normal')
+        doc.text('di -', 15, curY + 12)
+        doc.text(item.location || 'Tempat', 20, curY + 18)
+        curY += 30
+      }
     }
 
-    if (item.location) {
-      doc.text(`Tempat: ${item.location}`, 20, 85)
+    doc.setFont('times', 'normal')
+    doc.setFontSize(11)
+    
+    if (item.type !== 'PROPOSAL') {
+      doc.text('Assalamu’alaikum Warahmatullahi Wabarakatuh,', 15, curY)
+      curY += 10
     }
 
-    // Isi
-    doc.setFontSize(11)
     const splitText = doc.splitTextToSize(item.content || '', 170)
-    doc.text(splitText, 20, 100)
-
-    // TTD
-    const bottom = doc.internal.pageSize.height
-    doc.text('Mengetahui,', 20, bottom - 50)
-    doc.text('Ketua DKM Al-Muhajirin', 20, bottom - 43)
-    doc.text('Sekretaris DKM', 140, bottom - 43)
+    doc.text(splitText, 15, curY, { align: 'justify', lineHeightFactor: 1.5 })
     
-    doc.text('( ........................ )', 20, bottom - 20)
-    doc.text('( ........................ )', 140, bottom - 20)
+    curY += (splitText.length * 7) + 10
+    
+    if (item.type !== 'PROPOSAL') {
+      doc.text('Demikian surat ini kami sampaikan, atas perhatian dan kerjasamanya kami ucapkan terima kasih.', 15, curY)
+      doc.text('Wassalamu’alaikum Warahmatullahi Wabarakatuh,', 15, curY + 7)
+    }
+
+    const bottom = doc.internal.pageSize.height
+    const signatureY = Math.max(curY + 30, bottom - 60)
+    
+    doc.setFont('times', 'bold')
+    doc.text('Pengurus DKM Al-Muhajirin', centerX, signatureY - 10, { align: 'center' })
+    
+    doc.text('Ketua DKM,', 45, signatureY, { align: 'center' })
+    doc.text('Sekretaris,', 165, signatureY, { align: 'center' })
+    
+    doc.line(20, signatureY + 25, 70, signatureY + 25)
+    doc.line(140, signatureY + 25, 190, signatureY + 25)
+    
+    doc.setFont('times', 'normal')
+    doc.text('( ........................ )', 45, signatureY + 31, { align: 'center' })
+    doc.text('( ........................ )', 165, signatureY + 31, { align: 'center' })
+
+    doc.setFontSize(8)
+    doc.setTextColor(203, 213, 225)
+    doc.text('Dokumen ini dihasilkan secara otomatis oleh Sistem Informasi DKM Al-Muhajirin', centerX, bottom - 10, { align: 'center' })
 
     doc.save(`${item.type}_${item.title.replace(/\s+/g, '_')}.pdf`)
   }
+
+  const useTemplate = () => {
+    let content = ''
+    if (activeTab === 'PROPOSAL') {
+      content = `A. PENDAHULUAN\\nMasjid Al-Muhajirin merupakan pusat kegiatan keagamaan dan sosial bagi warga Ragas Grenyang. Dalam rangka meningkatkan kualitas...\\n\\nB. MAKSUD DAN TUJUAN\\nAdapun maksud dan tujuan dari kegiatan ini adalah:\\n1. Mempererat tali silaturahmi...\\n2. Meningkatkan syiar Islam...\\n\\nC. RINCIAN KEGIATAN\\nHari/Tanggal: ...\\nWaktu: ...\\nTempat: ...\\n\\nD. ESTIMASI BIAYA\\n(Rincian estimasi biaya dilampirkan)\\n\\nE. PENUTUP\\nDemikian proposal ini kami susun...`
+    } else if (activeTab === 'UNDANGAN') {
+      content = `Mengharap dengan hormat kehadiran Bapak/Ibu/Saudara/i dalam acara yang akan kami selenggarakan pada:\\n\\nHari/Tanggal: ...\\nWaktu: ...\\nTempat: ...\\nAcara: ...\\n\\nDemikian undangan ini kami sampaikan, mengingat pentingnya acara tersebut kami sangat mengharapkan kehadiran tepat pada waktunya.`
+    } else {
+      content = `Dalam rangka pelaksanaan program kerja DKM Al-Muhajirin bidang ..., maka dengan ini kami bermaksud untuk ...\\n\\nHal-hal terkait teknis pelaksanaan direncanakan pada:\\nHari/Tanggal: ...\\nWaktu: ...\\n\\nDemikian permohonan/pemberitahuan ini kami sampaikan.`
+    }
+    setFormData({ ...formData, content: content.replace(/\\\\n/g, '\\n') })
+  }
+
 
   return (
     <AdminLayout title="Administrasi & Persuratan" subtitle="Pembuatan Proposal, Undangan, dan Surat Resmi DKM.">
@@ -231,10 +310,10 @@ export default function PersuratanAdmin() {
 
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full md:w-auto">
-            <TabsList className="bg-white border rounded-[1.5rem] p-1.5 h-16 shadow-sm">
-              <TabsTrigger value="PROPOSAL" className="rounded-xl px-8 font-bold data-[state=active]:bg-[#0b3d2e] data-[state=active]:text-white">Proposal</TabsTrigger>
-              <TabsTrigger value="UNDANGAN" className="rounded-xl px-8 font-bold data-[state=active]:bg-[#0b3d2e] data-[state=active]:text-white">Undangan</TabsTrigger>
-              <TabsTrigger value="SURAT_RESMI" className="rounded-xl px-8 font-bold data-[state=active]:bg-[#0b3d2e] data-[state=active]:text-white">Surat Resmi</TabsTrigger>
+            <TabsList className="bg-white border rounded-2xl md:rounded-[1.5rem] p-1 h-12 md:h-16 shadow-sm w-full md:w-auto grid grid-cols-3 md:flex">
+              <TabsTrigger value="PROPOSAL" className="rounded-xl px-3 md:px-8 font-bold text-[10px] md:text-sm data-[state=active]:bg-[#0b3d2e] data-[state=active]:text-white">Proposal</TabsTrigger>
+              <TabsTrigger value="UNDANGAN" className="rounded-xl px-3 md:px-8 font-bold text-[10px] md:text-sm data-[state=active]:bg-[#0b3d2e] data-[state=active]:text-white">Undangan</TabsTrigger>
+              <TabsTrigger value="SURAT_RESMI" className="rounded-xl px-3 md:px-8 font-bold text-[10px] md:text-sm data-[state=active]:bg-[#0b3d2e] data-[state=active]:text-white">Surat Resmi</TabsTrigger>
             </TabsList>
           </Tabs>
 
@@ -321,10 +400,22 @@ export default function PersuratanAdmin() {
                   )}
 
                   <div className="space-y-2 md:col-span-2">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Isi / Keterangan Dokumen*</label>
+                    <div className="flex justify-between items-center mb-1">
+                      <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Isi / Keterangan Dokumen*</label>
+                      <Button 
+                        type="button" 
+                        variant="ghost" 
+                        size="sm" 
+                        onClick={useTemplate}
+                        className="text-[10px] h-7 font-bold text-emerald-600 hover:bg-emerald-50 rounded-lg border border-emerald-100"
+                      >
+                        <FileText className="h-3 w-3 mr-1" />
+                        Gunakan Template
+                      </Button>
+                    </div>
                     <textarea 
                       required 
-                      className="w-full min-h-[150px] p-6 rounded-3xl bg-gray-50/50 border border-gray-100 text-sm focus:outline-none focus:ring-4 focus:ring-emerald-500/5 transition-all"
+                      className="w-full min-h-[180px] p-6 rounded-3xl bg-gray-50/50 border border-gray-100 text-sm focus:outline-none focus:ring-4 focus:ring-emerald-500/5 transition-all leading-relaxed"
                       placeholder="Tuliskan isi surat atau deskripsi proposal di sini..."
                       value={formData.content}
                       onChange={e => setFormData({...formData, content: e.target.value})}
