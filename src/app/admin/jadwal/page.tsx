@@ -148,20 +148,21 @@ export default function JadwalTugasPage() {
   // Types of tasks
   const taskTypes = [
     { value: 'KHOTIB', label: 'Khotib' },
-    { value: 'IMAM', label: 'Imam' },
-    { value: 'MUADZIN', label: 'Muadzin' },
-    { value: 'BILAL', label: 'Bilal / Muraqqi' },
-    { value: 'LECTURER', label: 'Penceramah' },
-    { value: 'CLEANING', label: 'Kesehatan Masjid' },
-    { value: 'SECURITY', label: 'Keamanan' }
+    { value: 'IMAM_JUMAT', label: 'Imam Sholat Jum\'at' },
+    { value: 'ADZAN', label: 'Adzan' },
+    { value: 'IQOMAH', label: 'Iqomah' },
+    { value: 'IMAM_TARAWIH', label: 'Imam Tarawih' },
+    { value: 'PENCERAMAH', label: 'Penceramah / Kultum' },
+    { value: 'BILAL', label: 'Bilal / Muraqqi' }
   ]
 
   // Categories
   const categories = [
     { value: 'JUMAT', label: "Sholat Jum'at" },
-    { value: 'RAWATIB', label: 'Sholat Rawatib' },
-    { value: 'PENGAJIAN', label: 'Kajian/Pengajian' },
-    { value: 'RAMADHAN', label: 'Ramadhan' }
+    { value: 'TARAWIH', label: 'Sholat Tarawih' },
+    { value: 'IDUL_FITRI', label: 'Sholat Idul Fitri' },
+    { value: 'IDUL_ADHA', label: 'Sholat Idul Adha' },
+    { value: 'RAWATIB', label: 'Sholat Rawatib' }
   ]
 
   return (
@@ -364,7 +365,8 @@ export default function JadwalTugasPage() {
                         <td className="px-10 py-8">
                           <Badge className={`rounded-xl px-4 py-1.5 font-black text-[9px] uppercase tracking-widest border-none ${
                             item.type === 'KHOTIB' ? 'bg-orange-50 text-orange-600' :
-                            item.type === 'IMAM' ? 'bg-indigo-50 text-indigo-600' :
+                            item.type.includes('IMAM') ? 'bg-indigo-50 text-indigo-600' :
+                            item.type === 'ADZAN' ? 'bg-emerald-50 text-emerald-600' :
                             'bg-slate-50 text-slate-600'
                           }`}>
                             {taskTypes.find(t => t.value === item.type)?.label || item.type}
