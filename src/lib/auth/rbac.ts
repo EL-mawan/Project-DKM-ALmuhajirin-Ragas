@@ -97,6 +97,12 @@ export const PERMISSIONS = {
   DOCUMENT_READ: { resource: 'dokumen', action: 'read' },
   DOCUMENT_UPDATE: { resource: 'dokumen', action: 'update' },
   DOCUMENT_DELETE: { resource: 'dokumen', action: 'delete' },
+
+  // Schedule Management
+  JADWAL_CREATE: { resource: 'jadwal', action: 'create' },
+  JADWAL_READ: { resource: 'jadwal', action: 'read' },
+  JADWAL_UPDATE: { resource: 'jadwal', action: 'update' },
+  JADWAL_DELETE: { resource: 'jadwal', action: 'delete' },
   
   // Audit Logs
   AUDIT_READ: { resource: 'audit', action: 'read' },
@@ -135,7 +141,8 @@ export const ROLE_CONFIGS = {
       PERMISSIONS.GALLERY_UPDATE,
       PERMISSIONS.GALLERY_DELETE,
       PERMISSIONS.CONTACT_READ,
-      PERMISSIONS.CONTACT_DELETE
+      PERMISSIONS.CONTACT_DELETE,
+      PERMISSIONS.JADWAL_READ
     ]
   },
   
@@ -192,7 +199,11 @@ export const ROLE_CONFIGS = {
       PERMISSIONS.USER_READ,
       PERMISSIONS.USER_CREATE,
       PERMISSIONS.USER_UPDATE,
-      PERMISSIONS.USER_DELETE
+      PERMISSIONS.USER_DELETE,
+      PERMISSIONS.JADWAL_READ,
+      PERMISSIONS.JADWAL_CREATE,
+      PERMISSIONS.JADWAL_UPDATE,
+      PERMISSIONS.JADWAL_DELETE
     ]
   },
   
@@ -238,7 +249,11 @@ export const ROLE_CONFIGS = {
       PERMISSIONS.DOCUMENT_READ,
       PERMISSIONS.DOCUMENT_CREATE,
       PERMISSIONS.DOCUMENT_UPDATE,
-      PERMISSIONS.DOCUMENT_DELETE
+      PERMISSIONS.DOCUMENT_DELETE,
+      PERMISSIONS.JADWAL_READ,
+      PERMISSIONS.JADWAL_CREATE,
+      PERMISSIONS.JADWAL_UPDATE,
+      PERMISSIONS.JADWAL_DELETE
     ]
   },
   
@@ -263,7 +278,8 @@ export const ROLE_CONFIGS = {
       PERMISSIONS.GALLERY_UPDATE,
       PERMISSIONS.GALLERY_DELETE,
       PERMISSIONS.CONTACT_READ,
-      PERMISSIONS.CONTACT_DELETE
+      PERMISSIONS.CONTACT_DELETE,
+      PERMISSIONS.JADWAL_READ
     ]
   },
   
@@ -291,7 +307,11 @@ export const ROLE_CONFIGS = {
       PERMISSIONS.GALLERY_UPDATE,
       PERMISSIONS.GALLERY_DELETE,
       PERMISSIONS.CONTACT_READ,
-      PERMISSIONS.CONTACT_DELETE
+      PERMISSIONS.CONTACT_DELETE,
+      PERMISSIONS.JADWAL_READ,
+      PERMISSIONS.JADWAL_CREATE,
+      PERMISSIONS.JADWAL_UPDATE,
+      PERMISSIONS.JADWAL_DELETE
     ]
   }
 } as const

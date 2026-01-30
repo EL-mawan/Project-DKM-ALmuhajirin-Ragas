@@ -1,14 +1,24 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
-import { getServerSession } from 'next-auth/next'
+import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth/config'
+import { checkPermission } from '@/lib/auth/rbac'
 
 export const dynamic = 'force-dynamic'
 
-export async function GET(req: Request) {
+export async function GET(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
-    if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    if (!session || !session.user?.email) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+    const user = await db.user.findUnique({
+      where: { email: session.user.email },
+      include: { role: true }
+    })
+
+    if (!user || !checkPermission(user as any, 'jadwal', 'read')) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
 
     const { searchParams } = new URL(req.url)
     const category = searchParams.get('category')
@@ -24,14 +34,24 @@ export async function GET(req: Request) {
     })
     return NextResponse.json(data)
   } catch (error) {
+    console.error('GET Jadwal Error:', error)
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
   }
 }
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
-    if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    if (!session || !session.user?.email) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+    const user = await db.user.findUnique({
+      where: { email: session.user.email },
+      include: { role: true }
+    })
+
+    if (!user || !checkPermission(user as any, 'jadwal', 'create')) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
 
     const body = await req.json()
     const { date, type, category, name, description } = body
@@ -54,7 +74,7 @@ export async function POST(req: Request) {
     // Log the action
     await db.auditLog.create({
       data: {
-        userId: session.user.id,
+        userId: user.id,
         action: 'CREATE_JADWAL_TUGAS',
         table: 'jadwal_tugas',
         recordId: item.id,
@@ -62,7 +82,7 @@ export async function POST(req: Request) {
       }
     })
 
-    return NextResponse.json(item)
+    return NextResponse.json(item, { status: 201 })
   } catch (error) {
     console.error('API Error:', error)
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
