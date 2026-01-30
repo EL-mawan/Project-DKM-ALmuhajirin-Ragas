@@ -41,6 +41,7 @@ import {
 } from '@/components/ui/select'
 import { toast } from 'sonner'
 import { useSession } from 'next-auth/react'
+import jsPDF from 'jspdf'
 
 export default function JadwalTugasPage() {
   const router = useRouter()
@@ -145,6 +146,100 @@ export default function JadwalTugasPage() {
       setFormData(prev => ({ ...prev, type: validTypes[0]?.value || '' }))
     }
   }, [formData.category])
+
+  // PDF Generation Function matching the image
+  const generatePDF = (targetDate: string) => {
+    const doc = new jsPDF()
+    const dkmEmerald = [11, 61, 46] // #0b3d2e
+    const dkmDarkGreen = [58, 90, 64] // A forest green for the table headers
+    
+    // Find all tasks for this date in JUMAT category
+    const items = data.filter(d => 
+      new Date(d.date).toISOString().split('T')[0] === targetDate && 
+      d.category === 'JUMAT'
+    )
+
+    const dateObj = new Date(targetDate)
+    const formattedDate = dateObj.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })
+    
+    const pageWidth = doc.internal.pageSize.getWidth()
+    const centerX = pageWidth / 2
+
+    // --- LOGO PLACEHOLDER ---
+    doc.setDrawColor(0)
+    doc.circle(30, 20, 10, 'S') // Placeholder for the circular logo
+
+    // --- HEADER ---
+    doc.setFontSize(14)
+    doc.setFont('times', 'bold')
+    doc.text('Dewan Kemakmuran Masjid (DKM) Al-Muhajirin', centerX + 10, 18, { align: 'center' })
+    doc.setFontSize(12)
+    doc.text('Kp. Ragas Grenyang Desa Argawana Kecamatan Puloampel', centerX + 10, 25, { align: 'center' })
+    
+    doc.setFontSize(11)
+    doc.setFont('times', 'italic')
+    doc.text('Jadwal Tugas Sholat Jum\'at', centerX, 35, { align: 'center' })
+
+    doc.setLineWidth(0.8)
+    doc.line(15, 38, 195, 38)
+
+    // --- DATE ---
+    doc.setFont('times', 'normal')
+    doc.setFontSize(11)
+    doc.text(`Tanggal :        ${formattedDate}`, 30, 48)
+
+    // --- TABLE STRUCTURE ---
+    const startY = 55
+    const rowHeight = 10
+    const labelWidth = 50
+    const valueWidth = 115
+    
+    const tasksToShow = [
+      { label: 'Imam Sholat', type: 'IMAM_JUMAT' },
+      { label: 'Khotib', type: 'KHOTIB' },
+      { label: 'Bilal / Iqomah', type: 'BILAL' },
+      { label: 'Muadzin', type: 'ADZAN' }
+    ]
+
+    tasksToShow.forEach((task, i) => {
+      const curY = startY + (i * rowHeight)
+      
+      // Label Background (Dark Green)
+      doc.setFillColor(64, 86, 50) // Matching the image's dark green
+      doc.rect(15, curY, labelWidth, rowHeight, 'F')
+      
+      // Label Text
+      doc.setTextColor(255)
+      doc.setFont('times', 'normal')
+      doc.text(task.label, 17, curY + 6.5)
+      
+      // Value Cell
+      doc.setTextColor(0)
+      doc.text(':', 15 + labelWidth + 2, curY + 6.5)
+      
+      // Find the name for this task
+      const assigned = items.find(it => it.type === task.type)?.name || '..................................................................'
+      doc.text(assigned, 15 + labelWidth + 5, curY + 6.5)
+      
+      // Underline/Border
+      doc.setDrawColor(200)
+      doc.setLineWidth(0.1)
+      doc.line(15 + labelWidth + 4, curY + 8, 195, curY + 8, 'S')
+    })
+
+    // --- SIGNATURE ---
+    const sigY = 110
+    doc.setFont('times', 'normal')
+    doc.text('Mengetahui,', 160, sigY, { align: 'center' })
+    doc.text('Ketua DKM Al-Muhajirin', 160, sigY + 5, { align: 'center' })
+    
+    doc.setFont('times', 'bold')
+    doc.text('H. Agung Gunawan', 160, sigY + 25, { align: 'center' })
+    doc.setLineWidth(0.2)
+    doc.line(140, sigY + 26, 180, sigY + 26)
+
+    doc.save(`Jadwal_Jumat_${targetDate}.pdf`)
+  }
 
   const filteredData = data.filter(item => {
     const matchSearch = item.name.toLowerCase().includes(search.toLowerCase()) || 
@@ -393,6 +488,11 @@ export default function JadwalTugasPage() {
                         </td>
                         <td className="px-10 py-8 text-right">
                            <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all translate-x-2 group-hover:translate-x-0">
+                              {item.category === 'JUMAT' && (
+                                <Button variant="ghost" size="icon" className="rounded-xl h-10 w-10 text-emerald-600 hover:bg-emerald-50" onClick={() => generatePDF(new Date(item.date).toISOString().split('T')[0])}>
+                                   <Download className="h-4 w-4" />
+                                </Button>
+                              )}
                               <Button variant="ghost" size="icon" className="rounded-xl h-10 w-10 text-blue-500 hover:bg-blue-50" onClick={() => openEdit(item)}>
                                  <Edit2 className="h-4 w-4" />
                               </Button>
