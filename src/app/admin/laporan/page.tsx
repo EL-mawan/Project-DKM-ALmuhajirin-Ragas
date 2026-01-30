@@ -150,7 +150,7 @@ export default function LaporanAdmin() {
       const dateStr = new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
       doc.setFontSize(7)
       doc.setTextColor(100, 116, 139)
-      doc.text(`Ditetapkan: ${dateStr}`, centerX, 68, { align: 'center' })
+      doc.text(`Dibuatkan pada: ${dateStr}`, centerX, 68, { align: 'center' })
 
       const cardY = 74
       const cardW = 58

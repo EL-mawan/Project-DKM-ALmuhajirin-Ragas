@@ -1,5 +1,6 @@
 'use client'
 
+import { useRouter } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
@@ -40,6 +41,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import jsPDF from 'jspdf'
 
 export default function PersuratanAdmin() {
+  const router = useRouter()
   const { data: session } = useSession()
   const [loading, setLoading] = useState(true)
   const [data, setData] = useState<any[]>([])
@@ -301,7 +303,7 @@ export default function PersuratanAdmin() {
       <div className="p-6 sm:p-8 space-y-8">
         {/* Header Stats / Quick Actions */}
         <div className="grid grid-cols-3 gap-3 md:gap-6">
-          <Card className="rounded-2xl md:rounded-[2.5rem] border-none shadow-sm bg-gradient-to-br from-blue-50 to-indigo-50/30">
+          <Card className="rounded-2xl md:rounded-[2.5rem] border-none shadow-sm bg-linear-to-br from-blue-50 to-indigo-50/30">
             <CardContent className="p-3 md:p-8">
               <div className="flex flex-col md:flex-row items-center justify-between gap-2 md:gap-0">
                 <div className="text-center md:text-left">
@@ -314,7 +316,7 @@ export default function PersuratanAdmin() {
               </div>
             </CardContent>
           </Card>
-          <Card className="rounded-2xl md:rounded-[2.5rem] border-none shadow-sm bg-gradient-to-br from-emerald-50 to-teal-50/30">
+          <Card className="rounded-2xl md:rounded-[2.5rem] border-none shadow-sm bg-linear-to-br from-emerald-50 to-teal-50/30">
             <CardContent className="p-3 md:p-8">
               <div className="flex flex-col md:flex-row items-center justify-between gap-2 md:gap-0">
                 <div className="text-center md:text-left">
@@ -327,7 +329,7 @@ export default function PersuratanAdmin() {
               </div>
             </CardContent>
           </Card>
-          <Card className="rounded-2xl md:rounded-[2.5rem] border-none shadow-sm bg-gradient-to-br from-amber-50 to-orange-50/30">
+          <Card className="rounded-2xl md:rounded-[2.5rem] border-none shadow-sm bg-linear-to-br from-amber-50 to-orange-50/30">
             <CardContent className="p-3 md:p-8">
               <div className="flex flex-col md:flex-row items-center justify-between gap-2 md:gap-0">
                 <div className="text-center md:text-left">
@@ -344,14 +346,14 @@ export default function PersuratanAdmin() {
 
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full md:w-auto">
-            <TabsList className="bg-white border rounded-2xl md:rounded-[1.5rem] p-1 h-12 md:h-16 shadow-sm w-full md:w-auto grid grid-cols-3 md:flex">
+            <TabsList className="bg-white border rounded-2xl md:rounded-3xl p-1 h-12 md:h-16 shadow-sm w-full md:w-auto grid grid-cols-3 md:flex">
               <TabsTrigger value="PROPOSAL" className="rounded-xl px-3 md:px-8 font-bold text-[10px] md:text-sm data-[state=active]:bg-[#0b3d2e] data-[state=active]:text-white">Proposal</TabsTrigger>
               <TabsTrigger value="UNDANGAN" className="rounded-xl px-3 md:px-8 font-bold text-[10px] md:text-sm data-[state=active]:bg-[#0b3d2e] data-[state=active]:text-white">Undangan</TabsTrigger>
               <TabsTrigger value="SURAT_RESMI" className="rounded-xl px-3 md:px-8 font-bold text-[10px] md:text-sm data-[state=active]:bg-[#0b3d2e] data-[state=active]:text-white">Surat Resmi</TabsTrigger>
             </TabsList>
           </Tabs>
 
-          <Link href={`/admin/persuratan/buat?type=${activeTab}`}>
+          <Link href={activeTab === 'PROPOSAL' ? '/admin/persuratan/proposal/buat' : `/admin/persuratan/buat?type=${activeTab}`}>
             <Button className="rounded-2xl h-16 px-10 font-black uppercase tracking-widest shadow-xl shadow-primary/20 bg-[#0b3d2e] hover:bg-[#062c21] w-full sm:w-auto">
               <Plus className="h-5 w-5 mr-3" />
               Buat {activeTab === 'PROPOSAL' ? 'Proposal' : activeTab === 'UNDANGAN' ? 'Undangan' : 'Surat Resmi'}
@@ -463,6 +465,22 @@ export default function PersuratanAdmin() {
                         </td>
                         <td className="px-10 py-8 text-right">
                           <div className="flex justify-end space-x-2 opacity-0 group-hover:opacity-100 transition-all -translate-x-2 group-hover:translate-x-0">
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              className="rounded-2xl h-10 w-10 text-emerald-600 hover:bg-emerald-50"
+                              onClick={() => {
+                                if (item.type === 'PROPOSAL') {
+                                  router.push(`/admin/persuratan/proposal/buat?id=${item.id}`)
+                                } else {
+                                  router.push(`/admin/persuratan/buat?type=${item.type}&id=${item.id}`)
+                                }
+                              }}
+                              title="Edit Dokumen"
+                            >
+                              <Edit2 className="h-4 w-4" />
+                            </Button>
+                            
                             {/* Download button - only enabled if validated */}
                             <Button 
                               variant="ghost" 
