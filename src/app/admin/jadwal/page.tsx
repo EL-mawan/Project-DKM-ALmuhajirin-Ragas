@@ -51,7 +51,7 @@ export default function JadwalTugasPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingItem, setEditingItem] = useState<any>(null)
   const [search, setSearch] = useState('')
-  const [activeTab, setActiveTab] = useState('ALL')
+  const [activeTab, setActiveTab] = useState('JUMAT')
   
   const [formData, setFormData] = useState({
     date: new Date().toISOString().split('T')[0],
@@ -244,18 +244,18 @@ export default function JadwalTugasPage() {
   const filteredData = data.filter(item => {
     const matchSearch = item.name.toLowerCase().includes(search.toLowerCase()) || 
                       item.type.toLowerCase().includes(search.toLowerCase())
-    const matchTab = activeTab === 'ALL' || item.category === activeTab
+    const matchTab = item.category === activeTab
     return matchSearch && matchTab
   })
 
-  // Categories matching user request
   const categories = [
     { value: 'JUMAT', label: "Sholat Jum'at" },
     { value: 'TARAWIH', label: 'Sholat Tarawih' },
-    { value: 'IDUL_FITRI_ADHA', label: 'Sholat Idhul Fitri & Adha' }
+    { value: 'IDUL_FITRI', label: 'Sholat Idul Fitri' },
+    { value: 'IDUL_ADHA', label: 'Sholat Idul Adha' }
   ]
 
-  // Task types mapped to categories for better UX
+  // Task types mapped to categories
   const getTaskTypesByCategory = (cat: string) => {
     switch(cat) {
       case 'JUMAT':
@@ -274,7 +274,8 @@ export default function JadwalTugasPage() {
           { value: 'KAMILIN', label: 'Kamilin' },
           { value: 'DOA_WITIR', label: 'Do\'a Witir' }
         ]
-      case 'IDUL_FITRI_ADHA':
+      case 'IDUL_FITRI':
+      case 'IDUL_ADHA':
         return [
           { value: 'IMAM', label: 'Imam' },
           { value: 'KHOTIB', label: 'Khotib' },
@@ -290,7 +291,8 @@ export default function JadwalTugasPage() {
   const allTaskTypes = [
     ...getTaskTypesByCategory('JUMAT'),
     ...getTaskTypesByCategory('TARAWIH'),
-    ...getTaskTypesByCategory('IDUL_FITRI_ADHA')
+    ...getTaskTypesByCategory('IDUL_FITRI'),
+    ...getTaskTypesByCategory('IDUL_ADHA')
   ].reduce((acc: any[], current) => {
     const x = acc.find(item => item.value === current.value);
     if (!x) return acc.concat([current]);
@@ -305,12 +307,6 @@ export default function JadwalTugasPage() {
         {/* Actions & Filters */}
         <div className="flex flex-col lg:flex-row justify-between items-center gap-6">
           <div className="flex bg-white p-1.5 rounded-3xl border border-neutral-100 shadow-sm overflow-x-auto w-full lg:w-auto">
-             <button 
-               onClick={() => setActiveTab('ALL')}
-               className={`px-6 py-2.5 rounded-2xl text-xs font-black uppercase tracking-widest transition-all ${activeTab === 'ALL' ? 'bg-[#0b3d2e] text-white' : 'text-neutral-400 hover:text-[#0b3d2e]'}`}
-             >
-               Semua
-             </button>
              {categories.map(cat => (
                <button 
                  key={cat.value}
