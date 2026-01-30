@@ -129,7 +129,7 @@ export default function JadwalTugasPage() {
   const openEdit = (item: any) => {
     setEditingItem(item)
     setFormData({
-      date: new Date(item.date).toISOString().split('T')[0],
+      date: item.date ? new Date(item.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
       type: item.type,
       category: item.category,
       name: item.name,
@@ -138,6 +138,14 @@ export default function JadwalTugasPage() {
     setIsModalOpen(true)
   }
 
+  // Effect to reset type if it doesn't match new category in form
+  useEffect(() => {
+    const validTypes = getTaskTypesByCategory(formData.category)
+    if (!validTypes.some(t => t.value === formData.type)) {
+      setFormData(prev => ({ ...prev, type: validTypes[0]?.value || '' }))
+    }
+  }, [formData.category])
+
   const filteredData = data.filter(item => {
     const matchSearch = item.name.toLowerCase().includes(search.toLowerCase()) || 
                       item.type.toLowerCase().includes(search.toLowerCase())
@@ -145,56 +153,59 @@ export default function JadwalTugasPage() {
     return matchSearch && matchTab
   })
 
-  // Types of tasks
-  const taskTypes = [
-    { value: 'KHOTIB', label: 'Khotib' },
-    { value: 'IMAM_JUMAT', label: 'Imam Sholat Jum\'at' },
-    { value: 'ADZAN', label: 'Adzan' },
-    { value: 'IQOMAH', label: 'Iqomah' },
-    { value: 'IMAM_TARAWIH', label: 'Imam Tarawih' },
-    { value: 'PENCERAMAH', label: 'Penceramah / Kultum' },
-    { value: 'BILAL', label: 'Bilal / Muraqqi' }
-  ]
-
-  // Categories
+  // Categories matching user request
   const categories = [
     { value: 'JUMAT', label: "Sholat Jum'at" },
     { value: 'TARAWIH', label: 'Sholat Tarawih' },
-    { value: 'IDUL_FITRI', label: 'Sholat Idul Fitri' },
-    { value: 'IDUL_ADHA', label: 'Sholat Idul Adha' },
-    { value: 'RAWATIB', label: 'Sholat Rawatib' }
+    { value: 'IDUL_FITRI_ADHA', label: 'Sholat Idhul Fitri & Adha' }
   ]
+
+  // Task types mapped to categories for better UX
+  const getTaskTypesByCategory = (cat: string) => {
+    switch(cat) {
+      case 'JUMAT':
+        return [
+          { value: 'IMAM_JUMAT', label: 'Imam Sholat Jum\'at' },
+          { value: 'KHOTIB', label: 'Khotib' },
+          { value: 'BILAL', label: 'Bilal' },
+          { value: 'ADZAN', label: 'Adzan' },
+          { value: 'IQOMAH', label: 'Iqomah' }
+        ]
+      case 'TARAWIH':
+        return [
+          { value: 'IMAM_TARAWIH', label: 'Imam Tarawih' },
+          { value: 'BILAL_1', label: 'Bilal 1' },
+          { value: 'BILAL_2', label: 'Bilal 2' },
+          { value: 'KAMILIN', label: 'Kamilin' },
+          { value: 'DOA_WITIR', label: 'Do\'a Witir' }
+        ]
+      case 'IDUL_FITRI_ADHA':
+        return [
+          { value: 'IMAM', label: 'Imam' },
+          { value: 'KHOTIB', label: 'Khotib' },
+          { value: 'BILAL', label: 'Bilal' },
+          { value: 'IQOMAH', label: 'Iqomah' }
+        ]
+      default:
+        return []
+    }
+  }
+
+  // Flattened labels for table display
+  const allTaskTypes = [
+    ...getTaskTypesByCategory('JUMAT'),
+    ...getTaskTypesByCategory('TARAWIH'),
+    ...getTaskTypesByCategory('IDUL_FITRI_ADHA')
+  ].reduce((acc: any[], current) => {
+    const x = acc.find(item => item.value === current.value);
+    if (!x) return acc.concat([current]);
+    return acc;
+  }, []);
 
   return (
     <AdminLayout title="Jadwal Tugas" subtitle="Kelola penugasan imam, khotib, dan petugas operasional masjid.">
       <div className="p-6 md:p-10 space-y-8">
-        {/* Quick Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <Card className="rounded-[2.5rem] border-none shadow-sm bg-linear-to-br from-orange-50 to-amber-50/30">
-            <CardContent className="p-8">
-              <p className="text-[10px] font-black text-orange-600 uppercase tracking-widest">Total Tugas</p>
-              <h3 className="text-3xl font-black text-slate-900 mt-1">{data.length}</h3>
-            </CardContent>
-          </Card>
-          <Card className="rounded-[2.5rem] border-none shadow-sm bg-linear-to-br from-emerald-50 to-teal-50/30">
-            <CardContent className="p-8">
-              <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">Tugas Jum'at</p>
-              <h3 className="text-3xl font-black text-slate-900 mt-1">{data.filter(d => d.category === 'JUMAT').length}</h3>
-            </CardContent>
-          </Card>
-          <Card className="rounded-[2.5rem] border-none shadow-sm bg-linear-to-br from-blue-50 to-indigo-50/30">
-            <CardContent className="p-8">
-              <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest">Tugas Rutin</p>
-              <h3 className="text-3xl font-black text-slate-900 mt-1">{data.filter(d => d.category === 'RAWATIB').length}</h3>
-            </CardContent>
-          </Card>
-          <Card className="rounded-[2.5rem] border-none shadow-sm bg-linear-to-br from-violet-50 to-purple-50/30">
-            <CardContent className="p-8">
-              <p className="text-[10px] font-black text-violet-600 uppercase tracking-widest">Kajian & Lainnya</p>
-              <h3 className="text-3xl font-black text-slate-900 mt-1">{data.filter(d => d.category === 'PENGAJIAN').length}</h3>
-            </CardContent>
-          </Card>
-        </div>
+
 
         {/* Actions & Filters */}
         <div className="flex flex-col lg:flex-row justify-between items-center gap-6">
@@ -276,7 +287,7 @@ export default function JadwalTugasPage() {
                          <SelectValue placeholder="Pilih Tugas" />
                        </SelectTrigger>
                        <SelectContent className="rounded-xl">
-                         {taskTypes.map(t => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}
+                         {getTaskTypesByCategory(formData.category).map(t => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}
                        </SelectContent>
                      </Select>
                   </div>
@@ -369,7 +380,7 @@ export default function JadwalTugasPage() {
                             item.type === 'ADZAN' ? 'bg-emerald-50 text-emerald-600' :
                             'bg-slate-50 text-slate-600'
                           }`}>
-                            {taskTypes.find(t => t.value === item.type)?.label || item.type}
+                            {allTaskTypes.find(t => t.value === item.type)?.label || item.type}
                           </Badge>
                         </td>
                         <td className="px-10 py-8">
