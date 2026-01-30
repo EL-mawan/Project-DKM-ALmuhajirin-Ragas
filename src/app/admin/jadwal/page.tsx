@@ -90,17 +90,23 @@ export default function JadwalTugasPage() {
         body: JSON.stringify(formData)
       })
 
+      const result = await res.json()
+
       if (res.ok) {
         toast.success(editingItem ? 'Jadwal diperbarui' : 'Jadwal ditambahkan')
         setIsModalOpen(false)
         setEditingItem(null)
+        const savedCategory = formData.category
         resetForm()
-        fetchData()
+        await fetchData()
+        // Ensure user is on the tab of the new item
+        setActiveTab(savedCategory)
       } else {
-        toast.error('Gagal menyimpan data')
+        toast.error(result.error || 'Gagal menyimpan data')
       }
     } catch (error) {
-      toast.error('Terjadi kesalahan')
+      console.error('Submission error:', error)
+      toast.error('Terjadi kesalahan jaringan atau server')
     }
   }
 
@@ -346,7 +352,7 @@ export default function JadwalTugasPage() {
                   <DialogTitle className="text-2xl font-black">{editingItem ? 'Edit Jadwal Tugas' : 'Tambah Jadwal Tugas'}</DialogTitle>
                   <p className="text-emerald-100/60 text-xs mt-1 italic font-medium">Input penugasan rutin atau khusus DKM.</p>
                 </div>
-                <form onSubmit={handleSubmit} className="p-8 space-y-6 bg-white">
+                <form id="jadwal-form" onSubmit={handleSubmit} className="p-8 space-y-6 bg-white">
                   <div className="grid grid-cols-2 gap-6">
                     <div className="space-y-2">
                        <Label className="text-[10px] font-black uppercase tracking-widest text-neutral-400">Tanggal</Label>
@@ -405,7 +411,11 @@ export default function JadwalTugasPage() {
                   </div>
 
                   <DialogFooter className="pt-4">
-                    <Button type="submit" className="w-full h-14 rounded-2xl bg-[#0b3d2e] hover:bg-[#062c21] font-black uppercase tracking-widest text-sm shadow-xl shadow-emerald-900/10">
+                    <Button 
+                      form="jadwal-form"
+                      type="submit" 
+                      className="w-full h-14 rounded-2xl bg-[#0b3d2e] hover:bg-[#062c21] font-black uppercase tracking-widest text-sm shadow-xl shadow-emerald-900/10"
+                    >
                       {editingItem ? 'Simpan Perubahan' : 'Terbitkan Jadwal'}
                     </Button>
                   </DialogFooter>
