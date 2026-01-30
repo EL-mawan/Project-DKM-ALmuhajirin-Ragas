@@ -12,6 +12,7 @@ export async function GET(request: NextRequest) {
     const totalJamaah = await db.jamaahKepalaKeluarga.count({ where: { isActive: true } })
     const totalRemaja = await db.jamaahRemaja.count({ where: { isActive: true } })
     const totalKegiatan = await db.kegiatan.count()
+    const totalJadwal = await db.jadwalTugas.count()
     
     // Financial stats (Simplified for dashboard)
     const incomeMonth = await db.keuanganPemasukan.aggregate({
@@ -99,7 +100,8 @@ export async function GET(request: NextRequest) {
       sticks,
       trendData,
       activities,
-      unreadNotifications
+      unreadNotifications,
+      totalJadwal
     })
   } catch (error: any) {
     console.error('Dashboard Stats API Error:', error)

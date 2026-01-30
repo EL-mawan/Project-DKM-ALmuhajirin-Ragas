@@ -8,7 +8,8 @@ import {
   FileText, 
   Newspaper, 
   Image, 
-  MessageSquare 
+  MessageSquare,
+  Clock
 } from 'lucide-react'
 
 export const ADMIN_MENU_ITEMS = [
@@ -24,4 +25,5 @@ export const ADMIN_MENU_ITEMS = [
   { icon: Image, label: 'Galeri Foto', href: '/admin/galeri', roles: ['Master Admin', 'Tokoh Masyarakat', 'Ketua DKM', 'Bendahara DKM', 'Sekretaris DKM', 'RISMA (Remaja Islam)'], color: 'text-pink-500 bg-pink-50 border-pink-100' },
   { icon: MessageSquare, label: 'Kontak Pesan', href: '/admin/kontak', roles: ['Master Admin', 'Tokoh Masyarakat', 'Ketua DKM', 'Bendahara DKM', 'Sekretaris DKM', 'RISMA (Remaja Islam)'], color: 'text-teal-500 bg-teal-50 border-teal-100' },
   { icon: FileText, label: 'Persuratan', href: '/admin/persuratan', roles: ['Master Admin', 'Sekretaris DKM', 'RISMA (Remaja Islam)'], color: 'text-blue-500 bg-blue-50 border-blue-100' },
+  { icon: Clock, label: 'Jadwal Tugas', href: '/admin/jadwal', roles: ['Master Admin', 'Ketua DKM', 'Sekretaris DKM'], color: 'text-orange-600 bg-orange-50 border-orange-100' },
 ]

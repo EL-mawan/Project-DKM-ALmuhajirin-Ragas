@@ -505,17 +505,17 @@ function ProposalBuilderContent() {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid grid-cols-4 w-full bg-slate-100 p-1.5 rounded-3xl h-16 mb-6">
-            <TabsTrigger value="umum" className="rounded-2xl font-bold data-[state=active]:bg-white data-[state=active]:text-emerald-700 data-[state=active]:shadow-sm transition-all">
+          <TabsList className="grid grid-cols-2 md:grid-cols-4 h-auto md:h-16 w-full bg-slate-100 p-1.5 rounded-3xl mb-6 gap-1 md:gap-0">
+            <TabsTrigger value="umum" className="rounded-2xl font-bold py-3 md:py-0 data-[state=active]:bg-white data-[state=active]:text-emerald-700 data-[state=active]:shadow-sm transition-all text-xs md:text-sm">
               <FileText className="h-4 w-4 mr-2" /> Umum
             </TabsTrigger>
-            <TabsTrigger value="struktur" className="rounded-2xl font-bold data-[state=active]:bg-white data-[state=active]:text-emerald-700 data-[state=active]:shadow-sm transition-all">
+            <TabsTrigger value="struktur" className="rounded-2xl font-bold py-3 md:py-0 data-[state=active]:bg-white data-[state=active]:text-emerald-700 data-[state=active]:shadow-sm transition-all text-xs md:text-sm">
               <Users className="h-4 w-4 mr-2" /> Struktur
             </TabsTrigger>
-            <TabsTrigger value="rab" className="rounded-2xl font-bold data-[state=active]:bg-white data-[state=active]:text-emerald-700 data-[state=active]:shadow-sm transition-all">
+            <TabsTrigger value="rab" className="rounded-2xl font-bold py-3 md:py-0 data-[state=active]:bg-white data-[state=active]:text-emerald-700 data-[state=active]:shadow-sm transition-all text-xs md:text-sm">
               <IDR className="h-4 w-4 mr-2" /> RAB
             </TabsTrigger>
-            <TabsTrigger value="ttd" className="rounded-2xl font-bold data-[state=active]:bg-white data-[state=active]:text-emerald-700 data-[state=active]:shadow-sm transition-all">
+            <TabsTrigger value="ttd" className="rounded-2xl font-bold py-3 md:py-0 data-[state=active]:bg-white data-[state=active]:text-emerald-700 data-[state=active]:shadow-sm transition-all text-xs md:text-sm">
               <FileCheck className="h-4 w-4 mr-2" /> Penutup
             </TabsTrigger>
           </TabsList>
@@ -701,47 +701,86 @@ function ProposalBuilderContent() {
                 </div>
 
                 <div className="overflow-hidden rounded-3xl border border-slate-100 bg-slate-50/30">
-                  <table className="w-full text-left">
-                    <thead className="bg-emerald-900 text-white font-bold text-[10px] uppercase tracking-widest">
-                      <tr>
-                        <th className="px-6 py-5">Item & Spesifikasi</th>
-                        <th className="px-4 py-5 w-24 text-center">Jumlah</th>
-                        <th className="px-6 py-5 w-40">Harga Satuan</th>
-                        <th className="px-6 py-5 w-48">Total</th>
-                        <th className="px-4 py-5 w-12"></th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100 bg-white">
-                      {data.rab.map((item, i) => (
-                        <tr key={i} className="hover:bg-slate-50/50">
-                          <td className="px-6 py-4">
-                            <Input value={item.nama} placeholder="Nama Barang" onChange={(e) => updateRab(i, 'nama', e.target.value)} className="h-10 text-sm font-bold border-none bg-slate-50 mb-1" />
-                            <Input value={item.spesifikasi} placeholder="Spesifikasi" onChange={(e) => updateRab(i, 'spesifikasi', e.target.value)} className="h-8 text-xs border-none bg-transparent" />
-                          </td>
-                          <td className="px-4 py-4">
-                            <Input type="number" value={item.jumlah} onChange={(e) => updateRab(i, 'jumlah', parseInt(e.target.value))} className="h-10 text-center" />
-                          </td>
-                          <td className="px-6 py-4">
-                            <Input type="number" value={item.hargaSatuan} onChange={(e) => updateRab(i, 'hargaSatuan', parseInt(e.target.value))} className="h-10" />
-                          </td>
-                          <td className="px-6 py-4 font-bold text-slate-900">
-                            Rp {(item.totalHarga).toLocaleString('id-ID')}
-                          </td>
-                          <td className="px-4 py-4">
-                            <Button variant="ghost" size="icon" onClick={() => removeRab(i)} className="text-rose-400">
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </td>
+                  {/* RAB Mobile View */}
+                  <div className="md:hidden divide-y divide-slate-100 bg-white">
+                    {data.rab.map((item, i) => (
+                      <div key={i} className="p-5 space-y-3">
+                        <div className="flex justify-between items-start">
+                          <Input value={item.nama} placeholder="Nama Barang" onChange={(e) => updateRab(i, 'nama', e.target.value)} className="h-10 px-3 text-sm font-bold border-slate-100 bg-slate-50 w-full mr-2" />
+                          <Button variant="ghost" size="icon" onClick={() => removeRab(i)} className="text-rose-400 shrink-0 h-10 w-10">
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                        <Input value={item.spesifikasi} placeholder="Spesifikasi" onChange={(e) => updateRab(i, 'spesifikasi', e.target.value)} className="h-8 px-3 text-[10px] border-slate-50 bg-slate-50/50" />
+                        
+                        <div className="grid grid-cols-2 gap-3 pt-1">
+                          <div className="space-y-1">
+                            <Label className="text-[9px] uppercase font-bold text-slate-400">Jumlah</Label>
+                            <Input type="number" value={item.jumlah} onChange={(e) => updateRab(i, 'jumlah', parseInt(e.target.value))} className="h-9" />
+                          </div>
+                          <div className="space-y-1">
+                            <Label className="text-[9px] uppercase font-bold text-slate-400">Harga</Label>
+                            <Input type="number" value={item.hargaSatuan} onChange={(e) => updateRab(i, 'hargaSatuan', parseInt(e.target.value))} className="h-9" />
+                          </div>
+                        </div>
+                        <div className="flex justify-between items-center pt-2 border-t border-slate-50">
+                          <span className="text-[9px] uppercase font-black text-slate-400">Subtotal</span>
+                          <span className="font-bold text-emerald-600 text-sm">Rp {(item.totalHarga).toLocaleString('id-ID')}</span>
+                        </div>
+                      </div>
+                    ))}
+                    {data.rab.length > 0 && (
+                      <div className="p-6 bg-emerald-50 text-center">
+                        <p className="text-[10px] font-black uppercase tracking-widest text-emerald-900 mb-1">Total Biaya</p>
+                        <p className="text-2xl font-black text-emerald-700">Rp {calculateTotalRab().toLocaleString('id-ID')}</p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Desktop Table */}
+                  <div className="hidden md:block overflow-x-auto">
+                    <table className="w-full text-left">
+                      <thead className="bg-emerald-900 text-white font-bold text-[10px] uppercase tracking-widest">
+                        <tr>
+                          <th className="px-6 py-5 text-center">Item & Spesifikasi</th>
+                          <th className="px-4 py-5 w-24 text-center">Jumlah</th>
+                          <th className="px-6 py-5 w-40 text-center">Harga Satuan</th>
+                          <th className="px-6 py-5 w-48 text-center">Total</th>
+                          <th className="px-4 py-5 w-12"></th>
                         </tr>
-                      ))}
-                    </tbody>
-                    <tfoot>
-                        <tr className="bg-emerald-50">
-                            <td colSpan={3} className="px-6 py-6 text-right font-black uppercase tracking-widest text-xs text-emerald-900">Total Biaya</td>
-                            <td colSpan={2} className="px-6 py-6 text-2xl font-black text-emerald-700">Rp {calculateTotalRab().toLocaleString('id-ID')}</td>
-                        </tr>
-                    </tfoot>
-                  </table>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100 bg-white">
+                        {data.rab.map((item, i) => (
+                          <tr key={i} className="hover:bg-slate-50/50">
+                            <td className="px-6 py-4">
+                              <Input value={item.nama} placeholder="Nama Barang" onChange={(e) => updateRab(i, 'nama', e.target.value)} className="h-10 text-sm font-bold border-none bg-slate-50 mb-1" />
+                              <Input value={item.spesifikasi} placeholder="Spesifikasi" onChange={(e) => updateRab(i, 'spesifikasi', e.target.value)} className="h-8 text-xs border-none bg-transparent" />
+                            </td>
+                            <td className="px-4 py-4">
+                              <Input type="number" value={item.jumlah} onChange={(e) => updateRab(i, 'jumlah', parseInt(e.target.value))} className="h-10 text-center" />
+                            </td>
+                            <td className="px-6 py-4">
+                              <Input type="number" value={item.hargaSatuan} onChange={(e) => updateRab(i, 'hargaSatuan', parseInt(e.target.value))} className="h-10" />
+                            </td>
+                            <td className="px-6 py-4 font-bold text-slate-900">
+                              Rp {(item.totalHarga).toLocaleString('id-ID')}
+                            </td>
+                            <td className="px-4 py-4">
+                              <Button variant="ghost" size="icon" onClick={() => removeRab(i)} className="text-rose-400">
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                      <tfoot>
+                          <tr className="bg-emerald-50">
+                              <td colSpan={3} className="px-6 py-6 text-right font-black uppercase tracking-widest text-xs text-emerald-900">Total Biaya</td>
+                              <td colSpan={2} className="px-6 py-6 text-2xl font-black text-emerald-700">Rp {calculateTotalRab().toLocaleString('id-ID')}</td>
+                          </tr>
+                      </tfoot>
+                    </table>
+                  </div>
                 </div>
               </TabsContent>
 

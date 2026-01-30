@@ -1,0 +1,402 @@
+'use client'
+
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import { 
+  Calendar, 
+  Clock, 
+  Users, 
+  Search, 
+  Plus, 
+  MoreVertical, 
+  Edit2, 
+  Trash2, 
+  CheckCircle2, 
+  ChevronRight,
+  Filter,
+  Download,
+  Mail,
+  User as UserIcon
+} from 'lucide-react'
+import { AdminLayout } from '@/components/layout/admin-layout'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Badge } from '@/components/ui/badge'
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle, 
+  DialogTrigger,
+  DialogFooter
+} from '@/components/ui/dialog'
+import { Label } from '@/components/ui/label'
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from '@/components/ui/select'
+import { toast } from 'sonner'
+import { useSession } from 'next-auth/react'
+
+export default function JadwalTugasPage() {
+  const router = useRouter()
+  const { data: session } = useSession()
+  const [loading, setLoading] = useState(true)
+  const [data, setData] = useState<any[]>([])
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [editingItem, setEditingItem] = useState<any>(null)
+  const [search, setSearch] = useState('')
+  const [activeTab, setActiveTab] = useState('ALL')
+  
+  const [formData, setFormData] = useState({
+    date: new Date().toISOString().split('T')[0],
+    type: 'KHOTIB',
+    category: 'JUMAT',
+    name: '',
+    description: ''
+  })
+
+  const fetchData = async () => {
+    try {
+      setLoading(true)
+      const res = await fetch('/api/admin/jadwal')
+      const json = await res.json()
+      if (res.ok) setData(json)
+    } catch (error) {
+      toast.error('Gagal memuat data jadwal')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchData()
+  }, [])
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    try {
+      const url = editingItem ? `/api/admin/jadwal/${editingItem.id}` : '/api/admin/jadwal'
+      const method = editingItem ? 'PATCH' : 'POST'
+      
+      const res = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      })
+
+      if (res.ok) {
+        toast.success(editingItem ? 'Jadwal diperbarui' : 'Jadwal ditambahkan')
+        setIsModalOpen(false)
+        setEditingItem(null)
+        resetForm()
+        fetchData()
+      } else {
+        toast.error('Gagal menyimpan data')
+      }
+    } catch (error) {
+      toast.error('Terjadi kesalahan')
+    }
+  }
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('Hapus jadwal ini?')) return
+    try {
+      const res = await fetch(`/api/admin/jadwal/${id}`, { method: 'DELETE' })
+      if (res.ok) {
+        toast.success('Jadwal dihapus')
+        fetchData()
+      }
+    } catch (error) {
+      toast.error('Gagal menghapus')
+    }
+  }
+
+  const resetForm = () => {
+    setFormData({
+      date: new Date().toISOString().split('T')[0],
+      type: 'KHOTIB',
+      category: 'JUMAT',
+      name: '',
+      description: ''
+    })
+  }
+
+  const openEdit = (item: any) => {
+    setEditingItem(item)
+    setFormData({
+      date: new Date(item.date).toISOString().split('T')[0],
+      type: item.type,
+      category: item.category,
+      name: item.name,
+      description: item.description || ''
+    })
+    setIsModalOpen(true)
+  }
+
+  const filteredData = data.filter(item => {
+    const matchSearch = item.name.toLowerCase().includes(search.toLowerCase()) || 
+                      item.type.toLowerCase().includes(search.toLowerCase())
+    const matchTab = activeTab === 'ALL' || item.category === activeTab
+    return matchSearch && matchTab
+  })
+
+  // Types of tasks
+  const taskTypes = [
+    { value: 'KHOTIB', label: 'Khotib' },
+    { value: 'IMAM', label: 'Imam' },
+    { value: 'MUADZIN', label: 'Muadzin' },
+    { value: 'BILAL', label: 'Bilal / Muraqqi' },
+    { value: 'LECTURER', label: 'Penceramah' },
+    { value: 'CLEANING', label: 'Kesehatan Masjid' },
+    { value: 'SECURITY', label: 'Keamanan' }
+  ]
+
+  // Categories
+  const categories = [
+    { value: 'JUMAT', label: "Sholat Jum'at" },
+    { value: 'RAWATIB', label: 'Sholat Rawatib' },
+    { value: 'PENGAJIAN', label: 'Kajian/Pengajian' },
+    { value: 'RAMADHAN', label: 'Ramadhan' }
+  ]
+
+  return (
+    <AdminLayout title="Jadwal Tugas" subtitle="Kelola penugasan imam, khotib, dan petugas operasional masjid.">
+      <div className="p-6 md:p-10 space-y-8">
+        {/* Quick Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <Card className="rounded-[2.5rem] border-none shadow-sm bg-linear-to-br from-orange-50 to-amber-50/30">
+            <CardContent className="p-8">
+              <p className="text-[10px] font-black text-orange-600 uppercase tracking-widest">Total Tugas</p>
+              <h3 className="text-3xl font-black text-slate-900 mt-1">{data.length}</h3>
+            </CardContent>
+          </Card>
+          <Card className="rounded-[2.5rem] border-none shadow-sm bg-linear-to-br from-emerald-50 to-teal-50/30">
+            <CardContent className="p-8">
+              <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">Tugas Jum'at</p>
+              <h3 className="text-3xl font-black text-slate-900 mt-1">{data.filter(d => d.category === 'JUMAT').length}</h3>
+            </CardContent>
+          </Card>
+          <Card className="rounded-[2.5rem] border-none shadow-sm bg-linear-to-br from-blue-50 to-indigo-50/30">
+            <CardContent className="p-8">
+              <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest">Tugas Rutin</p>
+              <h3 className="text-3xl font-black text-slate-900 mt-1">{data.filter(d => d.category === 'RAWATIB').length}</h3>
+            </CardContent>
+          </Card>
+          <Card className="rounded-[2.5rem] border-none shadow-sm bg-linear-to-br from-violet-50 to-purple-50/30">
+            <CardContent className="p-8">
+              <p className="text-[10px] font-black text-violet-600 uppercase tracking-widest">Kajian & Lainnya</p>
+              <h3 className="text-3xl font-black text-slate-900 mt-1">{data.filter(d => d.category === 'PENGAJIAN').length}</h3>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Actions & Filters */}
+        <div className="flex flex-col lg:flex-row justify-between items-center gap-6">
+          <div className="flex bg-white p-1.5 rounded-3xl border border-neutral-100 shadow-sm overflow-x-auto w-full lg:w-auto">
+             <button 
+               onClick={() => setActiveTab('ALL')}
+               className={`px-6 py-2.5 rounded-2xl text-xs font-black uppercase tracking-widest transition-all ${activeTab === 'ALL' ? 'bg-[#0b3d2e] text-white' : 'text-neutral-400 hover:text-[#0b3d2e]'}`}
+             >
+               Semua
+             </button>
+             {categories.map(cat => (
+               <button 
+                 key={cat.value}
+                 onClick={() => setActiveTab(cat.value)}
+                 className={`px-6 py-2.5 rounded-2xl text-xs font-black uppercase tracking-widest transition-all ${activeTab === cat.value ? 'bg-[#0b3d2e] text-white' : 'text-neutral-400 hover:text-[#0b3d2e]'}`}
+               >
+                 {cat.label}
+               </button>
+             ))}
+          </div>
+
+          <div className="flex items-center gap-3 w-full lg:w-auto">
+            <div className="relative flex-1 lg:w-80">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-300" />
+              <Input 
+                placeholder="Cari nama petugas..." 
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                className="pl-11 h-12 rounded-2xl border-neutral-100 bg-white"
+              />
+            </div>
+            
+            <Dialog open={isModalOpen} onOpenChange={(open) => {
+              setIsModalOpen(open)
+              if (!open) {
+                setEditingItem(null)
+                resetForm()
+              }
+            }}>
+              <DialogTrigger asChild>
+                <Button className="h-12 px-6 rounded-2xl bg-[#0b3d2e] hover:bg-[#062c21] font-black uppercase tracking-widest text-xs">
+                  <Plus className="h-4 w-4 mr-2" /> Tambah Jadwal
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[500px] rounded-[2.5rem] p-0 overflow-hidden border-none">
+                <div className="bg-[#0b3d2e] p-8 text-white">
+                  <DialogTitle className="text-2xl font-black">{editingItem ? 'Edit Jadwal Tugas' : 'Tambah Jadwal Tugas'}</DialogTitle>
+                  <p className="text-emerald-100/60 text-xs mt-1 italic font-medium">Input penugasan rutin atau khusus DKM.</p>
+                </div>
+                <form onSubmit={handleSubmit} className="p-8 space-y-6 bg-white">
+                  <div className="grid grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                       <Label className="text-[10px] font-black uppercase tracking-widest text-neutral-400">Tanggal</Label>
+                       <Input type="date" value={formData.date} onChange={e => setFormData({...formData, date: e.target.value})} className="h-12 rounded-xl" required />
+                    </div>
+                    <div className="space-y-2">
+                       <Label className="text-[10px] font-black uppercase tracking-widest text-neutral-400">Kategori</Label>
+                       <Select 
+                        value={formData.category} 
+                        onValueChange={v => setFormData({...formData, category: v})}
+                       >
+                         <SelectTrigger className="h-12 rounded-xl">
+                           <SelectValue placeholder="Pilih Kategori" />
+                         </SelectTrigger>
+                         <SelectContent className="rounded-xl">
+                           {categories.map(c => <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>)}
+                         </SelectContent>
+                       </Select>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                     <Label className="text-[10px] font-black uppercase tracking-widest text-neutral-400">Jenis Tugas</Label>
+                     <Select 
+                      value={formData.type} 
+                      onValueChange={v => setFormData({...formData, type: v})}
+                     >
+                       <SelectTrigger className="h-12 rounded-xl font-bold">
+                         <SelectValue placeholder="Pilih Tugas" />
+                       </SelectTrigger>
+                       <SelectContent className="rounded-xl">
+                         {taskTypes.map(t => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}
+                       </SelectContent>
+                     </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                     <Label className="text-[10px] font-black uppercase tracking-widest text-neutral-400">Nama Petugas</Label>
+                     <Input 
+                      placeholder="Contoh: Ust. Sulaiman / H. Ahmad" 
+                      value={formData.name} 
+                      onChange={e => setFormData({...formData, name: e.target.value})}
+                      className="h-12 rounded-xl font-bold text-emerald-700"
+                      required
+                     />
+                  </div>
+
+                  <div className="space-y-2">
+                     <Label className="text-[10px] font-black uppercase tracking-widest text-neutral-400">Keterangan (Opsional)</Label>
+                     <Input 
+                      placeholder="Tambahan detail tugas..." 
+                      value={formData.description} 
+                      onChange={e => setFormData({...formData, description: e.target.value})}
+                      className="h-12 rounded-xl"
+                     />
+                  </div>
+
+                  <DialogFooter className="pt-4">
+                    <Button type="submit" className="w-full h-14 rounded-2xl bg-[#0b3d2e] hover:bg-[#062c21] font-black uppercase tracking-widest text-sm shadow-xl shadow-emerald-900/10">
+                      {editingItem ? 'Simpan Perubahan' : 'Terbitkan Jadwal'}
+                    </Button>
+                  </DialogFooter>
+                </form>
+              </DialogContent>
+            </Dialog>
+          </div>
+        </div>
+
+        {/* Schedule List */}
+        <Card className="rounded-[3rem] border-none shadow-2xl shadow-neutral-200/50 overflow-hidden bg-white">
+          <CardHeader className="p-10 border-b border-neutral-50 flex flex-row items-center justify-between">
+            <div>
+              <CardTitle className="text-2xl font-black text-slate-900">Daftar Penugasan</CardTitle>
+              <p className="text-xs text-neutral-400 mt-1 italic font-medium">Monitoring tugas aktif masjid.</p>
+            </div>
+          </CardHeader>
+          <CardContent className="p-0">
+            {loading ? (
+              <div className="p-20 flex flex-col items-center justify-center space-y-4">
+                 <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#0b3d2e] border-t-transparent shadow-sm"></div>
+                 <p className="text-xs font-black uppercase tracking-[0.2em] text-neutral-400">Menyelaraskan Data...</p>
+              </div>
+            ) : filteredData.length === 0 ? (
+              <div className="p-20 text-center">
+                 <div className="h-20 w-20 bg-neutral-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <Calendar className="h-10 w-10 text-neutral-200" />
+                 </div>
+                 <p className="text-lg font-bold text-neutral-300 italic">Tidak ada jadwal yang ditemukan</p>
+                 <button className="text-emerald-600 text-xs font-black uppercase mt-2 tracking-widest hover:underline" onClick={resetForm}>Tambah Tugas Sekarang</button>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left">
+                  <thead>
+                    <tr className="bg-neutral-50/50">
+                      <th className="px-10 py-6 text-[10px] font-black uppercase tracking-widest text-neutral-400">Petugas</th>
+                      <th className="px-10 py-6 text-[10px] font-black uppercase tracking-widest text-neutral-400">Jenis Tugas</th>
+                      <th className="px-10 py-6 text-[10px] font-black uppercase tracking-widest text-neutral-400">Waktu / Tanggal</th>
+                      <th className="px-10 py-6 text-right text-[10px] font-black uppercase tracking-widest text-neutral-400">Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-neutral-50/50">
+                    {filteredData.map((item) => (
+                      <tr key={item.id} className="hover:bg-neutral-50/20 transition-all group">
+                        <td className="px-10 py-8">
+                           <div className="flex items-center gap-4">
+                              <div className="h-12 w-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 border border-emerald-100 group-hover:scale-110 transition-transform">
+                                 <UserIcon className="h-6 w-6" />
+                              </div>
+                              <div>
+                                 <span className="font-black text-slate-900 block uppercase tracking-tight">{item.name}</span>
+                                 <Badge className="mt-1 bg-white border border-neutral-100 text-neutral-400 text-[10px] font-bold py-0 h-5 px-2 rounded-lg">
+                                    {categories.find(c => c.value === item.category)?.label || item.category}
+                                 </Badge>
+                              </div>
+                           </div>
+                        </td>
+                        <td className="px-10 py-8">
+                          <Badge className={`rounded-xl px-4 py-1.5 font-black text-[9px] uppercase tracking-widest border-none ${
+                            item.type === 'KHOTIB' ? 'bg-orange-50 text-orange-600' :
+                            item.type === 'IMAM' ? 'bg-indigo-50 text-indigo-600' :
+                            'bg-slate-50 text-slate-600'
+                          }`}>
+                            {taskTypes.find(t => t.value === item.type)?.label || item.type}
+                          </Badge>
+                        </td>
+                        <td className="px-10 py-8">
+                           <div className="flex flex-col">
+                              <span className="text-sm font-black text-[#0b3d2e]">
+                                {new Date(item.date).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+                              </span>
+                              <span className="text-[10px] text-neutral-400 font-medium italic mt-0.5">{item.description || 'Tanpa keterangan tambahan'}</span>
+                           </div>
+                        </td>
+                        <td className="px-10 py-8 text-right">
+                           <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all translate-x-2 group-hover:translate-x-0">
+                              <Button variant="ghost" size="icon" className="rounded-xl h-10 w-10 text-blue-500 hover:bg-blue-50" onClick={() => openEdit(item)}>
+                                 <Edit2 className="h-4 w-4" />
+                              </Button>
+                              <Button variant="ghost" size="icon" className="rounded-xl h-10 w-10 text-rose-500 hover:bg-rose-50" onClick={() => handleDelete(item.id)}>
+                                 <Trash2 className="h-4 w-4" />
+                              </Button>
+                           </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    </AdminLayout>
+  )
+}

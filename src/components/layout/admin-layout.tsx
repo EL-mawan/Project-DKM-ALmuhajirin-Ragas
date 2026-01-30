@@ -133,7 +133,7 @@ export function AdminLayout({ children, title, subtitle }: AdminLayoutProps) {
     <Layout showHeader={false} showFooter={false}>
       <div className="h-screen bg-neutral-50 flex overflow-hidden">
         {/* Sidebar (Desktop) */}
-        <aside className="fixed inset-y-0 left-0 z-50 w-72 bg-[#0b3d2e] border-r border-[#1a4d3d] transition-transform duration-300 lg:translate-x-0 lg:static hidden md:flex flex-col text-white shadow-2xl">
+        <aside className="fixed inset-y-0 left-0 z-50 w-72 bg-[#0b3d2e] border-r border-[#1a4d3d] lg:translate-x-0 lg:static hidden md:flex flex-col text-white shadow-2xl">
           <div className="flex flex-col h-full">
             <div className="p-8 flex items-center justify-between border-b border-[#1a4d3d]">
               <div className="flex items-center space-x-3">
@@ -151,27 +151,22 @@ export function AdminLayout({ children, title, subtitle }: AdminLayoutProps) {
             </div>
 
             <nav className="flex-1 px-4 py-6 overflow-y-auto space-y-1">
-              {filteredMenuItems.map((item, index) => {
+              {filteredMenuItems.map((item) => {
                 const isActive = pathname === item.href
                 return (
-                  <motion.div
-                    key={item.href}
-                    initial={{ x: -10, opacity: 0 }}
-                    animate={{ x: 0, opacity: 1 }}
-                    transition={{ delay: 0.1 + index * 0.05 }}
-                  >
+                  <div key={item.href}>
                     <Link
                       href={item.href}
-                      className={`flex items-center p-3 rounded-xl text-sm font-semibold transition-all group ${
+                      className={`flex items-center p-3 rounded-xl text-sm font-semibold group ${
                         isActive 
                           ? 'bg-emerald-500/10 text-emerald-400 border-r-4 border-emerald-500' 
                           : 'text-emerald-100/60 hover:text-white hover:bg-white/5'
                       }`}
                     >
-                      <item.icon className={`h-5 w-5 mr-3 transition-transform ${isActive ? 'scale-110 text-emerald-400' : 'group-hover:scale-110'}`} />
+                      <item.icon className={`h-5 w-5 mr-3 ${isActive ? 'text-emerald-400' : ''}`} />
                       {item.label}
                     </Link>
-                  </motion.div>
+                  </div>
                 )
               })}
             </nav>
@@ -200,7 +195,7 @@ export function AdminLayout({ children, title, subtitle }: AdminLayoutProps) {
 
         <main className="flex-1 flex flex-col min-w-0 relative">
           {/* Header Container (Fixed) */}
-          <div className={`fixed top-0 right-0 z-40 h-22 transition-transform duration-300 left-0 md:left-72 ${isVisible ? 'translate-y-0' : '-translate-y-full'}`}>
+          <div className={`fixed top-0 right-0 z-40 h-22 left-0 md:left-72 ${isVisible ? 'translate-y-0' : '-translate-y-full'}`}>
             {/* Mobile Header */}
             <MobileAdminHeader 
               title={title} 
@@ -247,13 +242,9 @@ export function AdminLayout({ children, title, subtitle }: AdminLayoutProps) {
             ref={scrollRef}
             className="flex-1 overflow-y-auto pt-22"
           >
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4 }}
-            >
+            <div>
               {children}
-            </motion.div>
+            </div>
           </div>
         </main>
       </div>
