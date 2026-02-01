@@ -1096,14 +1096,13 @@ function ProposalBuilderContent() {
 
 
       {/* PREVIEW SECTION */}
-      <div className={isViewMode ? "fixed inset-0 overflow-y-auto flex justify-center py-12 px-6 bg-slate-100/80 backdrop-blur-md z-50 animate-in fade-in duration-500" : "w-full lg:w-[700px] xl:w-[850px] 2xl:w-[1000px] shrink-0 sticky top-6 h-fit max-h-[calc(100vh-48px)] transition-all duration-500"}>
+      <div className={isViewMode ? "fixed inset-0 overflow-y-auto flex justify-center py-12 px-6 bg-slate-100/80 backdrop-blur-md z-50 animate-in fade-in duration-500" : "w-full lg:w-[450px] xl:w-[550px] 2xl:w-[650px] shrink-0 sticky top-6 h-fit max-h-[calc(100vh-48px)] transition-all duration-500"}>
         <div className="w-full h-full flex flex-col">
-          <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center justify-between mb-6">
             <div className="flex flex-col">
-              <h2 className="font-black text-2xl text-slate-900 uppercase tracking-tighter flex items-center gap-3">
-                Kajian Visual <Badge className="bg-emerald-600 text-white border-none font-black text-[10px] px-2.5 py-0.5 rounded-full shadow-lg shadow-emerald-200">PRO</Badge>
+              <h2 className="font-bold text-lg text-slate-800 uppercase tracking-tight flex items-center gap-2">
+                Preview <Badge className="bg-emerald-100 text-emerald-700 border-none font-bold text-[9px] px-2 py-0.5 rounded-full">PRO</Badge>
               </h2>
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Live Document Preview</p>
             </div>
             <div className="flex gap-2">
                 {isViewMode && (
@@ -1115,8 +1114,8 @@ function ProposalBuilderContent() {
             </div>
           </div>
 
-          <div className="bg-slate-50 border-2 border-slate-200/60 p-10 rounded-[4rem] shadow-2xl shadow-slate-200/50 h-full overflow-y-auto space-y-16 flex flex-col items-center custom-scrollbar scroll-smooth">
-              <div ref={previewRef} className="flex flex-col gap-12 scale-[0.45] sm:scale-[0.55] md:scale-[0.65] lg:scale-[0.75] xl:scale-[0.9] 2xl:scale-[1.1] origin-top transition-all duration-700 hover:scale-[1.12] focus-within:scale-[1.12]">
+          <div className="bg-slate-50 border border-slate-200 p-6 rounded-[3rem] shadow-xl shadow-slate-200/30 h-full overflow-y-auto space-y-12 flex flex-col items-center custom-scrollbar scroll-smooth">
+              <div ref={previewRef} className="flex flex-col gap-10 scale-[0.4] sm:scale-[0.5] md:scale-[0.55] lg:scale-[0.6] xl:scale-[0.75] 2xl:scale-[1.0] origin-top transition-all duration-500">
                 <PageCover data={data} />
                 <Page1 data={data} bulkRecipient={bulkRecipients.length > 0 ? bulkRecipients[currentRecipientIndex] : null} />
                 <Page2 data={data} />
