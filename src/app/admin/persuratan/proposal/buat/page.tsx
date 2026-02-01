@@ -281,8 +281,12 @@ function ProposalBuilderContent() {
       
       const updates: Partial<ProposalData> = { struktur: newStruktur }
       
-      if (category === 'pimpinanAtas' && index === 0) updates.namaKetua = name
-      if (category === 'pimpinanAtas' && index === 1) updates.namaTokohMasyarakat = name
+      if (category === 'pimpinanAtas' && index === 0) updates.namaTokohMasyarakat = name
+      if (category === 'pimpinanAtas' && index === 1) updates.namaKetua = name
+      if (category === 'pimpinanAtas' && index === 2) updates.namaKetuaRW = name
+      if (category === 'pimpinanAtas' && index === 3) updates.namaKetuaRT = name
+      if (category === 'pimpinanAtas' && index === 4) updates.namaKetuaPemuda = name
+      if (category === 'pimpinanAtas' && index === 5) updates.namaKetuaRISMA = name
       if (category === 'administrasi' && index === 0) updates.namaSekretaris = name
       if (category === 'administrasi' && index === 1) updates.namaBendahara = name
       
@@ -945,23 +949,7 @@ Hanya berikan JSON saja, tanpa penjelasan.`
                     </div>
                  </div>
 
-                 <div className="space-y-6">
-                    <h3 className="font-bold text-lg text-slate-800 border-l-4 border-emerald-500 pl-4">Penandatangan Tambahan (Opsional)</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div className="space-y-2">
-                            <Label className="text-[10px] uppercase text-slate-400 font-bold tracking-widest">Ketua RW</Label>
-                            <Input value={data.namaKetuaRW} className="h-11 rounded-xl bg-white" onChange={(e) => setData({...data, namaKetuaRW: e.target.value})} />
-                        </div>
-                        <div className="space-y-2">
-                            <Label className="text-[10px] uppercase text-slate-400 font-bold tracking-widest">Ketua RT</Label>
-                            <Input value={data.namaKetuaRT} className="h-11 rounded-xl bg-white" onChange={(e) => setData({...data, namaKetuaRT: e.target.value})} />
-                        </div>
-                         <div className="space-y-2">
-                             <Label className="text-[10px] uppercase text-slate-400 font-bold tracking-widest">Ketua Pemuda</Label>
-                             <Input value={data.namaKetuaPemuda} className="h-11 rounded-xl bg-white" onChange={(e) => setData({...data, namaKetuaPemuda: e.target.value})} />
-                         </div>
-                     </div>
-                  </div>
+
 
                   <div className="space-y-6">
                       <div className="flex items-center justify-between">
