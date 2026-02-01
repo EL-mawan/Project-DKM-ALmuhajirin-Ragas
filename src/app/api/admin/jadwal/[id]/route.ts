@@ -3,6 +3,7 @@ import { db } from '@/lib/db'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth/config'
 import { checkPermission } from '@/lib/auth/rbac'
+import { createAuditLog } from '@/lib/audit'
 
 export async function PATCH(
   req: NextRequest,
@@ -41,15 +42,13 @@ export async function PATCH(
     })
 
     // Log the action
-    await db.auditLog.create({
-      data: {
-        userId: user.id,
-        action: 'UPDATE_JADWAL_TUGAS',
-        table: 'jadwal_tugas',
-        recordId: id,
-        oldValues: JSON.stringify(oldData),
-        newValues: JSON.stringify(updated)
-      }
+    await createAuditLog({
+      userId: user.id,
+      action: 'UPDATE_JADWAL_TUGAS',
+      table: 'jadwal_tugas',
+      recordId: id,
+      oldValues: oldData,
+      newValues: updated
     })
 
     return NextResponse.json(updated)
@@ -83,14 +82,12 @@ export async function DELETE(
     await db.jadwalTugas.delete({ where: { id } })
 
     // Log the action
-    await db.auditLog.create({
-      data: {
-        userId: user.id,
-        action: 'DELETE_JADWAL_TUGAS',
-        table: 'jadwal_tugas',
-        recordId: id,
-        oldValues: JSON.stringify(oldData)
-      }
+    await createAuditLog({
+      userId: user.id,
+      action: 'DELETE_JADWAL_TUGAS',
+      table: 'jadwal_tugas',
+      recordId: id,
+      oldValues: oldData
     })
 
     return NextResponse.json({ success: true })

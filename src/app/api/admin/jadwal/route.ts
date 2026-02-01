@@ -3,6 +3,7 @@ import { db } from '@/lib/db'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth/config'
 import { checkPermission } from '@/lib/auth/rbac'
+import { createAuditLog } from '@/lib/audit'
 
 export const dynamic = 'force-dynamic'
 
@@ -82,14 +83,12 @@ export async function POST(req: NextRequest) {
     })
 
     // Log the action
-    await db.auditLog.create({
-      data: {
-        userId: user.id,
-        action: 'CREATE_JADWAL_TUGAS',
-        table: 'jadwal_tugas',
-        recordId: item.id,
-        newValues: JSON.stringify(item)
-      }
+    await createAuditLog({
+      userId: user.id,
+      action: 'CREATE_JADWAL_TUGAS',
+      table: 'jadwal_tugas',
+      recordId: item.id,
+      newValues: item
     })
 
     return NextResponse.json(item, { status: 201 })
