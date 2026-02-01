@@ -553,9 +553,9 @@ function ProposalBuilderContent() {
 
   return (
     <AdminLayout title="Proposal Builder" subtitle="Buat proposal premium DKM Al-Muhajirin">
-    <div className={isViewMode ? "" : "flex flex-col lg:flex-row gap-8 pb-20 mt-4"}>
+    <div className={isViewMode ? "" : "flex flex-col lg:flex-row gap-10 pb-20 mt-6 max-w-[2000px] mx-auto px-4 md:px-8 xl:px-12"}>
       {!isViewMode && (
-      <div className="flex-1 space-y-6">
+      <div className="flex-1 min-w-0 space-y-6">
         <div className="flex flex-col gap-2">
           <Button variant="ghost" className="p-0 h-auto hover:bg-transparent text-slate-500 hover:text-emerald-600 self-start" onClick={() => router.push('/admin/persuratan')}>
             <ChevronLeft className="h-4 w-4 mr-1" /> Kembali
@@ -567,6 +567,8 @@ function ProposalBuilderContent() {
             <p className="text-slate-500 font-medium italic">Format otomatis sesuai standar DKM Al-Muhajirin</p>
           </div>
         </div>
+        
+        {/* ... (existing Tabs and Card content remains same) ... */}
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid grid-cols-2 md:grid-cols-5 h-auto md:h-16 w-full bg-slate-100 p-1.5 rounded-3xl mb-6 gap-1 md:gap-0">
@@ -1091,23 +1093,30 @@ function ProposalBuilderContent() {
       </div>
       )}
 
+
+
       {/* PREVIEW SECTION */}
-      <div className={isViewMode ? "fixed inset-0 overflow-y-auto flex justify-center py-10 px-4 bg-slate-100 z-50" : "w-full lg:w-[650px] shrink-0"}>
-        <div className="w-full max-w-[850px]">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="font-black text-2xl text-slate-900 uppercase tracking-tight">Kajian Visual</h2>
+      <div className={isViewMode ? "fixed inset-0 overflow-y-auto flex justify-center py-12 px-6 bg-slate-100/80 backdrop-blur-md z-50 animate-in fade-in duration-500" : "w-full lg:w-[700px] xl:w-[850px] 2xl:w-[1000px] shrink-0 sticky top-6 h-fit max-h-[calc(100vh-48px)] transition-all duration-500"}>
+        <div className="w-full h-full flex flex-col">
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex flex-col">
+              <h2 className="font-black text-2xl text-slate-900 uppercase tracking-tighter flex items-center gap-3">
+                Kajian Visual <Badge className="bg-emerald-600 text-white border-none font-black text-[10px] px-2.5 py-0.5 rounded-full shadow-lg shadow-emerald-200">PRO</Badge>
+              </h2>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Live Document Preview</p>
+            </div>
             <div className="flex gap-2">
                 {isViewMode && (
                     <Button variant="outline" className="rounded-xl border-slate-300 font-bold" onClick={() => router.push('/admin/persuratan')}>Tutup</Button>
                 )}
-                <Button onClick={generatePDF} disabled={isGeneratingPDF} className="rounded-xl font-bold bg-slate-900">
+                <Button onClick={generatePDF} disabled={isGeneratingPDF} className="rounded-xl font-bold bg-slate-900 shadow-xl shadow-slate-200 hover:scale-105 transition-transform active:scale-95">
                     <Download className="mr-2 h-4 w-4" /> {isGeneratingPDF ? 'Mencetak...' : 'Unduh PDF'}
                 </Button>
             </div>
           </div>
 
-          <div className="bg-slate-200 p-8 rounded-[3.5rem] shadow-inner h-[calc(100vh-160px)] overflow-y-auto space-y-12 flex flex-col items-center">
-              <div ref={previewRef} className="flex flex-col gap-8 scale-[0.5] sm:scale-[0.6] md:scale-[0.7] lg:scale-[0.8] origin-top">
+          <div className="bg-slate-50 border-2 border-slate-200/60 p-10 rounded-[4rem] shadow-2xl shadow-slate-200/50 h-full overflow-y-auto space-y-16 flex flex-col items-center custom-scrollbar scroll-smooth">
+              <div ref={previewRef} className="flex flex-col gap-12 scale-[0.45] sm:scale-[0.55] md:scale-[0.65] lg:scale-[0.75] xl:scale-[0.9] 2xl:scale-[1.1] origin-top transition-all duration-700 hover:scale-[1.12] focus-within:scale-[1.12]">
                 <PageCover data={data} />
                 <Page1 data={data} bulkRecipient={bulkRecipients.length > 0 ? bulkRecipients[currentRecipientIndex] : null} />
                 <Page2 data={data} />
@@ -1130,6 +1139,10 @@ function ProposalBuilderContent() {
         }
         .kop-line { border-bottom: 3px solid black; margin-bottom: 2px; }
         .kop-line-thin { border-bottom: 1px solid black; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
     `}</style>
     <Dialog open={isBulkProcessing} onOpenChange={setIsBulkProcessing}>
         <DialogContent className="sm:max-w-md bg-white rounded-3xl p-8 border-none shadow-2xl">
@@ -1180,26 +1193,27 @@ function PageCover({ data }: { data: ProposalData }) {
              }}>
             
             {/* Header Style Elements */}
-            <div style={{ position: 'absolute', top: 0, right: 0, width: '300px', height: '300px', background: 'radial-gradient(circle, #f0fdf4 0%, transparent 70%)', zIndex: 0 }}></div>
+            <div style={{ position: 'absolute', top: 0, right: 0, width: '400px', height: '400px', background: 'radial-gradient(circle, #f0fdf4 0%, transparent 70%)', zIndex: 0 }}></div>
+            <div style={{ position: 'absolute', bottom: 0, left: 0, width: '350px', height: '350px', background: 'radial-gradient(circle, #ecfdf5 0%, transparent 70%)', zIndex: 0, opacity: 0.6 }}></div>
             
-            <div style={{ zIndex: 1, textAlign: 'center', width: '100%' }}>
-                <img src={data.logoKiri || "/logo.png"} style={{ width: '150px', height: '150px', objectFit: 'contain', margin: '0 auto 50px auto' }} />
+            <div style={{ zIndex: 1, textAlign: 'center', width: '100%', position: 'relative' }}>
+                <img src={data.logoKiri || "/logo.png"} style={{ width: '160px', height: '160px', objectFit: 'contain', margin: '0 auto 60px auto', filter: 'drop-shadow(0 10px 20px rgba(0,0,0,0.05))' }} />
                 
-                <h1 style={{ fontWeight: 'bold', fontSize: '28pt', margin: '0 0 10px 0', textTransform: 'uppercase', color: '#000', lineHeight: 1.1 }}>{data.perihal}</h1>
-                <div style={{ width: '120px', height: '4px', background: '#000', margin: '30px auto' }}></div>
+                <h1 style={{ fontWeight: '900', fontSize: '30pt', margin: '0 0 15px 0', textTransform: 'uppercase', color: '#0f172a', lineHeight: 1.1, letterSpacing: '-0.02em' }}>{data.perihal}</h1>
+                <div style={{ width: '150px', height: '6px', background: 'linear-gradient(to right, #059669, #10b981)', margin: '35px auto' }}></div>
                 
-                <h2 style={{ fontSize: '18pt', fontWeight: 'bold', margin: '0 0 60px 0', color: '#333' }}>PROPOSAL KEGIATAN</h2>
+                <h2 style={{ fontSize: '18pt', fontWeight: 'bold', margin: '0 0 70px 0', color: '#475569', letterSpacing: '0.2em' }}>PROPOSAL KEGIATAN</h2>
                 
-                <div style={{ margin: '80px 0', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                    <p style={{ fontSize: '14pt', margin: '0' }}>Diajukan Oleh:</p>
-                    <p style={{ fontSize: '16pt', fontWeight: 'bold', margin: '10px 0', textTransform: 'uppercase' }}>{data.namaKopSurat}</p>
-                    <div style={{ height: '2px', width: '400px', backgroundColor: '#eee', margin: '20px 0' }}></div>
-                    <p style={{ fontSize: '11pt', fontStyle: 'italic', color: '#666' }}>Kampung Ragas Grenyang, Desa Argawana</p>
-                    <p style={{ fontSize: '11pt', fontStyle: 'italic', color: '#666' }}>Kecamatan Puloampel Kabupaten Serang</p>
+                <div style={{ margin: '80px 0', display: 'flex', flexDirection: 'column', alignItems: 'center', backgroundColor: 'rgba(248, 250, 252, 0.5)', padding: '50px', borderRadius: '40px', border: '1px solid #f1f5f9' }}>
+                    <p style={{ fontSize: '12pt', margin: '0', color: '#64748b', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Diajukan Oleh:</p>
+                    <p style={{ fontSize: '18pt', fontWeight: '900', margin: '15px 0', textTransform: 'uppercase', color: '#064e3b' }}>{data.namaKopSurat}</p>
+                    <div style={{ height: '2px', width: '300px', backgroundColor: '#e2e8f0', margin: '25px 0' }}></div>
+                    <p style={{ fontSize: '11pt', fontStyle: 'italic', color: '#475569', fontWeight: '500' }}>Kampung Ragas Grenyang, Desa Argawana</p>
+                    <p style={{ fontSize: '11pt', fontStyle: 'italic', color: '#475569', fontWeight: '500' }}>Kecamatan Puloampel Kabupaten Serang - Banten</p>
                 </div>
 
-                <div style={{ position: 'absolute', bottom: '100px', left: 0, width: '100%', textAlign: 'center' }}>
-                    <p style={{ fontSize: '16pt', fontWeight: 'bold', letterSpacing: '4px' }}>TAHUN {new Date().getFullYear()}</p>
+                <div style={{ position: 'absolute', bottom: '-120px', left: 0, width: '100%', textAlign: 'center' }}>
+                    <p style={{ fontSize: '16pt', fontWeight: '900', letterSpacing: '8px', color: '#1e293b' }}>TAHUN {new Date().getFullYear()}</p>
                 </div>
             </div>
         </div>
