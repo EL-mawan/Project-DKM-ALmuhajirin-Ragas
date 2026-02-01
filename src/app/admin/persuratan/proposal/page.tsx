@@ -42,7 +42,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import jsPDF from 'jspdf'
 
-export default function PersuratanAdmin() {
+export default function PersuratanProposal() {
   const router = useRouter()
   const { data: session } = useSession()
   const [loading, setLoading] = useState(true)
@@ -280,10 +280,10 @@ export default function PersuratanAdmin() {
             </TabsList>
           </Tabs>
 
-          <Link href={activeTab === 'PROPOSAL' ? '/admin/persuratan/proposal/buat' : `/admin/persuratan/buat?type=${activeTab}`} className="w-full sm:w-auto">
+          <Link href="/admin/persuratan/proposal/buat" className="w-full sm:w-auto">
             <Button className="rounded-2xl h-14 md:h-16 px-8 md:px-10 font-black uppercase tracking-widest shadow-xl shadow-primary/20 bg-[#0b3d2e] hover:bg-[#062c21] w-full">
               <Plus className="h-5 w-5 mr-3" />
-              Buat {activeTab === 'PROPOSAL' ? 'Proposal' : activeTab === 'UNDANGAN' ? 'Undangan' : 'Surat'}
+              Buat Proposal
             </Button>
           </Link>
         </div>

@@ -361,11 +361,13 @@ Hanya berikan JSON saja, tanpa penjelasan tambahan.`
         })
       })
 
+      const result = await response.json()
+
       if (!response.ok) {
-        throw new Error('AI generation failed')
+        console.error('AI Server Error:', result)
+        throw new Error(result.details || result.error || 'AI generation failed')
       }
 
-      const result = await response.json()
       let generatedText = result.text.trim()
       
       // Remove markdown code blocks if present
@@ -391,9 +393,9 @@ Hanya berikan JSON saja, tanpa penjelasan tambahan.`
       }
 
       toast.success('Saran AI berhasil diterapkan! Silakan sesuaikan jika perlu.')
-    } catch (error) {
+    } catch (error: any) {
       console.error('AI generation error:', error)
-      toast.error('Gagal menghasilkan saran AI. Pastikan koneksi internet stabil.')
+      toast.error(`AI Error: ${error.message || 'Gagal menghasilkan saran'}`)
     } finally {
       setIsAiLoading(null)
     }
@@ -544,7 +546,7 @@ Hanya berikan JSON saja, tanpa penjelasan tambahan.`
 
       if (response.ok) {
         toast.success(proposalId ? 'Perubahan berhasil disimpan' : 'Proposal berhasil disimpan ke Riwayat Persuratan')
-        setTimeout(() => router.push('/admin/persuratan'), 1500)
+        setTimeout(() => router.push('/admin/persuratan/proposal'), 1500)
       } else {
         toast.error('Gagal menyimpan proposal')
       }

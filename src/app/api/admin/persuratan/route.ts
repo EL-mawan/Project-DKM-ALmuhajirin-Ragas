@@ -15,6 +15,14 @@ export async function GET(request: NextRequest) {
 
     const data = await db.dokumenResmi.findMany({
       where: type ? { type } : {},
+      include: {
+        creator: {
+          select: {
+            name: true,
+            avatar: true
+          }
+        }
+      },
       orderBy: { createdAt: 'desc' }
     })
     

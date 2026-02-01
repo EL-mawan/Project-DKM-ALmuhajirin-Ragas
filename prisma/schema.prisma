@@ -32,6 +32,7 @@ model User {
   updatedAt DateTime   @updatedAt
   auditLogs AuditLog[]
   role      Role       @relation(fields: [roleId], references: [id])
+  dokumenResmi DokumenResmi[]
 
   @@map("users")
 }
@@ -254,6 +255,7 @@ model DokumenResmi {
   status        String    @default("pending")
   fileUrl       String?
   createdBy     String
+  creator       User      @relation(fields: [createdBy], references: [id])
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   rejectionNote String?
