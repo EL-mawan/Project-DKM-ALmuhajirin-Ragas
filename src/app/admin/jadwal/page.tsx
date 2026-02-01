@@ -323,15 +323,22 @@ export default function JadwalTugasPage() {
         {/* Actions & Filters */}
         <div className="flex flex-col lg:flex-row justify-between items-center gap-6">
           <div className="flex bg-white p-1.5 rounded-3xl border border-neutral-100 shadow-sm overflow-x-auto w-full lg:w-auto">
-             {categories.map(cat => (
+             {categories.map(cat => {
+               const count = data.filter(d => d.category === cat.value).length
+               return (
                <button 
                  key={cat.value}
                  onClick={() => setActiveTab(cat.value)}
-                 className={`px-6 py-2.5 rounded-2xl text-xs font-black uppercase tracking-widest transition-all ${activeTab === cat.value ? 'bg-[#0b3d2e] text-white' : 'text-neutral-400 hover:text-[#0b3d2e]'}`}
+                 className={`px-6 py-2.5 rounded-2xl text-xs font-black uppercase tracking-widest transition-all flex items-center gap-2 ${activeTab === cat.value ? 'bg-[#0b3d2e] text-white' : 'text-neutral-400 hover:text-[#0b3d2e]'}`}
                >
                  {cat.label}
+                 {count > 0 && (
+                   <span className={`px-1.5 py-0.5 rounded-md text-[9px] font-bold ${activeTab === cat.value ? 'bg-white/20 text-white' : 'bg-emerald-50 text-emerald-600'}`}>
+                     {count}
+                   </span>
+                 )}
                </button>
-             ))}
+             )})}
           </div>
 
           <div className="flex items-center gap-3 w-full lg:w-auto">
@@ -424,9 +431,10 @@ export default function JadwalTugasPage() {
                     <Button 
                       form="jadwal-form"
                       type="submit" 
+                      disabled={loading}
                       className="w-full h-14 rounded-2xl bg-[#0b3d2e] hover:bg-[#062c21] font-black uppercase tracking-widest text-sm shadow-xl shadow-emerald-900/10"
                     >
-                      {editingItem ? 'Simpan Perubahan' : 'Terbitkan Jadwal'}
+                      {loading ? 'Menyimpan...' : (editingItem ? 'Simpan Perubahan' : 'Terbitkan Jadwal')}
                     </Button>
                   </DialogFooter>
                 </form>
@@ -442,6 +450,9 @@ export default function JadwalTugasPage() {
               <CardTitle className="text-2xl font-black text-slate-900">Daftar Penugasan</CardTitle>
               <p className="text-xs text-neutral-400 mt-1 italic font-medium">Monitoring tugas aktif masjid.</p>
             </div>
+            <Button variant="outline" size="sm" onClick={fetchData} disabled={loading} className="rounded-xl border-neutral-200 text-neutral-500 hover:text-emerald-600 hover:bg-emerald-50">
+                Refresh
+            </Button>
           </CardHeader>
           <CardContent className="p-0">
             {loading ? (
@@ -454,8 +465,14 @@ export default function JadwalTugasPage() {
                  <div className="h-20 w-20 bg-neutral-50 rounded-full flex items-center justify-center mx-auto mb-6">
                     <Calendar className="h-10 w-10 text-neutral-200" />
                  </div>
-                 <p className="text-lg font-bold text-neutral-300 italic">Tidak ada jadwal yang ditemukan</p>
-                 <button className="text-emerald-600 text-xs font-black uppercase mt-2 tracking-widest hover:underline" onClick={resetForm}>Tambah Tugas Sekarang</button>
+                 <p className="text-lg font-bold text-neutral-300 italic">
+                    {search ? `Tidak ada hasil untuk "${search}"` : 'Belum ada jadwal di kategori ini'}
+                 </p>
+                 {!search && (
+                    <button className="text-emerald-600 text-xs font-black uppercase mt-2 tracking-widest hover:underline" onClick={() => { setIsModalOpen(true); resetForm(); }}>
+                        + Buat Jadwal Baru
+                    </button>
+                 )}
               </div>
             ) : (
               <div className="overflow-x-auto">
