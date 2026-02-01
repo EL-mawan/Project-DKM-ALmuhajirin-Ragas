@@ -1574,7 +1574,7 @@ function Page5({ data, onNavigate }: { data: ProposalData, onNavigate?: (tab: st
                     }} title="Klik untuk mengedit">
                         <p style={{ fontSize: '11pt' }}>Ketua RT 015,</p>
                         <div style={{ height: '80px' }}></div>
-                        <p style={{ fontSize: '11pt', fontWeight: 'bold' }}>{data.namaKetuaRT || '( ........................ )'}</p>
+                        <p style={{ fontSize: '11pt', fontWeight: 'bold', textDecoration: 'underline' }}>{data.namaKetuaRT || '( ........................ )'}</p>
                     </div>
                     <div onClick={() => onNavigate?.('struktur')} style={{ 
                         opacity: data.namaKetuaRW ? 1 : 0.3, 
@@ -1582,7 +1582,7 @@ function Page5({ data, onNavigate }: { data: ProposalData, onNavigate?: (tab: st
                     }} title="Klik untuk mengedit">
                         <p style={{ fontSize: '11pt' }}>Ketua RW 008,</p>
                         <div style={{ height: '80px' }}></div>
-                        <p style={{ fontSize: '11pt', fontWeight: 'bold' }}>{data.namaKetuaRW || '( ........................ )'}</p>
+                        <p style={{ fontSize: '11pt', fontWeight: 'bold', textDecoration: 'underline' }}>{data.namaKetuaRW || '( ........................ )'}</p>
                     </div>
                     <div onClick={() => onNavigate?.('struktur')} style={{ 
                         opacity: data.namaKetuaPemuda ? 1 : 0.3, 
@@ -1590,7 +1590,7 @@ function Page5({ data, onNavigate }: { data: ProposalData, onNavigate?: (tab: st
                     }} title="Klik untuk mengedit">
                         <p style={{ fontSize: '11pt' }}>Ketua Pemuda,</p>
                         <div style={{ height: '80px' }}></div>
-                        <p style={{ fontSize: '11pt', fontWeight: 'bold' }}>{data.namaKetuaPemuda || '( ........................ )'}</p>
+                        <p style={{ fontSize: '11pt', textDecoration: 'underline',fontWeight: 'bold' }}>{data.namaKetuaPemuda || '( ........................ )'}</p>
                     </div>
                     <div onClick={() => onNavigate?.('struktur')} style={{ cursor: 'pointer' }} title="Klik untuk mengedit">
                         <p style={{ fontSize: '11pt' }}>Tokoh Masyarakat,</p>
