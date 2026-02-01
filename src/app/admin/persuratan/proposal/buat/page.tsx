@@ -96,7 +96,6 @@ interface ProposalData {
   namaKetuaRW: string
   namaKetuaRT: string
   namaKetuaPemuda: string
-  namaKetuaRISMA: string
   namaKepalaDesa: string
   logoKiri?: string
   logoKanan?: string
@@ -138,8 +137,7 @@ const initialData: ProposalData = {
       { role: 'Ketua DKM', name: '' },
       { role: 'Ketua RW 008', name: '' },
       { role: 'Ketua RT 015', name: '' },
-      { role: 'Ketua Pemuda', name: '' },
-      { role: 'Ketua RISMA', name: '' }
+      { role: 'Ketua Pemuda', name: '' }
     ],
     administrasi: [
       { role: 'Sekretaris', name: '' },
@@ -157,7 +155,6 @@ const initialData: ProposalData = {
   namaKetuaRW: '',
   namaKetuaRT: '',
   namaKetuaPemuda: '',
-  namaKetuaRISMA: '',
   namaKepalaDesa: '',
   logoKiri: "/logo.png",
   logoKanan: "",
@@ -286,7 +283,6 @@ function ProposalBuilderContent() {
       if (category === 'pimpinanAtas' && index === 2) updates.namaKetuaRW = name
       if (category === 'pimpinanAtas' && index === 3) updates.namaKetuaRT = name
       if (category === 'pimpinanAtas' && index === 4) updates.namaKetuaPemuda = name
-      if (category === 'pimpinanAtas' && index === 5) updates.namaKetuaRISMA = name
       if (category === 'administrasi' && index === 0) updates.namaSekretaris = name
       if (category === 'administrasi' && index === 1) updates.namaBendahara = name
       
@@ -1601,14 +1597,7 @@ function Page5({ data, onNavigate }: { data: ProposalData, onNavigate?: (tab: st
                         <div style={{ height: '80px' }}></div>
                         <p style={{ fontWeight: 'bold', textDecoration: 'underline', fontSize: '13pt' }}>{data.namaTokohMasyarakat || '( ........................ )'}</p>
                     </div>
-                    <div onClick={() => onNavigate?.('struktur')} style={{ 
-                        opacity: data.namaKetuaRISMA ? 1 : 0.3, 
-                        cursor: 'pointer' 
-                    }} title="Klik untuk mengedit">
-                         <p style={{ fontSize: '11pt' }}>Ketua RISMA,</p>
-                         <div style={{ height: '80px' }}></div>
-                         <p style={{ fontSize: '11pt', fontWeight: 'bold' }}>{data.namaKetuaRISMA || '( ........................ )'}</p>
-                    </div>
+
                     {data.namaKepalaDesa && (
                         <div style={{ gridColumn: '1 / -1', marginTop: '20px', cursor: 'pointer' }} onClick={() => onNavigate?.('ttd')} title="Klik untuk mengedit">
                             <p style={{ fontSize: '11pt' }}>Kepala Desa Argawana,</p>
