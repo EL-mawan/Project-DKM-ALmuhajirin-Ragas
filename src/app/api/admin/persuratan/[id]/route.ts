@@ -5,6 +5,34 @@ import { authOptions } from '@/lib/auth/config'
 import { checkPermission } from '@/lib/auth/rbac'
 import { createAuditLog } from '@/lib/audit'
 
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params
+    const session = await getServerSession(authOptions)
+    if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+    const data = await db.dokumenResmi.findUnique({
+      where: { id },
+      include: {
+        creator: {
+          select: {
+            name: true,
+            avatar: true
+          }
+        }
+      }
+    })
+    
+    if (!data) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+    return NextResponse.json(data)
+  } catch (error) {
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  }
+}
+
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }

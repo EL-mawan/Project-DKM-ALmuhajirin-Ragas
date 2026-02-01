@@ -56,10 +56,14 @@ export default function JadwalTugasPage() {
   const [formData, setFormData] = useState({
     date: new Date().toISOString().split('T')[0],
     type: 'KHOTIB',
-    category: 'JUMAT',
+    category: activeTab,
     name: '',
     description: ''
   })
+
+  const canCreate = session?.user?.role && ['Master Admin', 'Ketua DKM', 'Sekretaris DKM', 'RISMA (Remaja Islam)'].includes(session.user.role)
+  const canUpdate = canCreate
+  const canDelete = session?.user?.role && ['Master Admin', 'Ketua DKM', 'Sekretaris DKM'].includes(session.user.role)
 
   const fetchData = async () => {
     try {
@@ -97,20 +101,10 @@ export default function JadwalTugasPage() {
 
       if (res.ok) {
         toast.success(editingItem ? 'Jadwal diperbarui' : 'Jadwal berhasil diterbitkan')
-        // ... (rest is same)
         setIsModalOpen(false)
         setEditingItem(null)
-        const savedCategory = formData.category
         resetForm()
-        // Refresh data with no-cache and timestamp
-        const refreshRes = await fetch(`/api/admin/jadwal?t=${Date.now()}`, { cache: 'no-store' })
-        if (refreshRes.ok) {
-             const json = await refreshRes.json()
-             setData(json)
-        }
-        
-        // Ensure user is on the tab of the new item
-        setActiveTab(savedCategory)
+        await fetchData()
       } else {
         const errorMsg = result.error || 'Gagal menyimpan data'
         const debugInfo = result.details || result.stack || 'No debug info'
@@ -143,7 +137,7 @@ export default function JadwalTugasPage() {
     setFormData({
       date: new Date().toISOString().split('T')[0],
       type: 'KHOTIB',
-      category: 'JUMAT',
+      category: activeTab,
       name: '',
       description: ''
     })
@@ -358,6 +352,7 @@ export default function JadwalTugasPage() {
               />
             </div>
             
+            {canCreate && (
             <Dialog open={isModalOpen} onOpenChange={(open) => {
               setIsModalOpen(open)
               if (!open) {
@@ -370,7 +365,7 @@ export default function JadwalTugasPage() {
                   <Plus className="h-4 w-4 mr-2" /> Tambah Jadwal
                 </Button>
               </DialogTrigger>
-              <DialogContent className="sm:max-w-[500px] rounded-[2.5rem] p-0 overflow-hidden border-none">
+              <DialogContent className="sm:max-w-[500px] rounded-[2.5rem] p-0 overflow-hidden border-none shadow-2xl">
                 <div className="bg-[#0b3d2e] p-8 text-white">
                   <DialogTitle className="text-2xl font-black">{editingItem ? 'Edit Jadwal Tugas' : 'Tambah Jadwal Tugas'}</DialogTitle>
                   <p className="text-emerald-100/60 text-xs mt-1 italic font-medium">Input penugasan rutin atau khusus DKM.</p>
@@ -446,6 +441,7 @@ export default function JadwalTugasPage() {
                 </form>
               </DialogContent>
             </Dialog>
+            )}
           </div>
         </div>
 
@@ -537,12 +533,16 @@ export default function JadwalTugasPage() {
                                    <Download className="h-4 w-4" />
                                 </Button>
                               )}
-                              <Button variant="ghost" size="icon" className="rounded-xl h-10 w-10 text-blue-500 hover:bg-blue-50" onClick={() => openEdit(item)}>
-                                 <Edit2 className="h-4 w-4" />
-                              </Button>
-                              <Button variant="ghost" size="icon" className="rounded-xl h-10 w-10 text-rose-500 hover:bg-rose-50" onClick={() => handleDelete(item.id)}>
-                                 <Trash2 className="h-4 w-4" />
-                              </Button>
+                              {canUpdate && (
+                                <Button variant="ghost" size="icon" className="rounded-xl h-10 w-10 text-blue-500 hover:bg-blue-50" onClick={() => openEdit(item)}>
+                                   <Edit2 className="h-4 w-4" />
+                                </Button>
+                              )}
+                              {canDelete && (
+                                <Button variant="ghost" size="icon" className="rounded-xl h-10 w-10 text-rose-500 hover:bg-rose-50" onClick={() => handleDelete(item.id)}>
+                                   <Trash2 className="h-4 w-4" />
+                                </Button>
+                              )}
                            </div>
                         </td>
                       </tr>

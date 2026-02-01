@@ -241,9 +241,9 @@ function ProposalBuilderContent() {
 
   const fetchExistingProposal = async () => {
     try {
-      const res = await fetch(`/api/admin/persuratan`)
-      const list = await res.json()
-      const item = list.find((d: any) => d.id === proposalId)
+      const res = await fetch(`/api/admin/persuratan/${proposalId}`)
+      if (!res.ok) throw new Error('Proposal not found')
+      const item = await res.json()
       
       if (item && item.content) {
         try {
@@ -533,11 +533,11 @@ Hanya berikan JSON saja, tanpa penjelasan tambahan.`
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          title: data.perihal || 'Proposal Tanpa Judul',
+          title: (data.perihal || 'Proposal Tanpa Judul').trim(),
           type: 'PROPOSAL',
-          date: new Date(dateInput).toISOString(),
+          date: new Date(dateInput || new Date()).toISOString(),
           content: JSON.stringify({ ...data, bulkRecipients }),
-          recipient: bulkRecipients.length > 0 ? `${bulkRecipients.length} Penerima` : data.penerima.nama,
+          recipient: bulkRecipients.length > 0 ? `${bulkRecipients.length} Penerima` : (data.penerima.nama || 'Penerima'),
           location: data.tempat,
           nomorSurat: data.nomor,
           status: 'pending'
@@ -618,7 +618,16 @@ Hanya berikan JSON saja, tanpa penjelasan tambahan.`
               width: 794,
               height: 1123,
               onclone: (clonedDoc, clonedElement) => {
-                // Pastikan element yang dicapture tidak terpengaruh scale parentnya di clone
+                // Sangat penting: Reset transform parent untuk menghindari distorsi/blur/pemotongan saat di-capture
+                const container = clonedElement.parentElement;
+                if (container) {
+                   container.style.transform = 'none';
+                   container.style.scale = '1';
+                   container.style.width = 'fit-content';
+                   container.style.height = 'fit-content';
+                   container.style.padding = '0';
+                   container.style.margin = '0';
+                }
                 clonedElement.style.transform = 'none';
                 clonedElement.style.margin = '0';
               }
@@ -655,7 +664,16 @@ Hanya berikan JSON saja, tanpa penjelasan tambahan.`
             width: 794,
             height: 1123,
             onclone: (clonedDoc, clonedElement) => {
-              // Pastikan element yang dicapture tidak terpengaruh scale parentnya
+              // Sangat penting: Reset transform parent untuk menghindari distorsi/blur/pemotongan saat di-capture
+              const container = clonedElement.parentElement;
+              if (container) {
+                 container.style.transform = 'none';
+                 container.style.scale = '1';
+                 container.style.width = 'fit-content';
+                 container.style.height = 'fit-content';
+                 container.style.padding = '0';
+                 container.style.margin = '0';
+              }
               clonedElement.style.transform = 'none';
               clonedElement.style.margin = '0';
             }
@@ -1241,7 +1259,7 @@ Hanya berikan JSON saja, tanpa penjelasan tambahan.`
             </div>
             <div className="flex gap-2">
                 {isViewMode && (
-                    <Button variant="outline" className="rounded-xl border-slate-300 font-bold" onClick={() => router.push('/admin/persuratan')}>Tutup</Button>
+                    <Button variant="outline" className="rounded-xl border-slate-300 font-bold" onClick={() => router.push('/admin/persuratan/proposal')}>Tutup</Button>
                 )}
                 <Button onClick={generatePDF} disabled={isGeneratingPDF} className="rounded-xl font-bold bg-slate-900 shadow-xl shadow-slate-200 hover:scale-105 transition-transform active:scale-95">
                     <Download className="mr-2 h-4 w-4" /> {isGeneratingPDF ? 'Mencetak...' : 'Unduh PDF'}
@@ -1249,8 +1267,8 @@ Hanya berikan JSON saja, tanpa penjelasan tambahan.`
             </div>
           </div>
 
-          <div className="bg-slate-50 border border-slate-200 p-6 rounded-[3rem] shadow-xl shadow-slate-200/30 overflow-y-auto space-y-12 flex flex-col items-center custom-scrollbar scroll-smooth" style={{ maxHeight: 'calc(100vh - 180px)' }}>
-              <div ref={previewRef} className="flex flex-col gap-10 scale-[0.4] sm:scale-[0.5] md:scale-[0.55] lg:scale-[0.6] xl:scale-[0.75] 2xl:scale-[1.0] origin-top transition-all duration-500">
+          <div className="bg-slate-50 border border-slate-200 p-2 sm:p-6 rounded-[3rem] shadow-xl shadow-slate-200/30 overflow-x-hidden overflow-y-auto space-y-12 flex flex-col items-center custom-scrollbar scroll-smooth" style={{ maxHeight: 'calc(100vh - 180px)' }}>
+              <div ref={previewRef} id="proposal-preview-container" className="flex flex-col gap-10 scale-[0.35] sm:scale-[0.5] md:scale-[0.55] lg:scale-[0.6] xl:scale-[0.75] 2xl:scale-[1.0] origin-top transition-all duration-500">
                 <PageCover data={data} />
                 <Page1 data={data} bulkRecipient={bulkRecipients.length > 0 ? bulkRecipients[currentRecipientIndex] : null} onNavigate={setActiveTab} />
                 <Page2 data={data} />

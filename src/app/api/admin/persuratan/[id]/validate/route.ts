@@ -7,9 +7,10 @@ import { createAuditLog } from '@/lib/audit'
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const session = await getServerSession(authOptions)
     const user = session?.user
 
@@ -28,7 +29,7 @@ export async function PATCH(
     const { action, rejectionNote } = body // action: 'validate' or 'reject'
 
     const document = await db.dokumenResmi.findUnique({
-      where: { id: params.id }
+      where: { id }
     })
 
     if (!document) {
@@ -36,7 +37,7 @@ export async function PATCH(
     }
 
     const updatedDocument = await db.dokumenResmi.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         status: action === 'validate' ? 'validated' : 'rejected',
         validatedBy: user.id,
@@ -50,7 +51,7 @@ export async function PATCH(
       userId: user.id,
       action: action === 'validate' ? 'VALIDATE_DOCUMENT' : 'REJECT_DOCUMENT',
       table: 'dokumen_resmi',
-      recordId: params.id
+      recordId: id
     })
 
     return NextResponse.json(updatedDocument)

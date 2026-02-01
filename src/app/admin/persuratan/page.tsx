@@ -118,116 +118,155 @@ export default function PersuratanAdmin() {
   const generatePDF = (item: any) => {
     const doc = new jsPDF()
     const dkmEmerald = [11, 61, 46] // #0b3d2e
+    const dkmGold = [158, 115, 30] // #9e731e
     const dkmSlate = [15, 23, 42] // #0f172a
     
     const pageWidth = doc.internal.pageSize.getWidth()
     const centerX = pageWidth / 2
 
-    // --- 1. KOPSURAT (PREMIUM STYLE) ---
+    // Parse Content if JSON
+    let formData: any = {}
+    try {
+      formData = typeof item.content === 'string' ? JSON.parse(item.content) : item.content
+    } catch (e) {
+      formData = { content: item.content }
+    }
+
+    // --- 1. PREMIUM HEADER / KOP ---
+    // Decorative side bar
     doc.setFillColor(dkmEmerald[0], dkmEmerald[1], dkmEmerald[2])
-    doc.roundedRect(centerX - 40, 10, 80, 2, 1, 1, 'F')
+    doc.rect(0, 0, 5, 297, 'F')
     
+    // Header Line
+    doc.setFillColor(dkmGold[0], dkmGold[1], dkmGold[2])
+    doc.rect(15, 10, 180, 0.5, 'F')
+    
+    // DKM Text
     doc.setFontSize(14)
     doc.setFont('times', 'bold')
     doc.setTextColor(dkmEmerald[0], dkmEmerald[1], dkmEmerald[2])
-    doc.text('DEWAN KEMAKMURAN MASJID (DKM)', centerX, 20, { align: 'center' })
-    doc.setFontSize(18)
-    doc.text('AL-MUHAJIRIN RAGAS GRENYANG', centerX, 28, { align: 'center' })
+    doc.text('DEWAN KEMAKMURAN MASJID (DKM)', centerX, 22, { align: 'center', charSpace: 1 })
+    
+    doc.setFontSize(22)
+    doc.text('AL-MUHAJIRIN RAGAS GRENYANG', centerX, 32, { align: 'center' })
     
     doc.setFontSize(9)
     doc.setFont('times', 'italic')
-    doc.setTextColor(100, 116, 139)
-    doc.text('Kp. Ragas Grenyang, Desa Argawana, Kec. Puloampel, Serang - Banten 42455', centerX, 33, { align: 'center' })
-    doc.text('Email: dkm_almuhajirin@gmail.com | Website: dkm-almuhajirin-ragas.vercel.app', centerX, 37, { align: 'center' })
+    doc.setTextColor(148, 163, 184)
+    doc.text('Kp. Ragas Grenyang, Desa Argawana, Kec. Puloampel, Serang - Banten', centerX, 38, { align: 'center' })
+    doc.text('Email: dkm.almuhajirin.ragas@gmail.com | Website: dkm-almuhajirin.vercel.app', centerX, 43, { align: 'center' })
     
     doc.setDrawColor(dkmEmerald[0], dkmEmerald[1], dkmEmerald[2])
-    doc.setLineWidth(1)
-    doc.line(15, 41, 195, 41)
+    doc.setLineWidth(0.8)
+    doc.line(15, 48, 195, 48)
     doc.setLineWidth(0.2)
-    doc.line(15, 42.5, 195, 42.5)
+    doc.line(15, 50, 195, 50)
 
-    let curY = 55
-    doc.setFont('times', 'normal')
+    let curY = 65
     doc.setTextColor(dkmSlate[0], dkmSlate[1], dkmSlate[2])
+
+    // --- 2. DOCUMENT INFO ---
+    const dateStr = new Date(item.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })
+    doc.setFont('times', 'normal')
     doc.setFontSize(11)
+    doc.text(`${item.location || 'Bojonegara'}, ${dateStr}`, 195, curY, { align: 'right' })
+    
+    doc.text(`Nomor      : ${item.nomorSurat || '-'}`, 15, curY)
+    doc.text(`Lampiran  : -`, 15, curY + 6)
+    doc.setFont('times', 'bold')
+    doc.text(`Perihal      : ${item.title.toUpperCase()}`, 15, curY + 12)
+    
+    curY += 25
 
-    if (item.type === 'PROPOSAL') {
-      // --- PROPOSAL LAYOUT ---
-      doc.setFontSize(18)
-      doc.setFont('times', 'bold')
-      doc.text('PROPOSAL KEGIATAN', centerX, curY + 10, { align: 'center' })
-      doc.setFontSize(14)
-      doc.text(item.title.toUpperCase(), centerX, curY + 20, { align: 'center' })
-      
-      doc.setFontSize(11)
+    // Recipient Section
+    if (item.recipient) {
       doc.setFont('times', 'normal')
-      doc.text(`${item.location || 'Bojonegara'}, ${new Date(item.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}`, 195, curY + 35, { align: 'right' })
-      
-      curY += 50
-    } else {
-      // --- LETTER LAYOUT ---
-      const dateStr = new Date(item.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })
-      doc.text(`${item.location || 'Bojonegara'}, ${dateStr}`, 195, curY, { align: 'right' })
-      
-      doc.text(`Nomor      : ${item.nomorSurat || '-'}`, 15, curY)
-      doc.text(`Lampiran  : -`, 15, curY + 6)
+      doc.text('Kepada Yth.', 15, curY)
       doc.setFont('times', 'bold')
-      doc.text(`Perihal      : ${item.title.toUpperCase()}`, 15, curY + 12)
+      doc.text(item.recipient, 15, curY + 6)
       
-      curY += 25
+      if (formData.penerimaJabatan) {
+        doc.setFont('times', 'italic')
+        doc.setFontSize(10)
+        doc.text(formData.penerimaJabatan, 15, curY + 11)
+        doc.setFontSize(11)
+      }
 
-      if (item.recipient) {
-        doc.setFont('times', 'normal')
-        doc.text('Kepada Yth.', 15, curY)
-        doc.setFont('times', 'bold')
-        doc.text(item.recipient, 15, curY + 6)
-        doc.setFont('times', 'normal')
-        doc.text('di -', 15, curY + 12)
-        doc.text(item.location || 'Tempat', 20, curY + 18)
-        curY += 30
+      doc.setFont('times', 'normal')
+      doc.text('di -', 15, curY + (formData.penerimaJabatan ? 17 : 12))
+      doc.text(item.location || 'Tempat', 20, curY + (formData.penerimaJabatan ? 22 : 18))
+      curY += 35
+    }
+
+    // --- 3. GREETING ---
+    doc.setFont('times', 'normal')
+    doc.text('Assalamu’alaikum Warahmatullahi Wabarakatuh,', 15, curY)
+    curY += 10
+
+    // --- 4. CONTENT RENDERING ---
+    const renderContent = (text: string, fontSize = 11, fontStyle = 'normal') => {
+      if (!text) return
+      doc.setFont('times', fontStyle)
+      doc.setFontSize(fontSize)
+      const split = doc.splitTextToSize(text, 170)
+      doc.text(split, 15, curY, { align: 'justify', lineHeightFactor: 1.5 })
+      curY += (split.length * 7) + 5
+    }
+
+    // If it's a proposal from the builder, it might have specific structure
+    if (item.type === 'PROPOSAL') {
+      const pData = formData
+      renderContent(pData.suratPengantar || pData.perihal || item.title)
+    } else {
+      // Standard Letter types (Undangan, Surat Resmi)
+      if (formData.isiSuratPengantar) renderContent(formData.isiSuratPengantar)
+      
+      if (formData.latarBelakang) {
+        renderContent('Dasar Pemikiran:', 11, 'bold')
+        renderContent(formData.latarBelakang)
+      }
+
+      if (formData.maksudTujuanList && Array.isArray(formData.maksudTujuanList) && formData.maksudTujuanList.length > 0) {
+        renderContent('Maksud dan Tujuan:', 11, 'bold')
+        formData.maksudTujuanList.forEach((point: string, idx: number) => {
+          const splitPoint = doc.splitTextToSize(`${idx + 1}. ${point}`, 165)
+          doc.text(splitPoint, 20, curY)
+          curY += (splitPoint.length * 7)
+        })
+        curY += 5
+      }
+
+      // Fallback if no specific fields
+      if (!formData.isiSuratPengantar && !formData.latarBelakang) {
+        renderContent(item.content || item.title)
       }
     }
 
+    // Closing
     doc.setFont('times', 'normal')
     doc.setFontSize(11)
+    if (curY > 240) { doc.addPage(); curY = 30; }
     
-    if (item.type !== 'PROPOSAL') {
-      doc.text('Assalamu’alaikum Warahmatullahi Wabarakatuh,', 15, curY)
-      curY += 10
-    }
+    doc.text('Demikian surat ini kami sampaikan, atas perhatian dan kerjasamanya kami ucapkan terima kasih.', 15, curY)
+    doc.text('Wassalamu’alaikum Warahmatullahi Wabarakatuh,', 15, curY + 7)
+    
+    // --- 5. SIGNATURE BLOCK ---
+    const signatureY = Math.min(260, Math.max(curY + 30, doc.internal.pageSize.height - 50))
+    if (signatureY > 270) { doc.addPage(); curY = 30; }
 
-    const content = item.content || ''
-    const splitText = doc.splitTextToSize(content, 170)
-    doc.text(splitText, 15, curY, { align: 'justify', lineHeightFactor: 1.5 })
-    
-    curY += (splitText.length * 7) + 10
-    
-    if (item.type !== 'PROPOSAL') {
-      doc.text('Demikian surat ini kami sampaikan, atas perhatian dan kerjasamanya kami ucapkan terima kasih.', 15, curY)
-      doc.text('Wassalamu’alaikum Warahmatullahi Wabarakatuh,', 15, curY + 7)
-    }
-
-    const bottom = doc.internal.pageSize.height
-    const signatureY = Math.max(curY + 30, bottom - 60)
-    
     doc.setFont('times', 'bold')
-    doc.text('Pengurus DKM Al-Muhajirin', centerX, signatureY - 10, { align: 'center' })
+    doc.text('Ketua DKM,', 50, signatureY, { align: 'center' })
+    doc.text('Sekretaris,', 150, signatureY, { align: 'center' })
     
-    doc.text('Ketua DKM,', 45, signatureY, { align: 'center' })
-    doc.text('Sekretaris,', 165, signatureY, { align: 'center' })
+    doc.setDrawColor(200)
+    doc.line(25, signatureY + 22, 75, signatureY + 22)
+    doc.line(125, signatureY + 22, 175, signatureY + 22)
     
-    doc.line(20, signatureY + 25, 70, signatureY + 25)
-    doc.line(140, signatureY + 25, 190, signatureY + 25)
-    
-    doc.setFont('times', 'normal')
-    doc.text('( ........................ )', 45, signatureY + 31, { align: 'center' })
-    doc.text('( ........................ )', 165, signatureY + 31, { align: 'center' })
+    doc.text('H. AGUNG GUNAWAN', 50, signatureY + 28, { align: 'center' })
+    doc.text('..........................', 150, signatureY + 28, { align: 'center' })
 
-    doc.setFontSize(8)
-    doc.setTextColor(203, 213, 225)
-    doc.text('Dokumen ini dihasilkan secara otomatis oleh Sistem Informasi DKM Al-Muhajirin', centerX, bottom - 10, { align: 'center' })
-
-    doc.save(`${item.type}_${item.title.replace(/\s+/g, '_')}.pdf`)
+    doc.save(`${item.type}_${item.title.replace(/[^a-z0-9]/gi, '_')}.pdf`)
+    toast.success('PDF Premium berhasil diunduh')
   }
 
   return (
@@ -391,11 +430,36 @@ export default function PersuratanAdmin() {
                            </div>
 
                            <div className="flex items-center gap-1">
+                              {/* Validation Actions for Admins */}
+                              {canValidate && item.status === 'pending' && (
+                                <>
+                                  <Button 
+                                    variant="ghost" 
+                                    size="icon" 
+                                    className="h-10 w-10 rounded-xl text-emerald-600 hover:bg-emerald-50 shadow-sm border border-emerald-100/50"
+                                    onClick={() => handleValidate(item.id, 'validate')}
+                                    title="Validasi Dokumen"
+                                  >
+                                    <CheckCircle className="h-5 w-5" />
+                                  </Button>
+                                  <Button 
+                                    variant="ghost" 
+                                    size="icon" 
+                                    className="h-10 w-10 rounded-xl text-rose-600 hover:bg-rose-50 shadow-sm border border-rose-100/50"
+                                    onClick={() => handleValidate(item.id, 'reject')}
+                                    title="Tolak Dokumen"
+                                  >
+                                    <XCircle className="h-5 w-5" />
+                                  </Button>
+                                </>
+                              )}
+
                               <Button 
                                 variant="ghost" 
                                 size="icon" 
-                                className="h-10 w-10 rounded-xl text-slate-300 hover:text-indigo-600 hover:bg-indigo-50"
+                                className="h-10 w-10 rounded-xl text-slate-400 hover:text-indigo-600 hover:bg-indigo-50"
                                 onClick={() => router.push(item.type === 'PROPOSAL' ? `/admin/persuratan/proposal/buat?id=${item.id}&mode=view` : `/admin/persuratan/buat?type=${item.type}&id=${item.id}&mode=view`)}
+                                title="Lihat Detail"
                               >
                                 <Eye className="h-5 w-5" />
                               </Button>
@@ -404,8 +468,9 @@ export default function PersuratanAdmin() {
                                 variant="ghost" 
                                 size="icon"
                                 disabled={item.status !== 'validated'}
-                                className="h-10 w-10 rounded-xl text-slate-300 hover:text-blue-600 hover:bg-blue-50 disabled:opacity-30"
+                                className="h-10 w-10 rounded-xl text-slate-400 hover:text-blue-600 hover:bg-blue-50 disabled:opacity-20"
                                 onClick={() => generatePDF(item)}
+                                title="Unduh PDF"
                               >
                                 <Download className="h-5 w-5" />
                               </Button>
@@ -413,8 +478,9 @@ export default function PersuratanAdmin() {
                               <Button 
                                 variant="ghost" 
                                 size="icon" 
-                                className="h-10 w-10 rounded-xl text-slate-300 hover:text-emerald-600 hover:bg-emerald-50"
+                                className="h-10 w-10 rounded-xl text-slate-400 hover:text-emerald-600 hover:bg-emerald-50"
                                 onClick={() => router.push(item.type === 'PROPOSAL' ? `/admin/persuratan/proposal/buat?id=${item.id}` : `/admin/persuratan/buat?type=${item.type}&id=${item.id}`)}
+                                title="Edit Dokumen"
                               >
                                 <Edit2 className="h-5 w-5" />
                               </Button>
@@ -422,8 +488,9 @@ export default function PersuratanAdmin() {
                               <Button 
                                 variant="ghost" 
                                 size="icon" 
-                                className="h-10 w-10 rounded-xl text-slate-300 hover:text-rose-600 hover:bg-rose-50"
+                                className="h-10 w-10 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50"
                                 onClick={() => handleDelete(item.id)}
+                                title="Hapus Dokumen"
                               >
                                 <Trash2 className="h-5 w-5" />
                               </Button>
@@ -456,7 +523,7 @@ function StatusBadge({ status }: { status: string }) {
   )
   return (
     <Badge className="rounded-xl px-4 py-1.5 font-black text-[9px] uppercase tracking-widest bg-amber-50 text-amber-600 border-none shrink-0">
-       Menunggu_Validasi
+       Menunggu Validasi
     </Badge>
   )
 }
