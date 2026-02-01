@@ -136,8 +136,8 @@ const initialData: ProposalData = {
     pimpinanAtas: [
       { role: 'Tokoh Masyarakat', name: '' },
       { role: 'Ketua DKM', name: '' },
-      { role: 'Ketua RW', name: '' },
-      { role: 'Ketua RT', name: '' },
+      { role: 'Ketua RW 008', name: '' },
+      { role: 'Ketua RT 015', name: '' },
       { role: 'Ketua Pemuda', name: '' },
       { role: 'Ketua RISMA', name: '' }
     ],
