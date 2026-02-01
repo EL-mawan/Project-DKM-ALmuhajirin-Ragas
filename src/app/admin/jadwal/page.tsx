@@ -91,10 +91,13 @@ export default function JadwalTugasPage() {
         body: JSON.stringify(formData)
       })
 
+      console.log('Submission Response Status:', res.status)
       const result = await res.json()
+      console.log('Submission Result:', result)
 
       if (res.ok) {
         toast.success(editingItem ? 'Jadwal diperbarui' : 'Jadwal berhasil diterbitkan')
+        // ... (rest is same)
         setIsModalOpen(false)
         setEditingItem(null)
         const savedCategory = formData.category
@@ -109,10 +112,14 @@ export default function JadwalTugasPage() {
         // Ensure user is on the tab of the new item
         setActiveTab(savedCategory)
       } else {
-        toast.error(result.error || 'Gagal menyimpan data')
+        const errorMsg = result.error || 'Gagal menyimpan data'
+        const debugInfo = result.details || result.stack || 'No debug info'
+        alert(`GAGAL MENERBITKAN JADWAL!\n\nError: ${errorMsg}\nDetail: ${debugInfo}\nStatus: ${res.status}`)
+        toast.error(errorMsg)
       }
     } catch (error) {
       console.error('Submission error:', error)
+      alert(`NETWORK ERROR: ${error}`)
       toast.error('Terjadi kesalahan jaringan atau server')
     } finally {
         setLoading(false)
