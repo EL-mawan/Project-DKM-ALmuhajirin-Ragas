@@ -739,11 +739,18 @@ Hanya berikan JSON saja, tanpa penjelasan.`
                       <Users className="h-5 w-5 mr-3" /> Tujuan Penerima
                     </h3>
                     <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 flex-wrap">
-                        <a href="/template_penerima_proposal.xlsx" download className="flex items-center text-xs font-bold text-blue-600 hover:text-blue-700 whitespace-nowrap">
-                             <Download className="h-4 w-4 mr-1" /> Template
+                        <a 
+                            href="/template_penerima_proposal.xlsx" 
+                            download 
+                            className="flex items-center px-4 py-2 text-xs font-bold text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-xl transition-colors whitespace-nowrap"
+                        >
+                             <Download className="h-4 w-4 mr-2" /> Template
                         </a>
-                        <Label htmlFor="excel-upload" className="cursor-pointer flex items-center text-xs font-bold text-emerald-600 hover:text-emerald-700 whitespace-nowrap">
-                             <Upload className="h-4 w-4 mr-1" /> Upload Excel Penerima
+                        <Label 
+                            htmlFor="excel-upload" 
+                            className="cursor-pointer flex items-center px-4 py-2 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 border border-emerald-600 rounded-xl transition-colors whitespace-nowrap shadow-sm shadow-emerald-200"
+                        >
+                             <Upload className="h-4 w-4 mr-2" /> Upload Excel
                              <input id="excel-upload" type="file" accept=".xlsx, .xls" className="hidden" onChange={handleExcelUpload} />
                         </Label>
                         {bulkRecipients.length > 0 && (
