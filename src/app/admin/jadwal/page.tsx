@@ -64,7 +64,7 @@ export default function JadwalTugasPage() {
   const fetchData = async () => {
     try {
       setLoading(true)
-      const res = await fetch('/api/admin/jadwal', { cache: 'no-store' })
+      const res = await fetch(`/api/admin/jadwal?t=${Date.now()}`, { cache: 'no-store' })
       const json = await res.json()
       if (res.ok) setData(json)
     } catch (error) {
@@ -99,9 +99,8 @@ export default function JadwalTugasPage() {
         setEditingItem(null)
         const savedCategory = formData.category
         resetForm()
-        
-        // Refresh data with no-cache
-        const refreshRes = await fetch('/api/admin/jadwal', { cache: 'no-store' })
+        // Refresh data with no-cache and timestamp
+        const refreshRes = await fetch(`/api/admin/jadwal?t=${Date.now()}`, { cache: 'no-store' })
         if (refreshRes.ok) {
              const json = await refreshRes.json()
              setData(json)
@@ -409,7 +408,7 @@ export default function JadwalTugasPage() {
                   <div className="space-y-2">
                      <Label className="text-[10px] font-black uppercase tracking-widest text-neutral-400">Nama Petugas</Label>
                      <Input 
-                      placeholder="Contoh: Ust. Sulaiman / H. Ahmad" 
+                      placeholder="Masukkan nama petugas..." 
                       value={formData.name} 
                       onChange={e => setFormData({...formData, name: e.target.value})}
                       className="h-12 rounded-xl font-bold text-emerald-700"
