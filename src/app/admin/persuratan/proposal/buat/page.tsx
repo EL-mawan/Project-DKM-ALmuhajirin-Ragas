@@ -1244,11 +1244,11 @@ Hanya berikan JSON saja, tanpa penjelasan.`
           <div className="bg-slate-50 border border-slate-200 p-6 rounded-[3rem] shadow-xl shadow-slate-200/30 overflow-y-auto space-y-12 flex flex-col items-center custom-scrollbar scroll-smooth" style={{ maxHeight: 'calc(100vh - 180px)' }}>
               <div ref={previewRef} className="flex flex-col gap-10 scale-[0.4] sm:scale-[0.5] md:scale-[0.55] lg:scale-[0.6] xl:scale-[0.75] 2xl:scale-[1.0] origin-top transition-all duration-500">
                 <PageCover data={data} />
-                <Page1 data={data} bulkRecipient={bulkRecipients.length > 0 ? bulkRecipients[currentRecipientIndex] : null} />
+                <Page1 data={data} bulkRecipient={bulkRecipients.length > 0 ? bulkRecipients[currentRecipientIndex] : null} onNavigate={setActiveTab} />
                 <Page2 data={data} />
                 <Page3 data={data} />
                 <Page4 data={data} />
-                <Page5 data={data} />
+                <Page5 data={data} onNavigate={setActiveTab} />
                 {data.lampiranFoto.length > 0 && <Page6 data={data} />}
               </div>
           </div>
@@ -1380,7 +1380,7 @@ function PageWrapper({ children, data }: { children: React.ReactNode, data: Prop
     )
 }
 
-function Page1({ data, bulkRecipient }: { data: ProposalData, bulkRecipient?: any }) {
+function Page1({ data, bulkRecipient, onNavigate }: { data: ProposalData, bulkRecipient?: any, onNavigate?: (tab: string) => void }) {
     const recipient = bulkRecipient || data.penerima
     return (
         <PageWrapper data={data}>
@@ -1407,13 +1407,13 @@ function Page1({ data, bulkRecipient }: { data: ProposalData, bulkRecipient?: an
                 </div>
 
                 <div style={{ marginTop: '40px', display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '40px', textAlign: 'center' }}>
-                    <div>
+                    <div onClick={() => onNavigate?.('struktur')} style={{ cursor: 'pointer' }} title="Klik untuk mengedit">
                         <p>{data.tempat}, {data.tanggal}</p>
                         <p style={{ fontWeight: 'bold', marginTop: '10px' }}>Sekretaris DKM,</p>
                         <div style={{ height: '80px' }}></div>
                         <p style={{ fontWeight: 'bold', textDecoration: 'underline', fontSize: '13pt' }}>{data.namaSekretaris || '( ........................ )'}</p>
                     </div>
-                    <div>
+                    <div onClick={() => onNavigate?.('struktur')} style={{ cursor: 'pointer' }} title="Klik untuk mengedit">
                         <p>{data.tempat}, {data.tanggal}</p>
                         <p style={{ fontWeight: 'bold', marginTop: '10px' }}>Ketua DKM,</p>
                         <div style={{ height: '80px' }}></div>
@@ -1548,7 +1548,7 @@ function Page4({ data }: { data: ProposalData }) {
     )
 }
 
-function Page5({ data }: { data: ProposalData }) {
+function Page5({ data, onNavigate }: { data: ProposalData, onNavigate?: (tab: string) => void }) {
     return (
         <PageWrapper data={data}>
             <div style={{ fontSize: '12pt' }}>
@@ -1560,12 +1560,12 @@ function Page5({ data }: { data: ProposalData }) {
                 </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '20px', textAlign: 'center', marginBottom: '50px' }}>
-                    <div>
+                    <div onClick={() => onNavigate?.('struktur')} style={{ cursor: 'pointer' }} title="Klik untuk mengedit">
                         <p>Sekretaris DKM,</p>
                         <div style={{ height: '100px' }}></div>
                         <p style={{ fontWeight: 'bold', textDecoration: 'underline', fontSize: '13pt' }}>{data.namaSekretaris || '( ........................ )'}</p>
                     </div>
-                    <div>
+                    <div onClick={() => onNavigate?.('struktur')} style={{ cursor: 'pointer' }} title="Klik untuk mengedit">
                         <p>Ketua DKM,</p>
                         <div style={{ height: '100px' }}></div>
                         <p style={{ fontWeight: 'bold', textDecoration: 'underline', fontSize: '13pt' }}>{data.namaKetua || '( ........................ )'}</p>
@@ -1577,28 +1577,33 @@ function Page5({ data }: { data: ProposalData }) {
                 </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '30px', textAlign: 'center' }}>
-                    <div style={{ opacity: data.namaKetuaRT ? 1 : 0.3 }}>
+                    <div style={{ opacity: data.namaKetuaRT ? 1 : 0.3 }} onClick={() => onNavigate?.('struktur')} style={{ cursor: 'pointer', opacity: data.namaKetuaRT ? 1 : 0.3 }} title="Klik untuk mengedit">
                         <p style={{ fontSize: '11pt' }}>Ketua RT 015,</p>
                         <div style={{ height: '80px' }}></div>
                         <p style={{ fontSize: '11pt', fontWeight: 'bold' }}>{data.namaKetuaRT || '( ........................ )'}</p>
                     </div>
-                    <div style={{ opacity: data.namaKetuaRW ? 1 : 0.3 }}>
+                    <div style={{ opacity: data.namaKetuaRW ? 1 : 0.3 }} onClick={() => onNavigate?.('struktur')} style={{ cursor: 'pointer', opacity: data.namaKetuaRW ? 1 : 0.3 }} title="Klik untuk mengedit">
                         <p style={{ fontSize: '11pt' }}>Ketua RW 008,</p>
                         <div style={{ height: '80px' }}></div>
                         <p style={{ fontSize: '11pt', fontWeight: 'bold' }}>{data.namaKetuaRW || '( ........................ )'}</p>
                     </div>
-                    <div style={{ opacity: data.namaKetuaPemuda ? 1 : 0.3 }}>
+                    <div style={{ opacity: data.namaKetuaPemuda ? 1 : 0.3 }} onClick={() => onNavigate?.('struktur')} style={{ cursor: 'pointer', opacity: data.namaKetuaPemuda ? 1 : 0.3 }} title="Klik untuk mengedit">
                         <p style={{ fontSize: '11pt' }}>Ketua Pemuda,</p>
                         <div style={{ height: '80px' }}></div>
                         <p style={{ fontSize: '11pt', fontWeight: 'bold' }}>{data.namaKetuaPemuda || '( ........................ )'}</p>
                     </div>
-                    <div>
+                    <div onClick={() => onNavigate?.('struktur')} style={{ cursor: 'pointer' }} title="Klik untuk mengedit">
                         <p style={{ fontSize: '11pt' }}>Tokoh Masyarakat,</p>
                         <div style={{ height: '80px' }}></div>
-                        <p style={{ fontSize: '11pt', fontWeight: 'bold' }}>{data.namaTokohMasyarakat || '( ........................ )'}</p>
+                        <p style={{ fontWeight: 'bold', textDecoration: 'underline', fontSize: '13pt' }}>{data.namaTokohMasyarakat || '( ........................ )'}</p>
+                    </div>
+                    <div style={{ opacity: data.namaKetuaRISMA ? 1 : 0.3 }} onClick={() => onNavigate?.('struktur')} style={{ cursor: 'pointer', opacity: data.namaKetuaRISMA ? 1 : 0.3 }} title="Klik untuk mengedit">
+                         <p style={{ fontSize: '11pt' }}>Ketua RISMA,</p>
+                         <div style={{ height: '80px' }}></div>
+                         <p style={{ fontSize: '11pt', fontWeight: 'bold' }}>{data.namaKetuaRISMA || '( ........................ )'}</p>
                     </div>
                     {data.namaKepalaDesa && (
-                        <div style={{ gridColumn: '1 / -1', marginTop: '20px' }}>
+                        <div style={{ gridColumn: '1 / -1', marginTop: '20px' }} onClick={() => onNavigate?.('ttd')} style={{ cursor: 'pointer' }} title="Klik untuk mengedit">
                             <p style={{ fontSize: '11pt' }}>Kepala Desa Argawana,</p>
                             <div style={{ height: '80px' }}></div>
                             <p style={{ fontSize: '11pt', fontWeight: 'bold' }}>{data.namaKepalaDesa}</p>
