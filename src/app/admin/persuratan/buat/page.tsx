@@ -276,14 +276,17 @@ function BuatPersuratanContent() {
       
       // SIGNATURES ON PAGE 1
       const sigY1 = 225
-      doc.setFont('times', 'bold').text('Hormat Kami,', mLeft + 40, sigY1 - 10, { align: 'center' })
+      const colWidth1 = (pageWidth - (mLeft * 2)) / 3
+      doc.setFont('times', 'bold').text('Hormat Kami,', centerX, sigY1 - 15, { align: 'center' })
       
-      // Sekretaris and Ketua side by side
-      doc.text('Sekretaris DKM', mLeft + 40, sigY1, { align: 'center' })
-      doc.text(formData.ttdSekretarisDKM || '........................', mLeft + 40, sigY1 + 30, { align: 'center' })
+      doc.text('Sekretaris DKM', mLeft + (colWidth1 / 2), sigY1, { align: 'center' })
+      doc.text(formData.ttdSekretarisDKM || '........................', mLeft + (colWidth1 / 2), sigY1 + 25, { align: 'center' })
       
-      doc.text('Ketua DKM', pageWidth - mLeft - 40, sigY1, { align: 'center' })
-      doc.text(formData.ttdKetuaDKM || '........................', pageWidth - mLeft - 40, sigY1 + 30, { align: 'center' })
+      doc.text('Bendahara DKM', mLeft + colWidth1 + (colWidth1 / 2), sigY1, { align: 'center' })
+      doc.text(formData.ttdBendaharaDKM || '........................', mLeft + colWidth1 + (colWidth1 / 2), sigY1 + 25, { align: 'center' })
+
+      doc.text('Ketua DKM', mLeft + (colWidth1 * 2) + (colWidth1 / 2), sigY1, { align: 'center' })
+      doc.text(formData.ttdKetuaDKM || '........................', mLeft + (colWidth1 * 2) + (colWidth1 / 2), sigY1 + 25, { align: 'center' })
       
       // PAGE 2: PENDAHULUAN
       doc.addPage()
@@ -341,23 +344,24 @@ function BuatPersuratanContent() {
       doc.text(`${formData.lokasiPenerbitan}, ${new Date(formData.tanggalSurat).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}`, pageWidth - mLeft, sigStartYa, { align: 'right' })
       
       sigStartYa += 15
-      // Row 1: Sekretaris & Ketua
+      // Row 1: Sekretaris, Bendahara, Ketua
       doc.setFont('times', 'bold')
-      doc.text('Sekretaris DKM', mLeft + 40, sigStartYa, { align: 'center' })
-      doc.text(formData.ttdSekretarisDKM || '........................', mLeft + 40, sigStartYa + 30, { align: 'center' })
+      const colWidth = (pageWidth - (mLeft * 2)) / 3
       
-      doc.text('Ketua DKM', pageWidth - mLeft - 40, sigStartYa, { align: 'center' })
-      doc.text(formData.ttdKetuaDKM || '........................', pageWidth - mLeft - 40, sigStartYa + 30, { align: 'center' })
+      doc.text('Sekretaris DKM', mLeft + (colWidth / 2), sigStartYa, { align: 'center' })
+      doc.text(formData.ttdSekretarisDKM || '........................', mLeft + (colWidth / 2), sigStartYa + 30, { align: 'center' })
       
-      sigStartYa += 50
-      // Row 2: Bendahara & optional Tokoh Masyarakat
-      doc.text('Bendahara DKM', mLeft + 40, sigStartYa, { align: 'center' })
-      doc.text(formData.ttdBendaharaDKM || '........................', mLeft + 40, sigStartYa + 30, { align: 'center' })
+      doc.text('Bendahara DKM', mLeft + colWidth + (colWidth / 2), sigStartYa, { align: 'center' })
+      doc.text(formData.ttdBendaharaDKM || '........................', mLeft + colWidth + (colWidth / 2), sigStartYa + 30, { align: 'center' })
+
+      doc.text('Ketua DKM', mLeft + (colWidth * 2) + (colWidth / 2), sigStartYa, { align: 'center' })
+      doc.text(formData.ttdKetuaDKM || '........................', mLeft + (colWidth * 2) + (colWidth / 2), sigStartYa + 30, { align: 'center' })
       
       if (formData.ttdTokohMasyarakat) {
-        doc.text('Mengetahui,', pageWidth - mLeft - 40, sigStartYa - 8, { align: 'center' })
-        doc.setFontSize(9).text('Tokoh Masyarakat Masjid Al-Muhajirin', pageWidth - mLeft - 40, sigStartYa, { align: 'center' })
-        doc.setFontSize(11).text(formData.ttdTokohMasyarakat, pageWidth - mLeft - 40, sigStartYa + 30, { align: 'center' })
+        sigStartYa += 50
+        doc.text('Mengetahui,', centerX, sigStartYa - 8, { align: 'center' })
+        doc.setFontSize(9).text('Tokoh Masyarakat Masjid Al-Muhajirin', centerX, sigStartYa, { align: 'center' })
+        doc.setFontSize(11).text(formData.ttdTokohMasyarakat, centerX, sigStartYa + 30, { align: 'center' })
       }
 
       // Row 3: Optional RT/RW/Pemuda
@@ -394,23 +398,22 @@ function BuatPersuratanContent() {
       // SIGNATURES for Undangan/Official
       const sigY = curY
       doc.setFont('times', 'bold')
-      doc.text('Sekretaris DKM', mLeft + 40, sigY, { align: 'center' })
-      doc.text(formData.ttdSekretarisDKM || '........................', mLeft + 40, sigY + 25, { align: 'center' })
+      const colWidthLetter = (pageWidth - (mLeft * 2)) / 3
+
+      doc.text('Sekretaris DKM', mLeft + (colWidthLetter / 2), sigY, { align: 'center' })
+      doc.text(formData.ttdSekretarisDKM || '........................', mLeft + (colWidthLetter / 2), sigY + 25, { align: 'center' })
+
+      doc.text('Bendahara DKM', mLeft + colWidthLetter + (colWidthLetter / 2), sigY, { align: 'center' })
+      doc.text(formData.ttdBendaharaDKM || '........................', mLeft + colWidthLetter + (colWidthLetter / 2), sigY + 25, { align: 'center' })
       
-      doc.text('Ketua DKM', pageWidth - mLeft - 40, sigY, { align: 'center' })
-      doc.text(formData.ttdKetuaDKM || '........................', pageWidth - mLeft - 40, sigY + 25, { align: 'center' })
+      doc.text('Ketua DKM', mLeft + (colWidthLetter * 2) + (colWidthLetter / 2), sigY, { align: 'center' })
+      doc.text(formData.ttdKetuaDKM || '........................', mLeft + (colWidthLetter * 2) + (colWidthLetter / 2), sigY + 25, { align: 'center' })
       
-      if (formData.ttdBendaharaDKM || formData.ttdTokohMasyarakat) {
+      if (formData.ttdTokohMasyarakat) {
         const sigY2 = sigY + 45
-        if (formData.ttdBendaharaDKM) {
-          doc.text('Bendahara DKM', mLeft + 40, sigY2, { align: 'center' })
-          doc.text(formData.ttdBendaharaDKM, mLeft + 40, sigY2 + 25, { align: 'center' })
-        }
-        if (formData.ttdTokohMasyarakat) {
-          doc.text('Mengetahui,', pageWidth - mLeft - 40, sigY2 - 8, { align: 'center' })
-          doc.setFontSize(9).text('Tokoh Masyarakat Masjid Al-Muhajirin', pageWidth - mLeft - 40, sigY2, { align: 'center' })
-          doc.setFontSize(11).text(formData.ttdTokohMasyarakat, pageWidth - mLeft - 40, sigY2 + 25, { align: 'center' })
-        }
+        doc.text('Mengetahui,', centerX, sigY2 - 8, { align: 'center' })
+        doc.setFontSize(9).text('Tokoh Masyarakat Masjid Al-Muhajirin', centerX, sigY2, { align: 'center' })
+        doc.setFontSize(11).text(formData.ttdTokohMasyarakat, centerX, sigY2 + 25, { align: 'center' })
       }
     }
 
@@ -1219,11 +1222,17 @@ function BuatPersuratanContent() {
 
                 {/* SIGNATURES */}
                 <div className="mt-16 space-y-12">
-                   <div className="grid grid-cols-2 gap-8 text-[10px] text-center font-bold font-serif">
+                   <div className="grid grid-cols-3 gap-4 text-[10px] text-center font-bold font-serif">
                      <div className="space-y-16">
                        <p className="uppercase tracking-widest text-[#0b3d2e] border-b border-slate-100 pb-1">Sekretaris DKM</p>
                        <div>
                          <p className="underline uppercase font-black decoration-slate-900">{formData.ttdSekretarisDKM || '............................'}</p>
+                       </div>
+                     </div>
+                     <div className="space-y-16">
+                       <p className="uppercase tracking-widest text-[#0b3d2e] border-b border-slate-100 pb-1">Bendahara DKM</p>
+                       <div>
+                         <p className="underline uppercase font-black decoration-slate-900">{formData.ttdBendaharaDKM || '............................'}</p>
                        </div>
                      </div>
                      <div className="space-y-16">
@@ -1234,26 +1243,19 @@ function BuatPersuratanContent() {
                      </div>
                    </div>
 
-                   <div className={`grid ${formData.ttdTokohMasyarakat ? 'grid-cols-2' : 'grid-cols-1 justify-items-center'} gap-8 text-[10px] text-center font-bold font-serif`}>
-                      <div className="space-y-16">
-                        <p className="uppercase tracking-widest text-[#0b3d2e] border-b border-slate-100 pb-1">Bendahara DKM</p>
-                        <div>
-                          <p className="underline uppercase font-black decoration-slate-900">{formData.ttdBendaharaDKM || '............................'}</p>
-                        </div>
-                      </div>
-                      
-                      {formData.ttdTokohMasyarakat && (
-                        <div className="space-y-16">
+                   {formData.ttdTokohMasyarakat && (
+                      <div className="flex flex-col items-center text-[10px] text-center font-bold font-serif">
+                        <div className="space-y-16 w-1/2">
                           <div>
                             <p className="uppercase font-black text-slate-400 text-[8px]">Mengetahui,</p>
-                            <p className="uppercase tracking-widest text-[#0b3d2e] border-b border-slate-100 pb-1">Tokoh Masyarakat</p>
+                            <p className="uppercase tracking-widest text-[#0b3d2e] border-b border-slate-100 pb-1">Tokoh Masyarakat Masjid Al-Muhajirin</p>
                           </div>
                           <div>
                             <p className="underline uppercase font-black decoration-slate-900">{formData.ttdTokohMasyarakat}</p>
                           </div>
                         </div>
-                      )}
-                   </div>
+                      </div>
+                   )}
 
                    {(formData.ttdKetuaRW || formData.ttdKetuaRT) && (
                      <div className="grid grid-cols-2 gap-8 text-[10px] text-center font-bold font-serif border-t border-slate-50 pt-8">

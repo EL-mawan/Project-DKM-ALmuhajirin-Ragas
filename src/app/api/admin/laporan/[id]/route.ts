@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { db } from '@/lib/db'
 import { authOptions } from '@/lib/auth/config'
 import { checkPermission } from '@/lib/auth/rbac'
+import { createAuditLog } from '@/lib/audit'
 
 export async function DELETE(
   request: NextRequest,
@@ -24,8 +25,15 @@ export async function DELETE(
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
-    await db.laporanKeuangan.delete({
+    const deleted = await db.laporanKeuangan.delete({
       where: { id }
+    })
+
+    await createAuditLog({
+      userId: user.id,
+      action: `Hapus Laporan LPJ: ${deleted.title}`,
+      table: 'laporan_keuangan',
+      recordId: id
     })
 
     return NextResponse.json({ message: 'Deleted successfully' })

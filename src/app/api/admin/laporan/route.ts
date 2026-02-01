@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { db } from '@/lib/db'
 import { authOptions } from '@/lib/auth/config'
 import { checkPermission, RoleName } from '@/lib/auth/rbac'
+import { createAuditLog } from '@/lib/audit'
 
 // GET /api/admin/laporan - Get financial reports with charts data
 export async function GET(request: NextRequest) {
@@ -189,6 +190,14 @@ export async function POST(request: NextRequest) {
         status: 'pending',
         createdBy: user.id
       }
+    })
+
+    await createAuditLog({
+      userId: user.id,
+      action: `Terbitkan Laporan LPJ: ${newReport.title}`,
+      table: 'laporan_keuangan',
+      recordId: newReport.id,
+      newValues: newReport
     })
 
     return NextResponse.json(newReport, { status: 201 })

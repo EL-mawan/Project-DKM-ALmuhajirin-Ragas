@@ -337,23 +337,29 @@ export default function LaporanAdmin() {
       doc.setFontSize(10)
       doc.setTextColor(0)
       doc.setFont('helvetica', 'bold')
-      doc.text('Mengetahui,', 55, currentY, { align: 'center' })
-      doc.text('Ketua DKM Al-Muhajirin', 55, currentY + 6, { align: 'center' })
-      doc.setFont('helvetica', 'normal')
-      const agungName = 'H. Agung Gunawan'
-      const agungWidth = doc.getTextWidth(agungName)
-      doc.text(agungName, 55, currentY + 35, { align: 'center' })
-      doc.setLineWidth(0.3)
-      doc.line(55 - agungWidth/2, currentY + 36, 55 + agungWidth/2, currentY + 36)
-
+      // Standardized 3-Column Signatures
+      doc.setFontSize(10)
+      doc.setTextColor(dkmSlate[0], dkmSlate[1], dkmSlate[2])
       doc.setFont('helvetica', 'bold')
-      doc.text('Bendahara DKM', pageWidth - 55, currentY + 6, { align: 'center' })
+      
+      const colW = (pageWidth - 30) / 3
+      const sigY = currentY
+      
+      // Row 1
+      doc.text('Sekretaris DKM', 15 + colW/2, sigY, { align: 'center' })
+      doc.text('Bendahara DKM', 15 + colW + colW/2, sigY, { align: 'center' })
+      doc.text('Ketua DKM', 15 + colW*2 + colW/2, sigY, { align: 'center' })
       
       doc.setFont('helvetica', 'normal')
-      const lasturiName = 'Lasturi'
-      const lasturiWidth = doc.getTextWidth(lasturiName)
-      doc.text(lasturiName, pageWidth - 55, currentY + 35, { align: 'center' })
-      doc.line(pageWidth - 55 - lasturiWidth/2, currentY + 36, pageWidth - 55 + lasturiWidth/2, currentY + 36)
+      doc.text('( ........................ )', 15 + colW/2, sigY + 30, { align: 'center' })
+      doc.text('Lasturi', 15 + colW + colW/2, sigY + 30, { align: 'center' })
+      doc.text('H. Agung Gunawan', 15 + colW*2 + colW/2, sigY + 30, { align: 'center' })
+      
+      // Mengetahui
+      doc.setFont('helvetica', 'bold')
+      doc.text('Mengetahui,', centerX, sigY + 45, { align: 'center' })
+      doc.setFontSize(9).text('Tokoh Masyarakat Masjid Al-Muhajirin', centerX, sigY + 51, { align: 'center' })
+      doc.setFont('helvetica', 'normal').text('( ........................ )', centerX, sigY + 75, { align: 'center' })
 
       const totalPages = doc.internal.pages.length - 1
       for (let i = 1; i <= totalPages; i++) {

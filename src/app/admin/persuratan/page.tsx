@@ -232,10 +232,10 @@ export default function PersuratanAdmin() {
     <AdminLayout title="Administrasi & Persuratan" subtitle="Pembuatan Proposal, Undangan, dan Surat Resmi DKM.">
       <div className="p-6 sm:p-8 space-y-8">
         {/* Header Stats */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6">
+        {/* Header Stats */}
+        <div className="flex flex-col gap-3 sm:grid sm:grid-cols-3 md:gap-6">
           <Card className="rounded-2xl md:rounded-[2.5rem] border-none shadow-sm bg-linear-to-br from-blue-50 to-indigo-50/30">
-            <CardContent className="p-4 md:p-8">
-              <div className="flex flex-row items-center justify-between">
+            <CardContent className="p-4 md:p-8 flex items-center justify-between">
                 <div>
                   <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest">Total Proposal</p>
                   <h3 className="text-2xl md:text-3xl font-black text-[#0b3d2e] mt-1">{data.filter(d => d.type === 'PROPOSAL').length}</h3>
@@ -243,12 +243,10 @@ export default function PersuratanAdmin() {
                 <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl md:rounded-2xl bg-white shadow-sm flex items-center justify-center text-blue-500">
                   <FileText className="h-5 w-5 md:h-6 md:w-6" />
                 </div>
-              </div>
             </CardContent>
           </Card>
           <Card className="rounded-2xl md:rounded-[2.5rem] border-none shadow-sm bg-linear-to-br from-emerald-50 to-teal-50/30">
-            <CardContent className="p-4 md:p-8">
-              <div className="flex flex-row items-center justify-between">
+            <CardContent className="p-4 md:p-8 flex items-center justify-between">
                 <div>
                   <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">Surat Undangan</p>
                   <h3 className="text-2xl md:text-3xl font-black text-[#0b3d2e] mt-1">{data.filter(d => d.type === 'UNDANGAN').length}</h3>
@@ -256,12 +254,10 @@ export default function PersuratanAdmin() {
                 <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl md:rounded-2xl bg-white shadow-sm flex items-center justify-center text-emerald-500">
                   <Mail className="h-5 w-5 md:h-6 md:w-6" />
                 </div>
-              </div>
             </CardContent>
           </Card>
           <Card className="rounded-2xl md:rounded-[2.5rem] border-none shadow-sm bg-linear-to-br from-amber-50 to-orange-50/30">
-            <CardContent className="p-4 md:p-8">
-              <div className="flex flex-row items-center justify-between">
+            <CardContent className="p-4 md:p-8 flex items-center justify-between">
                 <div>
                   <p className="text-[10px] font-black text-amber-600 uppercase tracking-widest">Surat Resmi</p>
                   <h3 className="text-2xl md:text-3xl font-black text-[#0b3d2e] mt-1">{data.filter(d => d.type === 'SURAT_RESMI').length}</h3>
@@ -269,7 +265,6 @@ export default function PersuratanAdmin() {
                 <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl md:rounded-2xl bg-white shadow-sm flex items-center justify-center text-amber-500">
                   <CheckCircle2 className="h-5 w-5 md:h-6 md:w-6" />
                 </div>
-              </div>
             </CardContent>
           </Card>
         </div>
