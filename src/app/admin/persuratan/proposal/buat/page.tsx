@@ -96,6 +96,7 @@ interface ProposalData {
   namaKetuaRW: string
   namaKetuaRT: string
   namaKetuaPemuda: string
+  namaKetuaRISMA: string
   namaKepalaDesa: string
   logoKiri?: string
   logoKanan?: string
@@ -133,8 +134,12 @@ const initialData: ProposalData = {
   ],
   struktur: {
     pimpinanAtas: [
+      { role: 'Tokoh Masyarakat', name: '' },
       { role: 'Ketua DKM', name: '' },
-      { role: 'Mengetahui', name: 'Tokoh Masyarakat' }
+      { role: 'Ketua RW', name: '' },
+      { role: 'Ketua RT', name: '' },
+      { role: 'Ketua Pemuda', name: '' },
+      { role: 'Ketua RISMA', name: '' }
     ],
     administrasi: [
       { role: 'Sekretaris', name: '' },
@@ -152,6 +157,7 @@ const initialData: ProposalData = {
   namaKetuaRW: '',
   namaKetuaRT: '',
   namaKetuaPemuda: '',
+  namaKetuaRISMA: '',
   namaKepalaDesa: '',
   logoKiri: "/logo.png",
   logoKanan: "",
@@ -732,11 +738,11 @@ Hanya berikan JSON saja, tanpa penjelasan.`
                     <h3 className="font-black text-emerald-700 flex items-center text-lg uppercase tracking-wider">
                       <Users className="h-5 w-5 mr-3" /> Tujuan Penerima
                     </h3>
-                    <div className="flex items-center gap-4">
-                        <a href="/template_penerima_proposal.xlsx" download className="flex items-center text-xs font-bold text-blue-600 hover:text-blue-700">
-                             <Download className="h-4 w-4 mr-1" /> Download Template
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 flex-wrap">
+                        <a href="/template_penerima_proposal.xlsx" download className="flex items-center text-xs font-bold text-blue-600 hover:text-blue-700 whitespace-nowrap">
+                             <Download className="h-4 w-4 mr-1" /> Template
                         </a>
-                        <Label htmlFor="excel-upload" className="cursor-pointer flex items-center text-xs font-bold text-emerald-600 hover:text-emerald-700">
+                        <Label htmlFor="excel-upload" className="cursor-pointer flex items-center text-xs font-bold text-emerald-600 hover:text-emerald-700 whitespace-nowrap">
                              <Upload className="h-4 w-4 mr-1" /> Upload Excel Penerima
                              <input id="excel-upload" type="file" accept=".xlsx, .xls" className="hidden" onChange={handleExcelUpload} />
                         </Label>
@@ -910,7 +916,7 @@ Hanya berikan JSON saja, tanpa penjelasan.`
               <TabsContent value="struktur" className="space-y-10 mt-0">
                  <div className="space-y-6">
                     <h3 className="font-bold text-lg text-slate-800 border-l-4 border-emerald-500 pl-4">Pimpinan Utama</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                       {data.struktur.pimpinanAtas.map((p, i) => (
                         <div key={i} className="space-y-2 p-5 bg-slate-50/50 rounded-2xl border border-slate-100">
                            <Label className="text-[10px] uppercase text-slate-400 font-bold tracking-widest">{p.role}</Label>
