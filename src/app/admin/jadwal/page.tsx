@@ -446,7 +446,12 @@ export default function JadwalTugasPage() {
         <Card className="rounded-[3rem] border-none shadow-2xl shadow-neutral-200/50 overflow-hidden bg-white">
           <CardHeader className="p-10 border-b border-neutral-50 flex flex-row items-center justify-between">
             <div>
-              <CardTitle className="text-2xl font-black text-slate-900">Daftar Penugasan</CardTitle>
+              <CardTitle className="text-2xl font-black text-slate-900">
+                Daftar Penugasan 
+                <span className="ml-3 text-xs font-mono bg-slate-100 text-slate-500 px-2 py-1 rounded">
+                   Debug: Total={data.length} | Tab={activeTab} | Filtered={filteredData.length}
+                </span>
+              </CardTitle>
               <p className="text-xs text-neutral-400 mt-1 italic font-medium">Monitoring tugas aktif masjid.</p>
             </div>
             <Button variant="outline" size="sm" onClick={fetchData} disabled={loading} className="rounded-xl border-neutral-200 text-neutral-500 hover:text-emerald-600 hover:bg-emerald-50">
