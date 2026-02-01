@@ -64,7 +64,7 @@ export default function JadwalTugasPage() {
   const fetchData = async () => {
     try {
       setLoading(true)
-      const res = await fetch('/api/admin/jadwal')
+      const res = await fetch('/api/admin/jadwal', { cache: 'no-store' })
       const json = await res.json()
       if (res.ok) setData(json)
     } catch (error) {
@@ -80,6 +80,7 @@ export default function JadwalTugasPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setLoading(true) // Show loading indicator
     try {
       const url = editingItem ? `/api/admin/jadwal/${editingItem.id}` : '/api/admin/jadwal'
       const method = editingItem ? 'PATCH' : 'POST'
@@ -93,12 +94,19 @@ export default function JadwalTugasPage() {
       const result = await res.json()
 
       if (res.ok) {
-        toast.success(editingItem ? 'Jadwal diperbarui' : 'Jadwal ditambahkan')
+        toast.success(editingItem ? 'Jadwal diperbarui' : 'Jadwal berhasil diterbitkan')
         setIsModalOpen(false)
         setEditingItem(null)
         const savedCategory = formData.category
         resetForm()
-        await fetchData()
+        
+        // Refresh data with no-cache
+        const refreshRes = await fetch('/api/admin/jadwal', { cache: 'no-store' })
+        if (refreshRes.ok) {
+             const json = await refreshRes.json()
+             setData(json)
+        }
+        
         // Ensure user is on the tab of the new item
         setActiveTab(savedCategory)
       } else {
@@ -107,6 +115,8 @@ export default function JadwalTugasPage() {
     } catch (error) {
       console.error('Submission error:', error)
       toast.error('Terjadi kesalahan jaringan atau server')
+    } finally {
+        setLoading(false)
     }
   }
 
