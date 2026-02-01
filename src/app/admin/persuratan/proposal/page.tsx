@@ -272,13 +272,15 @@ export default function PersuratanProposal() {
         </div>
 
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full lg:w-auto">
-            <TabsList className="bg-white border rounded-2xl md:rounded-3xl p-1 h-14 md:h-16 shadow-sm w-full lg:w-auto grid grid-cols-3 md:flex overflow-x-auto">
-              <TabsTrigger value="PROPOSAL" className="rounded-xl px-4 md:px-8 font-bold text-[10px] md:text-sm data-[state=active]:bg-[#0b3d2e] data-[state=active]:text-white uppercase tracking-wider">Proposal</TabsTrigger>
-              <TabsTrigger value="UNDANGAN" className="rounded-xl px-4 md:px-8 font-bold text-[10px] md:text-sm data-[state=active]:bg-[#0b3d2e] data-[state=active]:text-white uppercase tracking-wider">Undangan</TabsTrigger>
-              <TabsTrigger value="SURAT_RESMI" className="rounded-xl px-4 md:px-8 font-bold text-[10px] md:text-sm data-[state=active]:bg-[#0b3d2e] data-[state=active]:text-white uppercase tracking-wider">Resmi</TabsTrigger>
-            </TabsList>
-          </Tabs>
+          <div className="flex items-center gap-4">
+             <div className="h-12 w-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                <FileText className="h-6 w-6" />
+             </div>
+             <div>
+                <h2 className="text-2xl font-black text-[#0b3d2e]">Daftar Proposal</h2>
+                <p className="text-xs text-neutral-400 font-medium">Manajemen dan riwayat pengajuan proposal DKM.</p>
+             </div>
+          </div>
 
           <Link href="/admin/persuratan/proposal/buat" className="w-full sm:w-auto">
             <Button className="rounded-2xl h-14 md:h-16 px-8 md:px-10 font-black uppercase tracking-widest shadow-xl shadow-primary/20 bg-[#0b3d2e] hover:bg-[#062c21] w-full">
