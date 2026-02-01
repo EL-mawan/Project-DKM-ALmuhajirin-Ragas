@@ -173,10 +173,11 @@ function ProposalBuilderContent() {
   const [isSaving, setIsSaving] = useState(false)
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false)
   const [isAiLoading, setIsAiLoading] = useState<string | null>(null)
-  const [history, setHistory] = useState<Partial<ProposalData>>({})
+  const [history, setHistory] = useState<ProposalData | null>(null)
   const [bulkRecipients, setBulkRecipients] = useState<{ nama: string, jabatan: string, alamat: string }[]>([])
   const [isBulkProcessing, setIsBulkProcessing] = useState(false)
   const [currentRecipientIndex, setCurrentRecipientIndex] = useState(0)
+  const [bulkProgress, setBulkProgress] = useState(0)
   const previewRef = useRef<HTMLDivElement>(null)
 
   const [proposalStatus, setProposalStatus] = useState<string>('pending')
@@ -255,6 +256,7 @@ function ProposalBuilderContent() {
   }
 
   const handleAiGenerate = async (type: string) => {
+    setHistory({...data})
     setIsAiLoading(type)
     // Simulate AI thinking
     await new Promise(resolve => setTimeout(resolve, 1500))
@@ -282,11 +284,26 @@ function ProposalBuilderContent() {
     }
 
     setIsAiLoading(null)
-    toast.success('Rekomendasi AI berhasil diterapkan!')
+    toast.success('Rekomendasi AI berhasil diterapkan! (Gunakan Undo untuk membatalkan)')
   }
 
-  const handleUndo = (type: 'background' | 'cover-letter' | 'closing') => {
-      // Basic undo implementation if history exists
+  const handleUndo = () => {
+      if (history) {
+        setData(history)
+        setHistory(null)
+        toast.success('Berhasil kembali ke perubahan sebelumnya')
+      } else {
+        toast.error('Tidak ada riwayat perubahan untuk dikembalikan')
+      }
+  }
+
+  const handleReset = () => {
+      if (confirm('Apakah Anda yakin ingin menghapus semua inputan dan kembali ke awal?')) {
+          setData(initialData)
+          setBulkRecipients([])
+          setCurrentRecipientIndex(0)
+          toast.success('Formulir berhasil direset')
+      }
   }
 
   const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>, side: 'logoKiri' | 'logoKanan') => {
@@ -455,32 +472,79 @@ function ProposalBuilderContent() {
   const generatePDF = async () => {
     if (!previewRef.current) return
     setIsGeneratingPDF(true)
-    toast.info('Menyiapkan PDF...')
-
+    
     try {
-      await document.fonts.ready;
-      const doc = new jsPDF('p', 'mm', 'a4')
-      const pages = previewRef.current.querySelectorAll('.proposal-page')
-      
-      for (let i = 0; i < pages.length; i++) {
-        const page = pages[i] as HTMLElement
-        const canvas = await html2canvas(page, {
-          scale: 2,
-          useCORS: true,
-          logging: false,
-          backgroundColor: '#ffffff',
-          windowWidth: 794,
-          windowHeight: 1123,
-        })
+      if (bulkRecipients.length > 0) {
+        setIsBulkProcessing(true)
+        setBulkProgress(0)
+        toast.info(`Menyiapkan ${bulkRecipients.length} PDF...`)
+        const zip = new JSZip()
         
-        const imgData = canvas.toDataURL('image/jpeg', 0.9)
-        if (i > 0) doc.addPage()
-        doc.addImage(imgData, 'JPEG', 0, 0, 210, 297, undefined, 'FAST')
+        for (let i = 0; i < bulkRecipients.length; i++) {
+          setCurrentRecipientIndex(i)
+          setBulkProgress(Math.round(((i + 1) / bulkRecipients.length) * 100))
+          
+          // Wait for DOM to update
+          await new Promise(resolve => setTimeout(resolve, 600))
+          
+          const doc = new jsPDF('p', 'mm', 'a4')
+          const pages = previewRef.current.querySelectorAll('.proposal-page')
+          
+          for (let j = 0; j < pages.length; j++) {
+            const page = pages[j] as HTMLElement
+            const canvas = await html2canvas(page, {
+              scale: 2,
+              useCORS: true,
+              logging: false,
+              backgroundColor: '#ffffff',
+              windowWidth: 794,
+              windowHeight: 1123,
+            })
+            const imgData = canvas.toDataURL('image/jpeg', 0.9)
+            if (j > 0) doc.addPage()
+            doc.addImage(imgData, 'JPEG', 0, 0, 210, 297, undefined, 'FAST')
+          }
+          
+          const pdfBlob = doc.output('blob')
+          const fileName = `Proposal_${bulkRecipients[i].nama.replace(/\s+/g, '_')}.pdf`
+          zip.file(fileName, pdfBlob)
+        }
+        
+        const content = await zip.generateAsync({ type: 'blob' })
+        const link = document.createElement('a')
+        link.href = URL.createObjectURL(content)
+        link.download = `Batch_Proposal_${data.perihal.replace(/\s+/g, '_')}.zip`
+        link.download = `Batch_Proposal_${data.perihal.replace(/\s+/g, '_')}.zip`
+        link.click()
+        setIsBulkProcessing(false)
+        toast.success('Batch PDF (ZIP) berhasil diunduh')
+      } else {
+        toast.info('Menyiapkan PDF...')
+        await document.fonts.ready;
+        const doc = new jsPDF('p', 'mm', 'a4')
+        const pages = previewRef.current.querySelectorAll('.proposal-page')
+        
+        for (let i = 0; i < pages.length; i++) {
+          const page = pages[i] as HTMLElement
+          const canvas = await html2canvas(page, {
+            scale: 2,
+            useCORS: true,
+            logging: false,
+            backgroundColor: '#ffffff',
+            windowWidth: 794,
+            windowHeight: 1123,
+          })
+          
+          const imgData = canvas.toDataURL('image/jpeg', 0.9)
+          if (i > 0) doc.addPage()
+          doc.addImage(imgData, 'JPEG', 0, 0, 210, 297, undefined, 'FAST')
+        }
+        
+        doc.save(`Proposal_${data.perihal.replace(/\s+/g, '_')}.pdf`)
+        toast.success('PDF berhasil diunduh')
       }
-      
-      doc.save(`Proposal_${data.perihal.replace(/\s+/g, '_')}.pdf`)
-      toast.success('PDF berhasil diunduh')
     } catch (error) {
+      console.error(error)
       toast.error('Gagal membuat PDF')
     } finally {
       setIsGeneratingPDF(false)
@@ -505,17 +569,20 @@ function ProposalBuilderContent() {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid grid-cols-2 md:grid-cols-4 h-auto md:h-16 w-full bg-slate-100 p-1.5 rounded-3xl mb-6 gap-1 md:gap-0">
-            <TabsTrigger value="umum" className="rounded-2xl font-bold py-3 md:py-0 data-[state=active]:bg-white data-[state=active]:text-emerald-700 data-[state=active]:shadow-sm transition-all text-xs md:text-sm">
+          <TabsList className="grid grid-cols-2 md:grid-cols-5 h-auto md:h-16 w-full bg-slate-100 p-1.5 rounded-3xl mb-6 gap-1 md:gap-0">
+            <TabsTrigger value="umum" className="rounded-2xl font-bold py-3 md:py-0 data-[state=active]:bg-white data-[state=active]:text-emerald-700 data-[state=active]:shadow-sm transition-all text-[10px] md:text-sm">
               <FileText className="h-4 w-4 mr-2" /> Umum
             </TabsTrigger>
-            <TabsTrigger value="struktur" className="rounded-2xl font-bold py-3 md:py-0 data-[state=active]:bg-white data-[state=active]:text-emerald-700 data-[state=active]:shadow-sm transition-all text-xs md:text-sm">
+            <TabsTrigger value="struktur" className="rounded-2xl font-bold py-3 md:py-0 data-[state=active]:bg-white data-[state=active]:text-emerald-700 data-[state=active]:shadow-sm transition-all text-[10px] md:text-sm">
               <Users className="h-4 w-4 mr-2" /> Struktur
             </TabsTrigger>
-            <TabsTrigger value="rab" className="rounded-2xl font-bold py-3 md:py-0 data-[state=active]:bg-white data-[state=active]:text-emerald-700 data-[state=active]:shadow-sm transition-all text-xs md:text-sm">
+            <TabsTrigger value="rab" className="rounded-2xl font-bold py-3 md:py-0 data-[state=active]:bg-white data-[state=active]:text-emerald-700 data-[state=active]:shadow-sm transition-all text-[10px] md:text-sm">
               <IDR className="h-4 w-4 mr-2" /> RAB
             </TabsTrigger>
-            <TabsTrigger value="ttd" className="rounded-2xl font-bold py-3 md:py-0 data-[state=active]:bg-white data-[state=active]:text-emerald-700 data-[state=active]:shadow-sm transition-all text-xs md:text-sm">
+            <TabsTrigger value="foto" className="rounded-2xl font-bold py-3 md:py-0 data-[state=active]:bg-white data-[state=active]:text-emerald-700 data-[state=active]:shadow-sm transition-all text-[10px] md:text-sm">
+              <ImageIcon className="h-4 w-4 mr-2" /> Foto
+            </TabsTrigger>
+            <TabsTrigger value="ttd" className="rounded-2xl font-bold py-3 md:py-0 data-[state=active]:bg-white data-[state=active]:text-emerald-700 data-[state=active]:shadow-sm transition-all text-[10px] md:text-sm">
               <FileCheck className="h-4 w-4 mr-2" /> Penutup
             </TabsTrigger>
           </TabsList>
@@ -555,23 +622,106 @@ function ProposalBuilderContent() {
                 </div>
                 
                 <div className="p-8 bg-slate-50/50 rounded-4xl border border-slate-100 space-y-6">
-                   <h3 className="font-black text-emerald-700 flex items-center text-lg uppercase tracking-wider">
-                     <Users className="h-5 w-5 mr-3" /> Tujuan Penerima
-                   </h3>
+                   <div className="flex items-center justify-between">
+                    <h3 className="font-black text-emerald-700 flex items-center text-lg uppercase tracking-wider">
+                      <Users className="h-5 w-5 mr-3" /> Tujuan Penerima
+                    </h3>
+                    <div className="flex items-center gap-4">
+                        <Label htmlFor="excel-upload" className="cursor-pointer flex items-center text-xs font-bold text-emerald-600 hover:text-emerald-700">
+                             <Upload className="h-4 w-4 mr-1" /> Upload Excel Penerima
+                             <input id="excel-upload" type="file" accept=".xlsx, .xls" className="hidden" onChange={handleExcelUpload} />
+                        </Label>
+                        {bulkRecipients.length > 0 && (
+                            <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200">
+                                {bulkRecipients.length} Penerima Dimuat
+                            </Badge>
+                        )}
+                    </div>
+                   </div>
                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
                       <Label className="text-slate-500 font-bold text-[10px] uppercase tracking-widest ml-1">Nama Penerima</Label>
-                      <Input className="h-12 rounded-xl bg-white border-slate-200" value={data.penerima.nama} onChange={(e) => handlePenerimaChange('nama', e.target.value)} />
+                      <Input 
+                        disabled={bulkRecipients.length > 0} 
+                        className="h-12 rounded-xl bg-white border-slate-200" 
+                        value={bulkRecipients.length > 0 ? bulkRecipients[currentRecipientIndex].nama : data.penerima.nama} 
+                        onChange={(e) => handlePenerimaChange('nama', e.target.value)} 
+                      />
                     </div>
                     <div className="space-y-2">
                       <Label className="text-slate-500 font-bold text-[10px] uppercase tracking-widest ml-1">Jabatan</Label>
-                      <Input className="h-12 rounded-xl bg-white border-slate-200" value={data.penerima.jabatan} onChange={(e) => handlePenerimaChange('jabatan', e.target.value)} />
+                      <Input 
+                        disabled={bulkRecipients.length > 0} 
+                        className="h-12 rounded-xl bg-white border-slate-200" 
+                        value={bulkRecipients.length > 0 ? bulkRecipients[currentRecipientIndex].jabatan : data.penerima.jabatan} 
+                        onChange={(e) => handlePenerimaChange('jabatan', e.target.value)} 
+                      />
                     </div>
                     <div className="space-y-2 md:col-span-2">
                       <Label className="text-slate-500 font-bold text-[10px] uppercase tracking-widest ml-1">Alamat Tujuan</Label>
-                      <Input className="h-12 rounded-xl bg-white border-slate-200" value={data.penerima.alamat} onChange={(e) => handlePenerimaChange('alamat', e.target.value)} />
+                      <Input 
+                        disabled={bulkRecipients.length > 0} 
+                        className="h-12 rounded-xl bg-white border-slate-200" 
+                        value={bulkRecipients.length > 0 ? bulkRecipients[currentRecipientIndex].alamat : data.penerima.alamat} 
+                        onChange={(e) => handlePenerimaChange('alamat', e.target.value)} 
+                      />
                     </div>
                   </div>
+                  {bulkRecipients.length > 0 && (
+                      <div className="flex items-center justify-between pt-2 border-t border-slate-100">
+                          <p className="text-[10px] font-bold text-slate-400">Navigasi Preview Penerima:</p>
+                          <div className="flex gap-2">
+                              <Button variant="ghost" size="sm" onClick={() => setCurrentRecipientIndex(prev => Math.max(0, prev - 1))} disabled={currentRecipientIndex === 0}>
+                                  <ChevronLeft className="h-4 w-4" />
+                              </Button>
+                              <span className="text-xs font-bold self-center">{currentRecipientIndex + 1} / {bulkRecipients.length}</span>
+                              <Button variant="ghost" size="sm" onClick={() => setCurrentRecipientIndex(prev => Math.min(bulkRecipients.length - 1, prev + 1))} disabled={currentRecipientIndex === bulkRecipients.length - 1}>
+                                  <ChevronRight className="h-4 w-4" />
+                              </Button>
+                              <Button variant="ghost" size="sm" className="text-rose-500" onClick={() => {setBulkRecipients([]); setCurrentRecipientIndex(0);}}>Reset Massal</Button>
+                          </div>
+                      </div>
+                  )}
+                </div>
+
+                <div className="p-8 bg-slate-50/50 rounded-4xl border border-slate-100 space-y-6">
+                    <div className="flex items-center justify-between">
+                        <h3 className="font-black text-emerald-700 flex items-center text-lg uppercase tracking-wider">
+                            <Calendar className="h-5 w-5 mr-3" /> Waktu & Tempat Kegiatan
+                        </h3>
+                        <div className="flex items-center gap-2">
+                            <Label htmlFor="show-waktu" className="text-xs font-bold text-slate-500">Tampilkan di Proposal</Label>
+                            <input 
+                                type="checkbox" 
+                                id="show-waktu" 
+                                checked={data.showWaktuTempat} 
+                                onChange={(e) => setData({...data, showWaktuTempat: e.target.checked})}
+                                className="h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                            />
+                        </div>
+                    </div>
+                    {data.showWaktuTempat && (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-in fade-in slide-in-from-top-2">
+                            <div className="space-y-2">
+                                <Label className="text-slate-500 font-bold text-[10px] uppercase tracking-widest ml-1">Hari & Tanggal Kegiatan</Label>
+                                <Input 
+                                    placeholder="Contoh: Minggu, 24 Maret 2024"
+                                    className="h-12 rounded-xl bg-white border-slate-200" 
+                                    value={data.waktuKegiatan} 
+                                    onChange={(e) => setData({...data, waktuKegiatan: e.target.value})} 
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label className="text-slate-500 font-bold text-[10px] uppercase tracking-widest ml-1">Tempat Kegiatan</Label>
+                                <Input 
+                                    placeholder="Contoh: Halaman Masjid Al-Muhajirin"
+                                    className="h-12 rounded-xl bg-white border-slate-200" 
+                                    value={data.tempatKegiatan} 
+                                    onChange={(e) => setData({...data, tempatKegiatan: e.target.value})} 
+                                />
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 <div className="space-y-3">
@@ -684,12 +834,53 @@ function ProposalBuilderContent() {
                             <Label className="text-[10px] uppercase text-slate-400 font-bold tracking-widest">Ketua RT</Label>
                             <Input value={data.namaKetuaRT} className="h-11 rounded-xl bg-white" onChange={(e) => setData({...data, namaKetuaRT: e.target.value})} />
                         </div>
-                        <div className="space-y-2">
-                            <Label className="text-[10px] uppercase text-slate-400 font-bold tracking-widest">Ketua Pemuda</Label>
-                            <Input value={data.namaKetuaPemuda} className="h-11 rounded-xl bg-white" onChange={(e) => setData({...data, namaKetuaPemuda: e.target.value})} />
-                        </div>
-                    </div>
-                 </div>
+                         <div className="space-y-2">
+                             <Label className="text-[10px] uppercase text-slate-400 font-bold tracking-widest">Ketua Pemuda</Label>
+                             <Input value={data.namaKetuaPemuda} className="h-11 rounded-xl bg-white" onChange={(e) => setData({...data, namaKetuaPemuda: e.target.value})} />
+                         </div>
+                     </div>
+                  </div>
+
+                  <div className="space-y-6">
+                      <div className="flex items-center justify-between">
+                        <h3 className="font-bold text-lg text-slate-800 border-l-4 border-emerald-500 pl-4">Seksi Operasional / Kepanitiaan</h3>
+                        <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            onClick={() => setData(prev => ({...prev, struktur: {...prev.struktur, operasional: [...prev.struktur.operasional, '']}}))}
+                            className="text-emerald-600 font-bold"
+                        >
+                            <Plus className="h-4 w-4 mr-1" /> Tambah Seksi
+                        </Button>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {data.struktur.operasional.map((op, i) => (
+                              <div key={i} className="flex gap-2">
+                                  <Input 
+                                    placeholder="Contoh: Seksi Konsumsi: Bpk. Fulan" 
+                                    value={op} 
+                                    onChange={(e) => {
+                                        const newOp = [...data.struktur.operasional]
+                                        newOp[i] = e.target.value
+                                        setData(prev => ({...prev, struktur: {...prev.struktur, operasional: newOp}}))
+                                    }} 
+                                    className="h-11 rounded-xl bg-slate-50 border-slate-200" 
+                                  />
+                                  <Button 
+                                    variant="ghost" 
+                                    size="icon" 
+                                    onClick={() => setData(prev => ({...prev, struktur: {...prev.struktur, operasional: prev.struktur.operasional.filter((_, idx) => idx !== i)}}))}
+                                    className="text-rose-400"
+                                  >
+                                      <Trash2 className="h-4 w-4" />
+                                  </Button>
+                              </div>
+                          ))}
+                          {data.struktur.operasional.length === 0 && (
+                              <p className="text-slate-400 text-sm italic col-span-2">Belum ada seksi operasional ditambahkan.</p>
+                          )}
+                      </div>
+                  </div>
               </TabsContent>
 
               <TabsContent value="rab" className="space-y-8 mt-0">
@@ -806,17 +997,89 @@ function ProposalBuilderContent() {
                         <Label className="font-bold text-slate-700">Tempat Penerbitan</Label>
                         <Input value={data.tempat} onChange={(e) => setData({...data, tempat: e.target.value})} className="h-12 rounded-xl" />
                     </div>
-                    <div className="space-y-2">
-                        <Label className="font-bold text-slate-700">Tanggal Surat</Label>
-                        <Input type="date" value={dateInput} onChange={(e) => setDateInput(e.target.value)} className="h-12 rounded-xl" />
+                     <div className="space-y-2">
+                         <Label className="font-bold text-slate-700">Tanggal Surat</Label>
+                         <Input type="date" value={dateInput} onChange={(e) => setDateInput(e.target.value)} className="h-12 rounded-xl" />
+                     </div>
+                 </div>
+               </TabsContent>
+
+               <TabsContent value="foto" className="space-y-8 mt-0">
+                    <div className="flex items-center justify-between">
+                        <h3 className="font-black text-xl text-slate-900 uppercase tracking-tight">Lampiran Dokumen/Foto</h3>
+                        <Button onClick={addLampiranFoto} className="bg-emerald-700 hover:bg-emerald-800 rounded-2xl px-6 h-12 shadow-lg shadow-emerald-100">
+                            <Plus className="h-4 w-4 mr-2" /> Tambah Foto
+                        </Button>
                     </div>
-                </div>
-              </TabsContent>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {data.lampiranFoto.map((foto, i) => (
+                            <Card key={i} className="overflow-hidden border-slate-100 rounded-3xl shadow-sm">
+                                <div className="aspect-video bg-slate-100 relative group">
+                                    {foto.url ? (
+                                        <img src={foto.url} alt="Lampiran" className="w-full h-full object-cover" />
+                                    ) : (
+                                        <div className="w-full h-full flex flex-col items-center justify-center text-slate-400">
+                                            <ImageIcon className="h-12 w-12 mb-2 opacity-20" />
+                                            <p className="text-xs font-bold">Belum ada foto</p>
+                                        </div>
+                                    )}
+                                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                                        <Label htmlFor={`foto-upload-${i}`} className="cursor-pointer bg-white text-slate-900 px-4 py-2 rounded-xl font-bold text-xs flex items-center">
+                                            <Upload className="h-3 w-3 mr-2" /> Ganti Foto
+                                            <input 
+                                                id={`foto-upload-${i}`} 
+                                                type="file" 
+                                                accept="image/*" 
+                                                className="hidden" 
+                                                onChange={(e) => handleLampiranFotoUpload(i, e)} 
+                                            />
+                                        </Label>
+                                        <Button variant="destructive" size="icon" onClick={() => removeLampiranFoto(i)} className="rounded-xl">
+                                            <Trash2 className="h-4 w-4" />
+                                        </Button>
+                                    </div>
+                                </div>
+                                <div className="p-4">
+                                    <Input 
+                                        placeholder="Tulis deskripsi atau keterangan foto..." 
+                                        value={foto.deskripsi} 
+                                        onChange={(e) => updateLampiranFoto(i, 'deskripsi', e.target.value)}
+                                        className="border-none bg-slate-50 rounded-xl"
+                                    />
+                                </div>
+                            </Card>
+                        ))}
+                    </div>
+                    {data.lampiranFoto.length === 0 && (
+                        <div className="text-center py-20 bg-slate-50 rounded-[3rem] border border-dashed border-slate-200">
+                            <ImageIcon className="h-20 w-20 mx-auto text-slate-200 mb-4" />
+                            <p className="text-slate-400 font-bold">Belum ada lampiran foto ditambahkan</p>
+                            <Button variant="ghost" className="mt-4 text-emerald-600 font-bold" onClick={addLampiranFoto}>Mulai Tambah Foto</Button>
+                        </div>
+                    )}
+               </TabsContent>
             </CardContent>
             
-            <div className="p-10 bg-slate-50 border-t">
+             <div className="p-10 bg-slate-50 border-t flex flex-col md:flex-row gap-4">
                <Button 
-                className="w-full h-16 rounded-3xl font-black bg-emerald-800 hover:bg-emerald-900 shadow-xl shadow-emerald-100 text-white text-lg"
+                variant="outline"
+                className="flex-1 md:flex-none h-16 rounded-3xl font-black border-slate-200 text-slate-500 hover:bg-slate-100 px-8"
+                onClick={handleReset}
+               >
+                 <RotateCcw className="h-5 w-5 mr-2" /> Reset
+               </Button>
+               {history && (
+                   <Button 
+                    variant="outline"
+                    className="flex-1 md:flex-none h-16 rounded-3xl font-black border-emerald-100 text-emerald-600 hover:bg-emerald-50 px-8"
+                    onClick={handleUndo}
+                   >
+                     Urungkan Ganti AI
+                   </Button>
+               )}
+               <Button 
+                className="flex-1 h-16 rounded-3xl font-black bg-emerald-800 hover:bg-emerald-900 shadow-xl shadow-emerald-100 text-white text-lg"
                 onClick={handleSave}
                 disabled={isSaving}
                >
@@ -845,11 +1108,13 @@ function ProposalBuilderContent() {
 
           <div className="bg-slate-200 p-8 rounded-[3.5rem] shadow-inner h-[calc(100vh-160px)] overflow-y-auto space-y-12 flex flex-col items-center">
               <div ref={previewRef} className="flex flex-col gap-8 scale-[0.5] sm:scale-[0.6] md:scale-[0.7] lg:scale-[0.8] origin-top">
-                <Page1 data={data} />
+                <PageCover data={data} />
+                <Page1 data={data} bulkRecipient={bulkRecipients.length > 0 ? bulkRecipients[currentRecipientIndex] : null} />
                 <Page2 data={data} />
                 <Page3 data={data} />
                 <Page4 data={data} />
                 <Page5 data={data} />
+                {data.lampiranFoto.length > 0 && <Page6 data={data} />}
               </div>
           </div>
         </div>
@@ -866,8 +1131,79 @@ function ProposalBuilderContent() {
         .kop-line { border-bottom: 3px solid black; margin-bottom: 2px; }
         .kop-line-thin { border-bottom: 1px solid black; }
     `}</style>
+    <Dialog open={isBulkProcessing} onOpenChange={setIsBulkProcessing}>
+        <DialogContent className="sm:max-w-md bg-white rounded-3xl p-8 border-none shadow-2xl">
+            <DialogHeader className="space-y-4">
+                <DialogTitle className="text-2xl font-black text-center text-slate-900">Memproses Proposal Massal</DialogTitle>
+                <DialogDescription className="text-center font-medium text-slate-500 italic">
+                    Harap tunggu, asisten digital sedang menyiapkan {bulkRecipients.length} dokumen PDF Anda.
+                </DialogDescription>
+            </DialogHeader>
+            <div className="py-8 space-y-6">
+                <div className="flex justify-between items-center mb-2">
+                    <span className="text-xs font-black text-emerald-600 uppercase tracking-widest animate-pulse">Progress: {bulkProgress}%</span>
+                    <span className="text-xs font-black text-slate-400 uppercase tracking-widest">{currentRecipientIndex + 1} / {bulkRecipients.length}</span>
+                </div>
+                <div className="w-full h-4 bg-slate-100 rounded-full overflow-hidden border border-slate-50">
+                    <div 
+                        className="h-full bg-linear-to-r from-emerald-500 to-teal-400 transition-all duration-500 ease-out shadow-lg shadow-emerald-100" 
+                        style={{ width: `${bulkProgress}%` }}
+                    />
+                </div>
+                <div className="flex flex-col items-center gap-2 pt-4">
+                    <p className="text-xs font-bold text-slate-800 uppercase tracking-widest">Sekarang Memproses:</p>
+                    <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-100 px-4 py-1.5 rounded-full text-[10px] font-black uppercase">
+                        {bulkRecipients[currentRecipientIndex]?.nama}
+                    </Badge>
+                </div>
+            </div>
+            <div className="flex justify-center">
+                <RotateCcw className="h-6 w-6 text-emerald-600 animate-spin" />
+            </div>
+        </DialogContent>
+    </Dialog>
     </AdminLayout>
   )
+}
+
+function PageCover({ data }: { data: ProposalData }) {
+    return (
+        <div className="proposal-page relative flex flex-col items-center justify-center" 
+             style={{ 
+               width: '794px', 
+               height: '1123px', 
+               padding: '100px 80px', 
+               boxSizing: 'border-box',
+               boxShadow: '0 0 40px rgba(0,0,0,0.1)',
+               margin: '0 auto',
+               background: 'linear-gradient(to bottom, #ffffff, #fcfdfc) !important'
+             }}>
+            
+            {/* Header Style Elements */}
+            <div style={{ position: 'absolute', top: 0, right: 0, width: '300px', height: '300px', background: 'radial-gradient(circle, #f0fdf4 0%, transparent 70%)', zIndex: 0 }}></div>
+            
+            <div style={{ zIndex: 1, textAlign: 'center', width: '100%' }}>
+                <img src={data.logoKiri || "/logo.png"} style={{ width: '150px', height: '150px', objectFit: 'contain', margin: '0 auto 50px auto' }} />
+                
+                <h1 style={{ fontWeight: 'bold', fontSize: '28pt', margin: '0 0 10px 0', textTransform: 'uppercase', color: '#000', lineHeight: 1.1 }}>{data.perihal}</h1>
+                <div style={{ width: '120px', height: '4px', background: '#000', margin: '30px auto' }}></div>
+                
+                <h2 style={{ fontSize: '18pt', fontWeight: 'bold', margin: '0 0 60px 0', color: '#333' }}>PROPOSAL KEGIATAN</h2>
+                
+                <div style={{ margin: '80px 0', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                    <p style={{ fontSize: '14pt', margin: '0' }}>Diajukan Oleh:</p>
+                    <p style={{ fontSize: '16pt', fontWeight: 'bold', margin: '10px 0', textTransform: 'uppercase' }}>{data.namaKopSurat}</p>
+                    <div style={{ height: '2px', width: '400px', backgroundColor: '#eee', margin: '20px 0' }}></div>
+                    <p style={{ fontSize: '11pt', fontStyle: 'italic', color: '#666' }}>Kampung Ragas Grenyang, Desa Argawana</p>
+                    <p style={{ fontSize: '11pt', fontStyle: 'italic', color: '#666' }}>Kecamatan Puloampel Kabupaten Serang</p>
+                </div>
+
+                <div style={{ position: 'absolute', bottom: '100px', left: 0, width: '100%', textAlign: 'center' }}>
+                    <p style={{ fontSize: '16pt', fontWeight: 'bold', letterSpacing: '4px' }}>TAHUN {new Date().getFullYear()}</p>
+                </div>
+            </div>
+        </div>
+    )
 }
 
 function PageWrapper({ children, data }: { children: React.ReactNode, data: ProposalData }) {
@@ -904,7 +1240,8 @@ function PageWrapper({ children, data }: { children: React.ReactNode, data: Prop
     )
 }
 
-function Page1({ data }: { data: ProposalData }) {
+function Page1({ data, bulkRecipient }: { data: ProposalData, bulkRecipient?: any }) {
+    const recipient = bulkRecipient || data.penerima
     return (
         <PageWrapper data={data}>
             <div style={{ fontSize: '12pt' }}>
@@ -917,10 +1254,11 @@ function Page1({ data }: { data: ProposalData }) {
                 </table>
 
                 <p>Kepada Yth.</p>
-                <p style={{ fontWeight: 'bold', fontSize: '13pt', margin: '5px 0' }}>{data.penerima.nama || '........................'}</p>
-                {data.penerima.jabatan && <p style={{ fontWeight: 'bold' }}>({data.penerima.jabatan})</p>}
+                <p style={{ fontWeight: 'bold', fontSize: '13pt', margin: '5px 0' }}>{recipient.nama || '........................'}</p>
+                {recipient.jabatan && <p style={{ fontWeight: 'bold' }}>({recipient.jabatan})</p>}
+                {recipient.instansi && <p style={{ fontWeight: 'bold' }}>{recipient.instansi}</p>}
                 <p style={{ marginTop: '10px' }}>di -</p>
-                <p style={{ paddingLeft: '30px', fontWeight: 'bold' }}>{data.penerima.alamat || 'Tempat'}</p>
+                <p style={{ paddingLeft: '30px', fontWeight: 'bold' }}>{recipient.alamat || 'Tempat'}</p>
 
                 <div style={{ marginTop: '40px', textAlign: 'justify' }}>
                     {data.suratPengantar.split('\n').map((line, i) => (
@@ -948,15 +1286,38 @@ function Page2({ data }: { data: ProposalData }) {
             <div style={{ fontSize: '12pt' }}>
                 <h2 style={{ fontSize: '16pt', fontWeight: 'bold', borderLeft: '10px solid black', paddingLeft: '20px', marginBottom: '30px', textTransform: 'uppercase' }}>I. Pendahuluan</h2>
                 
-                <h3 style={{ fontWeight: 'bold', marginBottom: '10px' }}>A. Latar Belakang</h3>
+                <h3 style={{ fontWeight: 'bold', marginBottom: '10px', fontSize: '13pt' }}>A. Latar Belakang</h3>
                 <div style={{ textAlign: 'justify', textIndent: '40px', marginBottom: '30px' }}>{data.latarBelakang}</div>
 
-                <h3 style={{ fontWeight: 'bold', marginBottom: '10px' }}>B. Maksud dan Tujuan</h3>
-                <ul style={{ paddingLeft: '30px' }}>
+                <h3 style={{ fontWeight: 'bold', marginBottom: '10px', fontSize: '13pt' }}>B. Maksud dan Tujuan</h3>
+                <ul style={{ paddingLeft: '30px', marginBottom: '30px' }}>
                     {data.tujuan.map((t, i) => (
                         <li key={i} style={{ marginBottom: '10px' }}>{t}</li>
                     ))}
                 </ul>
+
+                {data.showWaktuTempat && (
+                    <>
+                        <h3 style={{ fontWeight: 'bold', marginBottom: '10px', fontSize: '13pt' }}>C. Waktu dan Tempat Pelaksanaan</h3>
+                        <div style={{ paddingLeft: '20px' }}>
+                            <p style={{ marginBottom: '10px' }}>Kegiatan ini Insha Allah akan dilaksanakan pada:</p>
+                            <table style={{ width: '100%', marginBottom: '20px' }}>
+                                <tbody>
+                                    <tr>
+                                        <td style={{ width: '150px', fontWeight: 'bold' }}>Hari / Tanggal</td>
+                                        <td style={{ width: '20px' }}>:</td>
+                                        <td>{data.waktuKegiatan || '........................'}</td>
+                                    </tr>
+                                    <tr>
+                                        <td style={{ fontWeight: 'bold' }}>Tempat</td>
+                                        <td>:</td>
+                                        <td>{data.tempatKegiatan || '........................'}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </>
+                )}
             </div>
         </PageWrapper>
     )
@@ -985,6 +1346,17 @@ function Page3({ data }: { data: ProposalData }) {
                         </p>
                     ))}
                 </div>
+
+                {data.struktur.operasional.length > 0 && (
+                    <div style={{ marginBottom: '30px' }}>
+                        <h3 style={{ fontWeight: 'bold', textTransform: 'uppercase', fontSize: '11pt', borderBottom: '1px solid black', paddingBottom: '5px', marginBottom: '15px' }}>Seksi Operasional</h3>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px', paddingLeft: '20px' }}>
+                            {data.struktur.operasional.map((op, i) => (
+                                <p key={i} style={{ margin: '0' }}>• {op}</p>
+                            ))}
+                        </div>
+                    </div>
+                )}
             </div>
         </PageWrapper>
     )
@@ -1038,45 +1410,74 @@ function Page5({ data }: { data: ProposalData }) {
                 <h2 style={{ fontSize: '16pt', fontWeight: 'bold', borderLeft: '10px solid black', paddingLeft: '20px', marginBottom: '30px', textTransform: 'uppercase' }}>IV. Penutup</h2>
                 <div style={{ textAlign: 'justify', textIndent: '40px', marginBottom: '50px' }}>{data.penutup}</div>
 
+                <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+                    <p style={{ fontStyle: 'italic' }}>Argawana, {data.tanggal}</p>
+                </div>
+
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '40px', textAlign: 'center' }}>
                     <div>
-                        <p>Sekretaris DKM</p>
-                        <div style={{ height: '80px' }}></div>
-                        <p style={{ fontWeight: 'bold', textDecoration: 'underline' }}>{data.namaSekretaris}</p>
+                        <p style={{ fontWeight: 'bold', borderBottom: '1px solid #000', paddingBottom: '5px', marginBottom: '15px' }}>Dibuat Oleh:</p>
+                        <p>Sekretaris DKM,</p>
+                        <div style={{ height: '100px' }}></div>
+                        <p style={{ fontWeight: 'bold', textDecoration: 'underline', fontSize: '13pt' }}>{data.namaSekretaris || '( ........................ )'}</p>
                     </div>
                     <div>
-                        <p>Ketua DKM</p>
-                        <div style={{ height: '80px' }}></div>
-                        <p style={{ fontWeight: 'bold', textDecoration: 'underline' }}>{data.namaKetua}</p>
+                        <p style={{ fontWeight: 'bold', borderBottom: '1px solid #000', paddingBottom: '5px', marginBottom: '15px' }}>Disetujui Oleh:</p>
+                        <p>Ketua DKM,</p>
+                        <div style={{ height: '100px' }}></div>
+                        <p style={{ fontWeight: 'bold', textDecoration: 'underline', fontSize: '13pt' }}>{data.namaKetua || '( ........................ )'}</p>
                     </div>
-                    <div>
-                        <p>Bendahara DKM</p>
-                        <div style={{ height: '80px' }}></div>
-                        <p style={{ fontWeight: 'bold', textDecoration: 'underline' }}>{data.namaBendahara}</p>
+                    <div style={{ marginTop: '20px' }}>
+                        <p>Bendahara DKM,</p>
+                        <div style={{ height: '100px' }}></div>
+                        <p style={{ fontWeight: 'bold', textDecoration: 'underline', fontSize: '13pt' }}>{data.namaBendahara || '( ........................ )'}</p>
                     </div>
-                    <div>
-                        <p>Tokoh Masyarakat</p>
-                        <div style={{ height: '80px' }}></div>
-                        <p style={{ fontWeight: 'bold', textDecoration: 'underline' }}>{data.namaTokohMasyarakat}</p>
+                    <div style={{ marginTop: '20px' }}>
+                        <p>Tokoh Masyarakat,</p>
+                        <div style={{ height: '100px' }}></div>
+                        <p style={{ fontWeight: 'bold', textDecoration: 'underline', fontSize: '13pt' }}>{data.namaTokohMasyarakat || '( ........................ )'}</p>
                     </div>
                 </div>
 
-                <div style={{ marginTop: '40px', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px', textAlign: 'center', opacity: data.namaKetuaRW || data.namaKetuaRT || data.namaKetuaPemuda ? 1 : 0.3 }}>
-                    <div>
-                        <p style={{ fontSize: '10pt' }}>Ketua RW 008</p>
-                        <div style={{ height: '60px' }}></div>
-                        <p style={{ fontSize: '10pt', fontWeight: 'bold' }}>{data.namaKetuaRW || '( ........................ )'}</p>
+                <div style={{ marginTop: '60px', textAlign: 'center' }}>
+                    <p style={{ fontWeight: 'bold', backgroundColor: '#f9f9f9', padding: '10px', display: 'inline-block', borderRadius: '4px' }}>Mengetahui Pemerintah Setempat:</p>
+                </div>
+
+                <div style={{ marginTop: '30px', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px', textAlign: 'center' }}>
+                    <div style={{ opacity: data.namaKetuaRW ? 1 : 0.3 }}>
+                        <p style={{ fontSize: '11pt' }}>Ketua RW 008,</p>
+                        <div style={{ height: '80px' }}></div>
+                        <p style={{ fontSize: '11pt', fontWeight: 'bold' }}>{data.namaKetuaRW || '( ........................ )'}</p>
                     </div>
-                    <div>
-                        <p style={{ fontSize: '10pt' }}>Ketua RT 015</p>
-                        <div style={{ height: '60px' }}></div>
-                        <p style={{ fontSize: '10pt', fontWeight: 'bold' }}>{data.namaKetuaRT || '( ........................ )'}</p>
+                    <div style={{ opacity: data.namaKetuaRT ? 1 : 0.3 }}>
+                        <p style={{ fontSize: '11pt' }}>Ketua RT 015,</p>
+                        <div style={{ height: '80px' }}></div>
+                        <p style={{ fontSize: '11pt', fontWeight: 'bold' }}>{data.namaKetuaRT || '( ........................ )'}</p>
                     </div>
-                    <div>
-                        <p style={{ fontSize: '10pt' }}>Ketua Pemuda</p>
-                        <div style={{ height: '60px' }}></div>
-                        <p style={{ fontSize: '10pt', fontWeight: 'bold' }}>{data.namaKetuaPemuda || '( ........................ )'}</p>
+                    <div style={{ opacity: data.namaKetuaPemuda ? 1 : 0.3 }}>
+                        <p style={{ fontSize: '11pt' }}>Ketua Pemuda,</p>
+                        <div style={{ height: '80px' }}></div>
+                        <p style={{ fontSize: '11pt', fontWeight: 'bold' }}>{data.namaKetuaPemuda || '( ........................ )'}</p>
                     </div>
+                </div>
+            </div>
+        </PageWrapper>
+    )
+}
+
+function Page6({ data }: { data: ProposalData }) {
+    return (
+        <PageWrapper data={data}>
+            <div style={{ fontSize: '12pt' }}>
+                <h2 style={{ fontSize: '16pt', fontWeight: 'bold', borderLeft: '10px solid black', paddingLeft: '20px', marginBottom: '30px', textTransform: 'uppercase' }}>V. Lampiran Foto & Dokumentasi</h2>
+                
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '30px' }}>
+                    {data.lampiranFoto.map((foto, i) => (
+                        <div key={i} style={{ border: '1px solid #eee', padding: '10px', borderRadius: '10px', background: '#fafafa' }}>
+                            <img src={foto.url} alt={`Lampiran ${i}`} style={{ width: '100%', height: '220px', objectFit: 'cover', borderRadius: '5px', marginBottom: '10px' }} />
+                            <p style={{ textAlign: 'center', fontSize: '11pt', fontStyle: 'italic', fontWeight: 'bold' }}>{foto.deskripsi || `Dokumentasi ${i+1}`}</p>
+                        </div>
+                    ))}
                 </div>
             </div>
         </PageWrapper>
