@@ -1406,11 +1406,16 @@ function Page1({ data, bulkRecipient }: { data: ProposalData, bulkRecipient?: an
                     ))}
                 </div>
 
-                <div style={{ marginTop: '40px', display: 'flex', justifyContent: 'flex-end' }}>
-                    <div style={{ textAlign: 'center' }}>
+                <div style={{ marginTop: '40px', display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '40px', textAlign: 'center' }}>
+                    <div>
                         <p>{data.tempat}, {data.tanggal}</p>
-                        <p style={{ fontWeight: 'bold', marginTop: '10px' }}>Mengetahui,</p>
-                        <p style={{ fontWeight: 'bold' }}>Ketua DKM Al-Muhajirin</p>
+                        <p style={{ fontWeight: 'bold', marginTop: '10px' }}>Sekretaris DKM,</p>
+                        <div style={{ height: '80px' }}></div>
+                        <p style={{ fontWeight: 'bold', textDecoration: 'underline', fontSize: '13pt' }}>{data.namaSekretaris || '( ........................ )'}</p>
+                    </div>
+                    <div>
+                        <p>{data.tempat}, {data.tanggal}</p>
+                        <p style={{ fontWeight: 'bold', marginTop: '10px' }}>Ketua DKM,</p>
                         <div style={{ height: '80px' }}></div>
                         <p style={{ fontWeight: 'bold', textDecoration: 'underline', fontSize: '13pt' }}>{data.namaKetua || '( ........................ )'}</p>
                     </div>
@@ -1554,7 +1559,7 @@ function Page5({ data }: { data: ProposalData }) {
                     <p style={{ fontStyle: 'italic' }}>Argawana, {data.tanggal}</p>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '40px', textAlign: 'center', marginBottom: '50px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '20px', textAlign: 'center', marginBottom: '50px' }}>
                     <div>
                         <p>Sekretaris DKM,</p>
                         <div style={{ height: '100px' }}></div>
