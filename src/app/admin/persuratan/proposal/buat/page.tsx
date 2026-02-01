@@ -159,6 +159,11 @@ const initialData: ProposalData = {
   showWaktuTempat: false
 }
 
+const getRomanMonth = (month: number): string => {
+  const roman = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII']
+  return roman[month - 1] || ''
+}
+
 function ProposalBuilderContent() {
   const { data: session } = useSession()
   const router = useRouter()
@@ -180,6 +185,21 @@ function ProposalBuilderContent() {
   const [bulkProgress, setBulkProgress] = useState(0)
   const previewRef = useRef<HTMLDivElement>(null)
 
+  const generateAutoNomor = async () => {
+    try {
+      const res = await fetch('/api/admin/persuratan')
+      const list = await res.json()
+      const proposalCount = Array.isArray(list) ? list.filter((i: any) => i.type === 'PROPOSAL').length : 0
+      const nextNumber = (proposalCount + 1).toString().padStart(3, '0')
+      const month = getRomanMonth(new Date().getMonth() + 1)
+      const year = new Date().getFullYear()
+      return `${nextNumber}/PRP-ALM/${month}/${year}`
+    } catch (error) {
+      console.error('Failed to generate automatic document number', error)
+      return ''
+    }
+  }
+
   const [proposalStatus, setProposalStatus] = useState<string>('pending')
   const [rejectionReason, setRejectionReason] = useState<string>('')
   const [isRejectDialogOpen, setIsRejectDialogOpen] = useState(false)
@@ -199,11 +219,18 @@ function ProposalBuilderContent() {
     if (proposalId) {
       fetchExistingProposal()
     } else {
-      setData(initialData)
+      // Auto generate nomor for new proposal
+      const initNewProposal = async () => {
+        setIsLoadingInitialData(true)
+        const autoNomor = await generateAutoNomor()
+        setData({ ...initialData, nomor: autoNomor })
+        setIsLoadingInitialData(false)
+      }
+      
+      initNewProposal()
       setBulkRecipients([])
       setProposalStatus('pending')
       setRejectionReason('')
-      setIsLoadingInitialData(false)
     }
   }, [proposalId])
 
@@ -297,12 +324,13 @@ function ProposalBuilderContent() {
       }
   }
 
-  const handleReset = () => {
+  const handleReset = async () => {
       if (confirm('Apakah Anda yakin ingin menghapus semua inputan dan kembali ke awal?')) {
-          setData(initialData)
+          const autoNomor = await generateAutoNomor()
+          setData({ ...initialData, nomor: autoNomor })
           setBulkRecipients([])
           setCurrentRecipientIndex(0)
-          toast.success('Formulir berhasil direset')
+          toast.success('Formulir berhasil direset dengan nomor baru')
       }
   }
 
@@ -629,6 +657,9 @@ function ProposalBuilderContent() {
                       <Users className="h-5 w-5 mr-3" /> Tujuan Penerima
                     </h3>
                     <div className="flex items-center gap-4">
+                        <a href="/template_penerima_proposal.xlsx" download className="flex items-center text-xs font-bold text-blue-600 hover:text-blue-700">
+                             <Download className="h-4 w-4 mr-1" /> Download Template
+                        </a>
                         <Label htmlFor="excel-upload" className="cursor-pointer flex items-center text-xs font-bold text-emerald-600 hover:text-emerald-700">
                              <Upload className="h-4 w-4 mr-1" /> Upload Excel Penerima
                              <input id="excel-upload" type="file" accept=".xlsx, .xls" className="hidden" onChange={handleExcelUpload} />
@@ -1114,7 +1145,7 @@ function ProposalBuilderContent() {
             </div>
           </div>
 
-          <div className="bg-slate-50 border border-slate-200 p-6 rounded-[3rem] shadow-xl shadow-slate-200/30 h-full overflow-y-auto space-y-12 flex flex-col items-center custom-scrollbar scroll-smooth">
+          <div className="bg-slate-50 border border-slate-200 p-6 rounded-[3rem] shadow-xl shadow-slate-200/30 overflow-y-auto space-y-12 flex flex-col items-center custom-scrollbar scroll-smooth" style={{ maxHeight: 'calc(100vh - 180px)' }}>
               <div ref={previewRef} className="flex flex-col gap-10 scale-[0.4] sm:scale-[0.5] md:scale-[0.55] lg:scale-[0.6] xl:scale-[0.75] 2xl:scale-[1.0] origin-top transition-all duration-500">
                 <PageCover data={data} />
                 <Page1 data={data} bulkRecipient={bulkRecipients.length > 0 ? bulkRecipients[currentRecipientIndex] : null} />
@@ -1198,10 +1229,10 @@ function PageCover({ data }: { data: ProposalData }) {
             <div style={{ zIndex: 1, textAlign: 'center', width: '100%', position: 'relative' }}>
                 <img src={data.logoKiri || "/logo.png"} style={{ width: '160px', height: '160px', objectFit: 'contain', margin: '0 auto 60px auto', filter: 'drop-shadow(0 10px 20px rgba(0,0,0,0.05))' }} />
                 
+                <h2 style={{ fontSize: '18pt', fontWeight: 'bold', margin: '0 0 70px 0', color: '#475569', letterSpacing: '0.2em' }}>PROPOSAL</h2>
+                
                 <h1 style={{ fontWeight: '900', fontSize: '30pt', margin: '0 0 15px 0', textTransform: 'uppercase', color: '#0f172a', lineHeight: 1.1, letterSpacing: '-0.02em' }}>{data.perihal}</h1>
                 <div style={{ width: '150px', height: '6px', background: 'linear-gradient(to right, #059669, #10b981)', margin: '35px auto' }}></div>
-                
-                <h2 style={{ fontSize: '18pt', fontWeight: 'bold', margin: '0 0 70px 0', color: '#475569', letterSpacing: '0.2em' }}>PROPOSAL KEGIATAN</h2>
                 
                 <div style={{ margin: '80px 0', display: 'flex', flexDirection: 'column', alignItems: 'center', backgroundColor: 'rgba(248, 250, 252, 0.5)', padding: '50px', borderRadius: '40px', border: '1px solid #f1f5f9' }}>
                     <p style={{ fontSize: '12pt', margin: '0', color: '#64748b', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Diajukan Oleh:</p>
