@@ -285,33 +285,107 @@ function ProposalBuilderContent() {
   const handleAiGenerate = async (type: string) => {
     setHistory({...data})
     setIsAiLoading(type)
-    // Simulate AI thinking
-    await new Promise(resolve => setTimeout(resolve, 1500))
     
-    const templates: Record<string, any> = {
-      background: "Sehubungan dengan meningkatnya kebutuhan akan sarana ibadah yang memadai dan upaya untuk meningkatkan ukhuwah islamiyah di lingkungan Kp. Ragas Grenyang, maka kami memandang perlu untuk mengadakan kegiatan/pembangunan ini sebagai bagian dari program kerja tahunan DKM Al-Muhajirin. Mengingat pentingnya peran masjid sebagai pusat peradaban umat, kami berkomitmen untuk terus meningkatkan fasilitas dan kualitas pelayanan bagi seluruh jamaah.",
-      'cover-letter': "Assalamu'alaikum Wr. Wb. \n\nSalam silaturahmi kami sampaikan, teriring doa semoga bapak beserta keluarga selalu berada dalam lindungan Allah SWT, diberikan kesehatan, serta kelancaran dalam segala urusan.\n\nBersama dengan surat ini, kami selaku pengurus DKM Al-Muhajirin bermaksud untuk mengajukan permohonan dukungan dan bantuan dana untuk kegiatan yang akan kami laksanakan. Semoga bapak/ibu dapat memberikan dukungan positif demi kelancaran kegiatan tersebut.",
-      closing: "Demikian proposal ini kami susun dengan harapan mendapatkan pertimbangan dan dukungan dari Bapak/Ibu. Atas perhatian dan kerjasamanya kami haturkan terima kasih yang sebesar-besarnya. Semoga Allah SWT membalas segala bentuk kebaikan Bapak/Ibu dengan pahala yang berlipat ganda.",
-      objectives: [
-        'Meningkatkan kualitas sarana ibadah agar lebih nyaman bagi jamaah',
-        'Mempererat tali silaturahmi antar jamaah melalui kegiatan bersama',
-        'Menciptakan lingkungan yang religius dan kondusif untuk dakwah',
-        'Meningkatkan syiar Islam di lingkungan Kp. Ragas Grenyang'
-      ]
-    }
+    try {
+      const prompts: Record<string, string> = {
+        background: `Buatkan narasi latar belakang untuk proposal kegiatan DKM (Dewan Kemakmuran Masjid) Al-Muhajirin dengan perihal: "${data.perihal}". 
+        
+Konteks:
+- Lokasi: Kampung Ragas Grenyang, Desa Argawana, Kecamatan Puloampel, Kabupaten Serang, Banten
+- Organisasi: DKM Al-Muhajirin Ragas Grenyang
+- Masjid sebagai pusat kegiatan keagamaan dan sosial masyarakat
 
-    if (type === 'objectives') {
-      setData(prev => ({ ...prev, tujuan: templates.objectives }))
-    } else if (type === 'background') {
-      setData(prev => ({ ...prev, latarBelakang: templates.background }))
-    } else if (type === 'cover-letter') {
-      setData(prev => ({ ...prev, suratPengantar: templates['cover-letter'] }))
-    } else if (type === 'closing') {
-      setData(prev => ({ ...prev, penutup: templates.closing }))
-    }
+Buatkan latar belakang yang:
+1. Formal dan profesional
+2. Menjelaskan urgensi kegiatan/program
+3. Mengaitkan dengan kondisi jamaah dan masyarakat
+4. Panjang 2-3 paragraf (150-200 kata)
+5. Bahasa Indonesia yang baik dan benar
 
-    setIsAiLoading(null)
-    toast.success('Rekomendasi AI berhasil diterapkan! (Gunakan Undo untuk membatalkan)')
+Hanya berikan teks latar belakang saja, tanpa judul atau penjelasan tambahan.`,
+
+        'cover-letter': `Buatkan surat pengantar untuk proposal kegiatan DKM Al-Muhajirin dengan perihal: "${data.perihal}".
+
+Buatkan surat pengantar yang:
+1. Diawali dengan salam "Assalamu'alaikum Wr. Wb."
+2. Menyampaikan maksud pengajuan proposal
+3. Formal dan sopan
+4. Menggunakan bahasa Indonesia yang baik
+5. Panjang 2-3 paragraf
+
+Hanya berikan teks surat pengantar saja.`,
+
+        closing: `Buatkan kalimat penutup untuk proposal kegiatan DKM Al-Muhajirin dengan perihal: "${data.perihal}".
+
+Buatkan penutup yang:
+1. Mengucapkan terima kasih
+2. Menyampaikan harapan dukungan
+3. Doa untuk penerima proposal
+4. Formal dan profesional
+5. Panjang 1-2 paragraf
+
+Hanya berikan teks penutup saja.`,
+
+        objectives: `Buatkan 4-5 poin maksud dan tujuan untuk proposal kegiatan DKM Al-Muhajirin dengan perihal: "${data.perihal}".
+
+Konteks:
+- Organisasi: DKM Al-Muhajirin Ragas Grenyang
+- Lokasi: Kampung Ragas Grenyang, Serang, Banten
+
+Buatkan tujuan yang:
+1. Spesifik dan terukur
+2. Relevan dengan kegiatan masjid/DKM
+3. Bermanfaat untuk jamaah dan masyarakat
+4. Setiap poin maksimal 15 kata
+
+Format: Berikan dalam bentuk array JSON dengan key "tujuan", contoh:
+{"tujuan": ["Tujuan 1", "Tujuan 2", "Tujuan 3"]}
+
+Hanya berikan JSON saja, tanpa penjelasan.`
+      }
+
+      const response = await fetch('/api/ai/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          prompt: prompts[type],
+          context: {
+            perihal: data.perihal,
+            type: type
+          }
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('AI generation failed')
+      }
+
+      const result = await response.json()
+      
+      if (type === 'objectives') {
+        try {
+          const parsed = JSON.parse(result.text)
+          setData(prev => ({ ...prev, tujuan: parsed.tujuan }))
+        } catch {
+          // Fallback if JSON parsing fails
+          const lines = result.text.split('\n').filter((l: string) => l.trim().length > 0)
+          setData(prev => ({ ...prev, tujuan: lines }))
+        }
+      } else if (type === 'background') {
+        setData(prev => ({ ...prev, latarBelakang: result.text }))
+      } else if (type === 'cover-letter') {
+        setData(prev => ({ ...prev, suratPengantar: result.text }))
+      } else if (type === 'closing') {
+        setData(prev => ({ ...prev, penutup: result.text }))
+      }
+
+      toast.success('Saran AI berhasil diterapkan! (Gunakan Undo untuk membatalkan)')
+    } catch (error) {
+      console.error('AI generation error:', error)
+      toast.error('Gagal menghasilkan saran AI. Silakan coba lagi.')
+    } finally {
+      setIsAiLoading(null)
+    }
   }
 
   const handleUndo = () => {
