@@ -1577,17 +1577,26 @@ function Page5({ data, onNavigate }: { data: ProposalData, onNavigate?: (tab: st
                 </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '30px', textAlign: 'center' }}>
-                    <div style={{ opacity: data.namaKetuaRT ? 1 : 0.3 }} onClick={() => onNavigate?.('struktur')} style={{ cursor: 'pointer', opacity: data.namaKetuaRT ? 1 : 0.3 }} title="Klik untuk mengedit">
+                    <div onClick={() => onNavigate?.('struktur')} style={{ 
+                        opacity: data.namaKetuaRT ? 1 : 0.3, 
+                        cursor: 'pointer' 
+                    }} title="Klik untuk mengedit">
                         <p style={{ fontSize: '11pt' }}>Ketua RT 015,</p>
                         <div style={{ height: '80px' }}></div>
                         <p style={{ fontSize: '11pt', fontWeight: 'bold' }}>{data.namaKetuaRT || '( ........................ )'}</p>
                     </div>
-                    <div style={{ opacity: data.namaKetuaRW ? 1 : 0.3 }} onClick={() => onNavigate?.('struktur')} style={{ cursor: 'pointer', opacity: data.namaKetuaRW ? 1 : 0.3 }} title="Klik untuk mengedit">
+                    <div onClick={() => onNavigate?.('struktur')} style={{ 
+                        opacity: data.namaKetuaRW ? 1 : 0.3, 
+                        cursor: 'pointer' 
+                    }} title="Klik untuk mengedit">
                         <p style={{ fontSize: '11pt' }}>Ketua RW 008,</p>
                         <div style={{ height: '80px' }}></div>
                         <p style={{ fontSize: '11pt', fontWeight: 'bold' }}>{data.namaKetuaRW || '( ........................ )'}</p>
                     </div>
-                    <div style={{ opacity: data.namaKetuaPemuda ? 1 : 0.3 }} onClick={() => onNavigate?.('struktur')} style={{ cursor: 'pointer', opacity: data.namaKetuaPemuda ? 1 : 0.3 }} title="Klik untuk mengedit">
+                    <div onClick={() => onNavigate?.('struktur')} style={{ 
+                        opacity: data.namaKetuaPemuda ? 1 : 0.3, 
+                        cursor: 'pointer' 
+                    }} title="Klik untuk mengedit">
                         <p style={{ fontSize: '11pt' }}>Ketua Pemuda,</p>
                         <div style={{ height: '80px' }}></div>
                         <p style={{ fontSize: '11pt', fontWeight: 'bold' }}>{data.namaKetuaPemuda || '( ........................ )'}</p>
@@ -1597,13 +1606,16 @@ function Page5({ data, onNavigate }: { data: ProposalData, onNavigate?: (tab: st
                         <div style={{ height: '80px' }}></div>
                         <p style={{ fontWeight: 'bold', textDecoration: 'underline', fontSize: '13pt' }}>{data.namaTokohMasyarakat || '( ........................ )'}</p>
                     </div>
-                    <div style={{ opacity: data.namaKetuaRISMA ? 1 : 0.3 }} onClick={() => onNavigate?.('struktur')} style={{ cursor: 'pointer', opacity: data.namaKetuaRISMA ? 1 : 0.3 }} title="Klik untuk mengedit">
+                    <div onClick={() => onNavigate?.('struktur')} style={{ 
+                        opacity: data.namaKetuaRISMA ? 1 : 0.3, 
+                        cursor: 'pointer' 
+                    }} title="Klik untuk mengedit">
                          <p style={{ fontSize: '11pt' }}>Ketua RISMA,</p>
                          <div style={{ height: '80px' }}></div>
                          <p style={{ fontSize: '11pt', fontWeight: 'bold' }}>{data.namaKetuaRISMA || '( ........................ )'}</p>
                     </div>
                     {data.namaKepalaDesa && (
-                        <div style={{ gridColumn: '1 / -1', marginTop: '20px' }} onClick={() => onNavigate?.('ttd')} style={{ cursor: 'pointer' }} title="Klik untuk mengedit">
+                        <div style={{ gridColumn: '1 / -1', marginTop: '20px', cursor: 'pointer' }} onClick={() => onNavigate?.('ttd')} title="Klik untuk mengedit">
                             <p style={{ fontSize: '11pt' }}>Kepala Desa Argawana,</p>
                             <div style={{ height: '80px' }}></div>
                             <p style={{ fontSize: '11pt', fontWeight: 'bold' }}>{data.namaKepalaDesa}</p>
