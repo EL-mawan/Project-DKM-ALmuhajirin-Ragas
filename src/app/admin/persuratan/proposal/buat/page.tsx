@@ -1229,9 +1229,9 @@ function PageCover({ data }: { data: ProposalData }) {
             <div style={{ zIndex: 1, textAlign: 'center', width: '100%', position: 'relative' }}>
                 <img src={data.logoKiri || "/logo.png"} style={{ width: '160px', height: '160px', objectFit: 'contain', margin: '0 auto 60px auto', filter: 'drop-shadow(0 10px 20px rgba(0,0,0,0.05))' }} />
                 
-                <h2 style={{ fontSize: '18pt', fontWeight: 'bold', margin: '0 0 70px 0', color: '#475569', letterSpacing: '0.2em' }}>PROPOSAL</h2>
+                <h1 style={{ fontSize: '18pt', fontWeight: 'bold', margin: '0 0 70px 0', color: '#475569', letterSpacing: '0.2em' }}>PROPOSAL</h1>
                 
-                <h1 style={{ fontWeight: '900', fontSize: '30pt', margin: '0 0 15px 0', textTransform: 'uppercase', color: '#0f172a', lineHeight: 1.1, letterSpacing: '-0.02em' }}>{data.perihal}</h1>
+                <h2 style={{ fontWeight: '900', fontSize: '30pt', margin: '0 0 15px 0', textTransform: 'uppercase', color: '#0f172a', lineHeight: 1.1, letterSpacing: '-0.02em' }}>{data.perihal}</h2>
                 <div style={{ width: '150px', height: '6px', background: 'linear-gradient(to right, #059669, #10b981)', margin: '35px auto' }}></div>
                 
                 <div style={{ margin: '80px 0', display: 'flex', flexDirection: 'column', alignItems: 'center', backgroundColor: 'rgba(248, 250, 252, 0.5)', padding: '50px', borderRadius: '40px', border: '1px solid #f1f5f9' }}>
@@ -1242,8 +1242,8 @@ function PageCover({ data }: { data: ProposalData }) {
                     <p style={{ fontSize: '11pt', fontStyle: 'italic', color: '#475569', fontWeight: '500' }}>Kecamatan Puloampel Kabupaten Serang - Banten</p>
                 </div>
 
-                <div style={{ position: 'absolute', bottom: '-120px', left: 0, width: '100%', textAlign: 'center' }}>
-                    <p style={{ fontSize: '16pt', fontWeight: '900', letterSpacing: '8px', color: '#1e293b' }}>TAHUN {new Date().getFullYear()}</p>
+                <div style={{ position: 'absolute', bottom: '-100px', left: 0, width: '100%', textAlign: 'center' }}>
+                    <p style={{ fontSize: '14pt', fontWeight: '900', letterSpacing: '8px', color: '#1e293b' }}>TAHUN {new Date().getFullYear()}</p>
                 </div>
             </div>
         </div>
