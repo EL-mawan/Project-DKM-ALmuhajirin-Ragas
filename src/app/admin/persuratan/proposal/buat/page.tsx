@@ -96,6 +96,7 @@ interface ProposalData {
   namaKetuaRW: string
   namaKetuaRT: string
   namaKetuaPemuda: string
+  namaKepalaDesa: string
   logoKiri?: string
   logoKanan?: string
   namaKopSurat: string
@@ -151,6 +152,7 @@ const initialData: ProposalData = {
   namaKetuaRW: '',
   namaKetuaRT: '',
   namaKetuaPemuda: '',
+  namaKepalaDesa: '',
   logoKiri: "/logo.png",
   logoKanan: "",
   lampiranFoto: [],
@@ -1109,6 +1111,20 @@ Hanya berikan JSON saja, tanpa penjelasan.`
                          <Input type="date" value={dateInput} onChange={(e) => setDateInput(e.target.value)} className="h-12 rounded-xl" />
                      </div>
                  </div>
+                 
+                 <div className="p-6 bg-emerald-50/30 rounded-3xl border border-emerald-100 space-y-4">
+                   <h4 className="font-bold text-slate-800 text-sm uppercase tracking-wider">Tanda Tangan Pemerintah Setempat (Opsional)</h4>
+                   <div className="space-y-2">
+                     <Label className="font-bold text-slate-700">Kepala Desa Argawana</Label>
+                     <Input 
+                       value={data.namaKepalaDesa} 
+                       onChange={(e) => setData({...data, namaKepalaDesa: e.target.value})} 
+                       className="h-12 rounded-xl bg-white" 
+                       placeholder="Kosongkan jika tidak diperlukan"
+                     />
+                     <p className="text-xs text-slate-500 italic">* Jika diisi, tanda tangan Kepala Desa akan muncul di bagian Mengetahui</p>
+                   </div>
+                 </div>
                </TabsContent>
 
                <TabsContent value="foto" className="space-y-8 mt-0">
@@ -1532,51 +1548,51 @@ function Page5({ data }: { data: ProposalData }) {
                     <p style={{ fontStyle: 'italic' }}>Argawana, {data.tanggal}</p>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '40px', textAlign: 'center' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '40px', textAlign: 'center', marginBottom: '50px' }}>
                     <div>
-                        <p style={{ fontWeight: 'bold', borderBottom: '1px solid #000', paddingBottom: '5px', marginBottom: '15px' }}>Dibuat Oleh:</p>
                         <p>Sekretaris DKM,</p>
                         <div style={{ height: '100px' }}></div>
                         <p style={{ fontWeight: 'bold', textDecoration: 'underline', fontSize: '13pt' }}>{data.namaSekretaris || '( ........................ )'}</p>
                     </div>
                     <div>
-                        <p style={{ fontWeight: 'bold', borderBottom: '1px solid #000', paddingBottom: '5px', marginBottom: '15px' }}>Disetujui Oleh:</p>
                         <p>Ketua DKM,</p>
                         <div style={{ height: '100px' }}></div>
                         <p style={{ fontWeight: 'bold', textDecoration: 'underline', fontSize: '13pt' }}>{data.namaKetua || '( ........................ )'}</p>
                     </div>
-                    <div style={{ marginTop: '20px' }}>
-                        <p>Bendahara DKM,</p>
-                        <div style={{ height: '100px' }}></div>
-                        <p style={{ fontWeight: 'bold', textDecoration: 'underline', fontSize: '13pt' }}>{data.namaBendahara || '( ........................ )'}</p>
-                    </div>
-                    <div style={{ marginTop: '20px' }}>
-                        <p>Tokoh Masyarakat,</p>
-                        <div style={{ height: '100px' }}></div>
-                        <p style={{ fontWeight: 'bold', textDecoration: 'underline', fontSize: '13pt' }}>{data.namaTokohMasyarakat || '( ........................ )'}</p>
-                    </div>
                 </div>
 
-                <div style={{ marginTop: '60px', textAlign: 'center' }}>
-                    <p style={{ fontWeight: 'bold', backgroundColor: '#f9f9f9', padding: '10px', display: 'inline-block', borderRadius: '4px' }}>Mengetahui Pemerintah Setempat:</p>
+                <div style={{ textAlign: 'center', marginBottom: '30px' }}>
+                    <p style={{ fontWeight: 'bold', fontSize: '14pt' }}>Mengetahui</p>
                 </div>
 
-                <div style={{ marginTop: '30px', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px', textAlign: 'center' }}>
-                    <div style={{ opacity: data.namaKetuaRW ? 1 : 0.3 }}>
-                        <p style={{ fontSize: '11pt' }}>Ketua RW 008,</p>
-                        <div style={{ height: '80px' }}></div>
-                        <p style={{ fontSize: '11pt', fontWeight: 'bold' }}>{data.namaKetuaRW || '( ........................ )'}</p>
-                    </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '30px', textAlign: 'center' }}>
                     <div style={{ opacity: data.namaKetuaRT ? 1 : 0.3 }}>
                         <p style={{ fontSize: '11pt' }}>Ketua RT 015,</p>
                         <div style={{ height: '80px' }}></div>
                         <p style={{ fontSize: '11pt', fontWeight: 'bold' }}>{data.namaKetuaRT || '( ........................ )'}</p>
+                    </div>
+                    <div style={{ opacity: data.namaKetuaRW ? 1 : 0.3 }}>
+                        <p style={{ fontSize: '11pt' }}>Ketua RW 008,</p>
+                        <div style={{ height: '80px' }}></div>
+                        <p style={{ fontSize: '11pt', fontWeight: 'bold' }}>{data.namaKetuaRW || '( ........................ )'}</p>
                     </div>
                     <div style={{ opacity: data.namaKetuaPemuda ? 1 : 0.3 }}>
                         <p style={{ fontSize: '11pt' }}>Ketua Pemuda,</p>
                         <div style={{ height: '80px' }}></div>
                         <p style={{ fontSize: '11pt', fontWeight: 'bold' }}>{data.namaKetuaPemuda || '( ........................ )'}</p>
                     </div>
+                    <div>
+                        <p style={{ fontSize: '11pt' }}>Tokoh Masyarakat,</p>
+                        <div style={{ height: '80px' }}></div>
+                        <p style={{ fontSize: '11pt', fontWeight: 'bold' }}>{data.namaTokohMasyarakat || '( ........................ )'}</p>
+                    </div>
+                    {data.namaKepalaDesa && (
+                        <div style={{ gridColumn: '1 / -1', marginTop: '20px' }}>
+                            <p style={{ fontSize: '11pt' }}>Kepala Desa Argawana,</p>
+                            <div style={{ height: '80px' }}></div>
+                            <p style={{ fontSize: '11pt', fontWeight: 'bold' }}>{data.namaKepalaDesa}</p>
+                        </div>
+                    )}
                 </div>
             </div>
         </PageWrapper>
