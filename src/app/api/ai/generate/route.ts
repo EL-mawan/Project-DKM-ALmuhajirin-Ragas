@@ -7,6 +7,13 @@ export async function POST(req: NextRequest) {
   try {
     const { prompt, context } = await req.json()
 
+    if (!process.env.GEMINI_API_KEY) {
+      return NextResponse.json(
+        { error: 'Gemini API Key is not configured' },
+        { status: 500 }
+      )
+    }
+
     if (!prompt) {
       return NextResponse.json(
         { error: 'Prompt is required' },
@@ -15,7 +22,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Initialize Gemini model
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' })
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' })
 
     // Generate content
     const result = await model.generateContent(prompt)

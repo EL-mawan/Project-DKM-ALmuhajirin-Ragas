@@ -291,65 +291,62 @@ function ProposalBuilderContent() {
   }
 
   const handleAiGenerate = async (type: string) => {
+    if (!data.perihal || data.perihal.trim() === '') {
+      toast.error('Harap isi perihal proposal terlebih dahulu sebagai konteks untuk AI.')
+      setActiveTab('umum')
+      return
+    }
+
     setHistory({...data})
     setIsAiLoading(type)
     
     try {
       const prompts: Record<string, string> = {
-        background: `Buatkan narasi latar belakang untuk proposal kegiatan DKM (Dewan Kemakmuran Masjid) Al-Muhajirin dengan perihal: "${data.perihal}". 
+        background: `Buatkan narasi latar belakang yang mendalam dan inspiratif untuk proposal kegiatan DKM (Dewan Kemakmuran Masjid) Al-Muhajirin dengan judul kegiatan: "${data.perihal}". 
         
 Konteks:
 - Lokasi: Kampung Ragas Grenyang, Desa Argawana, Kecamatan Puloampel, Kabupaten Serang, Banten
 - Organisasi: DKM Al-Muhajirin Ragas Grenyang
-- Masjid sebagai pusat kegiatan keagamaan dan sosial masyarakat
+- Fokus: Memakmurkan masjid, pelayanan jamaah, dan syiar Islam di lingkungan industri Puloampel.
 
 Buatkan latar belakang yang:
-1. Formal dan profesional
-2. Menjelaskan urgensi kegiatan/program
-3. Mengaitkan dengan kondisi jamaah dan masyarakat
-4. Panjang 2-3 paragraf (150-200 kata)
-5. Bahasa Indonesia yang baik dan benar
+1. Formal, profesional, dan menyentuh sisi spiritual (gunakan bahasa yang elegan).
+2. Menjelaskan pentingnya kegiatan ini dalam meningkatkan kualitas ibadah atau sosial di masyarakat.
+3. Terdiri dari 3 paragraf (sekitar 200-250 kata).
+4. Gunakan Bahasa Indonesia yang baku namun tetap luwes.
 
-Hanya berikan teks latar belakang saja, tanpa judul atau penjelasan tambahan.`,
+Hanya berikan teks narasi saja, tanpa judul.`,
 
-        'cover-letter': `Buatkan surat pengantar untuk proposal kegiatan DKM Al-Muhajirin dengan perihal: "${data.perihal}".
+        'cover-letter': `Buatkan isi surat pengantar (bagian inti) untuk proposal kegiatan DKM Al-Muhajirin dengan judul: "${data.perihal}".
 
-Buatkan surat pengantar yang:
-1. Diawali dengan salam "Assalamu'alaikum Wr. Wb."
-2. Menyampaikan maksud pengajuan proposal
-3. Formal dan sopan
-4. Menggunakan bahasa Indonesia yang baik
-5. Panjang 2-3 paragraf
+Buatkan isi surat pengantar yang:
+1. Dimulai dengan salam pembuka yang hangat "Assalamu'alaikum Wr. Wb."
+2. Menyampaikan maksud permohonan dukungan dan kerjasama dengan tetap menjaga marwah masjid.
+3. Mengajak para dermawan/instansi untuk berpartisipasi dalam kebaikan ini.
+4. Formal, sopan, dan efektif.
+5. Terdiri dari 2-3 paragraf.
 
-Hanya berikan teks surat pengantar saja.`,
+Hanya berikan teks surat pengantarnya saja.`,
 
-        closing: `Buatkan kalimat penutup untuk proposal kegiatan DKM Al-Muhajirin dengan perihal: "${data.perihal}".
+        closing: `Buatkan paragraf penutup yang persuasif dan penuh doa untuk proposal "${data.perihal}" DKM Al-Muhajirin.
 
 Buatkan penutup yang:
-1. Mengucapkan terima kasih
-2. Menyampaikan harapan dukungan
-3. Doa untuk penerima proposal
-4. Formal dan profesional
-5. Panjang 1-2 paragraf
+1. Menyampaikan apresiasi dan rasa terima kasih yang mendalam.
+2. Memuat doa untuk keberkahan bagi para donator/pendukung.
+3. Memberikan kesan profesional dan amanah.
 
 Hanya berikan teks penutup saja.`,
 
-        objectives: `Buatkan 4-5 poin maksud dan tujuan untuk proposal kegiatan DKM Al-Muhajirin dengan perihal: "${data.perihal}".
+        objectives: `Buatkan 5 poin maksud dan tujuan yang spesifik, relevan, dan terukur untuk proposal kegiatan DKM Al-Muhajirin bertema: "${data.perihal}".
 
 Konteks:
 - Organisasi: DKM Al-Muhajirin Ragas Grenyang
-- Lokasi: Kampung Ragas Grenyang, Serang, Banten
-
-Buatkan tujuan yang:
-1. Spesifik dan terukur
-2. Relevan dengan kegiatan masjid/DKM
-3. Bermanfaat untuk jamaah dan masyarakat
-4. Setiap poin maksimal 15 kata
+- Sasaran: Jamaah Masjid Al-Muhajirin dan warga sekitar Ragas Grenyang.
 
 Format: Berikan dalam bentuk array JSON dengan key "tujuan", contoh:
 {"tujuan": ["Tujuan 1", "Tujuan 2", "Tujuan 3"]}
 
-Hanya berikan JSON saja, tanpa penjelasan.`
+Hanya berikan JSON saja, tanpa penjelasan tambahan.`
       }
 
       const response = await fetch('/api/ai/generate', {
@@ -369,28 +366,34 @@ Hanya berikan JSON saja, tanpa penjelasan.`
       }
 
       const result = await response.json()
+      let generatedText = result.text.trim()
+      
+      // Remove markdown code blocks if present
+      if (generatedText.startsWith('```')) {
+        generatedText = generatedText.replace(/^```[a-z]*\n/i, '').replace(/\n```$/i, '').trim()
+      }
       
       if (type === 'objectives') {
         try {
-          const parsed = JSON.parse(result.text)
-          setData(prev => ({ ...prev, tujuan: parsed.tujuan }))
+          const parsed = JSON.parse(generatedText)
+          setData(prev => ({ ...prev, tujuan: Array.isArray(parsed.tujuan) ? parsed.tujuan : Array.isArray(parsed) ? parsed : [generatedText] }))
         } catch {
           // Fallback if JSON parsing fails
-          const lines = result.text.split('\n').filter((l: string) => l.trim().length > 0)
-          setData(prev => ({ ...prev, tujuan: lines }))
+          const lines = generatedText.split('\n').filter((l: string) => l.trim().length > 0 && !l.startsWith('{') && !l.startsWith('}'))
+          setData(prev => ({ ...prev, tujuan: lines.length > 0 ? lines : [generatedText] }))
         }
       } else if (type === 'background') {
-        setData(prev => ({ ...prev, latarBelakang: result.text }))
+        setData(prev => ({ ...prev, latarBelakang: generatedText }))
       } else if (type === 'cover-letter') {
-        setData(prev => ({ ...prev, suratPengantar: result.text }))
+        setData(prev => ({ ...prev, suratPengantar: generatedText }))
       } else if (type === 'closing') {
-        setData(prev => ({ ...prev, penutup: result.text }))
+        setData(prev => ({ ...prev, penutup: generatedText }))
       }
 
-      toast.success('Saran AI berhasil diterapkan! (Gunakan Undo untuk membatalkan)')
+      toast.success('Saran AI berhasil diterapkan! Silakan sesuaikan jika perlu.')
     } catch (error) {
       console.error('AI generation error:', error)
-      toast.error('Gagal menghasilkan saran AI. Silakan coba lagi.')
+      toast.error('Gagal menghasilkan saran AI. Pastikan koneksi internet stabil.')
     } finally {
       setIsAiLoading(null)
     }
@@ -540,7 +543,7 @@ Hanya berikan JSON saja, tanpa penjelasan.`
       })
 
       if (response.ok) {
-        toast.success(proposalId ? 'Perubahan berhasil disimpan' : 'Proposal berhasil diajukan')
+        toast.success(proposalId ? 'Perubahan berhasil disimpan' : 'Proposal berhasil disimpan ke Riwayat Persuratan')
         setTimeout(() => router.push('/admin/persuratan'), 1500)
       } else {
         toast.error('Gagal menyimpan proposal')
@@ -584,6 +587,9 @@ Hanya berikan JSON saja, tanpa penjelasan.`
     setIsGeneratingPDF(true)
     
     try {
+      // Tunggu hingga font benar-benar terbaca
+      await document.fonts.ready;
+      
       if (bulkRecipients.length > 0) {
         setIsBulkProcessing(true)
         setBulkProgress(0)
@@ -594,8 +600,8 @@ Hanya berikan JSON saja, tanpa penjelasan.`
           setCurrentRecipientIndex(i)
           setBulkProgress(Math.round(((i + 1) / bulkRecipients.length) * 100))
           
-          // Wait for DOM to update
-          await new Promise(resolve => setTimeout(resolve, 600))
+          // Beri waktu DOM untuk merender ulang konten penerima
+          await new Promise(resolve => setTimeout(resolve, 800))
           
           const doc = new jsPDF('p', 'mm', 'a4')
           const pages = previewRef.current.querySelectorAll('.proposal-page')
@@ -603,59 +609,67 @@ Hanya berikan JSON saja, tanpa penjelasan.`
           for (let j = 0; j < pages.length; j++) {
             const page = pages[j] as HTMLElement
             const canvas = await html2canvas(page, {
-              scale: 2,
+              scale: 2.5,
               useCORS: true,
               logging: false,
               backgroundColor: '#ffffff',
-              windowWidth: 794,
-              windowHeight: 1123,
+              width: 794,
+              height: 1123,
+              onclone: (clonedDoc, clonedElement) => {
+                // Pastikan element yang dicapture tidak terpengaruh scale parentnya di clone
+                clonedElement.style.transform = 'none';
+                clonedElement.style.margin = '0';
+              }
             })
-            const imgData = canvas.toDataURL('image/jpeg', 0.9)
+            const imgData = canvas.toDataURL('image/jpeg', 0.95)
             if (j > 0) doc.addPage()
-            doc.addImage(imgData, 'JPEG', 0, 0, 210, 297, undefined, 'FAST')
+            doc.addImage(imgData, 'JPEG', 0, 0, 210, 297, undefined, 'MEDIUM')
           }
           
           const pdfBlob = doc.output('blob')
-          const fileName = `Proposal_${bulkRecipients[i].nama.replace(/\s+/g, '_')}.pdf`
+          const fileName = `Proposal_${bulkRecipients[i].nama.replace(/[^a-z0-9]/gi, '_')}.pdf`
           zip.file(fileName, pdfBlob)
         }
         
-        const content = await zip.generateAsync({ type: 'blob' })
+        const zipContent = await zip.generateAsync({ type: 'blob' })
         const link = document.createElement('a')
-        link.href = URL.createObjectURL(content)
-        link.download = `Batch_Proposal_${data.perihal.replace(/\s+/g, '_')}.zip`
-        link.download = `Batch_Proposal_${data.perihal.replace(/\s+/g, '_')}.zip`
+        link.href = URL.createObjectURL(zipContent)
+        link.download = `Batch_Proposal_${data.perihal.replace(/[^a-z0-9]/gi, '_')}.zip`
         link.click()
         setIsBulkProcessing(false)
-        toast.success('Batch PDF (ZIP) berhasil diunduh')
+        toast.success('Batch PDF berhasil diunduh dalam bentuk ZIP')
       } else {
-        toast.info('Menyiapkan PDF...')
-        await document.fonts.ready;
+        toast.info('Sedang merender PDF premium...')
         const doc = new jsPDF('p', 'mm', 'a4')
         const pages = previewRef.current.querySelectorAll('.proposal-page')
         
         for (let i = 0; i < pages.length; i++) {
           const page = pages[i] as HTMLElement
           const canvas = await html2canvas(page, {
-            scale: 2,
+            scale: 2.5,
             useCORS: true,
             logging: false,
             backgroundColor: '#ffffff',
-            windowWidth: 794,
-            windowHeight: 1123,
+            width: 794,
+            height: 1123,
+            onclone: (clonedDoc, clonedElement) => {
+              // Pastikan element yang dicapture tidak terpengaruh scale parentnya
+              clonedElement.style.transform = 'none';
+              clonedElement.style.margin = '0';
+            }
           })
           
-          const imgData = canvas.toDataURL('image/jpeg', 0.9)
+          const imgData = canvas.toDataURL('image/jpeg', 0.95)
           if (i > 0) doc.addPage()
-          doc.addImage(imgData, 'JPEG', 0, 0, 210, 297, undefined, 'FAST')
+          doc.addImage(imgData, 'JPEG', 0, 0, 210, 297, undefined, 'MEDIUM')
         }
         
-        doc.save(`Proposal_${data.perihal.replace(/\s+/g, '_')}.pdf`)
-        toast.success('PDF berhasil diunduh')
+        doc.save(`Proposal_${data.perihal.replace(/[^a-z0-9]/gi, '_')}.pdf`)
+        toast.success('PDF Proposal berhasil diunduh')
       }
     } catch (error) {
-      console.error(error)
-      toast.error('Gagal membuat PDF')
+      console.error('PDF Generation Error:', error)
+      toast.error('Gagal membuat PDF. Coba segarkan halaman.')
     } finally {
       setIsGeneratingPDF(false)
     }
@@ -1198,13 +1212,14 @@ Hanya berikan JSON saja, tanpa penjelasan.`
                      Urungkan Ganti AI
                    </Button>
                )}
-               <Button 
-                className="flex-1 h-16 rounded-3xl font-black bg-emerald-800 hover:bg-emerald-900 shadow-xl shadow-emerald-100 text-white text-lg"
-                onClick={handleSave}
-                disabled={isSaving}
-               >
-                 {isSaving ? 'Memproses...' : 'Simpan & Ajukan Proposal'}
-               </Button>
+                <Button 
+                 className="flex-1 h-16 rounded-3xl font-black bg-[#0b3d2e] hover:bg-[#062c21] shadow-xl shadow-emerald-100 text-white text-lg transition-all active:scale-95"
+                 onClick={handleSave}
+                 disabled={isSaving}
+                >
+                  <FileText className="mr-2 h-5 w-5" />
+                  {isSaving ? 'Menyimpan...' : 'Simpan'}
+                </Button>
             </div>
           </Card>
         </Tabs>

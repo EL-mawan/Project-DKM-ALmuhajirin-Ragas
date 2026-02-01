@@ -233,37 +233,37 @@ export default function PersuratanAdmin() {
       <div className="p-6 sm:p-8 space-y-8">
         {/* Header Stats */}
         {/* Header Stats */}
-        <div className="flex flex-col gap-3 sm:grid sm:grid-cols-3 md:gap-6">
+        <div className="grid grid-cols-3 gap-2 md:gap-6">
           <Card className="rounded-2xl md:rounded-[2.5rem] border-none shadow-sm bg-linear-to-br from-blue-50 to-indigo-50/30">
-            <CardContent className="p-4 md:p-8 flex items-center justify-between">
+            <CardContent className="p-3 md:p-8 flex flex-col md:flex-row items-center justify-between text-center md:text-left gap-2 md:gap-0">
                 <div>
-                  <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest">Total Proposal</p>
-                  <h3 className="text-2xl md:text-3xl font-black text-[#0b3d2e] mt-1">{data.filter(d => d.type === 'PROPOSAL').length}</h3>
+                  <p className="text-[7px] md:text-[10px] font-black text-blue-600 uppercase tracking-widest leading-tight">Total Proposal</p>
+                  <h3 className="text-lg md:text-3xl font-black text-[#0b3d2e] mt-1">{data.filter(d => d.type === 'PROPOSAL').length}</h3>
                 </div>
-                <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl md:rounded-2xl bg-white shadow-sm flex items-center justify-center text-blue-500">
-                  <FileText className="h-5 w-5 md:h-6 md:w-6" />
+                <div className="h-8 w-8 md:h-12 md:w-12 rounded-lg md:rounded-2xl bg-white shadow-sm flex items-center justify-center text-blue-500 shrink-0">
+                  <FileText className="h-4 w-4 md:h-6 md:w-6" />
                 </div>
             </CardContent>
           </Card>
           <Card className="rounded-2xl md:rounded-[2.5rem] border-none shadow-sm bg-linear-to-br from-emerald-50 to-teal-50/30">
-            <CardContent className="p-4 md:p-8 flex items-center justify-between">
+            <CardContent className="p-3 md:p-8 flex flex-col md:flex-row items-center justify-between text-center md:text-left gap-2 md:gap-0">
                 <div>
-                  <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">Surat Undangan</p>
-                  <h3 className="text-2xl md:text-3xl font-black text-[#0b3d2e] mt-1">{data.filter(d => d.type === 'UNDANGAN').length}</h3>
+                  <p className="text-[7px] md:text-[10px] font-black text-emerald-600 uppercase tracking-widest leading-tight">Surat Undangan</p>
+                  <h3 className="text-lg md:text-3xl font-black text-[#0b3d2e] mt-1">{data.filter(d => d.type === 'UNDANGAN').length}</h3>
                 </div>
-                <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl md:rounded-2xl bg-white shadow-sm flex items-center justify-center text-emerald-500">
-                  <Mail className="h-5 w-5 md:h-6 md:w-6" />
+                <div className="h-8 w-8 md:h-12 md:w-12 rounded-lg md:rounded-2xl bg-white shadow-sm flex items-center justify-center text-emerald-500 shrink-0">
+                  <Mail className="h-4 w-4 md:h-6 md:w-6" />
                 </div>
             </CardContent>
           </Card>
           <Card className="rounded-2xl md:rounded-[2.5rem] border-none shadow-sm bg-linear-to-br from-amber-50 to-orange-50/30">
-            <CardContent className="p-4 md:p-8 flex items-center justify-between">
+            <CardContent className="p-3 md:p-8 flex flex-col md:flex-row items-center justify-between text-center md:text-left gap-2 md:gap-0">
                 <div>
-                  <p className="text-[10px] font-black text-amber-600 uppercase tracking-widest">Surat Resmi</p>
-                  <h3 className="text-2xl md:text-3xl font-black text-[#0b3d2e] mt-1">{data.filter(d => d.type === 'SURAT_RESMI').length}</h3>
+                  <p className="text-[7px] md:text-[10px] font-black text-amber-600 uppercase tracking-widest leading-tight">Surat Resmi</p>
+                  <h3 className="text-lg md:text-3xl font-black text-[#0b3d2e] mt-1">{data.filter(d => d.type === 'SURAT_RESMI').length}</h3>
                 </div>
-                <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl md:rounded-2xl bg-white shadow-sm flex items-center justify-center text-amber-500">
-                  <CheckCircle2 className="h-5 w-5 md:h-6 md:w-6" />
+                <div className="h-8 w-8 md:h-12 md:w-12 rounded-lg md:rounded-2xl bg-white shadow-sm flex items-center justify-center text-amber-500 shrink-0">
+                  <CheckCircle2 className="h-4 w-4 md:h-6 md:w-6" />
                 </div>
             </CardContent>
           </Card>
@@ -323,115 +323,133 @@ export default function PersuratanAdmin() {
                 <p className="text-base md:text-lg font-bold text-gray-300 italic">Belum ada dokumen {activeTab.toLowerCase()}</p>
               </div>
             ) : (
-              <div className="w-full">
-                {/* Mobile View */}
-                <div className="md:hidden divide-y divide-gray-50">
+              <div className="p-6 md:p-10">
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 md:gap-8">
                   {filteredData.map((item) => (
-                    <div key={item.id} className="p-6 space-y-4">
-                      <div className="flex justify-between items-start">
-                        <div className="space-y-1">
-                          <h4 className="font-black text-[#0b3d2e] text-sm uppercase leading-tight">{item.title}</h4>
-                          <div className="flex flex-wrap gap-2">
-                            <span className="text-[9px] font-bold text-gray-400 flex items-center bg-gray-100 px-2 py-0.5 rounded-full">
-                              <Calendar className="h-3 w-3 mr-1" />
-                              {new Date(item.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}
-                            </span>
-                            {item.nomorSurat && (
-                              <span className="text-[9px] font-bold text-blue-500 uppercase">
-                                {item.nomorSurat}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                        <StatusBadge status={item.status} />
-                      </div>
-                      <div className="flex gap-2 pt-2">
-                        <Button variant="secondary" size="sm" className="flex-1 rounded-xl h-9 text-[10px] font-bold uppercase" onClick={() => router.push(item.type === 'PROPOSAL' ? `/admin/persuratan/proposal/buat?id=${item.id}` : `/admin/persuratan/buat?type=${item.type}&id=${item.id}`)}>
-                          <Edit2 className="h-3.5 w-3.5 mr-2" /> Edit
-                        </Button>
-                        <Button variant="secondary" size="sm" className={`flex-1 rounded-xl h-9 text-[10px] font-bold uppercase ${item.status === 'validated' ? 'bg-blue-50 text-blue-600' : 'opacity-50'}`} disabled={item.status !== 'validated'} onClick={() => generatePDF(item)}>
-                          <Download className="h-3.5 w-3.5 mr-2" /> PDF
-                        </Button>
-                        <Button variant="ghost" size="icon" className="rounded-xl h-9 w-9 text-rose-500 bg-rose-50" onClick={() => handleDelete(item.id)}>
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                    <Card key={item.id} className="group relative overflow-hidden rounded-4xl border-none shadow-xl shadow-slate-200/50 hover:shadow-2xl hover:shadow-emerald-100/50 transition-all duration-500 bg-white border border-slate-50">
+                      
+                      {/* Status Accent Bar */}
+                      <div className={`absolute top-0 left-0 right-0 h-1.5 ${
+                        item.status === 'validated' ? 'bg-emerald-500' : 
+                        item.status === 'rejected' ? 'bg-rose-500' : 'bg-amber-500'
+                      }`} />
 
-                {/* Desktop View */}
-                <div className="hidden md:block overflow-x-auto">
-                  <table className="w-full text-left">
-                    <thead>
-                      <tr className="bg-gray-50/50">
-                        <th className="px-10 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Rincian Dokumen</th>
-                        <th className="px-10 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Info Lain</th>
-                        <th className="px-10 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Status</th>
-                        <th className="px-10 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-right text-gray-400">Aksi</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-50">
-                      {filteredData.map((item) => (
-                        <tr key={item.id} className="hover:bg-gray-50/30 transition-all group">
-                          <td className="px-10 py-8">
-                            <div className="flex flex-col">
-                              <span className="font-black text-[#0b3d2e] group-hover:text-blue-600 transition-colors uppercase tracking-tight">{item.title}</span>
-                              <div className="flex items-center gap-3 mt-1.5">
-                                <span className="text-[10px] font-bold text-gray-400 flex items-center bg-gray-100 px-2 py-0.5 rounded-full">
-                                  <Calendar className="h-3 w-3 mr-1" />
-                                  {new Date(item.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
-                                </span>
-                                {item.nomorSurat && <span className="text-[10px] font-bold text-blue-500 uppercase tracking-tighter">No: {item.nomorSurat}</span>}
+                      <CardContent className="p-6 md:p-8 space-y-6">
+                        {/* Header: Title & Status */}
+                        <div className="flex justify-between items-start gap-4">
+                          <div className="space-y-1 flex-1">
+                            <h4 className="font-black text-[#0b3d2e] text-sm md:text-base uppercase leading-tight group-hover:text-emerald-700 transition-colors line-clamp-2 min-h-10">
+                              {item.title}
+                            </h4>
+                            <div className="flex items-center gap-2">
+                              {item.nomorSurat && (
+                                <Badge variant="outline" className="text-[9px] font-bold text-blue-500 border-blue-100 bg-blue-50/50 rounded-lg px-2 py-0">
+                                  {item.nomorSurat}
+                                </Badge>
+                              )}
+                              <span className="text-[10px] font-bold text-slate-400 flex items-center uppercase tracking-tighter">
+                                <Calendar className="h-3 w-3 mr-1 text-slate-300" />
+                                {new Date(item.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
+                              </span>
+                            </div>
+                          </div>
+                          <StatusBadge status={item.status} />
+                        </div>
+
+                        {/* Mid Section: Recipient & Location */}
+                        <div className="p-4 bg-slate-50/50 rounded-2xl border border-slate-100 space-y-2.5">
+                          {item.recipient && (
+                            <div className="flex items-start gap-3">
+                              <div className="h-6 w-6 rounded-lg bg-white shadow-sm flex items-center justify-center shrink-0 mt-0.5">
+                                <Mail className="h-3 w-3 text-rose-400" />
+                              </div>
+                              <div className="space-y-0.5">
+                                <p className="text-[8px] font-black uppercase tracking-widest text-slate-400">Penerima</p>
+                                <p className="text-[11px] font-bold text-slate-700 leading-tight line-clamp-1">{item.recipient}</p>
                               </div>
                             </div>
-                          </td>
-                          <td className="px-10 py-8">
-                            <div className="flex flex-col">
-                              {item.recipient && (
-                                <span className="text-[11px] font-bold text-gray-600 flex items-center">
-                                  <Mail className="h-3 w-3 mr-2 text-rose-400" />
-                                  {item.recipient}
-                                </span>
-                              )}
-                              {item.location && (
-                                <span className="text-[10px] text-gray-400 mt-1 flex items-center">
-                                  <MapPin className="h-3 w-3 mr-2" />
-                                  {item.location}
-                                </span>
-                              )}
+                          )}
+                          {item.location && (
+                            <div className="flex items-start gap-3">
+                              <div className="h-6 w-6 rounded-lg bg-white shadow-sm flex items-center justify-center shrink-0 mt-0.5">
+                                <MapPin className="h-3 w-3 text-emerald-400" />
+                              </div>
+                              <div className="space-y-0.5">
+                                <p className="text-[8px] font-black uppercase tracking-widest text-slate-400">Lokasi</p>
+                                <p className="text-[11px] font-bold text-slate-700 leading-tight line-clamp-1">{item.location}</p>
+                              </div>
                             </div>
-                          </td>
-                          <td className="px-10 py-8">
-                            <StatusBadge status={item.status} />
-                          </td>
-                          <td className="px-10 py-8 text-right">
-                            <div className="flex justify-end space-x-2 opacity-0 group-hover:opacity-100 transition-all translate-x-2 group-hover:translate-x-0">
-                               <Button variant="ghost" size="icon" className="rounded-xl h-9 w-9 text-emerald-600 hover:bg-emerald-50" onClick={() => router.push(item.type === 'PROPOSAL' ? `/admin/persuratan/proposal/buat?id=${item.id}` : `/admin/persuratan/buat?type=${item.type}&id=${item.id}`)}>
-                                 <Edit2 className="h-4 w-4" />
-                               </Button>
-                               <Button variant="ghost" size="icon" className={`rounded-xl h-9 w-9 ${item.status === 'validated' ? 'text-blue-500 hover:bg-blue-50' : 'text-gray-300'}`} disabled={item.status !== 'validated'} onClick={() => generatePDF(item)}>
-                                 <Download className="h-4 w-4" />
-                               </Button>
-                               {canValidate && item.status === 'pending' && (
-                                 <>
-                                   <Button variant="ghost" size="icon" className="rounded-xl h-9 w-9 text-emerald-600 hover:bg-emerald-50" onClick={() => handleValidate(item.id, 'validate')}>
-                                     <CheckCircle className="h-4 w-4" />
-                                   </Button>
-                                   <Button variant="ghost" size="icon" className="rounded-xl h-9 w-9 text-red-500 hover:bg-red-50" onClick={() => handleValidate(item.id, 'reject')}>
-                                     <XCircle className="h-4 w-4" />
-                                   </Button>
-                                 </>
-                               )}
-                               <Button variant="ghost" size="icon" className="rounded-xl h-9 w-9 text-rose-500 hover:bg-rose-50" onClick={() => handleDelete(item.id)}>
-                                 <Trash2 className="h-4 w-4" />
-                               </Button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                          )}
+                        </div>
+
+                        {/* Footer: CRUD Actions */}
+                        <div className="pt-4 border-t border-slate-100 flex items-center justify-between gap-2">
+                          <div className="flex gap-1.5 flex-1">
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="flex-1 rounded-xl h-10 md:h-11 bg-slate-50 text-slate-600 hover:bg-emerald-50 hover:text-emerald-700 font-bold text-[10px] uppercase tracking-wider transition-all"
+                              onClick={() => router.push(item.type === 'PROPOSAL' ? `/admin/persuratan/proposal/buat?id=${item.id}` : `/admin/persuratan/buat?type=${item.type}&id=${item.id}`)}
+                            >
+                              <Edit2 className="h-3.5 w-3.5 mr-2" /> Edit
+                            </Button>
+                            
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              disabled={item.status !== 'validated'}
+                              className={`flex-1 rounded-xl h-10 md:h-11 font-bold text-[10px] uppercase tracking-wider transition-all ${
+                                item.status === 'validated' 
+                                ? 'bg-blue-50 text-blue-600 hover:bg-blue-100' 
+                                : 'bg-slate-50 text-slate-300 opacity-50 cursor-not-allowed'
+                              }`}
+                              onClick={() => generatePDF(item)}
+                            >
+                              <Download className="h-3.5 w-3.5 mr-2" /> PDF
+                            </Button>
+                          </div>
+
+                          <div className="flex gap-1.5">
+                             {canValidate && item.status === 'pending' && (
+                               <>
+                                 <Button 
+                                   variant="ghost" 
+                                   size="icon" 
+                                   className="rounded-xl h-10 w-10 md:h-11 md:w-11 bg-emerald-50 text-emerald-600 hover:bg-emerald-100" 
+                                   onClick={() => handleValidate(item.id, 'validate')}
+                                   title="Validasi Dokumen"
+                                 >
+                                   <CheckCircle className="h-4 w-4" />
+                                 </Button>
+                                 <Button 
+                                   variant="ghost" 
+                                   size="icon" 
+                                   className="rounded-xl h-10 w-10 md:h-11 md:w-11 bg-rose-50 text-rose-500 hover:bg-rose-100" 
+                                   onClick={() => handleValidate(item.id, 'reject')}
+                                   title="Tolak Dokumen"
+                                 >
+                                   <XCircle className="h-4 w-4" />
+                                 </Button>
+                               </>
+                             )}
+                             
+                             <Button 
+                               variant="ghost" 
+                               size="icon" 
+                               className="rounded-xl h-10 w-10 md:h-11 md:w-11 bg-slate-50 text-rose-400 hover:bg-rose-50 hover:text-rose-600 transition-colors"
+                               onClick={() => handleDelete(item.id)}
+                               title="Hapus Dokumen"
+                             >
+                               <Trash2 className="h-4 w-4" />
+                             </Button>
+                          </div>
+                        </div>
+                      </CardContent>
+
+                      {/* Hover Decoration */}
+                      <div className="absolute -bottom-6 -right-6 h-24 w-24 bg-emerald-50/50 rounded-full blur-3xl group-hover:bg-emerald-100 transition-all duration-500 opacity-0 group-hover:opacity-100" />
+                    </Card>
+                  ))}
                 </div>
               </div>
             )}
