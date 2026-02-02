@@ -60,18 +60,24 @@ function BuatPersuratanContent() {
     penerimaLokasi: 'Tempat',
     
     // Konten (Undangan/Surat)
-    pembuka: '',
+    pembuka: `Assalamu'alaikum Wr. Wb. 
+
+Salam silaturahmi kami sampaikan, teriring doa semoga bapak beserta keluarga selalu berada dalam lindungan Allah SWT, diberikan kesehatan, serta kelancaran dalam segala urusan.`,
     hariAcara: '',
     tanggalAcara: '',
     waktuAcara: '',
     lokasiAcara: '',
     namaAcara: '',
-    penutup: '',
+    penutup: `Demikian surat undangan ini kami sampaikan, semoga dapat dikabulkan serta dapat dipahami, dan besar harapan kami semoga bapak pimpinan dapat merealisasikan undangan tersebut atas perhatiannya kami ucapkan terimakasih.`,
     
     // --- PROPOSAL TABS STATE ---
-    isiSuratPengantar: '',
-    latarBelakang: '',
-    maksudTujuanList: [] as string[],
+    isiSuratPengantar: `Bersama dengan surat ini, kami selaku Pengurus DKM Al-Muhajirin bermaksud untuk mengajukan permohonan dukungan dan kerjasama dalam rangka mensukseskan kegiatan yang telah kami rencanakan. Kami sangat berharap Bapak/Ibu dapat memberikan dukungan positif bagi terealisasinya program kebaikan ini, demi kemaslahatan umat dan peningkatan syiar Islam di lingkungan kita.`,
+    latarBelakang: `Masjid Al-Muhajirin merupakan pusat kegiatan keagamaan, sosial, dan dakwah bagi jamaah serta warga di lingkungan Kampung Ragas Grenyang. Seiring dengan perkembangan zaman dan bertambahnya jumlah jamaah, tantangan dalam mengelola kegiataan dakwah serta menjaga fasilitas masjid pun semakin meningkat.`,
+    maksudTujuanList: [
+      'Meningkatkan kualitas sarana dan prasarana ibadah bagi jamaah Masjid Al-Muhajirin.',
+      'Mempererat tali silaturahmi dan ukhuwah islamiyah antar warga Ragas Grenyang.',
+      'Mewujudkan lingkungan masjid yang nyaman, tertib, dan religius.'
+    ],
     waktuTempatAktif: false,
     
     // Struktur
@@ -89,7 +95,7 @@ function BuatPersuratanContent() {
     lampiranFotos: [] as string[],
     
     // Penutup / Signatures
-    kalimatPenutup: '',
+    kalimatPenutup: `Demikian proposal ini kami sampaikan dengan harapan besar agar Bapak/Ibu dapat membersamai langkah mulia ini. Kami percaya bahwa setiap kontribusi dan dukungan yang diberikan merupakan bentuk investasi akhirat yang tak terputus.`,
     lokasiPenerbitan: 'Serang',
     
     // Signatures

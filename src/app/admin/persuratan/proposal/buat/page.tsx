@@ -123,10 +123,30 @@ const initialData: ProposalData = {
     instansi: '',
     alamat: ''
   },
-  suratPengantar: '',
-  penutup: '',
-  latarBelakang: '',
-  tujuan: [],
+  suratPengantar: `Assalamu'alaikum Warahmatullahi Wabarakatuh,
+
+Salam silaturahmi kami sampaikan, teriring doa semoga Bapak/Ibu beserta keluarga senantiasa berada dalam lindungan Allah SWT, diberikan kesehatan, serta kelancaran dalam segala urusan.
+
+Bersama dengan surat ini, kami selaku Pengurus DKM Al-Muhajirin bermaksud untuk mengajukan permohonan dukungan dan kerjasama dalam rangka mensukseskan kegiatan yang telah kami rencanakan. Kami sangat berharap Bapak/Ibu dapat memberikan dukungan positif bagi terealisasinya program kebaikan ini, demi kemaslahatan umat dan peningkatan syiar Islam di lingkungan kita.
+
+Demikian permohonan ini kami sampaikan, atas perhatian dan dukungan yang Bapak/Ibu berikan, kami haturkan terima kasih yang sebesar-besarnya.`,
+  penutup: `Demikian proposal ini kami sampaikan dengan harapan besar agar Bapak/Ibu dapat membersamai langkah mulia ini. Kami percaya bahwa setiap kontribusi dan dukungan yang diberikan merupakan bentuk investasi akhirat yang tak terputus.
+
+Atas segala dukungan, kerelaan, dan partisipasi yang Bapak/Ibu berikan, kami mendoakan semoga Allah SWT membalas dengan keberkahan rizki, kesehatan yang afiat, serta pahala yang melimpah. Segala bentuk amanah yang diberikan akan kami kelola dengan penuh tanggung jawab dan transparansi.
+
+Wassalamu'alaikum Warahmatullahi Wabarakatuh.`,
+  latarBelakang: `Masjid Al-Muhajirin merupakan pusat kegiatan keagamaan, sosial, dan dakwah bagi jamaah serta warga di lingkungan Kampung Ragas Grenyang. Seiring dengan perkembangan zaman dan bertambahnya jumlah jamaah, tantangan dalam mengelola kegiataan dakwah serta menjaga fasilitas masjid pun semakin meningkat.
+
+Dalam upaya menjaga semangat kebersamaan dan meningkatkan kualitas ibadah umat, DKM Al-Muhajirin terus berupaya menghadirkan program-program yang bermanfaat secara spiritual maupun sosial. Hal ini sejalan dengan visi kami untuk menjadikan masjid sebagai pusat peradaban umat yang makmur, amanah, dan membawa keberkahan bagi lingkungan industri Puloampel.
+
+Oleh karena itu, kami memandang perlu untuk melaksanakan kegiatan ini sebagai bagian dari komitmen kami untuk terus melayani jamaah dan mengagungkan syiar Islam di tengah masyarakat.`,
+  tujuan: [
+    'Meningkatkan kualitas sarana dan prasarana ibadah bagi jamaah Masjid Al-Muhajirin.',
+    'Mempererat tali silaturahmi dan ukhuwah islamiyah antar warga Ragas Grenyang.',
+    'Mewujudkan lingkungan masjid yang nyaman, tertib, dan religius.',
+    'Memberikan sarana edukasi keagamaan yang efektif bagi generasi muda.',
+    'Menyiarkan syiar Islam secara inklusif kepada masyarakat luas.'
+  ],
   struktur: {
     pimpinanAtas: [
       { role: 'Tokoh Masyarakat', name: '' },
