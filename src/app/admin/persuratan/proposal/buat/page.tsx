@@ -291,39 +291,60 @@ function ProposalBuilderContent() {
   }
 
   const handleAiGenerate = async (type: 'background' | 'cover-letter' | 'closing' | 'objectives') => {
+    console.log(`[AI] Starting generation for: ${type}`);
+    
     if (!data.perihal || data.perihal.trim() === '') {
-      toast.error('Harap isi perihal proposal terlebih dahulu sebagai konteks untuk AI.')
-      setActiveTab('umum')
-      return
+      toast.error('Harap isi perihal proposal terlebih dahulu sebagai konteks untuk AI.');
+      setActiveTab('umum');
+      return;
     }
 
-    setHistory({...data})
-    setIsAiLoading(type)
+    setHistory({...data});
+    setIsAiLoading(type);
     
+    // Create a toast for the promise
     const promise = async () => {
       const prompts: Record<string, string> = {
-        background: `Buatkan narasi latar belakang yang mendalam dan inspiratif untuk proposal kegiatan DKM (Dewan Kemakmuran Masjid) Al-Muhajirin dengan judul kegiatan: "${data.perihal}". 
-        
-Konteks:
-- Lokasi: Kampung Ragas Grenyang, Desa Argawana, Kecamatan Puloampel, Kabupaten Serang, Banten
-- Organisasi: DKM Al-Muhajirin Ragas Grenyang
-- Fokus: Memakmurkan masjid, pelayanan jamaah, dan syiar Islam di lingkungan industri Puloampel.
+        background: `Buatkan narasi Latar Belakang yang LUAR BIASA untuk proposal kegiatan DKM Al-Muhajirin.
+Judul Kegiatan: "${data.perihal}"
+Lokasi: Kampung Ragas Grenyang, Serang, Banten.
 
-Buatkan latar belakang yang formal, profesional, dan menyentuh sisi spiritual. Terdiri dari 3 paragraf. Hanya berikan teks naratif saja, jangan ada kalimat pembuka seperti "Ini adalah narasinya" atau judul.`,
+Persyaratan Narasi:
+1. Sangat formal, inspiratif, dan menyentuh hati (Gunakan bahasa yang menggugah jiwa).
+2. Hubungkan dengan nilai-nilai religius dan kemaslahatan umat.
+3. Terdiri dari minimal 3 paragraf yang kohesif.
+4. Gunakan diksi yang elegan dan profesional (standar proposal nasional).
 
-        'cover-letter': `Buatkan isi surat pengantar (bagian inti) untuk proposal kegiatan DKM Al-Muhajirin dengan judul: "${data.perihal}".
-        
-Buatkan isi surat pengantar yang formal dan sopan, dimulai dengan "Assalamu'alaikum Wr. Wb.". Sampaikan maksud permohonan dukungan. Terdiri dari 2-3 paragraf. Hanya berikan teks surat pengantarnya saja, jangan ada kalimat pembuka lainnya.`,
+Hanya berikan teks narasinya saja. JANGAN berikan kalimat pembuka seperti "Ini adalah narasinya" atau judul apapun. Langsung ke paragraf pertama.`,
 
-        closing: `Buatkan paragraf penutup yang persuasif dan penuh doa untuk proposal "${data.perihal}" DKM Al-Muhajirin.
-        
-Sampaikan apresiasi dan doa keberkahan. Hanya berikan teks penutup saja, jangan ada kalimat pembuka lainnya.`,
+        'cover-letter': `Buatkan isi Surat Pengantar (bagian pokok) yang sangat santun dan profesional untuk proposal "${data.perihal}".
 
-        objectives: `Buatkan 5 poin maksud dan tujuan yang spesifik untuk proposal kegiatan DKM Al-Muhajirin bertema: "${data.perihal}".
-        
-Format: Berikan dalam bentuk array JSON dengan key "tujuan", contoh: {"tujuan": ["Tujuan 1", "Tujuan 2"]}. Hanya berikan JSON saja.`
-      }
+Instruksi:
+1. Mulai dengan salam lengkap "Assalamu'alaikum Warahmatullahi Wabarakatuh,"
+2. Gunakan gaya bahasa yang menunjukkan kerendahan hati namun tetap berwibawa sebagai pengurus DKM.
+3. Jelaskan bahwa proposal ini adalah upaya untuk kebaikan bersama (syiar Islam).
+4. Ajak kerjasama dengan cara yang sangat persuasif tanpa terkesan memaksa.
+5. Terdiri dari 2-3 paragraf.
 
+Hanya berikan isi surat narasinya saja. JANGAN berikan identitas pengirim/penerima atau judul.`,
+
+        closing: `Buatkan Kalimat Penutup yang sangat kuat, penuh doa, dan terpercaya untuk proposal "${data.perihal}".
+
+Instruksi:
+1. Sampaikan rasa syukur dan harapan yang tulus.
+2. Berikan doa yang mendalam bagi para donatur/pendukung.
+3. Tekankan sifat amanah dan transparansi DKM Al-Muhajirin.
+4. Gunakan penutup "Wassalamu'alaikum Warahmatullahi Wabarakatuh." sebagai akhir teks.
+
+Hanya berikan teks penutupnya saja. JANGAN ada tambahan lain.`,
+
+        objectives: `Berikan 5 poin "Maksud dan Tujuan" yang paling strategis dan visioner untuk proposal "${data.perihal}" DKM Al-Muhajirin.
+
+Format: Berikan HANYA dalam format JSON murni: {"tujuan": ["Poin 1", "Poin 2", "Poin 3", "Poin 4", "Poin 5"]}.
+Pastikan setiap poin dimulai dengan kata kerja (Contoh: Menjalin, Meningkatkan, Mewujudkan, dsb).`
+      };
+
+      console.log(`[AI] Dispatching fetch to /api/ai/generate with type: ${type}`);
       const response = await fetch('/api/ai/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -331,80 +352,90 @@ Format: Berikan dalam bentuk array JSON dengan key "tujuan", contoh: {"tujuan": 
           prompt: prompts[type],
           context: { perihal: data.perihal, type: type }
         })
-      })
+      });
 
-      const result = await response.json()
+      const result = await response.json();
+      console.log(`[AI] Received result for ${type}:`, result);
 
       if (!response.ok) {
-        throw new Error(result.details || result.error || 'AI generation failed')
+        throw new Error(result.details || result.error || 'Terjadi kesalahan pada server AI.');
       }
 
-      let text = result.text || ''
-      if (!text) throw new Error('AI tidak memberikan respon')
+      let rawText = result.text || '';
+      if (!rawText || rawText.length < 5) {
+        throw new Error('AI tidak memberikan respon yang memadai. Silakan coba lagi.');
+      }
 
-      // Cleaning logic: Remove intros and markdown
-      let cleanText = text.trim()
+      // Cleaning logic
+      let cleanText = rawText.trim();
       
-      // Remove markdown code blocks if present
-      if (cleanText.includes('```')) {
-        cleanText = cleanText.replace(/```(json)?/g, '').replace(/```/g, '').trim()
-      }
+      // 1. Remove Markdown code blocks
+      cleanText = cleanText.replace(/```(json)?/g, '').replace(/```/g, '').trim();
 
-      // Remove common AI intro phrases if they exist (regexp case-insensitive)
-      const intros = [
-        /^(tentu|ini|berikut|berikut adalah|berikut ini|ini adalah)[^:\n]*:/gi,
+      // 2. Remove common AI introductory phrases (Case Insensitive)
+      const introPatterns = [
+        /^(tentu|oke|baik|ini|berikut|berikut adalah|berikut ini|ini adalah|berikut narasinya|tentu saja)[^:\n]*:/gi,
         /^saya akan buatkan[^:\n]*:/gi,
-        /^narasi[^:\n]*:/gi,
-        /^latar belakang[^:\n]*:/gi
-      ]
-      intros.forEach(re => {
-        cleanText = cleanText.replace(re, '').trim()
-      })
+        /^latar belakang[^:\n]*:/gi,
+        /^surat pengantar[^:\n]*:/gi,
+        /^penutup[^:\n]*:/gi
+      ];
+      
+      introPatterns.forEach(pattern => {
+        cleanText = cleanText.replace(pattern, '').trim();
+      });
+
+      console.log(`[AI] Cleaned text for ${type}:`, cleanText.substring(0, 50) + '...');
       
       if (type === 'objectives') {
         try {
-          const jsonMatch = cleanText.match(/\{[\s\S]*\}/)
-          const cleanJson = jsonMatch ? jsonMatch[0] : cleanText
-          const parsed = JSON.parse(cleanJson)
+          const jsonMatch = cleanText.match(/\{[\s\S]*\}/);
+          const cleanJson = jsonMatch ? jsonMatch[0] : cleanText;
+          const parsed = JSON.parse(cleanJson);
           
-          let list: string[] = []
-          if (Array.isArray(parsed.tujuan)) list = parsed.tujuan
-          else if (Array.isArray(parsed)) list = parsed
-          else list = [cleanText]
+          let list: string[] = [];
+          if (Array.isArray(parsed.tujuan)) list = parsed.tujuan;
+          else if (Array.isArray(parsed)) list = parsed;
+          else list = [cleanText];
           
-          setData(prev => ({ ...prev, tujuan: list }))
+          setData(prev => ({ ...prev, tujuan: list }));
+          console.log(`[AI] Updated objectives list:`, list);
         } catch (e) {
+          console.warn(`[AI] JSON parsing failed for objectives, falling back to line splitting.`, e);
           const lines = cleanText.split('\n')
             .map(l => l.replace(/^\d+[\.\)]\s*/, '').replace(/^-\s*/, '').trim())
-            .filter(l => l.length > 5)
-          setData(prev => ({ ...prev, tujuan: lines.length > 0 ? lines : [cleanText] }))
+            .filter(l => l.length > 5);
+          setData(prev => ({ ...prev, tujuan: lines.length > 0 ? lines : [cleanText] }));
         }
       } else {
         const fieldMap: Record<string, keyof ProposalData> = {
           'background': 'latarBelakang',
           'cover-letter': 'suratPengantar',
           'closing': 'penutup'
-        }
+        };
         
-        const field = fieldMap[type]
+        const field = fieldMap[type];
         if (field) {
-          setData(prev => ({ ...prev, [field]: cleanText }))
+          setData(prev => ({ ...prev, [field]: cleanText }));
+          console.log(`[AI] Updated field: ${field}`);
         }
       }
-      return type
-    }
+      return type;
+    };
 
+    // Execute with toast.promise but ensure state is cleaned anyway
     toast.promise(promise(), {
-      loading: `AI sedang merumuskan ${type === 'cover-letter' ? 'surat pengantar' : type === 'background' ? 'latar belakang' : type === 'objectives' ? 'tujuan' : 'penutup'}...`,
-      success: () => {
-        setIsAiLoading(null)
-        return 'Saran AI berhasil diterapkan!'
+      loading: `AI sedang merumuskan pesan yang terbaik...`,
+      success: (data) => {
+        setIsAiLoading(null);
+        return `Saran AI untuk ${data === 'cover-letter' ? 'surat pengantar' : data === 'background' ? 'latar belakang' : data === 'objectives' ? 'tujuan' : 'penutup'} berhasil diterapkan!`;
       },
       error: (err) => {
-        setIsAiLoading(null)
-        return `Gagal: ${err.message || 'Server AI tidak merespon'}`
+        setIsAiLoading(null);
+        console.error(`[AI] Global error in handleAiGenerate:`, err);
+        return `Gagal: ${err.message || 'Server AI tidak merespon'}`;
       }
-    })
+    });
   }
 
   const handleUndo = () => {
