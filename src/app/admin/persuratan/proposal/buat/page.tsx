@@ -423,16 +423,15 @@ Pastikan setiap poin dimulai dengan kata kerja (Contoh: Menjalin, Meningkatkan, 
       return type;
     };
 
-    // Execute with toast.promise but ensure state is cleaned anyway
     toast.promise(promise(), {
-      loading: `AI sedang merumuskan pesan yang terbaik...`,
-      success: (data) => {
+      loading: `AI sedang merumuskan ide brilian untuk ${type === 'cover-letter' ? 'surat pengantar' : type === 'background' ? 'latar belakang' : type === 'objectives' ? 'tujuan' : 'penutup'}...`,
+      success: (resType) => {
         setIsAiLoading(null);
-        return `Saran AI untuk ${data === 'cover-letter' ? 'surat pengantar' : data === 'background' ? 'latar belakang' : data === 'objectives' ? 'tujuan' : 'penutup'} berhasil diterapkan!`;
+        return `Saran AI berhasil diterapkan! Silakan periksa bagian ${resType === 'cover-letter' ? 'Isi Surat' : resType === 'background' ? 'Latar Belakang' : resType === 'objectives' ? 'Maksud & Tujuan' : 'Penutup'}.`;
       },
       error: (err) => {
         setIsAiLoading(null);
-        console.error(`[AI] Global error in handleAiGenerate:`, err);
+        console.error(`[AI] Global error:`, err);
         return `Gagal: ${err.message || 'Server AI tidak merespon'}`;
       }
     });
@@ -932,9 +931,11 @@ Pastikan setiap poin dimulai dengan kata kerja (Contoh: Menjalin, Meningkatkan, 
                     </Button>
                   </div>
                   <Textarea 
+                    id="ai-surat-pengantar"
                     value={data.suratPengantar} 
                     onChange={(e) => setData({ ...data, suratPengantar: e.target.value })}
-                    className="min-h-[200px] rounded-3xl border-slate-200 p-6 bg-slate-50/30"
+                    className={`min-h-[200px] rounded-3xl border-slate-200 p-6 bg-slate-50/30 transition-all duration-500 ${isAiLoading === 'cover-letter' ? 'animate-pulse border-emerald-400 ring-2 ring-emerald-100' : ''}`}
+                    placeholder="Isi surat pengantar akan muncul di sini..."
                   />
                 </div>
 
@@ -953,9 +954,11 @@ Pastikan setiap poin dimulai dengan kata kerja (Contoh: Menjalin, Meningkatkan, 
                     </Button>
                   </div>
                   <Textarea 
+                    id="ai-latar-belakang"
                     value={data.latarBelakang} 
                     onChange={(e) => setData({ ...data, latarBelakang: e.target.value })}
-                    className="min-h-[150px] rounded-3xl border-slate-200 p-6 bg-slate-50/30"
+                    className={`min-h-[150px] rounded-3xl border-slate-200 p-6 bg-slate-50/30 transition-all duration-500 ${isAiLoading === 'background' ? 'animate-pulse border-emerald-400 ring-2 ring-emerald-100' : ''}`}
+                    placeholder="Narasi latar belakang akan muncul di sini..."
                   />
                 </div>
 
@@ -978,15 +981,21 @@ Pastikan setiap poin dimulai dengan kata kerja (Contoh: Menjalin, Meningkatkan, 
                       </Button>
                     </div>
                   </div>
-                  <div className="space-y-3">
+                  <div className={`space-y-3 transition-all duration-500 ${isAiLoading === 'objectives' ? 'animate-pulse opacity-50' : ''}`}>
                     {data.tujuan.map((t, i) => (
-                      <div key={i} className="flex gap-3">
-                        <Input value={t} onChange={(e) => updateTujuan(i, e.target.value)} className="rounded-xl h-12 border-slate-200" />
-                        <Button variant="ghost" size="icon" onClick={() => removeTujuan(i)} className="text-rose-500 rounded-xl">
+                      <div key={i} className="flex gap-3 animate-in fade-in slide-in-from-left-2" style={{ animationDelay: `${i * 100}ms` }}>
+                        <div className="flex items-center justify-center w-8 h-12 text-xs font-black text-emerald-600 bg-emerald-50 rounded-xl">{i+1}</div>
+                        <Input value={t} onChange={(e) => updateTujuan(i, e.target.value)} className="rounded-xl h-12 border-slate-200 bg-white" />
+                        <Button variant="ghost" size="icon" onClick={() => removeTujuan(i)} className="text-rose-500 rounded-xl hover:bg-rose-50">
                           <Trash2 className="h-5 w-5" />
                         </Button>
                       </div>
                     ))}
+                    {data.tujuan.length === 0 && (
+                      <div className="p-8 text-center border-2 border-dashed border-slate-100 rounded-3xl text-slate-400 font-bold italic text-sm">
+                        Belum ada poin tujuan. Gunakan "Saran AI" atau "Tambah Poin".
+                      </div>
+                    )}
                   </div>
                 </div>
               </TabsContent>
@@ -1167,7 +1176,13 @@ Pastikan setiap poin dimulai dengan kata kerja (Contoh: Menjalin, Meningkatkan, 
                       Saran AI
                     </Button>
                   </div>
-                  <Textarea value={data.penutup} onChange={(e) => setData({...data, penutup: e.target.value})} className="min-h-[150px] rounded-3xl" />
+                  <Textarea 
+                    id="ai-penutup"
+                    value={data.penutup} 
+                    onChange={(e) => setData({...data, penutup: e.target.value})} 
+                    className={`min-h-[150px] rounded-3xl border-slate-200 p-6 bg-slate-50/30 transition-all duration-500 ${isAiLoading === 'closing' ? 'animate-pulse border-emerald-400 ring-2 ring-emerald-100' : ''}`}
+                    placeholder="Kalimat penutup akan muncul di sini..."
+                  />
                 </div>
                 <div className="grid grid-cols-2 gap-6">
                     <div className="space-y-2">

@@ -23,9 +23,16 @@ export async function POST(req: NextRequest) {
 
     // Initialize Gemini model inside handler to ensure API key is fresh
     const genAI = new GoogleGenerativeAI(apiKey)
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' })
+    const model = genAI.getGenerativeModel({ 
+      model: 'gemini-1.5-flash',
+      generationConfig: {
+        temperature: 0.8,
+        topP: 0.95,
+        maxOutputTokens: 2048,
+      }
+    })
 
-    console.log(`AI Generating for: ${context?.type || 'unknown'}...`)
+    console.log(`[SERVER AI] Generating content for type: ${context?.type || 'unknown'} | Subject: ${context?.perihal || 'N/A'}`)
 
     // Generate content
     const result = await model.generateContent(prompt)

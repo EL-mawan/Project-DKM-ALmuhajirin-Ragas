@@ -184,20 +184,77 @@ function BuatPersuratanContent() {
   }
 
   // --- AI RECOMMENDATION LOGIC ---
-  const applyAIRecommend = (field: string) => {
-    const templates: Record<string, string | string[]> = {
-      isiSuratPengantar: "Bersama dengan surat ini, kami selaku pengurus DKM Al-Muhajirin bermaksud untuk mengajukan permohonan dukungan dan bantuan dana untuk kegiatan yang akan kami laksanakan. Semoga bapak/ibu dapat memberikan dukungan positif demi kelancaran kegiatan tersebut.",
-      latarBelakang: "Sehubungan dengan meningkatnya kebutuhan akan sarana ibadah yang memadai dan upaya untuk meningkatkan ukhuwah islamiyah di lingkungan Kp. Ragas Grenyang, maka kami memandang perlu untuk mengadakan kegiatan/pembangunan ini sebagai bagian dari program kerja tahunan DKM Al-Muhajirin.",
-      maksudTujuan: ["Meningkatkan kualitas sarana ibadah", "Mempererat tali silaturahmi antar jamaah", "Menciptakan lingkungan yang religius dan nyaman"],
-      kalimatPenutup: "Demikian proposal ini kami susun dengan harapan mendapatkan pertimbangan dan dukungan dari Bapak/Ibu. Atas perhatian dan kerjasamanya kami haturkan terima kasih yang sebesar-besarnya. Semoga Allah SWT membalas segala bentuk kebaikan Bapak/Ibu dengan pahala yang berlipat ganda."
+  const [isAiLoading, setIsAiLoading] = useState<string | null>(null)
+
+  const handleAiGenerate = async (type: 'isiSuratPengantar' | 'latarBelakang' | 'maksudTujuan' | 'kalimatPenutup') => {
+    if (!formData.perihal || formData.perihal.trim() === '') {
+      toast.error('Harap isi perihal surat terlebih dahulu sebagai konteks AI.')
+      setActiveTab('umum')
+      return
     }
 
-    if (field === 'maksudTujuan') {
-      setFormData(prev => ({ ...prev, maksudTujuanList: templates[field] as string[] }))
-    } else {
-      setFormData(prev => ({ ...prev, [field]: templates[field] }))
+    setIsAiLoading(type)
+    
+    const promise = async () => {
+      const prompts: Record<string, string> = {
+        isiSuratPengantar: `Buatkan isi surat pengantar yang sangat formal dan santun untuk "${formData.perihal}". Mulai dengan salam "Assalamu'alaikum Wr. Wb.". Fokus pada penyampaian maksud kerjasama. 2-3 paragraf. Hanya berikan teks isi surat saja.`,
+        latarBelakang: `Buatkan latar belakang yang persuasif dan mendalam untuk proposal/kegiatan "${formData.perihal}". Jelaskan urgensi dan manfaatnya. Minimal 3 paragraf. Hanya berikan narasi saja.`,
+        kalimatPenutup: `Buatkan penutup surat yang penuh harapan dan doa untuk "${formData.perihal}". Akhiri dengan "Wassalamu'alaikum Wr. Wb.". Hanya berikan teks penutup saja.`,
+        maksudTujuan: `Buatkan 5 poin maksud dan tujuan strategis untuk "${formData.perihal}". Berikan HANYA dalam format JSON: {"tujuan": ["Poin 1", "Poin 2", "Poin 3"]}.`
+      }
+
+      const res = await fetch('/api/ai/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          prompt: prompts[type],
+          context: { perihal: formData.perihal, type: type }
+        })
+      })
+
+      const result = await res.json()
+      if (!res.ok) throw new Error(result.details || result.error || 'AI Gagal')
+
+      let text = result.text || ''
+      if (!text) throw new Error('AI tidak merespon')
+
+      // Cleaning
+      let cleanText = text.trim()
+      if (cleanText.includes('```')) {
+        cleanText = cleanText.replace(/```(json)?/g, '').replace(/```/g, '').trim()
+      }
+      
+      const intros = [/^(tentu|ini|berikut)[^:\n]*:/gi, /^saya akan buatkan[^:\n]*:/gi]
+      intros.forEach(re => cleanText = cleanText.replace(re, '').trim())
+
+      if (type === 'maksudTujuan') {
+        try {
+          const jsonMatch = cleanText.match(/\{[\s\S]*\}/)
+          const cleanJson = jsonMatch ? jsonMatch[0] : cleanText
+          const parsed = JSON.parse(cleanJson)
+          const list = Array.isArray(parsed.tujuan) ? parsed.tujuan : (Array.isArray(parsed) ? parsed : [cleanText])
+          setFormData(prev => ({ ...prev, maksudTujuanList: list }))
+        } catch (e) {
+          const lines = cleanText.split('\n').map(l => l.replace(/^\d+[\.\)]\s*/, '').replace(/^-\s*/, '').trim()).filter(l => l.length > 5)
+          setFormData(prev => ({ ...prev, maksudTujuanList: lines.length > 0 ? lines : [cleanText] }))
+        }
+      } else {
+        setFormData(prev => ({ ...prev, [type]: cleanText }))
+      }
+      return type
     }
-    toast.success(`Rekomendasi AI untuk ${field} diterapkan!`)
+
+    toast.promise(promise(), {
+      loading: 'AI sedang merumuskan saran terbaik...',
+      success: () => {
+        setIsAiLoading(null)
+        return 'Saran AI berhasil diterapkan!'
+      },
+      error: (err) => {
+        setIsAiLoading(null)
+        return `Gagal: ${err.message}`
+      }
+    })
   }
 
   const handleSubmit = async () => {
@@ -570,18 +627,44 @@ function BuatPersuratanContent() {
                     <div className="space-y-4">
                       <div className="flex items-center justify-between">
                         <Label className="text-xs font-black uppercase text-slate-600">Isi Surat Pengantar</Label>
-                        <Button onClick={() => applyAIRecommend('isiSuratPengantar')} variant="ghost" size="sm" className="h-7 text-purple-600 font-bold text-[10px] uppercase hover:bg-purple-50"><MessageSquare className="h-3 w-3 mr-2" /> Rekomendasi AI</Button>
+                        <Button 
+  onClick={() => handleAiGenerate('isiSuratPengantar')} 
+  disabled={isAiLoading === 'isiSuratPengantar'}
+  variant="ghost" 
+  size="sm" 
+  className="h-7 text-purple-600 font-bold text-[10px] uppercase hover:bg-purple-50"
+>
+  {isAiLoading === 'isiSuratPengantar' ? "Memproses..." : <><MessageSquare className="h-3 w-3 mr-2" /> Rekomendasi AI</>}
+</Button>
                       </div>
-                      <Textarea placeholder="Tulislah isi surat pengantar..." className="min-h-[160px] rounded-[1.5rem] border-slate-200 p-6" value={formData.isiSuratPengantar} onChange={e => setFormData({...formData, isiSuratPengantar: e.target.value})} />
+                      <Textarea 
+                        placeholder="Tulislah isi surat pengantar..." 
+                        className={`min-h-[160px] rounded-[1.5rem] border-slate-200 p-6 transition-all duration-500 ${isAiLoading === 'isiSuratPengantar' ? 'animate-pulse border-purple-400 ring-2 ring-purple-50' : ''}`}
+                        value={formData.isiSuratPengantar} 
+                        onChange={e => setFormData({...formData, isiSuratPengantar: e.target.value})} 
+                      />
                     </div>
 
                     {/* Section 5: NARASI LATAR BELAKANG */}
                     <div className="space-y-4">
                       <div className="flex items-center justify-between">
                         <Label className="text-xs font-black uppercase text-slate-600">Narasi Latar Belakang</Label>
-                        <Button onClick={() => applyAIRecommend('latarBelakang')} variant="ghost" size="sm" className="h-7 text-purple-600 font-bold text-[10px] uppercase hover:bg-purple-50"><MessageSquare className="h-3 w-3 mr-2" /> Rekomendasi AI</Button>
+                        <Button 
+  onClick={() => handleAiGenerate('latarBelakang')} 
+  disabled={isAiLoading === 'latarBelakang'}
+  variant="ghost" 
+  size="sm" 
+  className="h-7 text-purple-600 font-bold text-[10px] uppercase hover:bg-purple-50"
+>
+  {isAiLoading === 'latarBelakang' ? "Memproses..." : <><MessageSquare className="h-3 w-3 mr-2" /> Rekomendasi AI</>}
+</Button>
                       </div>
-                      <Textarea placeholder="Tulislah alasan permohonan ini diajukan..." className="min-h-[120px] rounded-[1.5rem] border-slate-200 p-6" value={formData.latarBelakang} onChange={e => setFormData({...formData, latarBelakang: e.target.value})} />
+                      <Textarea 
+                        placeholder="Tulislah alasan permohonan ini diajukan..." 
+                        className={`min-h-[120px] rounded-[1.5rem] border-slate-200 p-6 transition-all duration-500 ${isAiLoading === 'latarBelakang' ? 'animate-pulse border-purple-400 ring-2 ring-purple-50' : ''}`}
+                        value={formData.latarBelakang} 
+                        onChange={e => setFormData({...formData, latarBelakang: e.target.value})} 
+                      />
                     </div>
 
                     {/* Section 6: MAKSUD DAN TUJUAN */}
@@ -589,11 +672,19 @@ function BuatPersuratanContent() {
                       <div className="flex items-center justify-between">
                         <Label className="text-xs font-black uppercase text-slate-600">Maksud dan Tujuan (Poin Ringkas)</Label>
                         <div className="flex gap-2">
-                          <Button onClick={() => applyAIRecommend('maksudTujuan')} variant="ghost" size="sm" className="h-7 text-purple-600 font-bold text-[10px] uppercase hover:bg-purple-50"><MessageSquare className="h-3 w-3 mr-2" /> AI Suggesi</Button>
+                          <Button 
+  onClick={() => handleAiGenerate('maksudTujuan')} 
+  disabled={isAiLoading === 'maksudTujuan'}
+  variant="ghost" 
+  size="sm" 
+  className="h-7 text-purple-600 font-bold text-[10px] uppercase hover:bg-purple-50"
+>
+  {isAiLoading === 'maksudTujuan' ? "Memproses..." : <><MessageSquare className="h-3 w-3 mr-2" /> AI Suggesi</>}
+</Button>
                           <Button onClick={addMaksudTujuan} variant="ghost" size="sm" className="h-7 text-emerald-600 font-bold text-[10px] uppercase hover:bg-emerald-50"><Plus className="h-3 w-3 mr-2" /> Tambah Manual</Button>
                         </div>
                       </div>
-                      <div className="space-y-3">
+                      <div className={`space-y-3 transition-all duration-500 ${isAiLoading === 'maksudTujuan' ? 'animate-pulse opacity-50' : ''}`}>
                         {formData.maksudTujuanList.map((item, idx) => (
                            <div key={idx} className="flex gap-2 animate-in fade-in slide-in-from-top-1">
                               <Input 
@@ -903,9 +994,21 @@ function BuatPersuratanContent() {
                      <div className="space-y-4">
                         <div className="flex items-center justify-between">
                            <Label className="text-xs font-black uppercase text-slate-600 tracking-widest">Kalimat Penutup</Label>
-                           <Button onClick={() => applyAIRecommend('kalimatPenutup')} variant="ghost" className="text-purple-600 font-bold text-[10px] uppercase"><MessageSquare className="h-3 w-3 mr-2" /> Rekomendasi AI</Button>
+                           <Button 
+  onClick={() => handleAiGenerate('kalimatPenutup')} 
+  disabled={isAiLoading === 'kalimatPenutup'}
+  variant="ghost" 
+  className="text-purple-600 font-bold text-[10px] uppercase"
+>
+  {isAiLoading === 'kalimatPenutup' ? "Memproses..." : <><MessageSquare className="h-3 w-3 mr-2" /> Rekomendasi AI</>}
+</Button>
                         </div>
-                        <Textarea className="min-h-[160px] rounded-3xl border-slate-200 p-6 shadow-sm bg-white font-serif" placeholder="Tuliskan kalimat penutup..." value={formData.kalimatPenutup} onChange={e => setFormData({...formData, kalimatPenutup: e.target.value})} />
+                        <Textarea 
+                          className={`min-h-[160px] rounded-3xl border-slate-200 p-6 shadow-sm bg-white font-serif transition-all duration-500 ${isAiLoading === 'kalimatPenutup' ? 'animate-pulse border-purple-400 ring-4 ring-purple-50' : ''}`}
+                          placeholder="Tuliskan kalimat penutup..." 
+                          value={formData.kalimatPenutup} 
+                          onChange={e => setFormData({...formData, kalimatPenutup: e.target.value})} 
+                        />
                      </div>
 
                      <div className="grid grid-cols-2 gap-6">
