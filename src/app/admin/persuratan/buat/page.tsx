@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, Suspense } from 'react'
+import { useState, useRef, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -33,6 +33,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Switch } from '@/components/ui/switch'
 import jsPDF from 'jspdf'
+import html2canvas from 'html2canvas'
 
 export const dynamic = 'force-dynamic'
 
@@ -42,6 +43,7 @@ function BuatPersuratanContent() {
   const type = searchParams.get('type') || 'PROPOSAL'
   const [activeTab, setActiveTab] = useState('umum')
   const [showPreview, setShowPreview] = useState(false)
+  const previewRef = useRef<HTMLDivElement>(null)
 
   const [formData, setFormData] = useState({
     // Kop Surat
@@ -299,191 +301,54 @@ Salam silaturahmi kami sampaikan, teriring doa semoga bapak beserta keluarga sel
     return 'Surat Resmi'
   }
 
-  const generatePreviewPDF = () => {
-    const doc = new jsPDF()
-    const pageWidth = doc.internal.pageSize.getWidth()
-    const centerX = pageWidth / 2
-    const mLeft = 20
-
-    // --- KOP SURAT (TIMES NEW ROMAN) ---
-    doc.setFont('times', 'bold').setFontSize(14)
-    const titleLines = doc.splitTextToSize(formData.namaKopSurat, 170)
-    doc.text(titleLines, centerX, 20, { align: 'center' })
+  const generatePreviewPDF = async () => {
+    if (!previewRef.current) return
     
-    doc.setFontSize(8).setFont('times', 'normal')
-    const addressLines = doc.splitTextToSize(formData.alamatKopSurat, 170)
-    doc.text(addressLines, centerX, 30, { align: 'center' })
-
-    const contactY = 30 + (addressLines.length * 4) + 2
-    doc.setFont('times', 'italic').text(formData.kontakKopSurat, centerX, contactY, { align: 'center' })
-    const lineY = contactY + 3
-    doc.setLineWidth(0.8).line(mLeft, lineY, pageWidth - mLeft, lineY)
-
-    // --- INFO & RECIPIENT ---
-    let curY = lineY + 15
-    doc.setFontSize(11).setFont('times', 'normal')
-    doc.text(`No      : ${formData.nomorSurat}`, mLeft, curY)
-    doc.text(`Perihal : ${formData.perihal}`, mLeft, curY + 6)
-    doc.text(`${formData.tempatSurat}, ${new Date(formData.tanggalSurat).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}`, pageWidth - mLeft, curY, { align: 'right' })
-
-    curY += 20
-    doc.text('Kepada Yth.', mLeft, curY)
-    doc.setFont('times', 'bold').text(formData.penerimaNama || '........................', mLeft, curY + 6)
-    doc.setFont('times', 'normal').text('di -', mLeft, curY + 12)
-    doc.text(formData.penerimaLokasi || 'Tempat', mLeft + 10, curY + 18)
-
-    curY += 30
-
-    if (type === 'PROPOSAL') {
-      // PAGE 1: SURAT PENGANTAR
-      doc.setFont('times', 'normal')
-      const pengantarLines = doc.splitTextToSize(formData.isiSuratPengantar || '[Isi Surat Pengantar]', 170)
-      doc.text(pengantarLines, mLeft, curY)
+    try {
+      toast.info('Sedang merender PDF premium...')
+      const doc = new jsPDF('p', 'mm', 'a4')
+      const pages = previewRef.current.querySelectorAll('.pdf-page')
       
-      // SIGNATURES ON PAGE 1
-      const sigY1 = 225
-      const colWidth1 = (pageWidth - (mLeft * 2)) / 3
-      doc.setFont('times', 'bold').text('Hormat Kami,', centerX, sigY1 - 15, { align: 'center' })
-      
-      doc.text('Sekretaris DKM', mLeft + (colWidth1 / 2), sigY1, { align: 'center' })
-      doc.text(formData.ttdSekretarisDKM || '........................', mLeft + (colWidth1 / 2), sigY1 + 25, { align: 'center' })
-      
-      doc.text('Bendahara DKM', mLeft + colWidth1 + (colWidth1 / 2), sigY1, { align: 'center' })
-      doc.text(formData.ttdBendaharaDKM || '........................', mLeft + colWidth1 + (colWidth1 / 2), sigY1 + 25, { align: 'center' })
-
-      doc.text('Ketua DKM', mLeft + (colWidth1 * 2) + (colWidth1 / 2), sigY1, { align: 'center' })
-      doc.text(formData.ttdKetuaDKM || '........................', mLeft + (colWidth1 * 2) + (colWidth1 / 2), sigY1 + 25, { align: 'center' })
-      
-      // PAGE 2: PENDAHULUAN
-      doc.addPage()
-      doc.setFont('times', 'bold').setFontSize(14).text(formData.namaKopSurat, centerX, 20, { align: 'center' })
-      doc.setLineWidth(0.5).line(mLeft, 25, pageWidth - mLeft, 25)
-      
-      let p2Y = 40
-      doc.setFontSize(12).setFont('times', 'bold').text('I. PENDAHULUAN', mLeft, p2Y)
-      doc.setFontSize(11).setFont('times', 'bold').text('A. Latar Belakang', mLeft, p2Y + 10)
-      doc.setFontSize(10).setFont('times', 'normal')
-      const p2LatarLines = doc.splitTextToSize(formData.latarBelakang || '...', 170)
-      doc.text(p2LatarLines, mLeft, p2Y + 16)
-      
-      p2Y += 30 + (p2LatarLines.length * 5)
-      doc.setFont('times', 'bold').text('B. Maksud Dan Tujuan', mLeft, p2Y)
-      doc.setFontSize(10).setFont('times', 'normal')
-      
-      formData.maksudTujuanList.forEach((point, idx) => {
-        const pointText = `${idx + 1}. ${point}`
-        const pointLines = doc.splitTextToSize(pointText, 160)
-        doc.text(pointLines, mLeft + 5, p2Y + 10 + (idx * 8))
-      })
-
-      // PAGE 3: STRUKTUR & RAB
-      doc.addPage()
-      doc.setFont('times', 'bold').setFontSize(12).text('II. STRUKTUR ORGANISASI', mLeft, 20)
-      doc.setFontSize(10).setFont('times', 'normal')
-      doc.text(`Pelindung (RW) : ${formData.pelindungRW}`, mLeft + 5, 30)
-      doc.text(`Penasehat (RT) : ${formData.penasehatRT}`, mLeft + 5, 35)
-      doc.text(`Ketua Pemuda   : ${formData.ketuaPemudaStruktur}`, mLeft + 5, 40)
-      
-      doc.setFont('times', 'bold').text('III. ANGGARAN BIAYA (RAB)', mLeft, 60)
-      let tableY = 70
-      doc.setFont('times', 'bold').text('Item', mLeft, tableY)
-      doc.text('Total', pageWidth - mLeft, tableY, { align: 'right' })
-      doc.line(mLeft, tableY + 2, pageWidth - mLeft, tableY + 2)
-      
-      formData.rabItems.forEach((item) => {
-        tableY += 8
-        doc.setFont('times', 'normal').text(item.item || '-', mLeft, tableY)
-        doc.text(`Rp ${item.total.toLocaleString('id-ID')}`, pageWidth - mLeft, tableY, { align: 'right' })
-      })
-      doc.line(mLeft, tableY + 2, pageWidth - mLeft, tableY + 2)
-      doc.setFont('times', 'bold').text('Total Estimasi', mLeft, tableY + 10)
-      doc.text(`Rp ${totalRAB.toLocaleString('id-ID')}`, pageWidth - mLeft, tableY + 10, { align: 'right' })
-
-      // PAGE 4: PENUTUP & SIGNATURES
-      doc.addPage()
-      doc.setFont('times', 'bold').setFontSize(12).text('IV. PENUTUP', mLeft, 20)
-      doc.setFontSize(11).setFont('times', 'normal')
-      const penutupLines = doc.splitTextToSize(formData.kalimatPenutup, 170)
-      doc.text(penutupLines, mLeft, 30)
-      
-      let sigStartYa = 60
-      doc.text(`${formData.lokasiPenerbitan}, ${new Date(formData.tanggalSurat).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}`, pageWidth - mLeft, sigStartYa, { align: 'right' })
-      
-      sigStartYa += 15
-      // Row 1: Sekretaris, Bendahara, Ketua
-      doc.setFont('times', 'bold')
-      const colWidth = (pageWidth - (mLeft * 2)) / 3
-      
-      doc.text('Sekretaris DKM', mLeft + (colWidth / 2), sigStartYa, { align: 'center' })
-      doc.text(formData.ttdSekretarisDKM || '........................', mLeft + (colWidth / 2), sigStartYa + 30, { align: 'center' })
-      
-      doc.text('Bendahara DKM', mLeft + colWidth + (colWidth / 2), sigStartYa, { align: 'center' })
-      doc.text(formData.ttdBendaharaDKM || '........................', mLeft + colWidth + (colWidth / 2), sigStartYa + 30, { align: 'center' })
-
-      doc.text('Ketua DKM', mLeft + (colWidth * 2) + (colWidth / 2), sigStartYa, { align: 'center' })
-      doc.text(formData.ttdKetuaDKM || '........................', mLeft + (colWidth * 2) + (colWidth / 2), sigStartYa + 30, { align: 'center' })
-      
-      if (formData.ttdTokohMasyarakat) {
-        sigStartYa += 50
-        doc.text('Mengetahui,', centerX, sigStartYa - 8, { align: 'center' })
-        doc.setFontSize(9).text('Tokoh Masyarakat Masjid Al-Muhajirin', centerX, sigStartYa, { align: 'center' })
-        doc.setFontSize(11).text(formData.ttdTokohMasyarakat, centerX, sigStartYa + 30, { align: 'center' })
+      if (pages.length === 0) {
+         toast.error('Gagal mendeteksi halaman preview')
+         return
       }
 
-      // Row 3: Optional RT/RW/Pemuda
-      sigStartYa += 50
-      if (formData.ttdKetuaRW || formData.ttdKetuaRT) {
-        if (formData.ttdKetuaRW) {
-          doc.text('Ketua RW', mLeft + 40, sigStartYa, { align: 'center' })
-          doc.text(formData.ttdKetuaRW, mLeft + 40, sigStartYa + 30, { align: 'center' })
-        }
-        if (formData.ttdKetuaRT) {
-          doc.text('Ketua RT', pageWidth - mLeft - 40, sigStartYa, { align: 'center' })
-          doc.text(formData.ttdKetuaRT, pageWidth - mLeft - 40, sigStartYa + 30, { align: 'center' })
-        }
+      for (let i = 0; i < pages.length; i++) {
+        const page = pages[i] as HTMLElement
+        const canvas = await html2canvas(page, {
+          scale: 3, 
+          useCORS: true,
+          logging: false,
+          backgroundColor: '#ffffff',
+          width: 794,
+          height: 1123,
+          onclone: (clonedDoc, clonedElement) => {
+             clonedElement.style.borderRadius = '0'
+             clonedElement.style.boxShadow = 'none'
+             clonedElement.style.transform = 'none'
+             
+             const container = clonedElement.parentElement
+             if (container) {
+                container.style.transform = 'none'
+                container.style.padding = '0'
+                container.style.margin = '0'
+             }
+          }
+        })
+        
+        const imgData = canvas.toDataURL('image/jpeg', 0.98)
+        if (i > 0) doc.addPage()
+        doc.addImage(imgData, 'JPEG', 0, 0, 210, 297, undefined, 'FAST')
       }
-
-    } else {
-      doc.setFont('times', 'normal')
-      const pembukaLines = doc.splitTextToSize(formData.pembuka, 170)
-      doc.text(pembukaLines, mLeft, curY)
-      curY += (pembukaLines.length * 5) + 5
-
-      if (type === 'UNDANGAN' && formData.namaAcara) {
-        doc.text(`Hari/Tanggal : ${formData.hariAcara}, ${formData.tanggalAcara}`, mLeft + 10, curY)
-        doc.text(`Waktu        : ${formData.waktuAcara}`, mLeft + 10, curY + 6)
-        doc.text(`Tempat       : ${formData.lokasiAcara}`, mLeft + 10, curY + 12)
-        doc.text(`Acara        : ${formData.namaAcara}`, mLeft + 10, curY + 18)
-        curY += 30
-      }
-
-      const penutupLines = doc.splitTextToSize(formData.penutup, 170)
-      doc.text(penutupLines, mLeft, curY)
-      curY += (penutupLines.length * 5) + 20
-
-      // SIGNATURES for Undangan/Official
-      const sigY = curY
-      doc.setFont('times', 'bold')
-      const colWidthLetter = (pageWidth - (mLeft * 2)) / 3
-
-      doc.text('Sekretaris DKM', mLeft + (colWidthLetter / 2), sigY, { align: 'center' })
-      doc.text(formData.ttdSekretarisDKM || '........................', mLeft + (colWidthLetter / 2), sigY + 25, { align: 'center' })
-
-      doc.text('Bendahara DKM', mLeft + colWidthLetter + (colWidthLetter / 2), sigY, { align: 'center' })
-      doc.text(formData.ttdBendaharaDKM || '........................', mLeft + colWidthLetter + (colWidthLetter / 2), sigY + 25, { align: 'center' })
       
-      doc.text('Ketua DKM', mLeft + (colWidthLetter * 2) + (colWidthLetter / 2), sigY, { align: 'center' })
-      doc.text(formData.ttdKetuaDKM || '........................', mLeft + (colWidthLetter * 2) + (colWidthLetter / 2), sigY + 25, { align: 'center' })
-      
-      if (formData.ttdTokohMasyarakat) {
-        const sigY2 = sigY + 45
-        doc.text('Mengetahui,', centerX, sigY2 - 8, { align: 'center' })
-        doc.setFontSize(9).text('Tokoh Masyarakat Masjid Al-Muhajirin', centerX, sigY2, { align: 'center' })
-        doc.setFontSize(11).text(formData.ttdTokohMasyarakat, centerX, sigY2 + 25, { align: 'center' })
-      }
+      const fileName = `${type}_${formData.perihal.replace(/[^a-z0-9]/gi, '_')}.pdf`
+      doc.save(fileName)
+      toast.success('PDF berhasil diunduh')
+    } catch (error) {
+      console.error('PDF Generation Error:', error)
+      toast.error('Gagal membuat PDF. Coba gunakan browser lain.')
     }
-
-    doc.save(`Draft_${type}_${formData.perihal}.pdf`)
   }
 
   return (
@@ -1268,8 +1133,8 @@ Salam silaturahmi kami sampaikan, teriring doa semoga bapak beserta keluarga sel
 
           {/* RIGHT: DIGITAL PREVIEW */}
           <div className={`w-full lg:w-1/2 bg-slate-200/50 p-4 lg:p-8 overflow-y-auto lg:sticky lg:top-0 lg:h-screen ${showPreview ? 'block' : 'hidden lg:block'}`}>
-            <div className="max-w-2xl mx-auto space-y-4">
-              <div className="flex items-center justify-between mb-4">
+            <div ref={previewRef} className="max-w-2xl mx-auto space-y-4">
+              <div className="flex items-center justify-between mb-4 no-print">
                 <h2 className="text-xl font-black text-slate-800 uppercase tracking-widest">Digital Preview</h2>
                 <div className="flex gap-2">
                   <Badge className="bg-emerald-100 text-emerald-700 border-none px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest">Ready</Badge>
@@ -1278,7 +1143,7 @@ Salam silaturahmi kami sampaikan, teriring doa semoga bapak beserta keluarga sel
               </div>
 
               {/* PAPER PREVIEW - PAGE 1 */}
-              <div className="bg-white shadow-2xl rounded-[2.5rem] p-8 lg:p-12 min-h-[842px] relative overflow-hidden mb-8">
+              <div className="pdf-page bg-white shadow-2xl rounded-[2.5rem] p-8 lg:p-12 min-h-[842px] relative overflow-hidden mb-8">
                 {/* LOGO & KOP */}
                 <div className="flex justify-between items-center border-b-2 border-slate-900 pb-4 mb-6">
                   <div className="h-16 w-16 bg-slate-100 rounded-full flex items-center justify-center border-2 border-slate-900">
@@ -1395,7 +1260,7 @@ Salam silaturahmi kami sampaikan, teriring doa semoga bapak beserta keluarga sel
               {/* PAPER PREVIEW - PAGE 2 (PENDALUAN - Only for PROPOSAL) */}
               {type === 'PROPOSAL' && (
                 <>
-                  <div className="bg-white shadow-2xl rounded-[2.5rem] p-8 lg:p-12 min-h-[842px] relative overflow-hidden mb-8">
+                  <div className="pdf-page bg-white shadow-2xl rounded-[2.5rem] p-8 lg:p-12 min-h-[842px] relative overflow-hidden mb-8">
                     <div className="flex justify-between items-center border-b-2 border-slate-900 pb-4 mb-10">
                       <div className="text-center flex-1 px-4">
                         <h1 className="font-black text-slate-900 text-sm leading-tight uppercase tracking-tight">{formData.namaKopSurat}</h1>
@@ -1425,7 +1290,7 @@ Salam silaturahmi kami sampaikan, teriring doa semoga bapak beserta keluarga sel
                   </div>
                   </div>
 
-                  <div id="proposal-page-3" className="bg-white shadow-2xl rounded-[2.5rem] p-8 lg:p-12 min-h-[842px] relative overflow-hidden">
+                  <div id="proposal-page-3" className="pdf-page bg-white shadow-2xl rounded-[2.5rem] p-8 lg:p-12 min-h-[842px] relative overflow-hidden">
                     <div className="flex justify-between items-center border-b-2 border-slate-900 pb-4 mb-10">
                       <div className="text-center flex-1 px-4">
                         <h1 className="font-black text-slate-900 text-sm leading-tight uppercase tracking-tight">{formData.namaKopSurat}</h1>
