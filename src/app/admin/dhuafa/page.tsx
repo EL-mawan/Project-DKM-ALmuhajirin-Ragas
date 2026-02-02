@@ -32,6 +32,7 @@ export default function DhuafaAdmin() {
   const [loading, setLoading] = useState(true)
   const [data, setData] = useState<any[]>([])
   const [search, setSearch] = useState('')
+  const [categoryFilter, setCategoryFilter] = useState('all')
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingItem, setEditingItem] = useState<any>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -135,10 +136,14 @@ export default function DhuafaAdmin() {
     setFormData({ nomor: '', name: '', type: 'fakir_miskin', address: '', phone: '', nik: '', keterangan: '' })
   }
 
-  const filteredData = (Array.isArray(data) ? data : []).filter((item: any) => 
-    item?.name?.toLowerCase().includes(search.toLowerCase()) ||
-    item?.nomor?.includes(search)
-  )
+  const filteredData = (Array.isArray(data) ? data : []).filter((item: any) => {
+    const matchesSearch = item?.name?.toLowerCase().includes(search.toLowerCase()) ||
+      item?.nomor?.includes(search)
+    
+    const matchesCategory = categoryFilter === 'all' || item?.type === categoryFilter
+    
+    return matchesSearch && matchesCategory
+  })
 
   const getTypeName = (type: string) => {
     const types: any = {
@@ -362,14 +367,30 @@ export default function DhuafaAdmin() {
           <CardHeader className="bg-white border-b p-8 sm:p-10">
             <div className="flex flex-col md:flex-row justify-between items-center gap-4">
               <CardTitle className="text-xl font-bold text-[#0b3d2e]">Database Penerima</CardTitle>
-              <div className="relative w-full md:w-96">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input 
-                  placeholder="Cari nama atau nomor..." 
-                  className="pl-10 rounded-full bg-gray-50/50 border-gray-100 focus:bg-white transition-all h-12"
-                  value={search}
-                  onChange={e => setSearch(e.target.value)}
-                />
+              <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
+                <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                  <SelectTrigger className="w-full sm:w-48 rounded-full bg-gray-50/50 border-gray-100 h-12">
+                    <SelectValue placeholder="Semua Kategori" />
+                  </SelectTrigger>
+                  <SelectContent className="rounded-xl">
+                    <SelectItem value="all">Semua Kategori</SelectItem>
+                    <SelectItem value="fakir_miskin">Fakir Miskin</SelectItem>
+                    <SelectItem value="yatim">Yatim</SelectItem>
+                    <SelectItem value="yatim_piatu">Yatim Piatu</SelectItem>
+                    <SelectItem value="janda">Janda</SelectItem>
+                    <SelectItem value="guru_ngaji">Guru Ngaji</SelectItem>
+                    <SelectItem value="fisabilillah">Fisabilillah</SelectItem>
+                  </SelectContent>
+                </Select>
+                <div className="relative w-full md:w-96">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input 
+                    placeholder="Cari nama atau nomor..." 
+                    className="pl-10 rounded-full bg-gray-50/50 border-gray-100 focus:bg-white transition-all h-12"
+                    value={search}
+                    onChange={e => setSearch(e.target.value)}
+                  />
+                </div>
               </div>
             </div>
           </CardHeader>
