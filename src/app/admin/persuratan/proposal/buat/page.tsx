@@ -622,6 +622,8 @@ Pastikan setiap poin dimulai dengan kata kerja (Contoh: Menjalin, Meningkatkan, 
         removeContainer: true,
         imageTimeout: 0
       };
+
+      if (isBulk) {
         setIsBulkProcessing(true)
         setBulkProgress(0)
         toast.info(`Menyiapkan ${bulkRecipients.length} PDF...`)
