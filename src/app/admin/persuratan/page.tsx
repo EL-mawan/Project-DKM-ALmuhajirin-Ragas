@@ -275,15 +275,21 @@ export default function PersuratanAdmin() {
       }
 
       doc.setFont('times', 'bold')
-      doc.text('Ketua DKM,', 50, curY, { align: 'center' })
-      doc.text('Sekretaris,', pageWidth - 50, curY, { align: 'center' })
+      const colLeft = 50
+      const colRight = pageWidth - 50
+
+      const ketuaName = formData.namaKetua || formData.ttdKetuaDKM || 'H. AGUNG GUNAWAN'
+      const sekretarisName = formData.namaSekretaris || formData.ttdSekretarisDKM || '..........................'
+
+      doc.text('Ketua DKM,', colLeft, curY, { align: 'center' })
+      doc.text('Sekretaris,', colRight, curY, { align: 'center' })
       
       doc.setDrawColor(200)
-      doc.line(25, curY + 22, 75, curY + 22)
-      doc.line(pageWidth - 75, curY + 22, pageWidth - 25, curY + 22)
+      doc.line(colLeft - 25, curY + 22, colLeft + 25, curY + 22)
+      doc.line(colRight - 25, curY + 22, colRight + 25, curY + 22)
       
-      doc.text('H. AGUNG GUNAWAN', 50, curY + 28, { align: 'center' })
-      doc.text('..........................', pageWidth - 50, curY + 28, { align: 'center' })
+      doc.text(ketuaName, colLeft, curY + 28, { align: 'center' })
+      doc.text(sekretarisName, colRight, curY + 28, { align: 'center' })
 
       // Generate filename
       const filename = `${item.type}_${item.title.replace(/[^a-z0-9]/gi, '_')}.pdf`

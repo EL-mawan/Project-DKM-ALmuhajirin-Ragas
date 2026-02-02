@@ -16,6 +16,8 @@ import {
   Download, 
   ChevronLeft, 
   ChevronRight, 
+  ArrowLeft,
+  ArrowRight,
   FileText, 
   Users, 
   FileCheck,
@@ -23,11 +25,11 @@ import {
   Image as ImageIcon,
   RotateCcw,
   Calendar,
-  Sparkles, // Keep Sparkles for now, as it's not explicitly removed, only replaced in usage
+  Sparkles,
   CheckCircle,
   XCircle,
   AlertCircle,
-  Wand2 // Added Wand2
+  Wand2
 } from 'lucide-react'
 
 import jsPDF from 'jspdf'
@@ -92,7 +94,6 @@ interface ProposalData {
   tempat: string
   namaKetua: string
   namaSekretaris: string
-  namaBendahara: string
   namaTokohMasyarakat: string
   namaKetuaRW: string
   namaKetuaRT: string
@@ -157,8 +158,7 @@ Oleh karena itu, kami memandang perlu untuk melaksanakan kegiatan ini sebagai ba
       { role: 'Ketua Pemuda', name: '' }
     ],
     administrasi: [
-      { role: 'Sekretaris', name: '' },
-      { role: 'Bendahara', name: '' }
+      { role: 'Sekretaris', name: '' }
     ],
     operasional: []
   },
@@ -167,7 +167,6 @@ Oleh karena itu, kami memandang perlu untuk melaksanakan kegiatan ini sebagai ba
   tempat: 'Argawana',
   namaKetua: '',
   namaSekretaris: '',
-  namaBendahara: '',
   namaTokohMasyarakat: '',
   namaKetuaRW: '',
   namaKetuaRT: '',
@@ -301,7 +300,6 @@ function ProposalBuilderContent() {
       if (category === 'pimpinanAtas' && index === 3) updates.namaKetuaRT = name
       if (category === 'pimpinanAtas' && index === 4) updates.namaKetuaPemuda = name
       if (category === 'administrasi' && index === 0) updates.namaSekretaris = name
-      if (category === 'administrasi' && index === 1) updates.namaBendahara = name
       
       return { ...prev, ...updates }
     })
@@ -667,7 +665,7 @@ Pastikan setiap poin dimulai dengan kata kerja (Contoh: Menjalin, Meningkatkan, 
           for (let j = 0; j < pages.length; j++) {
             const page = pages[j] as HTMLElement
             const canvas = await html2canvas(page, {
-              scale: 2.5,
+              scale: 3,
               useCORS: true,
               logging: false,
               backgroundColor: '#ffffff',
@@ -713,7 +711,7 @@ Pastikan setiap poin dimulai dengan kata kerja (Contoh: Menjalin, Meningkatkan, 
         for (let i = 0; i < pages.length; i++) {
           const page = pages[i] as HTMLElement
           const canvas = await html2canvas(page, {
-            scale: 2.5,
+            scale: 3,
             useCORS: true,
             logging: false,
             backgroundColor: '#ffffff',
@@ -1483,7 +1481,7 @@ function PageCover({ data }: { data: ProposalData }) {
             <div style={{ position: 'absolute', bottom: 0, left: 0, width: '350px', height: '350px', background: 'radial-gradient(circle, #ecfdf5 0%, transparent 70%)', zIndex: 0, opacity: 0.6 }}></div>
             
             <div style={{ zIndex: 1, textAlign: 'center', width: '100%', position: 'relative' }}>
-                <img src={data.logoKiri || "/logo.png"} style={{ width: '160px', height: '160px', objectFit: 'contain', margin: '0 auto 60px auto', filter: 'drop-shadow(0 10px 20px rgba(0,0,0,0.05))' }} />
+                <img src={data.logoKiri || "/logo.png"} alt="Logo Kiri" style={{ width: '160px', height: '160px', objectFit: 'contain', margin: '0 auto 60px auto', filter: 'drop-shadow(0 10px 20px rgba(0,0,0,0.05))' }} />
                 
                 <h1 style={{ fontSize: '18pt', fontWeight: 'bold', margin: '0 0 70px 0', color: '#475569', letterSpacing: '0.2em' }}>PROPOSAL</h1>
                 
@@ -1519,14 +1517,14 @@ function PageWrapper({ children, data }: { children: React.ReactNode, data: Prop
             }}>
         
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-            <img src={data.logoKiri || "/logo.png"} style={{ width: '85px', height: '85px', objectFit: 'contain' }} />
+            <img src={data.logoKiri || "/logo.png"} alt="Logo Kiri" style={{ width: '85px', height: '85px', objectFit: 'contain' }} />
             <div style={{ textAlign: 'center', flex: 1, padding: '0 20px' }}>
                 <h1 style={{ fontWeight: 'bold', fontSize: '15pt', margin: '0', textTransform: 'uppercase' }}>{data.namaKopSurat}</h1>
                 <p style={{ fontSize: '10pt', margin: '5px 0', whiteSpace: 'pre-line' }}>{data.alamatKopSurat}</p>
                 <p style={{ fontSize: '9pt', margin: '0', fontStyle: 'italic' }}>{data.kontakKopSurat}</p>
             </div>
             {data.logoKanan ? (
-                <img src={data.logoKanan} style={{ width: '85px', height: '85px', objectFit: 'contain' }} />
+                <img src={data.logoKanan} alt="Logo Kanan" style={{ width: '85px', height: '85px', objectFit: 'contain' }} />
             ) : <div style={{ width: '85px' }} />}
         </div>
         
@@ -1572,13 +1570,13 @@ function Page1({ data, bulkRecipient, onNavigate }: { data: ProposalData, bulkRe
 
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '20px', textAlign: 'center' }}>
                     <div onClick={() => onNavigate?.('struktur')} style={{ cursor: 'pointer' }} title="Klik untuk mengedit">
-                        <p style={{ fontWeight: 'bold' }}>Ketua DKM,</p>
+                        <p style={{ fontWeight: 'bold', fontSize: '11pt' }}>Ketua DKM,</p>
                         <div style={{ height: '70px' }}></div>
                         <p style={{ fontWeight: 'bold', textDecoration: 'underline', fontSize: '11pt' }}>{data.namaKetua || '( ........................ )'}</p>
                     </div>
 
                     <div onClick={() => onNavigate?.('struktur')} style={{ cursor: 'pointer' }} title="Klik untuk mengedit">
-                        <p style={{ fontWeight: 'bold' }}>Sekretaris DKM,</p>
+                        <p style={{ fontWeight: 'bold', fontSize: '11pt' }}>Sekretaris DKM,</p>
                         <div style={{ height: '70px' }}></div>
                         <p style={{ fontWeight: 'bold', textDecoration: 'underline', fontSize: '11pt' }}>{data.namaSekretaris || '( ........................ )'}</p>
                     </div>
@@ -1722,63 +1720,63 @@ function Page5({ data, onNavigate }: { data: ProposalData, onNavigate?: (tab: st
                     <p style={{ fontStyle: 'italic' }}>Argawana, {data.tanggal}</p>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '15px', textAlign: 'center', marginBottom: '40px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '20px', textAlign: 'center', marginBottom: '40px' }}>
                     <div onClick={() => onNavigate?.('struktur')} style={{ cursor: 'pointer' }} title="Klik untuk mengedit">
                         <p style={{ fontSize: '11pt', fontWeight: 'bold' }}>Ketua DKM,</p>
-                        <div style={{ height: '90px' }}></div>
-                        <p style={{ fontWeight: 'bold', textDecoration: 'underline', fontSize: '12pt' }}>{data.namaKetua || '( ........................ )'}</p>
+                        <div style={{ height: '80px' }}></div>
+                        <p style={{ fontWeight: 'bold', textDecoration: 'underline', fontSize: '11pt' }}>{data.namaKetua || '( ........................ )'}</p>
                     </div>
 
                     <div onClick={() => onNavigate?.('struktur')} style={{ cursor: 'pointer' }} title="Klik untuk mengedit">
                         <p style={{ fontSize: '11pt', fontWeight: 'bold' }}>Sekretaris DKM,</p>
-                        <div style={{ height: '90px' }}></div>
-                        <p style={{ fontWeight: 'bold', textDecoration: 'underline', fontSize: '12pt' }}>{data.namaSekretaris || '( ........................ )'}</p>
+                        <div style={{ height: '80px' }}></div>
+                        <p style={{ fontWeight: 'bold', textDecoration: 'underline', fontSize: '11pt' }}>{data.namaSekretaris || '( ........................ )'}</p>
                     </div>
                 </div>
 
                 <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-                    <p style={{ fontWeight: 'bold', fontSize: '13pt', textTransform: 'uppercase', letterSpacing: '1px' }}>Mengetahui,</p>
+                    <p style={{ fontWeight: 'bold', fontSize: '12pt', textTransform: 'uppercase', letterSpacing: '1px' }}>Mengetahui,</p>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '25px', textAlign: 'center' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '30px', textAlign: 'center' }}>
                     <div onClick={() => onNavigate?.('struktur')} style={{ 
-                        opacity: data.namaKetuaRT ? 1 : 0.3, 
+                        opacity: data.namaKetuaRT ? 1 : 0.4, 
                         cursor: 'pointer' 
                     }} title="Klik untuk mengedit">
-                        <p style={{ fontSize: '11pt', fontWeight: 'bold' }}>Ketua RT 015,</p>
-                        <p style={{ fontSize: '10pt', fontStyle: 'italic' }}>Kampung Ragas Grenyang</p>
-                        <div style={{ height: '70px' }}></div>
-                        <p style={{ fontSize: '11pt', fontWeight: 'bold', textDecoration: 'underline' }}>{data.namaKetuaRT || '( ........................ )'}</p>
+                        <p style={{ fontSize: '10pt', fontWeight: 'bold' }}>Ketua RT 015,</p>
+                        <p style={{ fontSize: '9pt', fontStyle: 'italic' }}>Kampung Ragas Grenyang</p>
+                        <div style={{ height: '60px' }}></div>
+                        <p style={{ fontSize: '10pt', fontWeight: 'bold', textDecoration: 'underline' }}>{data.namaKetuaRT || '( ........................ )'}</p>
                     </div>
                     <div onClick={() => onNavigate?.('struktur')} style={{ 
-                        opacity: data.namaKetuaRW ? 1 : 0.3, 
+                        opacity: data.namaKetuaRW ? 1 : 0.4, 
                         cursor: 'pointer' 
                     }} title="Klik untuk mengedit">
-                        <p style={{ fontSize: '11pt', fontWeight: 'bold' }}>Ketua RW 008,</p>
-                        <p style={{ fontSize: '10pt', fontStyle: 'italic' }}>Kampung Ragas Grenyang</p>
-                        <div style={{ height: '70px' }}></div>
-                        <p style={{ fontSize: '11pt', fontWeight: 'bold', textDecoration: 'underline' }}>{data.namaKetuaRW || '( ........................ )'}</p>
+                        <p style={{ fontSize: '10pt', fontWeight: 'bold' }}>Ketua RW 008,</p>
+                        <p style={{ fontSize: '9pt', fontStyle: 'italic' }}>Kampung Ragas Grenyang</p>
+                        <div style={{ height: '60px' }}></div>
+                        <p style={{ fontSize: '10pt', fontWeight: 'bold', textDecoration: 'underline' }}>{data.namaKetuaRW || '( ........................ )'}</p>
                     </div>
                     <div onClick={() => onNavigate?.('struktur')} style={{ cursor: 'pointer' }} title="Klik untuk mengedit">
                         <p style={{ fontSize: '11pt', fontWeight: 'bold' }}>Tokoh Masyarakat,</p>
                         <p style={{ fontSize: '10pt', fontStyle: 'italic' }}>Masjid Al-Muhajirin</p>
-                        <div style={{ height: '70px' }}></div>
-                        <p style={{ fontWeight: 'bold', textDecoration: 'underline', fontSize: '12pt' }}>{data.namaTokohMasyarakat || '( ........................ )'}</p>
+                        <div style={{ height: '60px' }}></div>
+                        <p style={{ fontWeight: 'bold', textDecoration: 'underline', fontSize: '11pt' }}>{data.namaTokohMasyarakat || '( ........................ )'}</p>
                     </div>
                     <div onClick={() => onNavigate?.('struktur')} style={{ 
-                        opacity: data.namaKetuaPemuda ? 1 : 0.3, 
+                        opacity: data.namaKetuaPemuda ? 1 : 0.4, 
                         cursor: 'pointer' 
                     }} title="Klik untuk mengedit">
-                        <p style={{ fontSize: '11pt', fontWeight: 'bold' }}>Ketua Pemuda,</p>
-                        <p style={{ fontSize: '10pt', fontStyle: 'italic' }}>Kampung Ragas Grenyang</p>
-                        <div style={{ height: '70px' }}></div>
-                        <p style={{ fontSize: '11pt', textDecoration: 'underline',fontWeight: 'bold' }}>{data.namaKetuaPemuda || '( ........................ )'}</p>
+                        <p style={{ fontSize: '10pt', fontWeight: 'bold' }}>Ketua Pemuda,</p>
+                        <p style={{ fontSize: '9pt', fontStyle: 'italic' }}>Kampung Ragas Grenyang</p>
+                        <div style={{ height: '60px' }}></div>
+                        <p style={{ fontSize: '10pt', textDecoration: 'underline',fontWeight: 'bold' }}>{data.namaKetuaPemuda || '( ........................ )'}</p>
                     </div>
 
                     {data.namaKepalaDesa && (
-                        <div style={{ gridColumn: '1 / -1', marginTop: '20px', cursor: 'pointer' }} onClick={() => onNavigate?.('ttd')} title="Klik untuk mengedit">
+                        <div style={{ gridColumn: '1 / -1', marginTop: '10px', cursor: 'pointer' }} onClick={() => onNavigate?.('ttd')} title="Klik untuk mengedit">
                             <p style={{ fontSize: '11pt', fontWeight: 'bold' }}>Kepala Desa Argawana,</p>
-                            <div style={{ height: '70px' }}></div>
+                            <div style={{ height: '60px' }}></div>
                             <p style={{ fontSize: '11pt', fontWeight: 'bold', textDecoration: 'underline' }}>{data.namaKepalaDesa}</p>
                         </div>
                     )}

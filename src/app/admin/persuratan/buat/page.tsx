@@ -1105,10 +1105,6 @@ Salam silaturahmi kami sampaikan, teriring doa semoga bapak beserta keluarga sel
                           <Label className="text-[10px] uppercase font-black text-emerald-600 tracking-widest block">Ketua DKM</Label>
                           <Input className="h-12 rounded-2xl bg-slate-50 border-none font-bold text-center" placeholder="Nama Ketua" value={formData.ttdKetuaDKM} onChange={e => setFormData({...formData, ttdKetuaDKM: e.target.value})} />
                         </div>
-                        <div className="p-6 rounded-3xl bg-white border border-slate-100 space-y-3 shadow-sm">
-                          <Label className="text-[10px] uppercase font-black text-emerald-600 tracking-widest block">Bendahara DKM</Label>
-                          <Input className="h-12 rounded-2xl bg-slate-50 border-none font-bold text-center" placeholder="Nama Bendahara" value={formData.ttdBendaharaDKM} onChange={e => setFormData({...formData, ttdBendaharaDKM: e.target.value})} />
-                        </div>
                       </div>
 
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-end">
@@ -1203,19 +1199,14 @@ Salam silaturahmi kami sampaikan, teriring doa semoga bapak beserta keluarga sel
 
                 {/* SIGNATURES */}
                 <div className="mt-16 space-y-12">
-                   <div className="grid grid-cols-3 gap-4 text-[10px] text-center font-bold font-serif">
+                   <div className="grid grid-cols-2 gap-8 text-[10px] text-center font-bold font-serif">
                      <div className="space-y-16">
                        <p className="uppercase tracking-widest text-[#0b3d2e] border-b border-slate-100 pb-1">Sekretaris DKM</p>
                        <div>
                          <p className="underline uppercase font-black decoration-slate-900">{formData.ttdSekretarisDKM || '............................'}</p>
                        </div>
                      </div>
-                     <div className="space-y-16">
-                       <p className="uppercase tracking-widest text-[#0b3d2e] border-b border-slate-100 pb-1">Bendahara DKM</p>
-                       <div>
-                         <p className="underline uppercase font-black decoration-slate-900">{formData.ttdBendaharaDKM || '............................'}</p>
-                       </div>
-                     </div>
+
                      <div className="space-y-16">
                        <p className="uppercase tracking-widest text-[#0b3d2e] border-b border-slate-100 pb-1">Ketua DKM</p>
                        <div>
