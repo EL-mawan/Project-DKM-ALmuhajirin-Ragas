@@ -1019,6 +1019,14 @@ Pastikan setiap poin dimulai dengan kata kerja (Contoh: Menjalin, Meningkatkan, 
                     )}
                   </div>
                 </div>
+
+                <div className="flex justify-end pt-8 border-t border-slate-100">
+                  <Button 
+                    onClick={() => setActiveTab('struktur')} 
+                    className="h-12 px-10 rounded-full bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-black uppercase tracking-widest text-[10px] hover:shadow-xl hover:shadow-emerald-100 group transition-all">
+                    Lanjut ke Struktur <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                  </Button>
+                </div>
               </TabsContent>
 
               <TabsContent value="struktur" className="space-y-10 mt-0">
@@ -1087,6 +1095,20 @@ Pastikan setiap poin dimulai dengan kata kerja (Contoh: Menjalin, Meningkatkan, 
                               <p className="text-slate-400 text-sm italic col-span-2">Belum ada seksi operasional ditambahkan.</p>
                           )}
                       </div>
+                  </div>
+
+                  <div className="flex justify-between pt-10 border-t border-slate-100">
+                    <Button 
+                      variant="ghost" 
+                      onClick={() => setActiveTab('pendahuluan')} 
+                      className="text-slate-400 group font-black uppercase text-[10px] tracking-widest hover:text-slate-600">
+                      <ArrowLeft className="h-4 w-4 mr-2 group-hover:-translate-x-1 transition-transform" /> Kembali
+                    </Button>
+                    <Button 
+                      onClick={() => setActiveTab('rab')} 
+                      className="h-12 px-10 rounded-full bg-gradient-to-r from-indigo-600 to-blue-600 text-white font-black uppercase tracking-widest text-[10px] hover:shadow-xl hover:shadow-indigo-100 group transition-all">
+                      Lanjut ke RAB <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                    </Button>
                   </div>
               </TabsContent>
 
@@ -1180,6 +1202,20 @@ Pastikan setiap poin dimulai dengan kata kerja (Contoh: Menjalin, Meningkatkan, 
                     </table>
                   </div>
                 </div>
+
+                <div className="flex justify-between pt-10 border-t border-slate-100">
+                  <Button 
+                    variant="ghost" 
+                    onClick={() => setActiveTab('struktur')} 
+                    className="text-slate-400 group font-black uppercase text-[10px] tracking-widest hover:text-slate-600">
+                    <ArrowLeft className="h-4 w-4 mr-2 group-hover:-translate-x-1 transition-transform" /> Kembali
+                  </Button>
+                  <Button 
+                    onClick={() => setActiveTab('ttd')} 
+                    className="h-12 px-10 rounded-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-black uppercase tracking-widest text-[10px] hover:shadow-xl hover:shadow-purple-100 group transition-all">
+                    Lanjut ke Tanda Tangan <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                  </Button>
+                </div>
               </TabsContent>
 
               <TabsContent value="ttd" className="space-y-8 mt-0">
@@ -1229,6 +1265,20 @@ Pastikan setiap poin dimulai dengan kata kerja (Contoh: Menjalin, Meningkatkan, 
                      <p className="text-xs text-slate-500 italic">* Jika diisi, tanda tangan Kepala Desa akan muncul di bagian Mengetahui</p>
                    </div>
                  </div>
+
+                  <div className="flex justify-between pt-10 border-t border-slate-100">
+                    <Button 
+                      variant="ghost" 
+                      onClick={() => setActiveTab('rab')} 
+                      className="text-slate-400 group font-black uppercase text-[10px] tracking-widest hover:text-slate-600">
+                      <ArrowLeft className="h-4 w-4 mr-2 group-hover:-translate-x-1 transition-transform" /> Kembali
+                    </Button>
+                    <Button 
+                      onClick={() => setActiveTab('foto')} 
+                      className="h-12 px-10 rounded-full bg-gradient-to-r from-pink-600 to-rose-600 text-white font-black uppercase tracking-widest text-[10px] hover:shadow-xl hover:shadow-pink-100 group transition-all">
+                      Lanjut ke Lampiran Foto <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                    </Button>
+                  </div>
                </TabsContent>
 
                <TabsContent value="foto" className="space-y-8 mt-0">
