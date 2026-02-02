@@ -116,158 +116,194 @@ export default function PersuratanAdmin() {
      item.nomorSurat?.toLowerCase().includes(search.toLowerCase()))
   )
 
-  const generatePDF = (item: any) => {
-    const doc = new jsPDF()
-    const dkmEmerald = [11, 61, 46] // #0b3d2e
-    const dkmGold = [158, 115, 30] // #9e731e
-    const dkmSlate = [15, 23, 42] // #0f172a
-    
-    const pageWidth = doc.internal.pageSize.getWidth()
-    const centerX = pageWidth / 2
-
-    // Parse Content if JSON
-    let formData: any = {}
+  const generatePDF = async (item: any) => {
     try {
-      formData = typeof item.content === 'string' ? JSON.parse(item.content) : item.content
-    } catch (e) {
-      formData = { content: item.content }
-    }
+      // Create PDF with A4 size
+      const doc = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4'
+      })
+      
+      const dkmEmerald = [11, 61, 46] // #0b3d2e
+      const dkmGold = [158, 115, 30] // #9e731e
+      const dkmSlate = [15, 23, 42] // #0f172a
+      
+      const pageWidth = doc.internal.pageSize.getWidth()
+      const pageHeight = doc.internal.pageSize.getHeight()
+      const centerX = pageWidth / 2
+      const margin = 15
 
-    // --- 1. PREMIUM HEADER / KOP ---
-    // Decorative side bar
-    doc.setFillColor(dkmEmerald[0], dkmEmerald[1], dkmEmerald[2])
-    doc.rect(0, 0, 5, 297, 'F')
-    
-    // Header Line
-    doc.setFillColor(dkmGold[0], dkmGold[1], dkmGold[2])
-    doc.rect(15, 10, 180, 0.5, 'F')
-    
-    // DKM Text
-    doc.setFontSize(14)
-    doc.setFont('times', 'bold')
-    doc.setTextColor(dkmEmerald[0], dkmEmerald[1], dkmEmerald[2])
-    doc.text('DEWAN KEMAKMURAN MASJID (DKM)', centerX, 22, { align: 'center', charSpace: 1 })
-    
-    doc.setFontSize(22)
-    doc.text('AL-MUHAJIRIN RAGAS GRENYANG', centerX, 32, { align: 'center' })
-    
-    doc.setFontSize(9)
-    doc.setFont('times', 'italic')
-    doc.setTextColor(148, 163, 184)
-    doc.text('Kp. Ragas Grenyang, Desa Argawana, Kec. Puloampel, Serang - Banten', centerX, 38, { align: 'center' })
-    doc.text('Email: dkm.almuhajirin.ragas@gmail.com | Website: dkm-almuhajirin.vercel.app', centerX, 43, { align: 'center' })
-    
-    doc.setDrawColor(dkmEmerald[0], dkmEmerald[1], dkmEmerald[2])
-    doc.setLineWidth(0.8)
-    doc.line(15, 48, 195, 48)
-    doc.setLineWidth(0.2)
-    doc.line(15, 50, 195, 50)
+      // Parse Content if JSON
+      let formData: any = {}
+      try {
+        formData = typeof item.content === 'string' ? JSON.parse(item.content) : item.content
+      } catch (e) {
+        formData = { content: item.content }
+      }
 
-    let curY = 65
-    doc.setTextColor(dkmSlate[0], dkmSlate[1], dkmSlate[2])
-
-    // --- 2. DOCUMENT INFO ---
-    const dateStr = new Date(item.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })
-    doc.setFont('times', 'normal')
-    doc.setFontSize(11)
-    doc.text(`${item.location || 'Bojonegara'}, ${dateStr}`, 195, curY, { align: 'right' })
-    
-    doc.text(`Nomor      : ${item.nomorSurat || '-'}`, 15, curY)
-    doc.text(`Lampiran  : -`, 15, curY + 6)
-    doc.setFont('times', 'bold')
-    doc.text(`Perihal      : ${item.title.toUpperCase()}`, 15, curY + 12)
-    
-    curY += 25
-
-    // Recipient Section
-    if (item.recipient) {
-      doc.setFont('times', 'normal')
-      doc.text('Kepada Yth.', 15, curY)
+      // --- 1. PREMIUM HEADER / KOP ---
+      // Decorative side bar
+      doc.setFillColor(dkmEmerald[0], dkmEmerald[1], dkmEmerald[2])
+      doc.rect(0, 0, 5, pageHeight, 'F')
+      
+      // Header Line
+      doc.setFillColor(dkmGold[0], dkmGold[1], dkmGold[2])
+      doc.rect(margin, 10, pageWidth - (margin * 2), 0.5, 'F')
+      
+      // DKM Text
+      doc.setFontSize(14)
       doc.setFont('times', 'bold')
-      doc.text(item.recipient, 15, curY + 6)
+      doc.setTextColor(dkmEmerald[0], dkmEmerald[1], dkmEmerald[2])
+      doc.text('DEWAN KEMAKMURAN MASJID (DKM)', centerX, 22, { align: 'center' })
       
-      if (formData.penerimaJabatan) {
-        doc.setFont('times', 'italic')
-        doc.setFontSize(10)
-        doc.text(formData.penerimaJabatan, 15, curY + 11)
-        doc.setFontSize(11)
-      }
+      doc.setFontSize(22)
+      doc.text('AL-MUHAJIRIN RAGAS GRENYANG', centerX, 32, { align: 'center' })
+      
+      doc.setFontSize(9)
+      doc.setFont('times', 'italic')
+      doc.setTextColor(148, 163, 184)
+      doc.text('Kp. Ragas Grenyang, Desa Argawana, Kec. Puloampel, Serang - Banten', centerX, 38, { align: 'center' })
+      doc.text('Email: dkm.almuhajirin.ragas@gmail.com | Website: dkm-almuhajirin.vercel.app', centerX, 43, { align: 'center' })
+      
+      doc.setDrawColor(dkmEmerald[0], dkmEmerald[1], dkmEmerald[2])
+      doc.setLineWidth(0.8)
+      doc.line(margin, 48, pageWidth - margin, 48)
+      doc.setLineWidth(0.2)
+      doc.line(margin, 50, pageWidth - margin, 50)
 
+      let curY = 65
+      doc.setTextColor(dkmSlate[0], dkmSlate[1], dkmSlate[2])
+
+      // --- 2. DOCUMENT INFO ---
+      const dateStr = new Date(item.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })
       doc.setFont('times', 'normal')
-      doc.text('di -', 15, curY + (formData.penerimaJabatan ? 17 : 12))
-      doc.text(item.location || 'Tempat', 20, curY + (formData.penerimaJabatan ? 22 : 18))
-      curY += 35
-    }
-
-    // --- 3. GREETING ---
-    doc.setFont('times', 'normal')
-    doc.text('Assalamu’alaikum Warahmatullahi Wabarakatuh,', 15, curY)
-    curY += 10
-
-    // --- 4. CONTENT RENDERING ---
-    const renderContent = (text: string, fontSize = 11, fontStyle = 'normal') => {
-      if (!text) return
-      doc.setFont('times', fontStyle)
-      doc.setFontSize(fontSize)
-      const split = doc.splitTextToSize(text, 170)
-      doc.text(split, 15, curY, { align: 'justify', lineHeightFactor: 1.5 })
-      curY += (split.length * 7) + 5
-    }
-
-    // If it's a proposal from the builder, it might have specific structure
-    if (item.type === 'PROPOSAL') {
-      const pData = formData
-      renderContent(pData.suratPengantar || pData.perihal || item.title)
-    } else {
-      // Standard Letter types (Undangan, Surat Resmi)
-      if (formData.isiSuratPengantar) renderContent(formData.isiSuratPengantar)
+      doc.setFontSize(11)
+      doc.text(`${item.location || 'Bojonegara'}, ${dateStr}`, pageWidth - margin, curY, { align: 'right' })
       
-      if (formData.latarBelakang) {
-        renderContent('Dasar Pemikiran:', 11, 'bold')
-        renderContent(formData.latarBelakang)
+      doc.text(`Nomor      : ${item.nomorSurat || '-'}`, margin, curY)
+      doc.text(`Lampiran  : -`, margin, curY + 6)
+      doc.setFont('times', 'bold')
+      doc.text(`Perihal      : ${item.title.toUpperCase()}`, margin, curY + 12)
+      
+      curY += 25
+
+      // Recipient Section
+      if (item.recipient) {
+        doc.setFont('times', 'normal')
+        doc.text('Kepada Yth.', margin, curY)
+        doc.setFont('times', 'bold')
+        doc.text(item.recipient, margin, curY + 6)
+        
+        if (formData.penerimaJabatan) {
+          doc.setFont('times', 'italic')
+          doc.setFontSize(10)
+          doc.text(formData.penerimaJabatan, margin, curY + 11)
+          doc.setFontSize(11)
+        }
+
+        doc.setFont('times', 'normal')
+        doc.text('di -', margin, curY + (formData.penerimaJabatan ? 17 : 12))
+        doc.text(item.location || 'Tempat', margin + 5, curY + (formData.penerimaJabatan ? 22 : 18))
+        curY += 35
       }
 
-      if (formData.maksudTujuanList && Array.isArray(formData.maksudTujuanList) && formData.maksudTujuanList.length > 0) {
-        renderContent('Maksud dan Tujuan:', 11, 'bold')
-        formData.maksudTujuanList.forEach((point: string, idx: number) => {
-          const splitPoint = doc.splitTextToSize(`${idx + 1}. ${point}`, 165)
-          doc.text(splitPoint, 20, curY)
-          curY += (splitPoint.length * 7)
-        })
-        curY += 5
+      // --- 3. GREETING ---
+      doc.setFont('times', 'normal')
+      doc.text('Assalamu\'alaikum Warahmatullahi Wabarakatuh,', margin, curY)
+      curY += 10
+
+      // --- 4. CONTENT RENDERING ---
+      const renderContent = (text: string, fontSize = 11, fontStyle: any = 'normal') => {
+        if (!text) return
+        doc.setFont('times', fontStyle)
+        doc.setFontSize(fontSize)
+        const maxWidth = pageWidth - (margin * 2)
+        const split = doc.splitTextToSize(text, maxWidth)
+        doc.text(split, margin, curY, { align: 'justify', lineHeightFactor: 1.5 })
+        curY += (split.length * 6) + 3
       }
 
-      // Fallback if no specific fields
-      if (!formData.isiSuratPengantar && !formData.latarBelakang) {
-        renderContent(item.content || item.title)
+      // If it's a proposal from the builder, it might have specific structure
+      if (item.type === 'PROPOSAL') {
+        const pData = formData
+        renderContent(pData.suratPengantar || pData.perihal || item.title)
+      } else {
+        // Standard Letter types (Undangan, Surat Resmi)
+        if (formData.isiSuratPengantar) renderContent(formData.isiSuratPengantar)
+        
+        if (formData.latarBelakang) {
+          renderContent('Dasar Pemikiran:', 11, 'bold')
+          renderContent(formData.latarBelakang)
+        }
+
+        if (formData.maksudTujuanList && Array.isArray(formData.maksudTujuanList) && formData.maksudTujuanList.length > 0) {
+          renderContent('Maksud dan Tujuan:', 11, 'bold')
+          formData.maksudTujuanList.forEach((point: string, idx: number) => {
+            const maxWidth = pageWidth - (margin * 2) - 5
+            const splitPoint = doc.splitTextToSize(`${idx + 1}. ${point}`, maxWidth)
+            doc.text(splitPoint, margin + 5, curY)
+            curY += (splitPoint.length * 6)
+          })
+          curY += 3
+        }
+
+        // Fallback if no specific fields
+        if (!formData.isiSuratPengantar && !formData.latarBelakang) {
+          renderContent(item.content || item.title)
+        }
       }
+
+      // Closing
+      doc.setFont('times', 'normal')
+      doc.setFontSize(11)
+      if (curY > pageHeight - 60) { 
+        doc.addPage()
+        curY = 30
+      }
+      
+      const closingText = doc.splitTextToSize('Demikian surat ini kami sampaikan, atas perhatian dan kerjasamanya kami ucapkan terima kasih.', pageWidth - (margin * 2))
+      doc.text(closingText, margin, curY)
+      curY += (closingText.length * 6) + 3
+      doc.text('Wassalamu\'alaikum Warahmatullahi Wabarakatuh,', margin, curY)
+      curY += 10
+      
+      // --- 5. SIGNATURE BLOCK ---
+      if (curY > pageHeight - 50) { 
+        doc.addPage()
+        curY = 30
+      }
+
+      doc.setFont('times', 'bold')
+      doc.text('Ketua DKM,', 50, curY, { align: 'center' })
+      doc.text('Sekretaris,', pageWidth - 50, curY, { align: 'center' })
+      
+      doc.setDrawColor(200)
+      doc.line(25, curY + 22, 75, curY + 22)
+      doc.line(pageWidth - 75, curY + 22, pageWidth - 25, curY + 22)
+      
+      doc.text('H. AGUNG GUNAWAN', 50, curY + 28, { align: 'center' })
+      doc.text('..........................', pageWidth - 50, curY + 28, { align: 'center' })
+
+      // Generate filename
+      const filename = `${item.type}_${item.title.replace(/[^a-z0-9]/gi, '_')}.pdf`
+      
+      // Use blob method for better download reliability
+      const pdfBlob = doc.output('blob')
+      const url = URL.createObjectURL(pdfBlob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = filename
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(url)
+      
+      toast.success('PDF berhasil diunduh!')
+    } catch (error) {
+      console.error('Error generating PDF:', error)
+      toast.error('Gagal mengunduh PDF')
     }
-
-    // Closing
-    doc.setFont('times', 'normal')
-    doc.setFontSize(11)
-    if (curY > 240) { doc.addPage(); curY = 30; }
-    
-    doc.text('Demikian surat ini kami sampaikan, atas perhatian dan kerjasamanya kami ucapkan terima kasih.', 15, curY)
-    doc.text('Wassalamu’alaikum Warahmatullahi Wabarakatuh,', 15, curY + 7)
-    
-    // --- 5. SIGNATURE BLOCK ---
-    const signatureY = Math.min(260, Math.max(curY + 30, doc.internal.pageSize.height - 50))
-    if (signatureY > 270) { doc.addPage(); curY = 30; }
-
-    doc.setFont('times', 'bold')
-    doc.text('Ketua DKM,', 50, signatureY, { align: 'center' })
-    doc.text('Sekretaris,', 150, signatureY, { align: 'center' })
-    
-    doc.setDrawColor(200)
-    doc.line(25, signatureY + 22, 75, signatureY + 22)
-    doc.line(125, signatureY + 22, 175, signatureY + 22)
-    
-    doc.text('H. AGUNG GUNAWAN', 50, signatureY + 28, { align: 'center' })
-    doc.text('..........................', 150, signatureY + 28, { align: 'center' })
-
-    doc.save(`${item.type}_${item.title.replace(/[^a-z0-9]/gi, '_')}.pdf`)
-    toast.success('PDF Premium berhasil diunduh')
   }
 
   return (
