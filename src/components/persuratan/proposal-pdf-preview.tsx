@@ -102,20 +102,21 @@ export function PageWrapper({ children, data, pageNumber }: { children: React.Re
         <div style={{ 
           position: 'absolute', 
           bottom: '40px', 
-          left: '80px', 
-          right: '80px', 
+          left: '60px', 
+          right: '60px', 
           display: 'flex', 
           justifyContent: 'space-between',
           alignItems: 'center',
-          borderTop: '1px solid #f1f5f9',
-          paddingTop: '15px',
-          fontSize: '8pt',
-          color: '#94a3b8',
-          textTransform: 'uppercase',
-          letterSpacing: '1px'
+          borderTop: '1px solid #e2e8f0',
+          paddingTop: '12px',
+          fontSize: '9pt',
+          color: '#64748b',
+          fontWeight: '500'
         }}>
-          <span>DKM Al-Muhajirin - Ragas Grenyang</span>
-          {pageNumber !== undefined && <span>Halaman {pageNumber}</span>}
+          <span>DKM Al-Muhajirin Ragas Grenyang</span>
+          {pageNumber !== undefined && (
+            <span style={{ color: '#0b3d2e', fontWeight: '800' }}>Halaman {pageNumber} dari {data.lampiranFoto && data.lampiranFoto.length > 0 ? '6' : '5'}</span>
+          )}
         </div>
       </div>
     )
