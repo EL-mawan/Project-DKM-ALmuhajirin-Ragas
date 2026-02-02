@@ -187,7 +187,7 @@ export function Page1({ data, bulkRecipient, onNavigate }: { data: Partial<Propo
                     </tbody>
                 </table>
 
-                <div style={{ marginBottom: '25px' }}>
+                <div style={{ marginBottom: '20px' }}>
                     <p style={{ marginBottom: '8px' }}>Kepada Yth.</p>
                     <p style={{ fontWeight: '900', fontSize: '14pt', margin: '0', color: '#0f172a' }}>{recipient.nama || '........................'}</p>
                     {recipient.jabatan && <p style={{ fontWeight: '700', color: '#475569', fontSize: '11pt', margin: '2px 0' }}>{recipient.jabatan}</p>}
@@ -196,26 +196,26 @@ export function Page1({ data, bulkRecipient, onNavigate }: { data: Partial<Propo
                     <p style={{ paddingLeft: '20px', fontWeight: 'bold', fontSize: '13pt' }}>{recipient.alamat || 'Tempat'}</p>
                 </div>
 
-                <div style={{ textAlign: 'justify', marginBottom: '30px', lineHeight: '1.6' }}>
+                <div style={{ textAlign: 'justify', marginBottom: '20px', lineHeight: '1.6' }}>
                     {data.suratPengantar?.split('\n').map((line, i) => (
                         <p key={i} style={{ textIndent: i > 0 ? '40px' : '0', marginBottom: '8px' }}>{line}</p>
                     ))}
                 </div>
 
-                <div style={{ textAlign: 'right', marginBottom: '30px' }}>
+                <div style={{ textAlign: 'right', marginBottom: '15px' }}>
                     <p style={{ fontWeight: '700' }}>{data.tempat}, {data.tanggal}</p>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', textAlign: 'center', marginBottom: '25px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', textAlign: 'center', marginBottom: '15px' }}>
                     <div onClick={() => onNavigate?.('struktur')} style={{ cursor: 'pointer' }}>
                         <p style={{ fontWeight: '900', fontSize: '11pt', textTransform: 'uppercase', color: '#64748b', marginBottom: '5px' }}>Ketua DKM,</p>
-                        <div style={{ height: '65px' }}></div>
+                        <div style={{ height: '55px' }}></div>
                         <p style={{ fontWeight: '900', textDecoration: 'underline', fontSize: '11pt', color: '#0f172a' }}>{data.namaKetua || '( ........................ )'}</p>
                     </div>
 
                     <div onClick={() => onNavigate?.('struktur')} style={{ cursor: 'pointer' }}>
                         <p style={{ fontWeight: '900', fontSize: '11pt', textTransform: 'uppercase', color: '#64748b', marginBottom: '5px' }}>Sekretaris DKM,</p>
-                        <div style={{ height: '65px' }}></div>
+                        <div style={{ height: '55px' }}></div>
                         <p style={{ fontWeight: '900', textDecoration: 'underline', fontSize: '11pt', color: '#0f172a' }}>{data.namaSekretaris || '( ........................ )'}</p>
                     </div>
                 </div>
@@ -224,7 +224,7 @@ export function Page1({ data, bulkRecipient, onNavigate }: { data: Partial<Propo
                     <p style={{ fontSize: '10pt', margin: '0 0 5px 0', fontWeight: 'bold', color: '#64748b' }}>Mengetahui,</p>
                     <div onClick={() => onNavigate?.('struktur')} style={{ cursor: 'pointer', display: 'inline-block' }}>
                         <p style={{ fontWeight: '900', fontSize: '12pt', margin: '0', color: '#0b3d2e' }}>Tokoh Masyarakat Masjid Al-Muhajirin</p>
-                        <div style={{ height: '60px' }}></div>
+                        <div style={{ height: '50px' }}></div>
                         <p style={{ fontWeight: '900', textDecoration: 'underline', fontSize: '11pt' }}>{data.namaTokohMasyarakat || '( ........................ )'}</p>
                     </div>
                 </div>
