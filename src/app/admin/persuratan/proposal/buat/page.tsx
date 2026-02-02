@@ -1353,7 +1353,7 @@ function PageCover({ data }: { data: ProposalData }) {
                 
                 <h1 style={{ fontSize: '18pt', fontWeight: 'bold', margin: '0 0 70px 0', color: '#475569', letterSpacing: '0.2em' }}>PROPOSAL</h1>
                 
-                <h2 style={{ fontWeight: '900', fontSize: '30pt', margin: '0 0 15px 0', textTransform: 'uppercase', color: '#0f172a', lineHeight: 1.1, letterSpacing: '-0.02em' }}>{data.perihal}</h2>
+                <h2 style={{ fontWeight: '900', fontSize: '20pt', margin: '0 0 15px 0', textTransform: 'uppercase', color: '#0f172a', lineHeight: 1.1, letterSpacing: '-0.02em' }}>{data.perihal}</h2>
                 <div style={{ width: '150px', height: '6px', background: 'linear-gradient(to right, #059669, #10b981)', margin: '35px auto' }}></div>
                 
                 <div style={{ margin: '80px 0', display: 'flex', flexDirection: 'column', alignItems: 'center', backgroundColor: 'rgba(248, 250, 252, 0.5)', padding: '50px', borderRadius: '40px', border: '1px solid #f1f5f9' }}>
@@ -1365,7 +1365,7 @@ function PageCover({ data }: { data: ProposalData }) {
                 </div>
 
                 <div style={{ position: 'absolute', bottom: '-100px', left: 0, width: '100%', textAlign: 'center' }}>
-                    <p style={{ fontSize: '14pt', fontWeight: '900', letterSpacing: '8px', color: '#1e293b' }}>TAHUN {new Date().getFullYear()}</p>
+                    <p style={{ fontSize: '12pt', fontWeight: '900', letterSpacing: '8px', color: '#1e293b' }}>TAHUN {new Date().getFullYear()}</p>
                 </div>
             </div>
         </div>
@@ -1442,11 +1442,7 @@ function Page1({ data, bulkRecipient, onNavigate }: { data: ProposalData, bulkRe
                         <div style={{ height: '70px' }}></div>
                         <p style={{ fontWeight: 'bold', textDecoration: 'underline', fontSize: '11pt' }}>{data.namaSekretaris || '( ........................ )'}</p>
                     </div>
-                    <div onClick={() => onNavigate?.('struktur')} style={{ cursor: 'pointer' }} title="Klik untuk mengedit">
-                        <p style={{ fontWeight: 'bold' }}>Bendahara DKM,</p>
-                        <div style={{ height: '70px' }}></div>
-                        <p style={{ fontWeight: 'bold', textDecoration: 'underline', fontSize: '11pt' }}>{data.namaBendahara || '( ........................ )'}</p>
-                    </div>
+
                     <div onClick={() => onNavigate?.('struktur')} style={{ cursor: 'pointer' }} title="Klik untuk mengedit">
                         <p style={{ fontWeight: 'bold' }}>Ketua DKM,</p>
                         <div style={{ height: '70px' }}></div>
@@ -1598,11 +1594,7 @@ function Page5({ data, onNavigate }: { data: ProposalData, onNavigate?: (tab: st
                         <div style={{ height: '90px' }}></div>
                         <p style={{ fontWeight: 'bold', textDecoration: 'underline', fontSize: '12pt' }}>{data.namaSekretaris || '( ........................ )'}</p>
                     </div>
-                    <div onClick={() => onNavigate?.('struktur')} style={{ cursor: 'pointer' }} title="Klik untuk mengedit">
-                        <p style={{ fontSize: '11pt', fontWeight: 'bold' }}>Bendahara DKM,</p>
-                        <div style={{ height: '90px' }}></div>
-                        <p style={{ fontWeight: 'bold', textDecoration: 'underline', fontSize: '12pt' }}>{data.namaBendahara || '( ........................ )'}</p>
-                    </div>
+                    
                     <div onClick={() => onNavigate?.('struktur')} style={{ cursor: 'pointer' }} title="Klik untuk mengedit">
                         <p style={{ fontSize: '11pt', fontWeight: 'bold' }}>Ketua DKM,</p>
                         <div style={{ height: '90px' }}></div>
