@@ -620,7 +620,7 @@ Pastikan setiap poin dimulai dengan kata kerja (Contoh: Menjalin, Meningkatkan, 
           setBulkProgress(Math.round(((i + 1) / bulkRecipients.length) * 100))
           
           // Beri waktu DOM untuk merender ulang konten penerima
-          await new Promise(resolve => setTimeout(resolve, 800))
+          await new Promise(resolve => setTimeout(resolve, 400))
           
           // Gunakan container tersembunyi untuk penangkapan yang stabil
           const captureContainer = document.getElementById('proposal-capture-container')
@@ -632,7 +632,7 @@ Pastikan setiap poin dimulai dengan kata kerja (Contoh: Menjalin, Meningkatkan, 
           for (let j = 0; j < pages.length; j++) {
             const page = pages[j] as HTMLElement
             const canvas = await html2canvas(page, {
-              scale: 3,
+              scale: 2,
               useCORS: true,
               logging: false,
               backgroundColor: '#ffffff',
@@ -682,7 +682,7 @@ Pastikan setiap poin dimulai dengan kata kerja (Contoh: Menjalin, Meningkatkan, 
         for (let i = 0; i < pages.length; i++) {
           const page = pages[i] as HTMLElement
           const canvas = await html2canvas(page, {
-            scale: 3,
+            scale: 2,
             useCORS: true,
             logging: false,
             backgroundColor: '#ffffff',

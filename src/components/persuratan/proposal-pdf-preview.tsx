@@ -64,7 +64,7 @@ export interface ProposalData {
 
 export function PageWrapper({ children, data, pageNumber }: { children: React.ReactNode, data: Partial<ProposalData>, pageNumber?: number }) {
     return (
-       <div className="proposal-page relative flex flex-col shadow-2xl" 
+       <div className="proposal-page relative flex flex-col" 
             style={{ 
               width: '794px', 
               height: '1123px', 
@@ -73,8 +73,7 @@ export function PageWrapper({ children, data, pageNumber }: { children: React.Re
               background: 'white',
               margin: '0 auto',
               color: 'black',
-              position: 'relative',
-              overflow: 'hidden'
+              position: 'relative'
             }}>
         
         {/* Header Section */}
@@ -136,17 +135,14 @@ export function PageCover({ data }: { data: Partial<ProposalData> }) {
              }}>
             
             {/* Centered Logo for Cover */}
-            <div style={{ width: '100%', textAlign: 'center', marginBottom: '40px', zIndex: 2 }}>
-                <img src={data.logoKiri || "/logo.png"} alt="Logo" crossOrigin="anonymous" style={{ width: '150px', height: '150px', objectFit: 'contain', margin: '0 auto' }} />
+            <div style={{ width: '100%', textAlign: 'center', marginTop: '60px', marginBottom: '80px', zIndex: 2 }}>
+                <img src={data.logoKiri || "/logo.png"} alt="Logo" crossOrigin="anonymous" style={{ width: '180px', height: '180px', objectFit: 'contain', margin: '0 auto' }} />
             </div>
 
-            <div style={{ position: 'absolute', top: 0, right: 0, width: '450px', height: '450px', background: 'radial-gradient(circle at top right, #f0fdf4 0%, transparent 70%)', zIndex: 0 }}></div>
-            <div style={{ position: 'absolute', bottom: 0, left: 0, width: '450px', height: '450px', background: 'radial-gradient(circle at bottom left, #ecfdf5 0%, transparent 70%)', zIndex: 0, opacity: 0.8 }}></div>
-
-            <div style={{ zIndex: 2, textAlign: 'center', width: '100%', position: 'relative', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                <div style={{ marginBottom: '40px' }}>
-                    <p style={{ fontSize: '14pt', fontWeight: 'bold', letterSpacing: '8px', color: '#64748b', margin: '0 0 15px 0', textTransform: 'uppercase' }}>PROPOSAL</p>
-                    <div style={{ width: '60px', height: '4px', background: '#0b3d2e', margin: '0 auto' }}></div>
+            <div style={{ zIndex: 2, textAlign: 'center', width: '100%', position: 'relative', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+                <div style={{ marginBottom: '50px' }}>
+                    <p style={{ fontSize: '16pt', fontWeight: 'bold', letterSpacing: '10px', color: '#94a3b8', margin: '0 0 15px 0', textTransform: 'uppercase' }}>PROPOSAL</p>
+                    <div style={{ width: '80px', height: '3px', background: '#0b3d2e', margin: '0 auto' }}></div>
                 </div>
                 
                 <h1 style={{ 
