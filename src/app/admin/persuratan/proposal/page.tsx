@@ -360,109 +360,120 @@ export default function PersuratanProposal() {
                 <Loader2 className="animate-spin h-10 w-10 md:h-12 md:w-12 text-[#0b3d2e]" />
               </div>
             ) : filteredData.length === 0 ? (
-              <div className="text-center py-20 md:py-32 px-6">
-                <div className="h-16 w-16 md:h-24 md:w-24 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <FileText className="h-8 w-8 md:h-10 md:w-10 text-gray-200" />
+              <div className="text-center py-24 md:py-40 px-6 animate-in fade-in zoom-in duration-500">
+                <div className="h-20 w-20 md:h-28 md:w-28 bg-slate-50/50 rounded-full flex items-center justify-center mx-auto mb-8 shadow-inner border border-slate-100">
+                  <FileText className="h-10 w-10 md:h-14 md:w-14 text-slate-200" />
                 </div>
-                <p className="text-base md:text-lg font-bold text-gray-300 italic">Belum ada dokumen {activeTab.toLowerCase()}</p>
+                <h3 className="text-xl md:text-2xl font-black text-slate-400 mb-2 italic">Belum ada dokumen {activeTab.toLowerCase()}</h3>
+                <p className="text-slate-300 text-sm font-medium">Draft atau riwayat proposal akan muncul di sini setelah Anda membuatnya.</p>
               </div>
             ) : (
-              <div className="p-6 md:p-10">
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 md:gap-8">
+              <div className="p-8 md:p-12 bg-slate-50/20">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-8 md:gap-10">
                   {filteredData.map((item) => (
-                    <Card key={item.id} className="group relative overflow-hidden rounded-[2.5rem] border-none shadow-xl shadow-slate-200/50 hover:shadow-2xl hover:shadow-indigo-100/50 transition-all duration-500 bg-white border border-slate-50">
+                    <Card key={item.id} className="group relative overflow-hidden rounded-[3rem] border-none shadow-2xl shadow-slate-200/40 hover:shadow-indigo-100 transition-all duration-700 bg-white border border-white hover:-translate-y-2">
                       
-                      <CardContent className="p-8 space-y-6">
-                        {/* Status Header */}
-                        <div className="flex justify-between items-center">
-                           <Badge className={`rounded-xl px-4 py-1.5 font-black text-[10px] uppercase tracking-widest border-none ${
-                             item.type === 'PROPOSAL' ? 'bg-indigo-50 text-indigo-600' : 
-                             item.type === 'UNDANGAN' ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'
-                           }`}>
-                             {item.type}
-                           </Badge>
+                      {/* Decorative Background Element */}
+                      <div className="absolute top-0 right-0 w-32 h-32 bg-linear-to-bl from-indigo-50/50 to-transparent rounded-bl-full pointer-events-none transition-transform group-hover:scale-150 duration-700" />
+                      
+                      <CardContent className="p-8 md:p-10 space-y-8 relative z-10">
+                        {/* Status & Type Header */}
+                        <div className="flex justify-between items-start">
+                           <div className="space-y-1">
+                              <Badge className={`rounded-xl px-4 py-1.5 font-black text-[10px] uppercase tracking-widest border-none ${
+                                item.type === 'PROPOSAL' ? 'bg-indigo-600/10 text-indigo-700' : 
+                                item.type === 'UNDANGAN' ? 'bg-emerald-600/10 text-emerald-700' : 'bg-amber-600/10 text-amber-700'
+                              }`}>
+                                {item.type}
+                              </Badge>
+                              {item.nomorSurat && (
+                                <p className="text-[10px] font-black text-slate-300 uppercase tracking-tighter pl-1">
+                                  No: {item.nomorSurat}
+                                </p>
+                              )}
+                           </div>
                            <StatusBadge status={item.status} />
                         </div>
 
-                        {/* Title Section */}
-                        <div className="space-y-2">
-                           <h4 className="font-black text-indigo-700 text-lg md:text-xl leading-tight group-hover:text-indigo-900 transition-colors line-clamp-2">
+                        {/* Title & Subject */}
+                        <div className="space-y-3">
+                           <h4 className="font-black text-[#0b3d2e] text-xl md:text-2xl leading-[1.2] group-hover:text-indigo-800 transition-colors duration-500 line-clamp-2">
                              {item.title}
                            </h4>
-                           {item.nomorSurat && (
-                             <p className="text-[11px] font-bold text-slate-400 tracking-wider">
-                               {item.nomorSurat}
-                             </p>
-                           )}
-                        </div>
-
-                        {/* Detail Info */}
-                        <div className="space-y-4 pt-2">
-                           <div className="flex items-center gap-3 text-slate-600">
-                             <div className="h-9 w-9 rounded-xl bg-slate-50 flex items-center justify-center shrink-0">
-                               <Send className="h-4 w-4 text-slate-400" />
-                             </div>
-                             <p className="text-xs font-bold text-slate-500 line-clamp-1">
-                               {item.recipient || 'Tanpa Penerima'}
-                             </p>
-                           </div>
-
-                           <div className="flex items-center gap-3 text-slate-600">
-                             <div className="h-9 w-9 rounded-xl bg-slate-50 flex items-center justify-center shrink-0">
-                               <Calendar className="h-4 w-4 text-slate-400" />
-                             </div>
-                             <p className="text-xs font-bold text-slate-500">
-                               {new Date(item.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
-                             </p>
+                           <div className="flex items-center gap-2">
+                              <div className="h-1.5 w-12 bg-indigo-500 rounded-full group-hover:w-24 transition-all duration-700" />
+                              <div className="h-1.5 w-1.5 bg-indigo-200 rounded-full" />
                            </div>
                         </div>
 
-                        {/* Footer Divider */}
-                        <div className="h-px w-full bg-slate-50" />
+                        {/* Essential Details Grid */}
+                        <div className="grid grid-cols-1 gap-5 bg-slate-50/50 p-6 rounded-[2rem] border border-slate-100/50">
+                           <div className="flex items-center gap-4">
+                             <div className="h-10 w-10 rounded-2xl bg-white shadow-sm flex items-center justify-center shrink-0 border border-slate-50">
+                               <Send className="h-5 w-5 text-indigo-400" />
+                             </div>
+                             <div className="flex flex-col">
+                                <span className="text-[9px] font-black uppercase tracking-widest text-slate-300">Penerima</span>
+                                <span className="text-xs font-bold text-slate-600 line-clamp-1">{item.recipient || 'Khalayak Umum'}</span>
+                             </div>
+                           </div>
 
-                        {/* Bottom Row */}
-                        <div className="flex items-center justify-between pt-2">
+                           <div className="flex items-center gap-4">
+                             <div className="h-10 w-10 rounded-2xl bg-white shadow-sm flex items-center justify-center shrink-0 border border-slate-50">
+                               <Calendar className="h-5 w-5 text-emerald-400" />
+                             </div>
+                             <div className="flex flex-col">
+                                <span className="text-[9px] font-black uppercase tracking-widest text-slate-300">Tanggal Terbit</span>
+                                <span className="text-xs font-bold text-slate-600">
+                                  {new Date(item.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
+                                </span>
+                             </div>
+                           </div>
+                        </div>
+
+                        {/* Action Toolbar */}
+                        <div className="flex items-center justify-between pt-4">
                            <div className="flex items-center gap-3">
-                              <div className="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-black text-sm border-2 border-white shadow-sm shrink-0">
-                                {item.creator?.name?.charAt(0) || 'D'}
+                              <div className="h-11 w-11 rounded-full bg-linear-to-tr from-indigo-500 to-blue-400 p-0.5 shadow-lg shadow-indigo-100 shrink-0">
+                                 <div className="h-full w-full rounded-full bg-white flex items-center justify-center text-indigo-600 font-black text-sm uppercase">
+                                   {item.creator?.name?.charAt(0) || 'D'}
+                                 </div>
                               </div>
                               <div className="flex flex-col">
-                                <span className="text-[10px] font-bold text-slate-300 uppercase tracking-widest">Dibuat Oleh</span>
-                                <span className="text-xs font-black text-slate-500">{item.creator?.name || 'DKM Admin'}</span>
+                                <span className="text-[9px] font-black text-slate-300 uppercase tracking-widest">Editor</span>
+                                <span className="text-xs font-black text-slate-700">{item.creator?.name?.split(' ')[0] || 'Admin'}</span>
                               </div>
                            </div>
 
-                           <div className="flex items-center gap-1">
-                              {/* Validation Actions for Admins */}
+                           <div className="flex items-center gap-1.5 bg-slate-50/80 p-1.5 rounded-2xl border border-slate-100">
+                              {/* Validation Logic */}
                               {canValidate && item.status === 'pending' && (
-                                <>
+                                <div className="flex gap-1 pr-1 border-r border-slate-200 mr-1">
                                   <Button 
                                     variant="ghost" 
                                     size="icon" 
-                                    className="h-10 w-10 rounded-xl text-emerald-600 hover:bg-emerald-50 shadow-sm border border-emerald-100/50"
+                                    className="h-9 w-9 rounded-xl text-emerald-600 hover:bg-emerald-50 bg-white shadow-sm hover:scale-110 transition-transform"
                                     onClick={() => handleValidate(item.id, 'validate')}
-                                    title="Validasi Dokumen"
                                   >
                                     <CheckCircle className="h-5 w-5" />
                                   </Button>
                                   <Button 
                                     variant="ghost" 
                                     size="icon" 
-                                    className="h-10 w-10 rounded-xl text-rose-600 hover:bg-rose-50 shadow-sm border border-rose-100/50"
+                                    className="h-9 w-9 rounded-xl text-rose-600 hover:bg-rose-50 bg-white shadow-sm hover:scale-110 transition-transform"
                                     onClick={() => handleValidate(item.id, 'reject')}
-                                    title="Tolak Dokumen"
                                   >
                                     <XCircle className="h-5 w-5" />
                                   </Button>
-                                </>
+                                </div>
                               )}
 
                               <Button 
                                 variant="ghost" 
                                 size="icon" 
-                                className="h-10 w-10 rounded-xl text-slate-400 hover:text-indigo-600 hover:bg-indigo-50"
+                                className="h-9 w-9 rounded-xl text-slate-400 hover:text-indigo-600 hover:bg-white hover:shadow-sm transition-all"
                                 onClick={() => router.push(item.type === 'PROPOSAL' ? `/admin/persuratan/proposal/buat?id=${item.id}&mode=view` : `/admin/persuratan/buat?type=${item.type}&id=${item.id}&mode=view`)}
-                                title="Lihat Detail"
+                                title="Lihat"
                               >
                                 <Eye className="h-5 w-5" />
                               </Button>
@@ -471,9 +482,9 @@ export default function PersuratanProposal() {
                                 variant="ghost" 
                                 size="icon"
                                 disabled={item.status !== 'validated'}
-                                className="h-10 w-10 rounded-xl text-slate-400 hover:text-blue-600 hover:bg-blue-50 disabled:opacity-20"
+                                className="h-9 w-9 rounded-xl text-slate-400 hover:text-blue-600 hover:bg-white hover:shadow-sm disabled:opacity-30 transition-all"
                                 onClick={() => generatePDF(item)}
-                                title="Unduh PDF"
+                                title="Download"
                               >
                                 <Download className="h-5 w-5" />
                               </Button>
@@ -481,9 +492,9 @@ export default function PersuratanProposal() {
                               <Button 
                                 variant="ghost" 
                                 size="icon" 
-                                className="h-10 w-10 rounded-xl text-slate-400 hover:text-emerald-600 hover:bg-emerald-50"
+                                className="h-9 w-9 rounded-xl text-slate-400 hover:text-emerald-600 hover:bg-white hover:shadow-sm transition-all"
                                 onClick={() => router.push(item.type === 'PROPOSAL' ? `/admin/persuratan/proposal/buat?id=${item.id}` : `/admin/persuratan/buat?type=${item.type}&id=${item.id}`)}
-                                title="Edit Dokumen"
+                                title="Edit"
                               >
                                 <Edit2 className="h-5 w-5" />
                               </Button>
@@ -491,9 +502,9 @@ export default function PersuratanProposal() {
                               <Button 
                                 variant="ghost" 
                                 size="icon" 
-                                className="h-10 w-10 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50"
+                                className="h-9 w-9 rounded-xl text-rose-300 hover:text-rose-600 hover:bg-rose-50 transition-all"
                                 onClick={() => handleDelete(item.id)}
-                                title="Hapus Dokumen"
+                                title="Hapus"
                               >
                                 <Trash2 className="h-5 w-5" />
                               </Button>
