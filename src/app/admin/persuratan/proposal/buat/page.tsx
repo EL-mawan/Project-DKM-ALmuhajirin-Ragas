@@ -300,7 +300,7 @@ function ProposalBuilderContent() {
     setHistory({...data})
     setIsAiLoading(type)
     
-    try {
+    const promise = async () => {
       const prompts: Record<string, string> = {
         background: `Buatkan narasi latar belakang yang mendalam dan inspiratif untuk proposal kegiatan DKM (Dewan Kemakmuran Masjid) Al-Muhajirin dengan judul kegiatan: "${data.perihal}". 
         
@@ -309,44 +309,19 @@ Konteks:
 - Organisasi: DKM Al-Muhajirin Ragas Grenyang
 - Fokus: Memakmurkan masjid, pelayanan jamaah, dan syiar Islam di lingkungan industri Puloampel.
 
-Buatkan latar belakang yang:
-1. Formal, profesional, dan menyentuh sisi spiritual (gunakan bahasa yang elegan).
-2. Menjelaskan pentingnya kegiatan ini dalam meningkatkan kualitas ibadah atau sosial di masyarakat.
-3. Terdiri dari 3 paragraf (sekitar 200-250 kata).
-4. Gunakan Bahasa Indonesia yang baku namun tetap luwes.
-
-Hanya berikan teks narasi saja, tanpa judul.`,
+Buatkan latar belakang yang formal, profesional, dan menyentuh sisi spiritual. Terdiri dari 3 paragraf. Hanya berikan teks naratif saja, jangan ada kalimat pembuka seperti "Ini adalah narasinya" atau judul.`,
 
         'cover-letter': `Buatkan isi surat pengantar (bagian inti) untuk proposal kegiatan DKM Al-Muhajirin dengan judul: "${data.perihal}".
-
-Buatkan isi surat pengantar yang:
-1. Dimulai dengan salam pembuka yang hangat "Assalamu'alaikum Wr. Wb."
-2. Menyampaikan maksud permohonan dukungan dan kerjasama dengan tetap menjaga marwah masjid.
-3. Mengajak para dermawan/instansi untuk berpartisipasi dalam kebaikan ini.
-4. Formal, sopan, dan efektif.
-5. Terdiri dari 2-3 paragraf.
-
-Hanya berikan teks surat pengantarnya saja.`,
+        
+Buatkan isi surat pengantar yang formal dan sopan, dimulai dengan "Assalamu'alaikum Wr. Wb.". Sampaikan maksud permohonan dukungan. Terdiri dari 2-3 paragraf. Hanya berikan teks surat pengantarnya saja, jangan ada kalimat pembuka lainnya.`,
 
         closing: `Buatkan paragraf penutup yang persuasif dan penuh doa untuk proposal "${data.perihal}" DKM Al-Muhajirin.
+        
+Sampaikan apresiasi dan doa keberkahan. Hanya berikan teks penutup saja, jangan ada kalimat pembuka lainnya.`,
 
-Buatkan penutup yang:
-1. Menyampaikan apresiasi dan rasa terima kasih yang mendalam.
-2. Memuat doa untuk keberkahan bagi para donator/pendukung.
-3. Memberikan kesan profesional dan amanah.
-
-Hanya berikan teks penutup saja.`,
-
-        objectives: `Buatkan 5 poin maksud dan tujuan yang spesifik, relevan, dan terukur untuk proposal kegiatan DKM Al-Muhajirin bertema: "${data.perihal}".
-
-Konteks:
-- Organisasi: DKM Al-Muhajirin Ragas Grenyang
-- Sasaran: Jamaah Masjid Al-Muhajirin dan warga sekitar Ragas Grenyang.
-
-Format: Berikan dalam bentuk array JSON dengan key "tujuan", contoh:
-{"tujuan": ["Tujuan 1", "Tujuan 2", "Tujuan 3"]}
-
-Hanya berikan JSON saja, tanpa penjelasan tambahan.`
+        objectives: `Buatkan 5 poin maksud dan tujuan yang spesifik untuk proposal kegiatan DKM Al-Muhajirin bertema: "${data.perihal}".
+        
+Format: Berikan dalam bentuk array JSON dengan key "tujuan", contoh: {"tujuan": ["Tujuan 1", "Tujuan 2"]}. Hanya berikan JSON saja.`
       }
 
       const response = await fetch('/api/ai/generate', {
@@ -354,10 +329,7 @@ Hanya berikan JSON saja, tanpa penjelasan tambahan.`
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
           prompt: prompts[type],
-          context: {
-            perihal: data.perihal,
-            type: type
-          }
+          context: { perihal: data.perihal, type: type }
         })
       })
 
@@ -367,39 +339,45 @@ Hanya berikan JSON saja, tanpa penjelasan tambahan.`
         throw new Error(result.details || result.error || 'AI generation failed')
       }
 
-      let generatedText = result.text.trim()
+      let text = result.text || ''
+      if (!text) throw new Error('AI tidak memberikan respon')
+
+      // Cleaning logic: Remove intros and markdown
+      let cleanText = text.trim()
       
-      // Clean up markdown markers
-      if (generatedText.includes('```')) {
-        generatedText = generatedText.replace(/```(json)?/g, '').replace(/```/g, '').trim()
+      // Remove markdown code blocks if present
+      if (cleanText.includes('```')) {
+        cleanText = cleanText.replace(/```(json)?/g, '').replace(/```/g, '').trim()
       }
+
+      // Remove common AI intro phrases if they exist (regexp case-insensitive)
+      const intros = [
+        /^(tentu|ini|berikut|berikut adalah|berikut ini|ini adalah)[^:\n]*:/gi,
+        /^saya akan buatkan[^:\n]*:/gi,
+        /^narasi[^:\n]*:/gi,
+        /^latar belakang[^:\n]*:/gi
+      ]
+      intros.forEach(re => {
+        cleanText = cleanText.replace(re, '').trim()
+      })
       
       if (type === 'objectives') {
         try {
-          // Attempt to extract JSON if there's text around it
-          const jsonMatch = generatedText.match(/\{[\s\S]*\}/)
-          const cleanJson = jsonMatch ? jsonMatch[0] : generatedText
+          const jsonMatch = cleanText.match(/\{[\s\S]*\}/)
+          const cleanJson = jsonMatch ? jsonMatch[0] : cleanText
           const parsed = JSON.parse(cleanJson)
           
           let list: string[] = []
-          if (Array.isArray(parsed.tujuan)) {
-            list = parsed.tujuan
-          } else if (Array.isArray(parsed)) {
-            list = parsed
-          } else {
-            list = [generatedText]
-          }
+          if (Array.isArray(parsed.tujuan)) list = parsed.tujuan
+          else if (Array.isArray(parsed)) list = parsed
+          else list = [cleanText]
           
           setData(prev => ({ ...prev, tujuan: list }))
         } catch (e) {
-          console.error('Failed to parse AI JSON:', e)
-          // Fallback: split by lines/numbers
-          const lines = generatedText
-            .split('\n')
-            .map(l => l.replace(/^\d+[\.\)]\s*/, '').trim())
+          const lines = cleanText.split('\n')
+            .map(l => l.replace(/^\d+[\.\)]\s*/, '').replace(/^-\s*/, '').trim())
             .filter(l => l.length > 5)
-          
-          setData(prev => ({ ...prev, tujuan: lines.length > 0 ? lines : [generatedText] }))
+          setData(prev => ({ ...prev, tujuan: lines.length > 0 ? lines : [cleanText] }))
         }
       } else {
         const fieldMap: Record<string, keyof ProposalData> = {
@@ -410,17 +388,23 @@ Hanya berikan JSON saja, tanpa penjelasan tambahan.`
         
         const field = fieldMap[type]
         if (field) {
-          setData(prev => ({ ...prev, [field]: generatedText }))
+          setData(prev => ({ ...prev, [field]: cleanText }))
         }
       }
-
-      toast.success('Saran AI berhasil diterapkan!')
-    } catch (error: any) {
-      console.error('AI generation error:', error)
-      toast.error(`Gagal: ${error.message || 'Server AI tidak merespon'}`)
-    } finally {
-      setIsAiLoading(null)
+      return type
     }
+
+    toast.promise(promise(), {
+      loading: `AI sedang merumuskan ${type === 'cover-letter' ? 'surat pengantar' : type === 'background' ? 'latar belakang' : type === 'objectives' ? 'tujuan' : 'penutup'}...`,
+      success: () => {
+        setIsAiLoading(null)
+        return 'Saran AI berhasil diterapkan!'
+      },
+      error: (err) => {
+        setIsAiLoading(null)
+        return `Gagal: ${err.message || 'Server AI tidak merespon'}`
+      }
+    })
   }
 
   const handleUndo = () => {
@@ -1629,12 +1613,6 @@ function Page5({ data, onNavigate }: { data: ProposalData, onNavigate?: (tab: st
                 </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '25px', textAlign: 'center' }}>
-                    <div onClick={() => onNavigate?.('struktur')} style={{ cursor: 'pointer' }} title="Klik untuk mengedit">
-                        <p style={{ fontSize: '11pt', fontWeight: 'bold' }}>Tokoh Masyarakat,</p>
-                        <p style={{ fontSize: '10pt', fontStyle: 'italic' }}>Masjid Al-Muhajirin</p>
-                        <div style={{ height: '70px' }}></div>
-                        <p style={{ fontWeight: 'bold', textDecoration: 'underline', fontSize: '12pt' }}>{data.namaTokohMasyarakat || '( ........................ )'}</p>
-                    </div>
                     <div onClick={() => onNavigate?.('struktur')} style={{ 
                         opacity: data.namaKetuaRT ? 1 : 0.3, 
                         cursor: 'pointer' 
@@ -1652,6 +1630,12 @@ function Page5({ data, onNavigate }: { data: ProposalData, onNavigate?: (tab: st
                         <p style={{ fontSize: '10pt', fontStyle: 'italic' }}>Kampung Ragas Grenyang</p>
                         <div style={{ height: '70px' }}></div>
                         <p style={{ fontSize: '11pt', fontWeight: 'bold', textDecoration: 'underline' }}>{data.namaKetuaRW || '( ........................ )'}</p>
+                    </div>
+                    <div onClick={() => onNavigate?.('struktur')} style={{ cursor: 'pointer' }} title="Klik untuk mengedit">
+                        <p style={{ fontSize: '11pt', fontWeight: 'bold' }}>Tokoh Masyarakat,</p>
+                        <p style={{ fontSize: '10pt', fontStyle: 'italic' }}>Masjid Al-Muhajirin</p>
+                        <div style={{ height: '70px' }}></div>
+                        <p style={{ fontWeight: 'bold', textDecoration: 'underline', fontSize: '12pt' }}>{data.namaTokohMasyarakat || '( ........................ )'}</p>
                     </div>
                     <div onClick={() => onNavigate?.('struktur')} style={{ 
                         opacity: data.namaKetuaPemuda ? 1 : 0.3, 
