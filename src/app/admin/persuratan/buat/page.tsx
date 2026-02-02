@@ -60,13 +60,13 @@ function BuatPersuratanContent() {
     penerimaLokasi: 'Tempat',
     
     // Konten (Undangan/Surat)
-    pembuka: 'Assalamu\'alaikum Wr. Wb. \n\nSalam silaturahmi kami sampaikan, teriring doa semoga bapak beserta keluarga selalu berada dalam lindungan Allah SWT, diberikan kesehatan, serta kelancaran dalam segala urusan.',
+    pembuka: '',
     hariAcara: '',
     tanggalAcara: '',
     waktuAcara: '',
     lokasiAcara: '',
     namaAcara: '',
-    penutup: 'Demikian surat undangan ini kami sampaikan, semoga dapat dikabulkan serta dapat dipahami, dan besar harapan kami semoga bapak pimpinan dapat merealisasikan undangan tersebut atas perhatiannya kami ucapkan terimakasih.',
+    penutup: '',
     
     // --- PROPOSAL TABS STATE ---
     isiSuratPengantar: '',
@@ -89,7 +89,7 @@ function BuatPersuratanContent() {
     lampiranFotos: [] as string[],
     
     // Penutup / Signatures
-    kalimatPenutup: 'Demikian proposal ini kami sampaikan. Atas perhatian dan kerjasamanya, kami ucapkan terima kasih.',
+    kalimatPenutup: '',
     lokasiPenerbitan: 'Serang',
     
     // Signatures

@@ -123,14 +123,10 @@ const initialData: ProposalData = {
     instansi: '',
     alamat: ''
   },
-  suratPengantar: 'Assalamu\'alaikum Wr. Wb. \n\nSalam silaturahmi kami sampaikan, teriring doa semoga bapak beserta keluarga selalu berada dalam lindungan Allah SWT, diberikan kesehatan, serta kelancaran dalam segala urusan.\n\nBersama dengan surat ini, kami selaku pengurus DKM Al-Muhajirin bermaksud untuk mengajukan permohonan dukungan dan bantuan dana untuk kegiatan yang akan kami laksanakan. Semoga bapak/ibu dapat memberikan dukungan positif demi kelancaran kegiatan tersebut.',
-  penutup: 'Demikian proposal ini kami susun dengan harapan mendapatkan pertimbangan dan dukungan dari Bapak/Ibu. Atas perhatian dan kerjasamanya kami haturkan terima kasih yang sebesar-besarnya. Semoga Allah SWT membalas segala bentuk kebaikan Bapak/Ibu dengan pahala yang berlipat ganda.',
-  latarBelakang: 'Masjid Al-Muhajirin merupakan pusat kegiatan keagamaan dan sosial bagi warga Ragas Grenyang. Dalam rangka meningkatkan kualitas pelayanan jamaah dan memakmurkan masjid, kami merencanakan kegiatan...',
-  tujuan: [
-    'Meningkatkan kualitas sarana ibadah',
-    'Mempererat tali silaturahmi antar jamaah',
-    'Menciptakan lingkungan yang religius dan nyaman'
-  ],
+  suratPengantar: '',
+  penutup: '',
+  latarBelakang: '',
+  tujuan: [],
   struktur: {
     pimpinanAtas: [
       { role: 'Tokoh Masyarakat', name: '' },
