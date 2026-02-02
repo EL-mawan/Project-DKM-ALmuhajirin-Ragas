@@ -290,7 +290,7 @@ function ProposalBuilderContent() {
     })
   }
 
-  const handleAiGenerate = async (type: string) => {
+  const handleAiGenerate = async (type: 'background' | 'cover-letter' | 'closing' | 'objectives') => {
     if (!data.perihal || data.perihal.trim() === '') {
       toast.error('Harap isi perihal proposal terlebih dahulu sebagai konteks untuk AI.')
       setActiveTab('umum')
@@ -364,38 +364,60 @@ Hanya berikan JSON saja, tanpa penjelasan tambahan.`
       const result = await response.json()
 
       if (!response.ok) {
-        console.error('AI Server Error:', result)
         throw new Error(result.details || result.error || 'AI generation failed')
       }
 
       let generatedText = result.text.trim()
       
-      // Remove markdown code blocks if present
-      if (generatedText.startsWith('```')) {
-        generatedText = generatedText.replace(/^```[a-z]*\n/i, '').replace(/\n```$/i, '').trim()
+      // Clean up markdown markers
+      if (generatedText.includes('```')) {
+        generatedText = generatedText.replace(/```(json)?/g, '').replace(/```/g, '').trim()
       }
       
       if (type === 'objectives') {
         try {
-          const parsed = JSON.parse(generatedText)
-          setData(prev => ({ ...prev, tujuan: Array.isArray(parsed.tujuan) ? parsed.tujuan : Array.isArray(parsed) ? parsed : [generatedText] }))
-        } catch {
-          // Fallback if JSON parsing fails
-          const lines = generatedText.split('\n').filter((l: string) => l.trim().length > 0 && !l.startsWith('{') && !l.startsWith('}'))
+          // Attempt to extract JSON if there's text around it
+          const jsonMatch = generatedText.match(/\{[\s\S]*\}/)
+          const cleanJson = jsonMatch ? jsonMatch[0] : generatedText
+          const parsed = JSON.parse(cleanJson)
+          
+          let list: string[] = []
+          if (Array.isArray(parsed.tujuan)) {
+            list = parsed.tujuan
+          } else if (Array.isArray(parsed)) {
+            list = parsed
+          } else {
+            list = [generatedText]
+          }
+          
+          setData(prev => ({ ...prev, tujuan: list }))
+        } catch (e) {
+          console.error('Failed to parse AI JSON:', e)
+          // Fallback: split by lines/numbers
+          const lines = generatedText
+            .split('\n')
+            .map(l => l.replace(/^\d+[\.\)]\s*/, '').trim())
+            .filter(l => l.length > 5)
+          
           setData(prev => ({ ...prev, tujuan: lines.length > 0 ? lines : [generatedText] }))
         }
-      } else if (type === 'background') {
-        setData(prev => ({ ...prev, latarBelakang: generatedText }))
-      } else if (type === 'cover-letter') {
-        setData(prev => ({ ...prev, suratPengantar: generatedText }))
-      } else if (type === 'closing') {
-        setData(prev => ({ ...prev, penutup: generatedText }))
+      } else {
+        const fieldMap: Record<string, keyof ProposalData> = {
+          'background': 'latarBelakang',
+          'cover-letter': 'suratPengantar',
+          'closing': 'penutup'
+        }
+        
+        const field = fieldMap[type]
+        if (field) {
+          setData(prev => ({ ...prev, [field]: generatedText }))
+        }
       }
 
-      toast.success('Saran AI berhasil diterapkan! Silakan sesuaikan jika perlu.')
+      toast.success('Saran AI berhasil diterapkan!')
     } catch (error: any) {
       console.error('AI generation error:', error)
-      toast.error(`AI Error: ${error.message || 'Gagal menghasilkan saran'}`)
+      toast.error(`Gagal: ${error.message || 'Server AI tidak merespon'}`)
     } finally {
       setIsAiLoading(null)
     }
@@ -1436,17 +1458,17 @@ function Page1({ data, bulkRecipient, onNavigate }: { data: ProposalData, bulkRe
                     <p>{data.tempat}, {data.tanggal}</p>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px', textAlign: 'center' }}>
-                    <div onClick={() => onNavigate?.('struktur')} style={{ cursor: 'pointer' }} title="Klik untuk mengedit">
-                        <p style={{ fontWeight: 'bold' }}>Sekretaris DKM,</p>
-                        <div style={{ height: '70px' }}></div>
-                        <p style={{ fontWeight: 'bold', textDecoration: 'underline', fontSize: '11pt' }}>{data.namaSekretaris || '( ........................ )'}</p>
-                    </div>
-
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '20px', textAlign: 'center' }}>
                     <div onClick={() => onNavigate?.('struktur')} style={{ cursor: 'pointer' }} title="Klik untuk mengedit">
                         <p style={{ fontWeight: 'bold' }}>Ketua DKM,</p>
                         <div style={{ height: '70px' }}></div>
                         <p style={{ fontWeight: 'bold', textDecoration: 'underline', fontSize: '11pt' }}>{data.namaKetua || '( ........................ )'}</p>
+                    </div>
+
+                    <div onClick={() => onNavigate?.('struktur')} style={{ cursor: 'pointer' }} title="Klik untuk mengedit">
+                        <p style={{ fontWeight: 'bold' }}>Sekretaris DKM,</p>
+                        <div style={{ height: '70px' }}></div>
+                        <p style={{ fontWeight: 'bold', textDecoration: 'underline', fontSize: '11pt' }}>{data.namaSekretaris || '( ........................ )'}</p>
                     </div>
                 </div>
             </div>
@@ -1588,17 +1610,17 @@ function Page5({ data, onNavigate }: { data: ProposalData, onNavigate?: (tab: st
                     <p style={{ fontStyle: 'italic' }}>Argawana, {data.tanggal}</p>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '15px', textAlign: 'center', marginBottom: '40px' }}>
-                    <div onClick={() => onNavigate?.('struktur')} style={{ cursor: 'pointer' }} title="Klik untuk mengedit">
-                        <p style={{ fontSize: '11pt', fontWeight: 'bold' }}>Sekretaris DKM,</p>
-                        <div style={{ height: '90px' }}></div>
-                        <p style={{ fontWeight: 'bold', textDecoration: 'underline', fontSize: '12pt' }}>{data.namaSekretaris || '( ........................ )'}</p>
-                    </div>
-                    
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '15px', textAlign: 'center', marginBottom: '40px' }}>
                     <div onClick={() => onNavigate?.('struktur')} style={{ cursor: 'pointer' }} title="Klik untuk mengedit">
                         <p style={{ fontSize: '11pt', fontWeight: 'bold' }}>Ketua DKM,</p>
                         <div style={{ height: '90px' }}></div>
                         <p style={{ fontWeight: 'bold', textDecoration: 'underline', fontSize: '12pt' }}>{data.namaKetua || '( ........................ )'}</p>
+                    </div>
+
+                    <div onClick={() => onNavigate?.('struktur')} style={{ cursor: 'pointer' }} title="Klik untuk mengedit">
+                        <p style={{ fontSize: '11pt', fontWeight: 'bold' }}>Sekretaris DKM,</p>
+                        <div style={{ height: '90px' }}></div>
+                        <p style={{ fontWeight: 'bold', textDecoration: 'underline', fontSize: '12pt' }}>{data.namaSekretaris || '( ........................ )'}</p>
                     </div>
                 </div>
 
