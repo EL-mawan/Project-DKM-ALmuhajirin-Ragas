@@ -23,7 +23,9 @@ import {
   Layout,
   MessageSquare,
   Plus,
-  ArrowRight
+  ArrowRight,
+  Wand2,
+  RotateCcw
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -251,14 +253,15 @@ Salam silaturahmi kami sampaikan, teriring doa semoga bapak beserta keluarga sel
     }
 
     toast.promise(promise(), {
-      loading: 'AI sedang merumuskan saran terbaik...',
-      success: () => {
+      loading: 'Generate AI sedang merumuskan konten terbaik...',
+      success: (resType) => {
         setIsAiLoading(null)
-        return 'Saran AI berhasil diterapkan!'
+        return `Generate AI Berhasil! Bagian ${resType === 'isiSuratPengantar' ? 'Surat Pengantar' : resType === 'latarBelakang' ? 'Latar Belakang' : resType === 'maksudTujuan' ? 'Tujuan' : 'Penutup'} telah diperbarui.`
       },
       error: (err) => {
         setIsAiLoading(null)
-        return `Gagal: ${err.message}`
+        console.error(`[AI Error]:`, err)
+        return `Generate Gagal: ${err.message}`
       }
     })
   }
@@ -633,14 +636,15 @@ Salam silaturahmi kami sampaikan, teriring doa semoga bapak beserta keluarga sel
                     <div className="space-y-4">
                       <div className="flex items-center justify-between">
                         <Label className="text-xs font-black uppercase text-slate-600">Isi Surat Pengantar</Label>
-                        <Button 
+<Button 
   onClick={() => handleAiGenerate('isiSuratPengantar')} 
   disabled={isAiLoading === 'isiSuratPengantar'}
   variant="ghost" 
   size="sm" 
-  className="h-7 text-purple-600 font-bold text-[10px] uppercase hover:bg-purple-50"
+  className="h-7 text-purple-600 font-bold text-[10px] uppercase hover:bg-purple-50 flex items-center gap-1.5"
 >
-  {isAiLoading === 'isiSuratPengantar' ? "Memproses..." : <><MessageSquare className="h-3 w-3 mr-2" /> Rekomendasi AI</>}
+  {isAiLoading === 'isiSuratPengantar' ? <RotateCcw className="h-3 w-3 animate-spin" /> : <Wand2 className="h-3 w-3" />}
+  Generate AI
 </Button>
                       </div>
                       <Textarea 
@@ -660,9 +664,10 @@ Salam silaturahmi kami sampaikan, teriring doa semoga bapak beserta keluarga sel
   disabled={isAiLoading === 'latarBelakang'}
   variant="ghost" 
   size="sm" 
-  className="h-7 text-purple-600 font-bold text-[10px] uppercase hover:bg-purple-50"
+  className="h-7 text-purple-600 font-bold text-[10px] uppercase hover:bg-purple-50 flex items-center gap-1.5"
 >
-  {isAiLoading === 'latarBelakang' ? "Memproses..." : <><MessageSquare className="h-3 w-3 mr-2" /> Rekomendasi AI</>}
+  {isAiLoading === 'latarBelakang' ? <RotateCcw className="h-3 w-3 animate-spin" /> : <Wand2 className="h-3 w-3" />}
+  Generate AI
 </Button>
                       </div>
                       <Textarea 
@@ -678,15 +683,16 @@ Salam silaturahmi kami sampaikan, teriring doa semoga bapak beserta keluarga sel
                       <div className="flex items-center justify-between">
                         <Label className="text-xs font-black uppercase text-slate-600">Maksud dan Tujuan (Poin Ringkas)</Label>
                         <div className="flex gap-2">
-                          <Button 
-  onClick={() => handleAiGenerate('maksudTujuan')} 
-  disabled={isAiLoading === 'maksudTujuan'}
-  variant="ghost" 
-  size="sm" 
-  className="h-7 text-purple-600 font-bold text-[10px] uppercase hover:bg-purple-50"
->
-  {isAiLoading === 'maksudTujuan' ? "Memproses..." : <><MessageSquare className="h-3 w-3 mr-2" /> AI Suggesi</>}
-</Button>
+  <Button 
+    onClick={() => handleAiGenerate('maksudTujuan')} 
+    disabled={isAiLoading === 'maksudTujuan'}
+    variant="ghost" 
+    size="sm" 
+    className="h-7 text-purple-600 font-bold text-[10px] uppercase hover:bg-purple-50 flex items-center gap-1.5"
+  >
+    {isAiLoading === 'maksudTujuan' ? <RotateCcw className="h-3 w-3 animate-spin" /> : <Wand2 className="h-3 w-3" />}
+    Generate AI
+  </Button>
                           <Button onClick={addMaksudTujuan} variant="ghost" size="sm" className="h-7 text-emerald-600 font-bold text-[10px] uppercase hover:bg-emerald-50"><Plus className="h-3 w-3 mr-2" /> Tambah Manual</Button>
                         </div>
                       </div>
@@ -1004,9 +1010,10 @@ Salam silaturahmi kami sampaikan, teriring doa semoga bapak beserta keluarga sel
   onClick={() => handleAiGenerate('kalimatPenutup')} 
   disabled={isAiLoading === 'kalimatPenutup'}
   variant="ghost" 
-  className="text-purple-600 font-bold text-[10px] uppercase"
+  className="text-purple-600 font-bold text-[10px] uppercase flex items-center gap-1.5"
 >
-  {isAiLoading === 'kalimatPenutup' ? "Memproses..." : <><MessageSquare className="h-3 w-3 mr-2" /> Rekomendasi AI</>}
+  {isAiLoading === 'kalimatPenutup' ? <RotateCcw className="h-3 w-3 animate-spin" /> : <Wand2 className="h-3 w-3" />}
+  Generate AI
 </Button>
                         </div>
                         <Textarea 

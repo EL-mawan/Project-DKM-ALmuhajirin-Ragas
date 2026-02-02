@@ -23,10 +23,11 @@ import {
   Image as ImageIcon,
   RotateCcw,
   Calendar,
-  Sparkles,
+  Sparkles, // Keep Sparkles for now, as it's not explicitly removed, only replaced in usage
   CheckCircle,
   XCircle,
-  AlertCircle
+  AlertCircle,
+  Wand2 // Added Wand2
 } from 'lucide-react'
 
 import jsPDF from 'jspdf'
@@ -315,7 +316,8 @@ function ProposalBuilderContent() {
       return;
     }
 
-    setHistory({...data});
+    // Use functional update for history
+    setHistory(prevHistory => ({...data}));
     setIsAiLoading(type);
     
     // Create a toast for the promise
@@ -327,9 +329,8 @@ Lokasi: Kampung Ragas Grenyang, Serang, Banten.
 
 Persyaratan Narasi:
 1. Sangat formal, inspiratif, dan menyentuh hati (Gunakan bahasa yang menggugah jiwa).
-2. Hubungkan dengan nilai-nilai religius dan kemaslahatan umat.
-3. Terdiri dari minimal 3 paragraf yang kohesif.
-4. Gunakan diksi yang elegan dan profesional (standar proposal nasional).
+2. Terdiri dari minimal 3 paragraf yang kohesif.
+3. Gunakan diksi yang elegan dan profesional (standar proposal nasional).
 
 Hanya berikan teks narasinya saja. JANGAN berikan kalimat pembuka seperti "Ini adalah narasinya" atau judul apapun. Langsung ke paragraf pertama.`,
 
@@ -414,6 +415,7 @@ Pastikan setiap poin dimulai dengan kata kerja (Contoh: Menjalin, Meningkatkan, 
           else if (Array.isArray(parsed)) list = parsed;
           else list = [cleanText];
           
+          // Use functional update for setData
           setData(prev => ({ ...prev, tujuan: list }));
           console.log(`[AI] Updated objectives list:`, list);
         } catch (e) {
@@ -421,6 +423,7 @@ Pastikan setiap poin dimulai dengan kata kerja (Contoh: Menjalin, Meningkatkan, 
           const lines = cleanText.split('\n')
             .map(l => l.replace(/^\d+[\.\)]\s*/, '').replace(/^-\s*/, '').trim())
             .filter(l => l.length > 5);
+          // Use functional update for setData
           setData(prev => ({ ...prev, tujuan: lines.length > 0 ? lines : [cleanText] }));
         }
       } else {
@@ -432,6 +435,7 @@ Pastikan setiap poin dimulai dengan kata kerja (Contoh: Menjalin, Meningkatkan, 
         
         const field = fieldMap[type];
         if (field) {
+          // Use functional update for setData
           setData(prev => ({ ...prev, [field]: cleanText }));
           console.log(`[AI] Updated field: ${field}`);
         }
@@ -440,15 +444,15 @@ Pastikan setiap poin dimulai dengan kata kerja (Contoh: Menjalin, Meningkatkan, 
     };
 
     toast.promise(promise(), {
-      loading: `AI sedang merumuskan ide brilian untuk ${type === 'cover-letter' ? 'surat pengantar' : type === 'background' ? 'latar belakang' : type === 'objectives' ? 'tujuan' : 'penutup'}...`,
+      loading: `Generate AI sedang merumuskan konten terbaik...`,
       success: (resType) => {
         setIsAiLoading(null);
-        return `Saran AI berhasil diterapkan! Silakan periksa bagian ${resType === 'cover-letter' ? 'Isi Surat' : resType === 'background' ? 'Latar Belakang' : resType === 'objectives' ? 'Maksud & Tujuan' : 'Penutup'}.`;
+        return `Generate AI Berhasil! Konten ${resType === 'cover-letter' ? 'Surat Pengantar' : resType === 'background' ? 'Latar Belakang' : resType === 'objectives' ? 'Maksud & Tujuan' : 'Penutup'} telah diperbarui.`;
       },
       error: (err) => {
         setIsAiLoading(null);
-        console.error(`[AI] Global error:`, err);
-        return `Gagal: ${err.message || 'Server AI tidak merespon'}`;
+        console.error(`[AI Error]:`, err);
+        return `Generate Gagal: ${err.message || 'Cek koneksi/API'}`;
       }
     });
   }
@@ -940,10 +944,10 @@ Pastikan setiap poin dimulai dengan kata kerja (Contoh: Menjalin, Meningkatkan, 
                       size="sm" 
                       onClick={() => handleAiGenerate('cover-letter')}
                       disabled={isAiLoading === 'cover-letter'}
-                      className="text-emerald-600 hover:bg-emerald-50 rounded-xl h-8 font-bold"
+                      className="text-emerald-600 hover:bg-emerald-50 rounded-xl h-8 font-bold flex items-center gap-2"
                     >
-                      {isAiLoading === 'cover-letter' ? <RotateCcw className="h-3.5 w-3.5 mr-2 animate-spin" /> : <Sparkles className="h-3.5 w-3.5 mr-2" />}
-                      Saran AI
+                      {isAiLoading === 'cover-letter' ? <RotateCcw className="h-3.5 w-3.5 animate-spin" /> : <Wand2 className="h-3.5 w-3.5" />}
+                      Generate AI
                     </Button>
                   </div>
                   <Textarea 
@@ -963,10 +967,10 @@ Pastikan setiap poin dimulai dengan kata kerja (Contoh: Menjalin, Meningkatkan, 
                       size="sm" 
                       onClick={() => handleAiGenerate('background')}
                       disabled={isAiLoading === 'background'}
-                      className="text-emerald-600 hover:bg-emerald-50 rounded-xl h-8 font-bold"
+                      className="text-emerald-600 hover:bg-emerald-50 rounded-xl h-8 font-bold flex items-center gap-2"
                     >
-                      {isAiLoading === 'background' ? <RotateCcw className="h-3.5 w-3.5 mr-2 animate-spin" /> : <Sparkles className="h-3.5 w-3.5 mr-2" />}
-                      Saran AI
+                      {isAiLoading === 'background' ? <RotateCcw className="h-3.5 w-3.5 animate-spin" /> : <Wand2 className="h-3.5 w-3.5" />}
+                      Generate AI
                     </Button>
                   </div>
                   <Textarea 
@@ -983,17 +987,18 @@ Pastikan setiap poin dimulai dengan kata kerja (Contoh: Menjalin, Meningkatkan, 
                     <Label className="font-bold text-slate-700 ml-1">Maksud dan Tujuan</Label>
                     <div className="flex gap-2">
                       <Button 
-                        variant="ghost" 
-                        size="sm" 
                         onClick={() => handleAiGenerate('objectives')}
                         disabled={isAiLoading === 'objectives'}
-                        className="text-emerald-600 hover:bg-emerald-50 rounded-xl h-8 font-bold"
+                        variant="ghost" 
+                        size="sm" 
+                        className="text-emerald-600 hover:bg-emerald-50 rounded-xl h-8 font-bold flex items-center gap-2"
                       >
-                        {isAiLoading === 'objectives' ? <RotateCcw className="h-3.5 w-3.5 mr-2 animate-spin" /> : <Sparkles className="h-3.5 w-3.5 mr-2" />}
-                        Saran AI
+                        {isAiLoading === 'objectives' ? <RotateCcw className="h-3.5 w-3.5 animate-spin" /> : <Wand2 className="h-3.5 w-3.5" />}
+                        Generate AI
                       </Button>
-                      <Button variant="ghost" size="sm" onClick={addTujuan} className="rounded-xl text-emerald-600 hover:bg-emerald-50 font-bold h-8">
-                          <Plus className="h-4 w-4 mr-1" /> Tambah Poin
+                      <Button onClick={addTujuan} variant="ghost" size="sm" className="text-emerald-600 hover:bg-emerald-50 rounded-xl h-8 font-bold flex items-center gap-2">
+                        <Plus className="h-3.5 w-3.5" />
+                        Tambah Poin
                       </Button>
                     </div>
                   </div>
@@ -1186,10 +1191,10 @@ Pastikan setiap poin dimulai dengan kata kerja (Contoh: Menjalin, Meningkatkan, 
                       size="sm" 
                       onClick={() => handleAiGenerate('closing')}
                       disabled={isAiLoading === 'closing'}
-                      className="text-emerald-600 hover:bg-emerald-50 rounded-xl h-8 font-bold"
+                      className="text-emerald-600 hover:bg-emerald-50 rounded-xl h-8 font-bold flex items-center gap-2"
                     >
-                      {isAiLoading === 'closing' ? <RotateCcw className="h-3.5 w-3.5 mr-2 animate-spin" /> : <Sparkles className="h-3.5 w-3.5 mr-2" />}
-                      Saran AI
+                      {isAiLoading === 'closing' ? <RotateCcw className="h-3.5 w-3.5 animate-spin" /> : <Wand2 className="h-3.5 w-3.5" />}
+                      Generate AI
                     </Button>
                   </div>
                   <Textarea 
