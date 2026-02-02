@@ -387,7 +387,7 @@ export function Page5({ data, onNavigate }: { data: Partial<ProposalData>, onNav
                     <p style={{ fontStyle: 'italic', fontWeight: '900', color: '#475569', fontSize: '11pt' }}>{data.tempat}, {data.tanggal}</p>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px', textAlign: 'center', marginBottom: '60px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '20px', textAlign: 'center', marginBottom: '60px' }}>
                     <div onClick={() => onNavigate?.('struktur')} style={{ cursor: 'pointer' }}>
                         <p style={{ fontSize: '11pt', fontWeight: '900', textTransform: 'uppercase', color: '#64748b', marginBottom: '10px' }}>Sekretaris DKM,</p>
                         <div style={{ height: '90px' }}></div>
@@ -398,12 +398,6 @@ export function Page5({ data, onNavigate }: { data: Partial<ProposalData>, onNav
                         <p style={{ fontSize: '11pt', fontWeight: '900', textTransform: 'uppercase', color: '#64748b', marginBottom: '10px' }}>Ketua DKM,</p>
                         <div style={{ height: '90px' }}></div>
                         <p style={{ fontWeight: '900', textDecoration: 'underline', fontSize: '12pt', color: '#0f172a' }}>{data.namaKetua || '( ........................ )'}</p>
-                    </div>
-
-                    <div onClick={() => onNavigate?.('struktur')} style={{ cursor: 'pointer' }}>
-                        <p style={{ fontSize: '11pt', fontWeight: '900', textTransform: 'uppercase', color: '#64748b', marginBottom: '10px' }}>Bendahara DKM,</p>
-                        <div style={{ height: '90px' }}></div>
-                        <p style={{ fontWeight: '900', textDecoration: 'underline', fontSize: '12pt', color: '#0f172a' }}>{data.namaBendahara || '( ........................ )'}</p>
                     </div>
                 </div>
 

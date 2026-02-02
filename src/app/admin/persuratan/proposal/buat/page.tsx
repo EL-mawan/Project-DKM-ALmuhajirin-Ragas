@@ -26,10 +26,9 @@ import {
   RotateCcw,
   Calendar,
   Sparkles,
-  CheckCircle,
-  XCircle,
   AlertCircle,
-  Wand2
+  Wand2,
+  Wallet
 } from 'lucide-react'
 
 import jsPDF from 'jspdf'
@@ -599,7 +598,11 @@ Pastikan setiap poin dimulai dengan kata kerja (Contoh: Menjalin, Meningkatkan, 
   }
 
   const generatePDF = async () => {
-    if (!previewRef.current) return
+    const captureContainer = document.getElementById('proposal-capture-container')
+    if (!captureContainer) {
+        toast.error('Gagal memproses render PDF. Silakan coba lagi.')
+        return
+    }
     setIsGeneratingPDF(true)
     
     try {
@@ -619,8 +622,12 @@ Pastikan setiap poin dimulai dengan kata kerja (Contoh: Menjalin, Meningkatkan, 
           // Beri waktu DOM untuk merender ulang konten penerima
           await new Promise(resolve => setTimeout(resolve, 800))
           
+          // Gunakan container tersembunyi untuk penangkapan yang stabil
+          const captureContainer = document.getElementById('proposal-capture-container')
+          if (!captureContainer) throw new Error('Capture container not found')
+          
           const doc = new jsPDF('p', 'mm', 'a4')
-          const pages = previewRef.current.querySelectorAll('.proposal-page')
+          const pages = captureContainer.querySelectorAll('.proposal-page')
           
           for (let j = 0; j < pages.length; j++) {
             const page = pages[j] as HTMLElement
@@ -665,8 +672,12 @@ Pastikan setiap poin dimulai dengan kata kerja (Contoh: Menjalin, Meningkatkan, 
         toast.success('Batch PDF berhasil diunduh dalam bentuk ZIP')
       } else {
         toast.info('Sedang merender PDF premium...')
+        
+        const captureContainer = document.getElementById('proposal-capture-container')
+        if (!captureContainer) throw new Error('Capture container not found')
+
         const doc = new jsPDF('p', 'mm', 'a4')
-        const pages = previewRef.current.querySelectorAll('.proposal-page')
+        const pages = captureContainer.querySelectorAll('.proposal-page')
         
         for (let i = 0; i < pages.length; i++) {
           const page = pages[i] as HTMLElement
@@ -722,6 +733,7 @@ Pastikan setiap poin dimulai dengan kata kerja (Contoh: Menjalin, Meningkatkan, 
 
   return (
     <AdminLayout title="Proposal Builder" subtitle="Buat proposal premium DKM Al-Muhajirin">
+    <>
     <div className={isViewMode ? "" : "flex flex-col lg:flex-row gap-10 pb-20 mt-6 max-w-[2000px] mx-auto px-4 md:px-8 xl:px-12"}>
       {!isViewMode && (
       <div className="flex-1 min-w-0 space-y-6">
@@ -748,7 +760,7 @@ Pastikan setiap poin dimulai dengan kata kerja (Contoh: Menjalin, Meningkatkan, 
               <Users className="h-4 w-4 mr-2" /> Struktur
             </TabsTrigger>
             <TabsTrigger value="rab" className="rounded-2xl font-bold py-3 md:py-0 data-[state=active]:bg-white data-[state=active]:text-emerald-700 data-[state=active]:shadow-sm transition-all text-[10px] md:text-sm">
-              <IDR className="h-4 w-4 mr-2" /> RAB
+              <Wallet className="h-4 w-4 mr-2" /> RAB
             </TabsTrigger>
             <TabsTrigger value="foto" className="rounded-2xl font-bold py-3 md:py-0 data-[state=active]:bg-white data-[state=active]:text-emerald-700 data-[state=active]:shadow-sm transition-all text-[10px] md:text-sm">
               <ImageIcon className="h-4 w-4 mr-2" /> Foto
@@ -1353,21 +1365,39 @@ Pastikan setiap poin dimulai dengan kata kerja (Contoh: Menjalin, Meningkatkan, 
                 {isViewMode && (
                     <Button variant="outline" className="rounded-xl border-slate-300 font-bold" onClick={() => router.push('/admin/persuratan/proposal')}>Tutup</Button>
                 )}
-                <Button onClick={generatePDF} disabled={isGeneratingPDF} className="rounded-xl font-bold bg-slate-900 shadow-xl shadow-slate-200 hover:scale-105 transition-transform active:scale-95">
-                    <Download className="mr-2 h-4 w-4" /> {isGeneratingPDF ? 'Mencetak...' : 'Unduh PDF'}
+                {bulkRecipients.length > 1 && (
+                    <Button onClick={generatePDF} disabled={isGeneratingPDF} className="rounded-xl font-bold bg-emerald-600 text-white shadow-xl shadow-emerald-200 hover:scale-105 transition-transform active:scale-95">
+                        <Download className="mr-2 h-4 w-4" /> {isGeneratingPDF ? 'Mencetak...' : 'Unduh Massal'}
+                    </Button>
+                )}
+                <Button onClick={generatePDF} disabled={isGeneratingPDF && bulkRecipients.length <= 1} className="rounded-xl font-bold bg-slate-900 shadow-xl shadow-slate-200 hover:scale-105 transition-transform active:scale-95">
+                    <Download className="mr-2 h-4 w-4" /> {isGeneratingPDF && bulkRecipients.length <= 1 ? 'Mencetak...' : 'Unduh PDF'}
                 </Button>
             </div>
           </div>
 
           <div className="bg-slate-50 border border-slate-200 p-2 sm:p-6 rounded-[3rem] shadow-xl shadow-slate-200/30 overflow-x-hidden overflow-y-auto space-y-12 flex flex-col items-center custom-scrollbar scroll-smooth" style={{ maxHeight: 'calc(100vh - 180px)' }}>
               <div ref={previewRef} id="proposal-preview-container" className="flex flex-col gap-10 scale-[0.35] sm:scale-[0.5] md:scale-[0.55] lg:scale-[0.6] xl:scale-[0.75] 2xl:scale-[1.0] origin-top transition-all duration-500">
-                <PageCover data={data} />
+                {/* Visible Preview (without cover) */}
                 <Page1 data={data} bulkRecipient={bulkRecipients.length > 0 ? bulkRecipients[currentRecipientIndex] : null} onNavigate={setActiveTab} />
                 <Page2 data={data} />
                 <Page3 data={data} />
                 <Page4 data={data} />
                 <Page5 data={data} onNavigate={setActiveTab} />
                 {data.lampiranFoto.length > 0 && <Page6 data={data} />}
+              </div>
+
+              {/* Hidden Container for PDF Capture (with cover) */}
+              <div style={{ position: 'absolute', left: '-5000px', top: 0 }}>
+                <div id="proposal-capture-container" className="flex flex-col gap-0 font-serif" style={{ width: '794px' }}>
+                  <PageCover data={data} />
+                  <Page1 data={data} bulkRecipient={bulkRecipients.length > 0 ? bulkRecipients[currentRecipientIndex] : null} />
+                  <Page2 data={data} />
+                  <Page3 data={data} />
+                  <Page4 data={data} />
+                  <Page5 data={data} />
+                  {data.lampiranFoto.length > 0 && <Page6 data={data} />}
+                </div>
               </div>
           </div>
         </div>
@@ -1422,6 +1452,7 @@ Pastikan setiap poin dimulai dengan kata kerja (Contoh: Menjalin, Meningkatkan, 
             </div>
         </DialogContent>
     </Dialog>
+    </>
     </AdminLayout>
   )
 }

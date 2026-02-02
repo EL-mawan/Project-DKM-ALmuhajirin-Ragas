@@ -13,7 +13,8 @@ import {
   User,
   MapPin,
   Phone,
-  Loader2
+  Loader2,
+  Download
 } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { toast } from 'sonner'
@@ -24,6 +25,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea'
 import { StatusPopup } from '@/components/ui/status-popup'
 import { useStatusPopup } from '@/lib/hooks/use-status-popup'
+import jsPDF from 'jspdf'
+import autoTable from 'jspdf-autotable'
 
 export default function DhuafaAdmin() {
   const [loading, setLoading] = useState(true)
@@ -149,6 +152,94 @@ export default function DhuafaAdmin() {
     return types[type] || type
   }
 
+  const generatePDF = () => {
+    const doc = new jsPDF()
+    const itemsPerPage = 60
+    const itemsPerColumn = 30
+
+    const sortedData = [...filteredData].sort((a, b) => {
+        const numA = parseInt(a.nomor) || 0
+        const numB = parseInt(b.nomor) || 0
+        return numA - numB
+    })
+
+    for (let i = 0; i < sortedData.length; i += itemsPerPage) {
+      if (i > 0) doc.addPage()
+
+      // HEADER
+      doc.setFontSize(14)
+      doc.setFont('helvetica', 'bold')
+      doc.text('Data Penerima Bantuan (Dhuafa) Masjid Al-Muhajirin', 105, 12, { align: 'center' })
+      
+      doc.setFontSize(10)
+      doc.setFont('helvetica', 'normal')
+      doc.text(`Kampung Ragas Grenyang, Kec. Puloampel`, 105, 18, { align: 'center' })
+
+      const chunk = sortedData.slice(i, i + itemsPerPage)
+      const leftHalf = chunk.slice(0, itemsPerColumn)
+      const rightHalf = chunk.slice(itemsPerColumn, itemsPerPage)
+
+      const tableColumn = ["No", "Nama", "Kategori", "Keterangan", "Nominal (Rp)"]
+      const tableStyles = {
+        theme: 'grid' as const,
+        headStyles: { 
+          fillColor: [11, 61, 46] as [number, number, number], 
+          textColor: [255, 255, 255] as [number, number, number], 
+          fontStyle: 'bold' as const, 
+          halign: 'center' as const, 
+          fontSize: 8 
+        },
+        styles: { 
+          fontSize: 7.5, 
+          cellPadding: 1.5, 
+          lineColor: [180, 180, 180] as [number, number, number], 
+          lineWidth: 0.1 
+        },
+        columnStyles: {
+          0: { halign: 'center' as const, cellWidth: 8 },
+          1: { cellWidth: 32 },
+          2: { cellWidth: 20 },
+          3: { cellWidth: 15 },
+          4: { cellWidth: 15 }
+        }
+      }
+
+      // Draw Left Table
+      autoTable(doc, {
+        ...tableStyles,
+        head: [tableColumn],
+        body: leftHalf.map((item) => [
+          item.nomor,
+          item.name,
+          getTypeName(item.type),
+          item.keterangan || '-',
+          ""
+        ]),
+        startY: 25,
+        margin: { right: 107, left: 10 },
+      })
+
+      // Draw Right Table
+      if (rightHalf.length > 0) {
+        autoTable(doc, {
+          ...tableStyles,
+          head: [tableColumn],
+          body: rightHalf.map((item) => [
+            item.nomor,
+            item.name,
+            getTypeName(item.type),
+            item.keterangan || '-',
+            ""
+          ]),
+          startY: 25,
+          margin: { left: 107, right: 10 },
+        })
+      }
+    }
+
+    doc.save(`Data_Penerima_Dhuafa_${new Date().toLocaleDateString('id-ID')}.pdf`)
+  }
+
   return (
     <AdminLayout title="Kaum Dhuafa" subtitle="Kelola program bantuan & database penerima manfaat.">
       <div className="p-6 sm:p-8 space-y-6">
@@ -158,25 +249,36 @@ export default function DhuafaAdmin() {
             <p className="text-muted-foreground text-sm hidden sm:block">Total {filteredData.length} penerima terdaftar.</p>
           </div>
           
-          <Dialog open={isModalOpen} onOpenChange={(open) => {
-            setIsModalOpen(open)
-            if (!open) {
-              setEditingItem(null)
-              resetForm()
-            }
-          }}>
-            <DialogTrigger asChild>
-              <Button className="rounded-xl shadow-lg w-full sm:w-auto py-6 sm:py-2">
-                <Plus className="h-4 w-4 mr-2" />
-                Tambah Penerima
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[600px] rounded-[2.5rem]">
-              <DialogHeader>
-                <DialogTitle className="text-2xl font-bold text-[#0b3d2e]">
-                  {editingItem ? 'Edit Data Dhuafa' : 'Tambah Penerima Baru'}
-                </DialogTitle>
-              </DialogHeader>
+          <div className="flex flex-wrap gap-3 w-full sm:w-auto">
+            <Button 
+                variant="outline" 
+                className="rounded-xl shadow-md bg-white border-emerald-100 text-[#0b3d2e] flex-1 sm:flex-none py-6 sm:py-2"
+                onClick={generatePDF}
+                disabled={filteredData.length === 0}
+            >
+                <Download className="h-4 w-4 mr-2" />
+                Unduh PDF
+            </Button>
+
+            <Dialog open={isModalOpen} onOpenChange={(open) => {
+              setIsModalOpen(open)
+              if (!open) {
+                setEditingItem(null)
+                resetForm()
+              }
+            }}>
+              <DialogTrigger asChild>
+                <Button className="rounded-xl shadow-lg flex-1 sm:flex-none py-6 sm:py-2">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Tambah Penerima
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[600px] rounded-[2.5rem]">
+                <DialogHeader>
+                  <DialogTitle className="text-2xl font-bold text-[#0b3d2e]">
+                    {editingItem ? 'Edit Data Dhuafa' : 'Tambah Penerima Baru'}
+                  </DialogTitle>
+                </DialogHeader>
               <form onSubmit={handleSubmit} onKeyDown={handleKeyDown} className="space-y-4 pt-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
@@ -253,6 +355,7 @@ export default function DhuafaAdmin() {
               </form>
             </DialogContent>
           </Dialog>
+          </div>
         </div>
 
         <Card className="rounded-[2.5rem] border-none shadow-xl overflow-hidden shadow-gray-200/50">
