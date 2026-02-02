@@ -410,7 +410,7 @@ export default function PersuratanAdmin() {
               <div className="p-6 md:p-10">
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 md:gap-8">
                   {filteredData.map((item) => (
-                    <Card key={item.id} className="group relative overflow-hidden rounded-[2.5rem] border-none shadow-xl shadow-slate-200/50 hover:shadow-2xl hover:shadow-indigo-100/50 transition-all duration-500 bg-white border border-slate-50">
+                    <Card key={item.id} className="group relative overflow-hidden rounded-[2.5rem] border-none shadow-xl shadow-slate-200/40 hover:shadow-2xl hover:shadow-indigo-100/40 transition-all duration-500 bg-white border border-slate-50">
                       
                       <CardContent className="p-8 space-y-6">
                         {/* Status Header */}
@@ -426,7 +426,7 @@ export default function PersuratanAdmin() {
 
                         {/* Title Section */}
                         <div className="space-y-2">
-                           <h4 className="font-black text-indigo-700 text-lg md:text-xl leading-tight group-hover:text-indigo-900 transition-colors line-clamp-2">
+                           <h4 className="font-black text-[#5e17eb] text-xl leading-tight transition-colors line-clamp-2">
                              {item.title}
                            </h4>
                            {item.nomorSurat && (
@@ -442,7 +442,7 @@ export default function PersuratanAdmin() {
                              <div className="h-9 w-9 rounded-xl bg-slate-50 flex items-center justify-center shrink-0">
                                <Send className="h-4 w-4 text-slate-400" />
                              </div>
-                             <p className="text-xs font-bold text-slate-500 line-clamp-1">
+                             <p className="text-sm font-medium text-slate-600 line-clamp-1">
                                {item.recipient || 'Tanpa Penerima'}
                              </p>
                            </div>
@@ -451,56 +451,54 @@ export default function PersuratanAdmin() {
                              <div className="h-9 w-9 rounded-xl bg-slate-50 flex items-center justify-center shrink-0">
                                <Calendar className="h-4 w-4 text-slate-400" />
                              </div>
-                             <p className="text-xs font-bold text-slate-500">
+                             <p className="text-sm font-medium text-slate-600">
                                {new Date(item.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
                              </p>
                            </div>
                         </div>
 
-                        {/* Footer Divider */}
+                        {/* Footer Divider (Subtle) */}
                         <div className="h-px w-full bg-slate-50" />
 
-                        {/* Bottom Row */}
-                        <div className="flex items-center justify-between pt-2">
-                           <div className="flex items-center gap-3">
-                              <div className="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-black text-sm border-2 border-white shadow-sm shrink-0">
+                        {/* Bottom Row: Author & Actions */}
+                        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2">
+                           <div className="flex items-center gap-3 w-full sm:w-auto">
+                              <div className="h-10 w-10 rounded-full bg-indigo-50 flex items-center justify-center text-[#5e17eb] font-black text-sm border-2 border-white shadow-sm shrink-0">
                                 {item.creator?.name?.charAt(0) || 'D'}
                               </div>
-                              <div className="flex flex-col">
-                                <span className="text-[10px] font-bold text-slate-300 uppercase tracking-widest">Dibuat Oleh</span>
-                                <span className="text-xs font-black text-slate-500">{item.creator?.name || 'DKM Admin'}</span>
-                              </div>
+                              <p className="text-xs font-bold text-slate-400">
+                                <span className="font-medium mr-1 uppercase text-[10px]">By</span> 
+                                <span className="text-slate-500 font-bold">{item.creator?.name || 'DKM Admin'}</span>
+                              </p>
                            </div>
 
-                           <div className="flex items-center gap-1">
+                           <div className="flex items-center gap-1 justify-end w-full sm:w-auto">
                               {/* Validation Actions for Admins */}
                               {canValidate && item.status === 'pending' && (
-                                <>
+                                <div className="flex items-center gap-1 mr-2 pr-2 border-r border-slate-100">
                                   <Button 
                                     variant="ghost" 
                                     size="icon" 
-                                    className="h-10 w-10 rounded-xl text-emerald-600 hover:bg-emerald-50 shadow-sm border border-emerald-100/50"
+                                    className="h-10 w-10 rounded-xl text-emerald-600 hover:bg-emerald-50"
                                     onClick={() => handleValidate(item.id, 'validate')}
-                                    title="Validasi Dokumen"
                                   >
                                     <CheckCircle className="h-5 w-5" />
                                   </Button>
                                   <Button 
                                     variant="ghost" 
                                     size="icon" 
-                                    className="h-10 w-10 rounded-xl text-rose-600 hover:bg-rose-50 shadow-sm border border-rose-100/50"
+                                    className="h-10 w-10 rounded-xl text-rose-600 hover:bg-rose-50"
                                     onClick={() => handleValidate(item.id, 'reject')}
-                                    title="Tolak Dokumen"
                                   >
                                     <XCircle className="h-5 w-5" />
                                   </Button>
-                                </>
+                                </div>
                               )}
 
                               <Button 
                                 variant="ghost" 
                                 size="icon" 
-                                className="h-10 w-10 rounded-xl text-slate-400 hover:text-indigo-600 hover:bg-indigo-50"
+                                className="h-10 w-10 rounded-xl text-slate-300 hover:text-indigo-600 hover:bg-indigo-50 transition-all duration-300"
                                 onClick={() => router.push(item.type === 'PROPOSAL' ? `/admin/persuratan/proposal/buat?id=${item.id}&mode=view` : `/admin/persuratan/buat?type=${item.type}&id=${item.id}&mode=view`)}
                                 title="Lihat Detail"
                               >
@@ -511,7 +509,7 @@ export default function PersuratanAdmin() {
                                 variant="ghost" 
                                 size="icon"
                                 disabled={item.status !== 'validated'}
-                                className="h-10 w-10 rounded-xl text-slate-400 hover:text-blue-600 hover:bg-blue-50 disabled:opacity-20"
+                                className="h-10 w-10 rounded-xl text-slate-300 hover:text-blue-600 hover:bg-blue-50 disabled:opacity-30 transition-all duration-300"
                                 onClick={() => generatePDF(item)}
                                 title="Unduh PDF"
                               >
@@ -521,7 +519,7 @@ export default function PersuratanAdmin() {
                               <Button 
                                 variant="ghost" 
                                 size="icon" 
-                                className="h-10 w-10 rounded-xl text-slate-400 hover:text-emerald-600 hover:bg-emerald-50"
+                                className="h-10 w-10 rounded-xl text-slate-300 hover:text-emerald-600 hover:bg-emerald-50 transition-all duration-300"
                                 onClick={() => router.push(item.type === 'PROPOSAL' ? `/admin/persuratan/proposal/buat?id=${item.id}` : `/admin/persuratan/buat?type=${item.type}&id=${item.id}`)}
                                 title="Edit Dokumen"
                               >
@@ -531,7 +529,7 @@ export default function PersuratanAdmin() {
                               <Button 
                                 variant="ghost" 
                                 size="icon" 
-                                className="h-10 w-10 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50"
+                                className="h-10 w-10 rounded-xl text-slate-300 hover:text-rose-600 hover:bg-rose-50 transition-all duration-300"
                                 onClick={() => handleDelete(item.id)}
                                 title="Hapus Dokumen"
                               >
@@ -556,17 +554,17 @@ export default function PersuratanAdmin() {
 function StatusBadge({ status }: { status: string }) {
   if (status === 'validated') return (
     <Badge className="rounded-xl px-4 py-1.5 font-black text-[9px] uppercase tracking-widest bg-emerald-50 text-emerald-600 border-none shrink-0">
-       Tersertifikasi
+       TERVALIDASI
     </Badge>
   )
   if (status === 'rejected') return (
     <Badge className="rounded-xl px-4 py-1.5 font-black text-[9px] uppercase tracking-widest bg-rose-50 text-rose-600 border-none shrink-0">
-       Ditolak
+       DITOLAK
     </Badge>
   )
   return (
     <Badge className="rounded-xl px-4 py-1.5 font-black text-[9px] uppercase tracking-widest bg-amber-50 text-amber-600 border-none shrink-0">
-       Menunggu Validasi
+       MENUNGGU_VALIDASI
     </Badge>
   )
 }

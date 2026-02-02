@@ -56,10 +56,23 @@ export function AdminLayout({ children, title, subtitle }: AdminLayoutProps) {
   }
 
   useEffect(() => {
-    fetchNotificationCount()
-    // Poll every 1 minute
-    const interval = setInterval(fetchNotificationCount, 60000)
-    return () => clearInterval(interval)
+    let isMounted = true;
+    const updateCount = async () => {
+      try {
+        const res = await fetch('/api/admin/dashboard/stats')
+        const data = await res.json()
+        if (res.ok && isMounted) setNotificationCount(data.unreadNotifications || 0)
+      } catch (err) {
+        console.error(err)
+      }
+    }
+
+    updateCount()
+    const interval = setInterval(updateCount, 60000)
+    return () => {
+      isMounted = false
+      clearInterval(interval)
+    }
   }, [])
 
   // Header visibility logic

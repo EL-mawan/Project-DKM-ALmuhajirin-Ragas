@@ -435,7 +435,7 @@ Salam silaturahmi kami sampaikan, teriring doa semoga bapak beserta keluarga sel
                     </Card>
 
                     {/* Section 2: TUJUAN / PENERIMA */}
-                    <Card className="rounded-[2rem] border-2 border-purple-50 shadow-sm bg-white overflow-hidden p-8">
+                    <Card className="rounded-4xl border-2 border-purple-50 shadow-sm bg-white overflow-hidden p-8">
                       <div className="flex items-center gap-3 mb-6">
                         <div className="h-8 w-8 rounded-lg bg-purple-100 flex items-center justify-center text-purple-600">
                           <Users className="h-4 w-4" />
@@ -474,7 +474,7 @@ Salam silaturahmi kami sampaikan, teriring doa semoga bapak beserta keluarga sel
                     </Card>
 
                     {/* Section 3: PENGATURAN LOGO */}
-                    <Card className="rounded-[2rem] border-2 border-slate-50 shadow-sm bg-white overflow-hidden p-8">
+                    <Card className="rounded-4xl border-2 border-slate-50 shadow-sm bg-white overflow-hidden p-8">
                       <div className="flex items-center gap-3 mb-8">
                         <div className="h-8 w-8 rounded-lg bg-blue-100 flex items-center justify-center text-blue-600">
                           <PenTool className="h-4 w-4" />
@@ -514,7 +514,7 @@ Salam silaturahmi kami sampaikan, teriring doa semoga bapak beserta keluarga sel
                       </div>
                       <Textarea 
                         placeholder="Tulislah isi surat pengantar..." 
-                        className={`min-h-[160px] rounded-[1.5rem] border-slate-200 p-6 transition-all duration-500 ${isAiLoading === 'isiSuratPengantar' ? 'animate-pulse border-purple-400 ring-2 ring-purple-50' : ''}`}
+                        className={`min-h-[160px] rounded-3xl border-slate-200 p-6 transition-all duration-500 ${isAiLoading === 'isiSuratPengantar' ? 'animate-pulse border-purple-400 ring-2 ring-purple-50' : ''}`}
                         value={formData.isiSuratPengantar} 
                         onChange={e => setFormData({...formData, isiSuratPengantar: e.target.value})} 
                       />
@@ -537,7 +537,7 @@ Salam silaturahmi kami sampaikan, teriring doa semoga bapak beserta keluarga sel
                       </div>
                       <Textarea 
                         placeholder="Tulislah alasan permohonan ini diajukan..." 
-                        className={`min-h-[120px] rounded-[1.5rem] border-slate-200 p-6 transition-all duration-500 ${isAiLoading === 'latarBelakang' ? 'animate-pulse border-purple-400 ring-2 ring-purple-50' : ''}`}
+                        className={`min-h-[120px] rounded-3xl border-slate-200 p-6 transition-all duration-500 ${isAiLoading === 'latarBelakang' ? 'animate-pulse border-purple-400 ring-2 ring-purple-50' : ''}`}
                         value={formData.latarBelakang} 
                         onChange={e => setFormData({...formData, latarBelakang: e.target.value})} 
                       />
@@ -576,7 +576,7 @@ Salam silaturahmi kami sampaikan, teriring doa semoga bapak beserta keluarga sel
                            </div>
                         ))}
                         {formData.maksudTujuanList.length === 0 && (
-                          <div className="h-20 border-2 border-dashed border-slate-100 rounded-[2rem] flex items-center justify-center text-slate-300 text-[10px] font-black uppercase italic tracking-widest bg-slate-50/50">
+                          <div className="h-20 border-2 border-dashed border-slate-100 rounded-4xl flex items-center justify-center text-slate-300 text-[10px] font-black uppercase italic tracking-widest bg-slate-50/50">
                             Belum ada poin ditambahkan
                           </div>
                         )}
@@ -584,7 +584,7 @@ Salam silaturahmi kami sampaikan, teriring doa semoga bapak beserta keluarga sel
                     </div>
 
                     {/* Section 7: WAKTU DAN TEMPAT */}
-                    <div className="p-8 rounded-[2rem] border-2 border-slate-50 bg-white flex items-center justify-between shadow-sm">
+                    <div className="p-8 rounded-4xl border-2 border-slate-50 bg-white flex items-center justify-between shadow-sm">
                       <div className="flex items-center gap-4">
                         <div className="h-10 w-10 rounded-xl bg-purple-50 flex items-center justify-center text-purple-500">
                           <Calendar className="h-5 w-5" />
@@ -620,10 +620,10 @@ Salam silaturahmi kami sampaikan, teriring doa semoga bapak beserta keluarga sel
                       
                       <div className="space-y-8 relative">
                         <div className="flex flex-col items-center mb-10">
-                          <div className="h-12 w-12 rounded-[1.5rem] bg-indigo-600 text-white flex items-center justify-center shadow-lg shadow-indigo-100 mb-4 animate-bounce">
+                          <div className="h-12 w-12 rounded-3xl bg-indigo-600 text-white flex items-center justify-center shadow-lg shadow-indigo-100 mb-4 animate-bounce">
                             <Users className="h-6 w-6" />
                           </div>
-                          <h3 className="text-xl font-black text-slate-800 tracking-tight uppercase tracking-[0.2em] text-center">Pimpinan Utama</h3>
+                          <h3 className="text-xl font-black text-slate-800 uppercase tracking-widest text-center">Pimpinan Utama</h3>
                           <p className="text-[10px] text-slate-400 font-bold uppercase mt-1">Penanggung Jawab & Penasehat</p>
                         </div>
 
@@ -673,19 +673,19 @@ Salam silaturahmi kami sampaikan, teriring doa semoga bapak beserta keluarga sel
                     {/* Section: Operational Core / Pengurus Harian */}
                     <div className="pt-12 border-t-2 border-dashed border-slate-100">
                       <div className="flex flex-col items-center mb-10">
-                        <div className="h-12 w-12 rounded-[1.5rem] bg-blue-600 text-white flex items-center justify-center shadow-lg shadow-blue-100 mb-4">
+                        <div className="h-12 w-12 rounded-3xl bg-blue-600 text-white flex items-center justify-center shadow-lg shadow-blue-100 mb-4">
                           <Layout className="h-6 w-6" />
                         </div>
-                        <h3 className="text-xl font-black text-slate-800 tracking-tight uppercase tracking-[0.2em] text-center">Pengurus Harian</h3>
+                        <h3 className="text-xl font-black text-slate-800 uppercase tracking-widest text-center">Pengurus Harian</h3>
                         <p className="text-[10px] text-slate-400 font-bold uppercase mt-1">Administrasi & Keuangan</p>
                       </div>
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="p-6 rounded-[2rem] bg-white border border-slate-100 shadow-sm space-y-4">
+                        <div className="p-6 rounded-4xl bg-white border border-slate-100 shadow-sm space-y-4">
                            <Label className="text-[9px] uppercase font-black text-slate-300 tracking-[0.3em] block text-center italic">Sekretaris Utama</Label>
                            <Input className="h-12 rounded-2xl bg-slate-50/80 border-none font-bold text-center text-xs" placeholder="Nama Sekretaris..." value={formData.sekretarisStruktur} onChange={e => setFormData({...formData, sekretarisStruktur: e.target.value})} />
                         </div>
-                        <div className="p-6 rounded-[2rem] bg-white border border-slate-100 shadow-sm space-y-4">
+                        <div className="p-6 rounded-4xl bg-white border border-slate-100 shadow-sm space-y-4">
                            <Label className="text-[9px] uppercase font-black text-slate-300 tracking-[0.3em] block text-center italic">Bendahara Utama</Label>
                            <Input className="h-12 rounded-2xl bg-slate-50/80 border-none font-bold text-center text-xs" placeholder="Nama Bendahara..." value={formData.bendaharaStruktur} onChange={e => setFormData({...formData, bendaharaStruktur: e.target.value})} />
                         </div>
@@ -746,12 +746,12 @@ Salam silaturahmi kami sampaikan, teriring doa semoga bapak beserta keluarga sel
                      {/* Summary Card */}
                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <Card className="col-span-2 rounded-[2.5rem] bg-indigo-600 p-8 shadow-xl shadow-indigo-100 flex items-center justify-between text-white overflow-hidden relative">
-                           <div className="absolute top-0 right-0 h-full w-48 bg-white/10 skew-x-[30deg] translate-x-12" />
+                           <div className="absolute top-0 right-0 h-full w-48 bg-white/10 skew-x-30 translate-x-12" />
                            <div className="relative">
                               <p className="text-[10px] font-black uppercase tracking-[0.3em] opacity-70 mb-2">Total Estimasi Anggaran</p>
                               <h2 className="text-4xl font-black tracking-tight">IDR {totalRAB.toLocaleString('id-ID')}</h2>
                            </div>
-                           <div className="h-16 w-16 rounded-[1.5rem] bg-white/20 flex items-center justify-center relative backdrop-blur-md">
+                           <div className="h-16 w-16 rounded-3xl bg-white/20 flex items-center justify-center relative backdrop-blur-md">
                               <DollarSign className="h-8 w-8" />
                            </div>
                         </Card>
@@ -768,7 +768,7 @@ Salam silaturahmi kami sampaikan, teriring doa semoga bapak beserta keluarga sel
                               <div className="h-10 w-10 rounded-[1.2rem] bg-slate-900 text-white flex items-center justify-center">
                                  <Plus className="h-5 w-5" />
                               </div>
-                              <h3 className="text-xl font-black text-slate-800 tracking-tight uppercase tracking-wider">Daftar Kebutuhan</h3>
+                              <h3 className="text-xl font-black text-slate-800 tracking-wider">Daftar Kebutuhan</h3>
                            </div>
                            <Button onClick={addRABItem} className="h-11 px-8 rounded-full bg-slate-900 hover:bg-black text-white font-black uppercase tracking-widest text-[10px] transition-all hover:scale-105 active:scale-95 shadow-xl shadow-slate-200">
                               <Plus className="h-3 w-3 mr-2" /> Tambah Barang / Jasa
@@ -819,7 +819,7 @@ Salam silaturahmi kami sampaikan, teriring doa semoga bapak beserta keluarga sel
                               ))}
                               
                               {formData.rabItems.length === 0 && (
-                                <div className="h-48 border-2 border-dashed border-slate-50 rounded-[2rem] flex flex-col items-center justify-center space-y-4 bg-slate-50/20">
+                                <div className="h-48 border-2 border-dashed border-slate-50 rounded-4xl flex flex-col items-center justify-center space-y-4 bg-slate-50/20">
                                    <div className="h-12 w-12 rounded-full bg-slate-50 flex items-center justify-center text-slate-200">
                                       <DollarSign className="h-6 w-6" />
                                    </div>
@@ -837,7 +837,7 @@ Salam silaturahmi kami sampaikan, teriring doa semoga bapak beserta keluarga sel
                               <div className="h-10 w-10 rounded-[1.2rem] bg-indigo-50 text-indigo-600 flex items-center justify-center">
                                  <FileText className="h-5 w-5" />
                               </div>
-                              <h3 className="text-xl font-black text-slate-800 tracking-tight uppercase tracking-wider">Lampiran Pendukung</h3>
+                              <h3 className="text-xl font-black text-slate-800 tracking-wider">Lampiran Pendukung</h3>
                            </div>
                            <Button variant="outline" className="h-10 px-6 rounded-full border-indigo-100 text-indigo-600 font-black uppercase text-[9px] tracking-widest hover:bg-indigo-50">
                               <Upload className="h-3 w-3 mr-2" /> Upload Dokumen/Foto
@@ -919,7 +919,7 @@ Salam silaturahmi kami sampaikan, teriring doa semoga bapak beserta keluarga sel
                              { label: 'Ketua Padepokan', field: 'ttdKetuaPadepokan', icon: <PenTool className="h-4 w-4" /> },
                              { label: 'Ketua DPD Bandrong', field: 'ttdKetuaDPDBandrong', icon: <PenTool className="h-4 w-4" /> },
                            ].map((item, idx) => (
-                             <div key={idx} className="p-6 rounded-[2rem] bg-white border border-slate-100 shadow-sm hover:shadow-md transition-shadow group">
+                             <div key={idx} className="p-6 rounded-4xl bg-white border border-slate-100 shadow-sm hover:shadow-md transition-shadow group">
                                <div className="flex items-center gap-2 mb-4">
                                   <div className={`h-8 w-8 rounded-lg flex items-center justify-center ${(item as any).required ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-50 text-slate-400 opacity-50 group-hover:opacity-100'}`}>
                                     {(item as any).icon}

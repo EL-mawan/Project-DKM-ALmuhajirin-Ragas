@@ -8,7 +8,6 @@ import {
   Calendar,
   Users,
   Heart,
-  Image,
   Phone,
   ArrowRight,
   Clock,
@@ -19,7 +18,10 @@ import {
   Building,
   Star,
   TrendingUp,
-  Mail
+  Mail,
+  MessageSquare,
+  Bell,
+  Image as ImageIcon
 } from 'lucide-react'
 import Link from 'next/link'
 
@@ -325,7 +327,7 @@ export default function Home() {
                 <div key={i} className="relative group overflow-hidden rounded-3xl cursor-pointer">
                   <img src={item.imageUrl} alt={item.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
                   <div className="absolute inset-0 bg-primary/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center backdrop-blur-[2px]">
-                     <Image className="text-white w-10 h-10" />
+                     <ImageIcon className="text-white w-10 h-10" />
                   </div>
                 </div>
               ))
