@@ -41,7 +41,17 @@ import { useStatusPopup } from '@/lib/hooks/use-status-popup'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import jsPDF from 'jspdf'
+import html2canvas from 'html2canvas'
 import { toast } from 'sonner'
+import { 
+  PageCover, 
+  Page1, 
+  Page2, 
+  Page3, 
+  Page4, 
+  Page5, 
+  Page6
+} from '@/components/persuratan/proposal-pdf-preview'
 
 export default function PersuratanAdmin() {
   const router = useRouter()
@@ -116,7 +126,58 @@ export default function PersuratanAdmin() {
      item.nomorSurat?.toLowerCase().includes(search.toLowerCase()))
   )
 
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false)
+  const [activePDFData, setActivePDFData] = useState<any>(null)
+
   const generatePDF = async (item: any) => {
+    if (item.type !== 'PROPOSAL') {
+        // Fallback to old manual generation for other types for now
+        return generateManualPDF(item)
+    }
+
+    try {
+      setIsGeneratingPDF(true)
+      setActivePDFData(item)
+      toast.info('Menyiapkan render PDF premium...')
+
+      // Wait for React to render the hidden preview
+      await new Promise(resolve => setTimeout(resolve, 800))
+      
+      const previewContainer = document.getElementById('hidden-proposal-preview')
+      if (!previewContainer) throw new Error('Preview container not found')
+
+      const doc = new jsPDF('p', 'mm', 'a4')
+      const pages = previewContainer.querySelectorAll('.proposal-page')
+      
+      for (let i = 0; i < pages.length; i++) {
+        const page = pages[i] as HTMLElement
+        const canvas = await html2canvas(page, {
+          scale: 2.5, // High quality
+          useCORS: true,
+          backgroundColor: '#ffffff',
+          width: 794,
+          height: 1123,
+          logging: false
+        })
+        
+        const imgData = canvas.toDataURL('image/jpeg', 0.9)
+        if (i > 0) doc.addPage()
+        doc.addImage(imgData, 'JPEG', 0, 0, 210, 297)
+      }
+
+      const fileName = `Proposal_${item.title.replace(/[^a-z0-9]/gi, '_')}.pdf`
+      doc.save(fileName)
+      toast.success('PDF Proposal premium berhasil diunduh')
+    } catch (error) {
+      console.error(error)
+      toast.error('Gagal membuat PDF premium')
+    } finally {
+      setIsGeneratingPDF(false)
+      setActivePDFData(null)
+    }
+  }
+
+  const generateManualPDF = async (item: any) => {
     try {
       // Create PDF with A4 size
       const doc = new jsPDF({
@@ -547,6 +608,29 @@ export default function PersuratanAdmin() {
         </Card>
       </div>
       <StatusPopup {...statusProps} />
+
+      {/* Hidden Preview Container for PDF Generation */}
+      <div style={{ position: 'fixed', left: '-5000px', top: 0, zIndex: -1 }}>
+        <div id="hidden-proposal-preview">
+          {activePDFData && (() => {
+            const formData = typeof activePDFData.content === 'string' 
+              ? JSON.parse(activePDFData.content) 
+              : activePDFData.content;
+            
+            return (
+              <div className="flex flex-col gap-0 font-serif" style={{ width: '794px' }}>
+                <PageCover data={formData} />
+                <Page1 data={formData} />
+                <Page2 data={formData} />
+                <Page3 data={formData} />
+                <Page4 data={formData} />
+                <Page5 data={formData} />
+                {formData.lampiranFoto?.length > 0 && <Page6 data={formData} />}
+              </div>
+            )
+          })()}
+        </div>
+      </div>
     </AdminLayout>
   )
 }

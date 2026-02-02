@@ -46,71 +46,28 @@ import {
 } from "@/components/ui/dialog"
 import { AdminLayout } from '@/components/layout/admin-layout'
 import { useSession } from 'next-auth/react'
+import { 
+  PageCover, 
+  Page1, 
+  Page2, 
+  Page3, 
+  Page4, 
+  Page5, 
+  Page6, 
+  type ProposalData as SharedProposalData,
+  type RABItem,
+  type ProposalFoto
+} from '@/components/persuratan/proposal-pdf-preview'
+
+type ProposalData = SharedProposalData;
 
 const IDR = ({ className }: { className?: string }) => (
   <div className={`${className} font-bold text-[10px] flex items-center justify-center`}>Rp</div>
 )
 
 // --- Types ---
-interface Pimpinan {
-  role: string
-  name: string
-}
+// Types are imported from shared components
 
-interface RABItem {
-  nama: string
-  spesifikasi: string
-  jumlah: number
-  satuan: string
-  hargaSatuan: number
-  totalHarga: number
-}
-
-interface ProposalFoto {
-  url: string
-  deskripsi: string
-}
-
-interface ProposalData {
-  nomor: string
-  lampiran: string
-  perihal: string
-  penerima: {
-    nama: string
-    jabatan: string
-    instansi: string
-    alamat: string
-  }
-  latarBelakang: string
-  suratPengantar: string
-  tujuan: string[]
-  struktur: {
-    pimpinanAtas: Pimpinan[]
-    administrasi: Pimpinan[]
-    operasional: string[]
-  }
-  rab: RABItem[]
-  tanggal: string
-  tempat: string
-  namaKetua: string
-  namaSekretaris: string
-  namaTokohMasyarakat: string
-  namaKetuaRW: string
-  namaKetuaRT: string
-  namaKetuaPemuda: string
-  namaKepalaDesa: string
-  logoKiri?: string
-  logoKanan?: string
-  namaKopSurat: string
-  alamatKopSurat: string
-  kontakKopSurat: string
-  penutup: string
-  bulkRecipients?: { nama: string, jabatan: string, alamat: string }[]
-  lampiranFoto: ProposalFoto[]
-  waktuKegiatan: string
-  tempatKegiatan: string
-  showWaktuTempat: boolean
-}
 
 const initialData: ProposalData = {
   namaKopSurat: 'DEWAN KEMAKMURAN MASJID (DKM) AL-MUHAJIRIN RAGAS GRENYANG',
@@ -158,7 +115,8 @@ Oleh karena itu, kami memandang perlu untuk melaksanakan kegiatan ini sebagai ba
       { role: 'Ketua Pemuda', name: '' }
     ],
     administrasi: [
-      { role: 'Sekretaris', name: '' }
+      { role: 'Sekretaris', name: '' },
+      { role: 'Bendahara', name: '' }
     ],
     operasional: []
   },
@@ -167,6 +125,7 @@ Oleh karena itu, kami memandang perlu untuk melaksanakan kegiatan ini sebagai ba
   tempat: 'Argawana',
   namaKetua: '',
   namaSekretaris: '',
+  namaBendahara: '',
   namaTokohMasyarakat: '',
   namaKetuaRW: '',
   namaKetuaRT: '',
@@ -300,6 +259,7 @@ function ProposalBuilderContent() {
       if (category === 'pimpinanAtas' && index === 3) updates.namaKetuaRT = name
       if (category === 'pimpinanAtas' && index === 4) updates.namaKetuaPemuda = name
       if (category === 'administrasi' && index === 0) updates.namaSekretaris = name
+      if (category === 'administrasi' && index === 1) updates.namaBendahara = name
       
       return { ...prev, ...updates }
     })
@@ -1109,7 +1069,7 @@ Pastikan setiap poin dimulai dengan kata kerja (Contoh: Menjalin, Meningkatkan, 
                   <div className="flex justify-between pt-10 border-t border-slate-100">
                     <Button 
                       variant="ghost" 
-                      onClick={() => setActiveTab('pendahuluan')} 
+                      onClick={() => setActiveTab('umum')} 
                       className="text-slate-400 group font-black uppercase text-[10px] tracking-widest hover:text-slate-600">
                       <ArrowLeft className="h-4 w-4 mr-2 group-hover:-translate-x-1 transition-transform" /> Kembali
                     </Button>
@@ -1432,6 +1392,9 @@ Pastikan setiap poin dimulai dengan kata kerja (Contoh: Menjalin, Meningkatkan, 
         <DialogContent className="sm:max-w-md bg-white rounded-3xl p-8 border-none shadow-2xl">
             <DialogHeader className="space-y-4">
                 <DialogTitle className="text-2xl font-black text-center text-slate-900">Memproses Proposal Massal</DialogTitle>
+                <DialogDescription className="text-center text-slate-500">
+                  Mohon tunggu, sistem sedang merender file PDF Anda satu per satu.
+                </DialogDescription>
                 <DialogDescription className="text-center font-medium text-slate-500 italic">
                     Harap tunggu, asisten digital sedang menyiapkan {bulkRecipients.length} dokumen PDF Anda.
                 </DialogDescription>
@@ -1461,348 +1424,6 @@ Pastikan setiap poin dimulai dengan kata kerja (Contoh: Menjalin, Meningkatkan, 
     </Dialog>
     </AdminLayout>
   )
-}
-
-function PageCover({ data }: { data: ProposalData }) {
-    return (
-        <div className="proposal-page relative flex flex-col items-center justify-center" 
-             style={{ 
-               width: '794px', 
-               height: '1123px', 
-               padding: '100px 80px', 
-               boxSizing: 'border-box',
-               boxShadow: '0 0 40px rgba(0,0,0,0.1)',
-               margin: '0 auto',
-               background: 'linear-gradient(to bottom, #ffffff, #fcfdfc) !important'
-             }}>
-            
-            {/* Header Style Elements */}
-            <div style={{ position: 'absolute', top: 0, right: 0, width: '400px', height: '400px', background: 'radial-gradient(circle, #f0fdf4 0%, transparent 70%)', zIndex: 0 }}></div>
-            <div style={{ position: 'absolute', bottom: 0, left: 0, width: '350px', height: '350px', background: 'radial-gradient(circle, #ecfdf5 0%, transparent 70%)', zIndex: 0, opacity: 0.6 }}></div>
-            
-            <div style={{ zIndex: 1, textAlign: 'center', width: '100%', position: 'relative' }}>
-                <img src={data.logoKiri || "/logo.png"} alt="Logo Kiri" style={{ width: '160px', height: '160px', objectFit: 'contain', margin: '0 auto 60px auto', filter: 'drop-shadow(0 10px 20px rgba(0,0,0,0.05))' }} />
-                
-                <h1 style={{ fontSize: '18pt', fontWeight: 'bold', margin: '0 0 70px 0', color: '#475569', letterSpacing: '0.2em' }}>PROPOSAL</h1>
-                
-                <h2 style={{ fontWeight: '900', fontSize: '20pt', margin: '0 0 15px 0', textTransform: 'uppercase', color: '#0f172a', lineHeight: 1.1, letterSpacing: '-0.02em' }}>{data.perihal}</h2>
-                <div style={{ width: '150px', height: '6px', background: 'linear-gradient(to right, #059669, #10b981)', margin: '35px auto' }}></div>
-                
-                <div style={{ margin: '80px 0', display: 'flex', flexDirection: 'column', alignItems: 'center', backgroundColor: 'rgba(248, 250, 252, 0.5)', padding: '50px', borderRadius: '40px', border: '1px solid #f1f5f9' }}>
-                    <p style={{ fontSize: '12pt', margin: '0', color: '#64748b', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Diajukan Oleh:</p>
-                    <p style={{ fontSize: '18pt', fontWeight: '900', margin: '15px 0', textTransform: 'uppercase', color: '#064e3b' }}>{data.namaKopSurat}</p>
-                    <div style={{ height: '2px', width: '300px', backgroundColor: '#e2e8f0', margin: '25px 0' }}></div>
-                    <p style={{ fontSize: '11pt', fontStyle: 'italic', color: '#475569', fontWeight: '500' }}>Kampung Ragas Grenyang, Desa Argawana</p>
-                    <p style={{ fontSize: '11pt', fontStyle: 'italic', color: '#475569', fontWeight: '500' }}>Kecamatan Puloampel Kabupaten Serang - Banten</p>
-                </div>
-
-                <div style={{ position: 'absolute', bottom: '-100px', left: 0, width: '100%', textAlign: 'center' }}>
-                    <p style={{ fontSize: '12pt', fontWeight: '900', letterSpacing: '8px', color: '#1e293b' }}>TAHUN {new Date().getFullYear()}</p>
-                </div>
-            </div>
-        </div>
-    )
-}
-
-function PageWrapper({ children, data }: { children: React.ReactNode, data: ProposalData }) {
-    return (
-       <div className="proposal-page relative flex flex-col" 
-            style={{ 
-              width: '794px', 
-              height: '1123px', 
-              padding: '60px 80px', 
-              boxSizing: 'border-box',
-              boxShadow: '0 0 40px rgba(0,0,0,0.1)',
-              margin: '0 auto'
-            }}>
-        
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-            <img src={data.logoKiri || "/logo.png"} alt="Logo Kiri" style={{ width: '85px', height: '85px', objectFit: 'contain' }} />
-            <div style={{ textAlign: 'center', flex: 1, padding: '0 20px' }}>
-                <h1 style={{ fontWeight: 'bold', fontSize: '15pt', margin: '0', textTransform: 'uppercase' }}>{data.namaKopSurat}</h1>
-                <p style={{ fontSize: '10pt', margin: '5px 0', whiteSpace: 'pre-line' }}>{data.alamatKopSurat}</p>
-                <p style={{ fontSize: '9pt', margin: '0', fontStyle: 'italic' }}>{data.kontakKopSurat}</p>
-            </div>
-            {data.logoKanan ? (
-                <img src={data.logoKanan} alt="Logo Kanan" style={{ width: '85px', height: '85px', objectFit: 'contain' }} />
-            ) : <div style={{ width: '85px' }} />}
-        </div>
-        
-        <div className="kop-line"></div>
-        <div className="kop-line-thin"></div>
-
-        <div style={{ flex: 1, marginTop: '30px' }}>
-          {children}
-        </div>
-      </div>
-    )
-}
-
-function Page1({ data, bulkRecipient, onNavigate }: { data: ProposalData, bulkRecipient?: any, onNavigate?: (tab: string) => void }) {
-    const recipient = bulkRecipient || data.penerima
-    return (
-        <PageWrapper data={data}>
-            <div style={{ fontSize: '12pt' }}>
-                <table style={{ width: '100%', marginBottom: '30px' }}>
-                    <tbody>
-                        <tr><td style={{ width: '100px' }}>Nomor</td><td style={{ width: '20px' }}>:</td><td style={{ fontWeight: 'bold' }}>{data.nomor || '___/___/___/___'}</td></tr>
-                        <tr><td>Lampiran</td><td>:</td><td>{data.lampiran}</td></tr>
-                        <tr><td>Perihal</td><td>:</td><td><span style={{ fontWeight: 'bold', textDecoration: 'underline' }}>{data.perihal}</span></td></tr>
-                    </tbody>
-                </table>
-
-                <p>Kepada Yth.</p>
-                <p style={{ fontWeight: 'bold', fontSize: '13pt', margin: '5px 0' }}>{recipient.nama || '........................'}</p>
-                {recipient.jabatan && <p style={{ fontWeight: 'bold' }}>({recipient.jabatan})</p>}
-                {recipient.instansi && <p style={{ fontWeight: 'bold' }}>{recipient.instansi}</p>}
-                <p style={{ marginTop: '10px' }}>di -</p>
-                <p style={{ paddingLeft: '30px', fontWeight: 'bold' }}>{recipient.alamat || 'Tempat'}</p>
-
-                <div style={{ marginTop: '40px', textAlign: 'justify' }}>
-                    {data.suratPengantar.split('\n').map((line, i) => (
-                        <p key={i} style={{ textIndent: line.length > 50 ? '40px' : '0', marginBottom: '15px' }}>{line}</p>
-                    ))}
-                </div>
-
-                <div style={{ textAlign: 'right', marginBottom: '20px' }}>
-                    <p>{data.tempat}, {data.tanggal}</p>
-                </div>
-
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '20px', textAlign: 'center' }}>
-                    <div onClick={() => onNavigate?.('struktur')} style={{ cursor: 'pointer' }} title="Klik untuk mengedit">
-                        <p style={{ fontWeight: 'bold', fontSize: '11pt' }}>Ketua DKM,</p>
-                        <div style={{ height: '70px' }}></div>
-                        <p style={{ fontWeight: 'bold', textDecoration: 'underline', fontSize: '11pt' }}>{data.namaKetua || '( ........................ )'}</p>
-                    </div>
-
-                    <div onClick={() => onNavigate?.('struktur')} style={{ cursor: 'pointer' }} title="Klik untuk mengedit">
-                        <p style={{ fontWeight: 'bold', fontSize: '11pt' }}>Sekretaris DKM,</p>
-                        <div style={{ height: '70px' }}></div>
-                        <p style={{ fontWeight: 'bold', textDecoration: 'underline', fontSize: '11pt' }}>{data.namaSekretaris || '( ........................ )'}</p>
-                    </div>
-                </div>
-            </div>
-        </PageWrapper>
-    )
-}
-
-function Page2({ data }: { data: ProposalData }) {
-    return (
-        <PageWrapper data={data}>
-            <div style={{ fontSize: '12pt' }}>
-                <h2 style={{ fontSize: '16pt', fontWeight: 'bold', borderLeft: '10px solid black', paddingLeft: '20px', marginBottom: '30px', textTransform: 'uppercase' }}>I. Pendahuluan</h2>
-                
-                <h3 style={{ fontWeight: 'bold', marginBottom: '10px', fontSize: '13pt' }}>A. Latar Belakang</h3>
-                <div style={{ textAlign: 'justify', textIndent: '40px', marginBottom: '30px' }}>{data.latarBelakang}</div>
-
-                <h3 style={{ fontWeight: 'bold', marginBottom: '10px', fontSize: '13pt' }}>B. Maksud dan Tujuan</h3>
-                <ul style={{ paddingLeft: '30px', marginBottom: '30px' }}>
-                    {data.tujuan.map((t, i) => (
-                        <li key={i} style={{ marginBottom: '10px' }}>{t}</li>
-                    ))}
-                </ul>
-
-                {data.showWaktuTempat && (
-                    <>
-                        <h3 style={{ fontWeight: 'bold', marginBottom: '10px', fontSize: '13pt' }}>C. Waktu dan Tempat Pelaksanaan</h3>
-                        <div style={{ paddingLeft: '20px' }}>
-                            <p style={{ marginBottom: '10px' }}>Kegiatan ini Insha Allah akan dilaksanakan pada:</p>
-                            <table style={{ width: '100%', marginBottom: '20px' }}>
-                                <tbody>
-                                    <tr>
-                                        <td style={{ width: '150px', fontWeight: 'bold' }}>Hari / Tanggal</td>
-                                        <td style={{ width: '20px' }}>:</td>
-                                        <td>{data.waktuKegiatan || '........................'}</td>
-                                    </tr>
-                                    <tr>
-                                        <td style={{ fontWeight: 'bold' }}>Tempat</td>
-                                        <td>:</td>
-                                        <td>{data.tempatKegiatan || '........................'}</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </>
-                )}
-            </div>
-        </PageWrapper>
-    )
-}
-
-function Page3({ data }: { data: ProposalData }) {
-    return (
-        <PageWrapper data={data}>
-            <div style={{ fontSize: '12pt' }}>
-                <h2 style={{ fontSize: '16pt', fontWeight: 'bold', borderLeft: '10px solid black', paddingLeft: '20px', marginBottom: '30px', textTransform: 'uppercase' }}>II. Struktur Organisasi</h2>
-                
-                <div style={{ marginBottom: '30px' }}>
-                    <h3 style={{ fontWeight: 'bold', textTransform: 'uppercase', fontSize: '11pt', borderBottom: '1px solid black', paddingBottom: '5px', marginBottom: '15px' }}>Pimpinan Utama</h3>
-                    {data.struktur.pimpinanAtas.map((p, i) => (
-                        <p key={i} style={{ paddingLeft: '20px', marginBottom: '5px' }}>
-                            <span style={{ fontWeight: 'bold', display: 'inline-block', width: '180px' }}>{p.role}</span> : {p.name || '........................'}
-                        </p>
-                    ))}
-                </div>
-
-                <div style={{ marginBottom: '30px' }}>
-                    <h3 style={{ fontWeight: 'bold', textTransform: 'uppercase', fontSize: '11pt', borderBottom: '1px solid black', paddingBottom: '5px', marginBottom: '15px' }}>Administrasi & Keuangan</h3>
-                    {data.struktur.administrasi.map((p, i) => (
-                        <p key={i} style={{ paddingLeft: '20px', marginBottom: '5px' }}>
-                            <span style={{ fontWeight: 'bold', display: 'inline-block', width: '180px' }}>{p.role}</span> : {p.name || '........................'}
-                        </p>
-                    ))}
-                </div>
-
-                {data.struktur.operasional.length > 0 && (
-                    <div style={{ marginBottom: '30px' }}>
-                        <h3 style={{ fontWeight: 'bold', textTransform: 'uppercase', fontSize: '11pt', borderBottom: '1px solid black', paddingBottom: '5px', marginBottom: '15px' }}>Seksi Operasional</h3>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px', paddingLeft: '20px' }}>
-                            {data.struktur.operasional.map((op, i) => (
-                                <p key={i} style={{ margin: '0' }}>• {op}</p>
-                            ))}
-                        </div>
-                    </div>
-                )}
-            </div>
-        </PageWrapper>
-    )
-}
-
-function Page4({ data }: { data: ProposalData }) {
-    const total = data.rab.reduce((sum, it) => sum + (it.totalHarga || 0), 0)
-    return (
-        <PageWrapper data={data}>
-            <div style={{ fontSize: '12pt' }}>
-                <h2 style={{ fontSize: '16pt', fontWeight: 'bold', borderLeft: '10px solid black', paddingLeft: '20px', marginBottom: '30px', textTransform: 'uppercase' }}>III. Rencana Anggaran Biaya</h2>
-                
-                <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid black' }}>
-                    <thead>
-                        <tr style={{ backgroundColor: '#f0f0f0' }}>
-                            <th style={{ border: '1px solid black', padding: '10px' }}>Item</th>
-                            <th style={{ border: '1px solid black', padding: '10px', width: '80px' }}>Qty</th>
-                            <th style={{ border: '1px solid black', padding: '10px' }}>Harga</th>
-                            <th style={{ border: '1px solid black', padding: '10px' }}>Total</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {data.rab.map((item, i) => (
-                            <tr key={i}>
-                                <td style={{ border: '1px solid black', padding: '10px' }}>
-                                    <p style={{ fontWeight: 'bold' }}>{item.nama}</p>
-                                    <p style={{ fontSize: '10pt', color: '#666' }}>{item.spesifikasi}</p>
-                                </td>
-                                <td style={{ border: '1px solid black', padding: '10px', textAlign: 'center' }}>{item.jumlah} {item.satuan}</td>
-                                <td style={{ border: '1px solid black', padding: '10px', textAlign: 'right' }}>{item.hargaSatuan.toLocaleString('id-ID')}</td>
-                                <td style={{ border: '1px solid black', padding: '10px', textAlign: 'right', fontWeight: 'bold' }}>{item.totalHarga.toLocaleString('id-ID')}</td>
-                            </tr>
-                        ))}
-                    </tbody>
-                    <tfoot>
-                        <tr style={{ backgroundColor: '#f0f0f0', fontWeight: 'bold' }}>
-                            <td colSpan={3} style={{ border: '1px solid black', padding: '15px', textAlign: 'center', textTransform: 'uppercase' }}>Total Estimasi</td>
-                            <td style={{ border: '1px solid black', padding: '15px', textAlign: 'right', fontSize: '14pt' }}>Rp {total.toLocaleString('id-ID')}</td>
-                        </tr>
-                    </tfoot>
-                </table>
-            </div>
-        </PageWrapper>
-    )
-}
-
-function Page5({ data, onNavigate }: { data: ProposalData, onNavigate?: (tab: string) => void }) {
-    return (
-        <PageWrapper data={data}>
-            <div style={{ fontSize: '12pt' }}>
-                <h2 style={{ fontSize: '16pt', fontWeight: 'bold', borderLeft: '10px solid black', paddingLeft: '20px', marginBottom: '30px', textTransform: 'uppercase' }}>IV. Penutup</h2>
-                <div style={{ textAlign: 'justify', textIndent: '40px', marginBottom: '50px' }}>{data.penutup}</div>
-
-                <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-                    <p style={{ fontStyle: 'italic' }}>Argawana, {data.tanggal}</p>
-                </div>
-
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '20px', textAlign: 'center', marginBottom: '40px' }}>
-                    <div onClick={() => onNavigate?.('struktur')} style={{ cursor: 'pointer' }} title="Klik untuk mengedit">
-                        <p style={{ fontSize: '11pt', fontWeight: 'bold' }}>Ketua DKM,</p>
-                        <div style={{ height: '80px' }}></div>
-                        <p style={{ fontWeight: 'bold', textDecoration: 'underline', fontSize: '11pt' }}>{data.namaKetua || '( ........................ )'}</p>
-                    </div>
-
-                    <div onClick={() => onNavigate?.('struktur')} style={{ cursor: 'pointer' }} title="Klik untuk mengedit">
-                        <p style={{ fontSize: '11pt', fontWeight: 'bold' }}>Sekretaris DKM,</p>
-                        <div style={{ height: '80px' }}></div>
-                        <p style={{ fontWeight: 'bold', textDecoration: 'underline', fontSize: '11pt' }}>{data.namaSekretaris || '( ........................ )'}</p>
-                    </div>
-                </div>
-
-                <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-                    <p style={{ fontWeight: 'bold', fontSize: '12pt', textTransform: 'uppercase', letterSpacing: '1px' }}>Mengetahui,</p>
-                </div>
-
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '30px', textAlign: 'center' }}>
-                    <div onClick={() => onNavigate?.('struktur')} style={{ 
-                        opacity: data.namaKetuaRT ? 1 : 0.4, 
-                        cursor: 'pointer' 
-                    }} title="Klik untuk mengedit">
-                        <p style={{ fontSize: '10pt', fontWeight: 'bold' }}>Ketua RT 015,</p>
-                        <p style={{ fontSize: '9pt', fontStyle: 'italic' }}>Kampung Ragas Grenyang</p>
-                        <div style={{ height: '60px' }}></div>
-                        <p style={{ fontSize: '10pt', fontWeight: 'bold', textDecoration: 'underline' }}>{data.namaKetuaRT || '( ........................ )'}</p>
-                    </div>
-                    <div onClick={() => onNavigate?.('struktur')} style={{ 
-                        opacity: data.namaKetuaRW ? 1 : 0.4, 
-                        cursor: 'pointer' 
-                    }} title="Klik untuk mengedit">
-                        <p style={{ fontSize: '10pt', fontWeight: 'bold' }}>Ketua RW 008,</p>
-                        <p style={{ fontSize: '9pt', fontStyle: 'italic' }}>Kampung Ragas Grenyang</p>
-                        <div style={{ height: '60px' }}></div>
-                        <p style={{ fontSize: '10pt', fontWeight: 'bold', textDecoration: 'underline' }}>{data.namaKetuaRW || '( ........................ )'}</p>
-                    </div>
-                    <div onClick={() => onNavigate?.('struktur')} style={{ cursor: 'pointer' }} title="Klik untuk mengedit">
-                        <p style={{ fontSize: '11pt', fontWeight: 'bold' }}>Tokoh Masyarakat,</p>
-                        <p style={{ fontSize: '10pt', fontStyle: 'italic' }}>Masjid Al-Muhajirin</p>
-                        <div style={{ height: '60px' }}></div>
-                        <p style={{ fontWeight: 'bold', textDecoration: 'underline', fontSize: '11pt' }}>{data.namaTokohMasyarakat || '( ........................ )'}</p>
-                    </div>
-                    <div onClick={() => onNavigate?.('struktur')} style={{ 
-                        opacity: data.namaKetuaPemuda ? 1 : 0.4, 
-                        cursor: 'pointer' 
-                    }} title="Klik untuk mengedit">
-                        <p style={{ fontSize: '10pt', fontWeight: 'bold' }}>Ketua Pemuda,</p>
-                        <p style={{ fontSize: '9pt', fontStyle: 'italic' }}>Kampung Ragas Grenyang</p>
-                        <div style={{ height: '60px' }}></div>
-                        <p style={{ fontSize: '10pt', textDecoration: 'underline',fontWeight: 'bold' }}>{data.namaKetuaPemuda || '( ........................ )'}</p>
-                    </div>
-
-                    {data.namaKepalaDesa && (
-                        <div style={{ gridColumn: '1 / -1', marginTop: '10px', cursor: 'pointer' }} onClick={() => onNavigate?.('ttd')} title="Klik untuk mengedit">
-                            <p style={{ fontSize: '11pt', fontWeight: 'bold' }}>Kepala Desa Argawana,</p>
-                            <div style={{ height: '60px' }}></div>
-                            <p style={{ fontSize: '11pt', fontWeight: 'bold', textDecoration: 'underline' }}>{data.namaKepalaDesa}</p>
-                        </div>
-                    )}
-                </div>
-            </div>
-        </PageWrapper>
-    )
-}
-
-function Page6({ data }: { data: ProposalData }) {
-    return (
-        <PageWrapper data={data}>
-            <div style={{ fontSize: '12pt' }}>
-                <h2 style={{ fontSize: '16pt', fontWeight: 'bold', borderLeft: '10px solid black', paddingLeft: '20px', marginBottom: '30px', textTransform: 'uppercase' }}>V. Lampiran Foto & Dokumentasi</h2>
-                
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '30px' }}>
-                    {data.lampiranFoto.map((foto, i) => (
-                        <div key={i} style={{ border: '1px solid #eee', padding: '10px', borderRadius: '10px', background: '#fafafa' }}>
-                            <img src={foto.url} alt={`Lampiran ${i}`} style={{ width: '100%', height: '220px', objectFit: 'cover', borderRadius: '5px', marginBottom: '10px' }} />
-                            <p style={{ textAlign: 'center', fontSize: '11pt', fontStyle: 'italic', fontWeight: 'bold' }}>{foto.deskripsi || `Dokumentasi ${i+1}`}</p>
-                        </div>
-                    ))}
-                </div>
-            </div>
-        </PageWrapper>
-    )
 }
 
 export default function ProposalBuilderPage() {

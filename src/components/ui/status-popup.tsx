@@ -4,7 +4,7 @@ import React from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { CheckCircle2, XCircle, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Dialog, DialogContent } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { cn } from '@/lib/utils'
 
 interface StatusPopupProps {
@@ -59,11 +59,11 @@ export function StatusPopup({
             </div>
 
             <div className="space-y-2">
-              <h3 className="text-2xl font-black text-[#0b3d2e] tracking-tight">{title}</h3>
+              <DialogTitle className="text-2xl font-black text-[#0b3d2e] tracking-tight">{title}</DialogTitle>
               {description && (
-                <p className="text-muted-foreground text-sm leading-relaxed px-4">
+                <DialogDescription className="text-muted-foreground text-sm leading-relaxed px-4">
                   {description}
-                </p>
+                </DialogDescription>
               )}
             </div>
 
