@@ -740,7 +740,18 @@ Pastikan setiap poin dimulai dengan kata kerja (Contoh: Menjalin, Meningkatkan, 
           doc.addImage(imgData, 'JPEG', 0, 0, 210, 297, undefined, 'MEDIUM')
         }
         
-        doc.save(`Proposal_${data.perihal.replace(/[^a-z0-9]/gi, '_')}.pdf`)
+        // Use blob method for better download reliability
+        const pdfBlob = doc.output('blob')
+        const url = URL.createObjectURL(pdfBlob)
+        const fileName = `Proposal_${data.perihal.replace(/[^a-z0-9]/gi, '_')}.pdf`
+        const link = document.createElement('a')
+        link.href = url
+        link.download = fileName
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+        URL.revokeObjectURL(url)
+        
         toast.success('PDF Proposal berhasil diunduh')
       }
     } catch (error) {
