@@ -62,7 +62,7 @@ export interface ProposalData {
   showWaktuTempat: boolean
 }
 
-export function PageWrapper({ children, data }: { children: React.ReactNode, data: Partial<ProposalData> }) {
+export function PageWrapper({ children, data, pageNumber }: { children: React.ReactNode, data: Partial<ProposalData>, pageNumber?: number }) {
     return (
        <div className="proposal-page relative flex flex-col shadow-2xl" 
             style={{ 
@@ -115,7 +115,7 @@ export function PageWrapper({ children, data }: { children: React.ReactNode, dat
           letterSpacing: '1px'
         }}>
           <span>DKM Al-Muhajirin - Ragas Grenyang</span>
-          <span>Halaman {Math.floor(Math.random() * 5) + 1}</span>
+          {pageNumber !== undefined && <span>Halaman {pageNumber}</span>}
         </div>
       </div>
     )
@@ -191,7 +191,7 @@ export function PageCover({ data }: { data: Partial<ProposalData> }) {
 export function Page1({ data, bulkRecipient, onNavigate }: { data: Partial<ProposalData>, bulkRecipient?: any, onNavigate?: (tab: string) => void }) {
     const recipient = bulkRecipient || data.penerima || { nama: '', jabatan: '', instansi: '', alamat: '' }
     return (
-        <PageWrapper data={data}>
+        <PageWrapper data={data} pageNumber={1}>
             <div style={{ fontSize: '12pt' }}>
                 <table style={{ width: '100%', marginBottom: '25px' }}>
                     <tbody>
@@ -249,7 +249,7 @@ export function Page1({ data, bulkRecipient, onNavigate }: { data: Partial<Propo
 
 export function Page2({ data }: { data: Partial<ProposalData> }) {
     return (
-        <PageWrapper data={data}>
+        <PageWrapper data={data} pageNumber={2}>
             <div style={{ fontSize: '12pt' }}>
                 <h2 style={{ fontSize: '16pt', fontWeight: '900', borderLeft: '10px solid #0b3d2e', paddingLeft: '20px', marginBottom: '25px', textTransform: 'uppercase', color: '#0b3d2e' }}>I. Pendahuluan</h2>
                 
@@ -292,7 +292,7 @@ export function Page2({ data }: { data: Partial<ProposalData> }) {
 
 export function Page3({ data }: { data: Partial<ProposalData> }) {
     return (
-        <PageWrapper data={data}>
+        <PageWrapper data={data} pageNumber={3}>
             <div style={{ fontSize: '12pt' }}>
                 <h2 style={{ fontSize: '18pt', fontWeight: '900', borderLeft: '12px solid #0b3d2e', paddingLeft: '25px', marginBottom: '40px', textTransform: 'uppercase', color: '#0b3d2e', letterSpacing: '1px' }}>II. Struktur Organisasi</h2>
                 
@@ -350,7 +350,7 @@ export function Page3({ data }: { data: Partial<ProposalData> }) {
 export function Page4({ data }: { data: Partial<ProposalData> }) {
     const total = data.rab?.reduce((acc, curr) => acc + curr.totalHarga, 0) || 0
     return (
-        <PageWrapper data={data}>
+        <PageWrapper data={data} pageNumber={4}>
             <div style={{ fontSize: '12pt' }}>
                 <h2 style={{ fontSize: '16pt', fontWeight: '900', borderLeft: '10px solid #0b3d2e', paddingLeft: '20px', marginBottom: '25px', textTransform: 'uppercase', color: '#0b3d2e' }}>III. Rencana Anggaran Biaya</h2>
                 
@@ -391,7 +391,7 @@ export function Page4({ data }: { data: Partial<ProposalData> }) {
 
 export function Page5({ data, onNavigate }: { data: Partial<ProposalData>, onNavigate?: (tab: string) => void }) {
     return (
-        <PageWrapper data={data}>
+        <PageWrapper data={data} pageNumber={5}>
             <div style={{ fontSize: '12pt' }}>
                 <h2 style={{ fontSize: '16pt', fontWeight: '900', borderLeft: '10px solid #0b3d2e', paddingLeft: '20px', marginBottom: '25px', textTransform: 'uppercase', color: '#0b3d2e' }}>IV. Penutup</h2>
                 <div style={{ textAlign: 'justify', textIndent: '40px', marginBottom: '35px', lineHeight: '1.7', color: '#0f172a' }}>{data.penutup}</div>
@@ -463,7 +463,7 @@ export function Page5({ data, onNavigate }: { data: Partial<ProposalData>, onNav
 
 export function Page6({ data }: { data: Partial<ProposalData> }) {
     return (
-        <PageWrapper data={data}>
+        <PageWrapper data={data} pageNumber={6}>
             <div style={{ fontSize: '12pt' }}>
                 <h2 style={{ fontSize: '18pt', fontWeight: '900', borderLeft: '12px solid #0b3d2e', paddingLeft: '25px', marginBottom: '40px', textTransform: 'uppercase', color: '#0b3d2e', letterSpacing: '1px' }}>V. Lampiran Dokumentasi</h2>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '30px' }}>
