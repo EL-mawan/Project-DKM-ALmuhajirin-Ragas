@@ -1378,7 +1378,8 @@ Pastikan setiap poin dimulai dengan kata kerja (Contoh: Menjalin, Meningkatkan, 
 
           <div className="bg-slate-50 border border-slate-200 p-2 sm:p-6 rounded-[3rem] shadow-xl shadow-slate-200/30 overflow-x-hidden overflow-y-auto space-y-12 flex flex-col items-center custom-scrollbar scroll-smooth" style={{ maxHeight: 'calc(100vh - 180px)' }}>
               <div ref={previewRef} id="proposal-preview-container" className="flex flex-col gap-10 scale-[0.35] sm:scale-[0.5] md:scale-[0.55] lg:scale-[0.6] xl:scale-[0.75] 2xl:scale-[1.0] origin-top transition-all duration-500">
-                {/* Visible Preview (without cover) */}
+                {/* Visible Preview (with cover) */}
+                <PageCover data={data} />
                 <Page1 data={data} bulkRecipient={bulkRecipients.length > 0 ? bulkRecipients[currentRecipientIndex] : null} onNavigate={setActiveTab} />
                 <Page2 data={data} />
                 <Page3 data={data} />

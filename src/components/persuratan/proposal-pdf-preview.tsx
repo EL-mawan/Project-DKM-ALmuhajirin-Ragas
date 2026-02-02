@@ -68,12 +68,13 @@ export function PageWrapper({ children, data }: { children: React.ReactNode, dat
             style={{ 
               width: '794px', 
               height: '1123px', 
-              padding: '60px 80px', 
+              padding: '40px 60px', 
               boxSizing: 'border-box',
               background: 'white',
               margin: '0 auto',
               color: 'black',
-              position: 'relative'
+              position: 'relative',
+              overflow: 'hidden'
             }}>
         
         {/* Header Section */}
@@ -90,10 +91,10 @@ export function PageWrapper({ children, data }: { children: React.ReactNode, dat
             {!data.logoKanan && <div style={{ width: '85px' }} />}
         </div>
         
-        <div style={{ height: '3px', background: '#0b3d2e', marginBottom: '1px' }}></div>
-        <div style={{ height: '1px', background: '#0b3d2e' }}></div>
+        <div style={{ height: '2.5px', background: '#0b3d2e', marginBottom: '1px' }}></div>
+        <div style={{ height: '0.8px', background: '#0b3d2e' }}></div>
 
-        <div style={{ flex: 1, marginTop: '35px', position: 'relative' }}>
+        <div style={{ flex: 1, marginTop: '25px', position: 'relative' }}>
           {children}
         </div>
 
@@ -126,50 +127,62 @@ export function PageCover({ data }: { data: Partial<ProposalData> }) {
              style={{ 
                width: '794px', 
                height: '1123px', 
-               padding: '120px 80px', 
+               padding: '40px 60px', 
                boxSizing: 'border-box',
                margin: '0 auto',
                background: 'white',
-               border: '20px solid #f8fafc'
+               position: 'relative'
              }}>
             
+            {/* Standard Header for Cover */}
+            <div style={{ width: '100%', marginBottom: '20px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                    <img src={data.logoKiri || "/logo.png"} alt="Logo" crossOrigin="anonymous" style={{ width: '70px', height: '70px', objectFit: 'contain' }} />
+                    <div style={{ textAlign: 'center', flex: 1, padding: '0 15px' }}>
+                        <h1 style={{ fontWeight: '900', fontSize: '14pt', margin: '0', textTransform: 'uppercase', color: '#0b3d2e' }}>{data.namaKopSurat}</h1>
+                        <p style={{ fontSize: '9pt', margin: '3px 0', color: '#334155', fontWeight: '500' }}>{data.alamatKopSurat}</p>
+                    </div>
+                    {data.logoKanan ? (
+                        <img src={data.logoKanan} alt="Logo" crossOrigin="anonymous" style={{ width: '70px', height: '70px', objectFit: 'contain' }} />
+                    ) : <div style={{ width: '70px' }} />}
+                </div>
+                <div style={{ height: '2.5px', background: '#0b3d2e', marginBottom: '1px' }}></div>
+                <div style={{ height: '0.8px', background: '#0b3d2e' }}></div>
+            </div>
+
             <div style={{ position: 'absolute', top: 0, right: 0, width: '450px', height: '450px', background: 'radial-gradient(circle at top right, #f0fdf4 0%, transparent 70%)', zIndex: 0 }}></div>
             <div style={{ position: 'absolute', bottom: 0, left: 0, width: '450px', height: '450px', background: 'radial-gradient(circle at bottom left, #ecfdf5 0%, transparent 70%)', zIndex: 0, opacity: 0.8 }}></div>
-            <div style={{ position: 'absolute', top: '40px', left: '40px', right: '40px', bottom: '40px', border: '1px solid #e2e8f0', pointerEvents: 'none', zIndex: 1 }}></div>
 
-            <div style={{ zIndex: 2, textAlign: 'center', width: '100%', position: 'relative' }}>
-                <img src={data.logoKiri || "/logo.png"} alt="Logo Kiri" style={{ width: '160px', height: '160px', objectFit: 'contain', margin: '0 auto 50px auto' }} />
-                
-                <div style={{ marginBottom: '80px' }}>
-                    <p style={{ fontSize: '15pt', fontWeight: 'bold', letterSpacing: '10px', color: '#64748b', margin: '0 0 20px 0', textTransform: 'uppercase' }}>PROPOSAL</p>
-                    <div style={{ width: '80px', height: '5px', background: '#0b3d2e', margin: '0 auto' }}></div>
+            <div style={{ zIndex: 2, textAlign: 'center', width: '100%', position: 'relative', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                <div style={{ marginBottom: '40px' }}>
+                    <p style={{ fontSize: '14pt', fontWeight: 'bold', letterSpacing: '8px', color: '#64748b', margin: '0 0 15px 0', textTransform: 'uppercase' }}>PROPOSAL</p>
+                    <div style={{ width: '60px', height: '4px', background: '#0b3d2e', margin: '0 auto' }}></div>
                 </div>
                 
                 <h1 style={{ 
                     fontWeight: '900', 
-                    fontSize: '28pt', 
-                    margin: '0 0 30px 0', 
+                    fontSize: '24pt', 
+                    margin: '0 0 25px 0', 
                     textTransform: 'uppercase', 
                     color: '#0f172a', 
-                    lineHeight: '1.2', 
-                    letterSpacing: '-0.5px' 
+                    lineHeight: '1.2'
                 }}>
                     {data.perihal || 'Judul Proposal'}
                 </h1>
                 
-                <div style={{ margin: '60px auto', maxWidth: '520px', backgroundColor: '#f8fafc', padding: '50px', borderRadius: '40px', border: '1px solid #f1f5f9', boxShadow: '0 10px 40px rgba(0,0,0,0.03)' }}>
-                    <p style={{ fontSize: '11pt', margin: '0 0 20px 0', color: '#64748b', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '3px' }}>Diajukan Oleh:</p>
-                    <p style={{ fontSize: '18pt', fontWeight: '900', margin: '0', textTransform: 'uppercase', color: '#0b3d2e', lineHeight: '1.3' }}>{data.namaKopSurat}</p>
-                    <div style={{ height: '2px', width: '120px', backgroundColor: '#cbd5e1', margin: '30px auto' }}></div>
-                    <p style={{ fontSize: '12pt', color: '#475569', fontWeight: '500', lineHeight: '1.6' }}>
+                <div style={{ margin: '30px auto', maxWidth: '520px', backgroundColor: '#f8fafc', padding: '40px', borderRadius: '30px', border: '1px solid #f1f5f9' }}>
+                    <p style={{ fontSize: '10pt', margin: '0 0 15px 0', color: '#64748b', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '2px' }}>Diajukan Oleh:</p>
+                    <p style={{ fontSize: '16pt', fontWeight: '900', margin: '0', textTransform: 'uppercase', color: '#0b3d2e', lineHeight: '1.3' }}>{data.namaKopSurat}</p>
+                    <div style={{ height: '2px', width: '100px', backgroundColor: '#cbd5e1', margin: '20px auto' }}></div>
+                    <p style={{ fontSize: '11pt', color: '#475569', fontWeight: '500', lineHeight: '1.5' }}>
                         Kampung Ragas Grenyang, Desa Argawana<br/>
                         Kecamatan Puloampel Kabupaten Serang - Banten
                     </p>
                 </div>
-            </div>
 
-            <div style={{ zIndex: 2, textAlign: 'center', width: '100%' }}>
-                <p style={{ fontSize: '16pt', fontWeight: '900', letterSpacing: '15px', color: '#0f172a', margin: '0' }}>TAHUN {new Date().getFullYear()}</p>
+                <div style={{ marginTop: '40px' }}>
+                    <p style={{ fontSize: '14pt', fontWeight: '900', letterSpacing: '10px', color: '#0f172a', margin: '0' }}>TAHUN {new Date().getFullYear()}</p>
+                </div>
             </div>
         </div>
     )
@@ -180,26 +193,26 @@ export function Page1({ data, bulkRecipient, onNavigate }: { data: Partial<Propo
     return (
         <PageWrapper data={data}>
             <div style={{ fontSize: '12pt' }}>
-                <table style={{ width: '100%', marginBottom: '40px' }}>
+                <table style={{ width: '100%', marginBottom: '25px' }}>
                     <tbody>
-                        <tr><td style={{ width: '110px', color: '#64748b' }}>Nomor</td><td style={{ width: '20px' }}>:</td><td style={{ fontWeight: 'bold' }}>{data.nomor || '___/___/___/___'}</td></tr>
-                        <tr><td style={{ color: '#64748b' }}>Lampiran</td><td>:</td><td>{data.lampiran}</td></tr>
-                        <tr><td style={{ color: '#64748b' }}>Perihal</td><td>:</td><td style={{ fontWeight: 'bold', textDecoration: 'underline', color: '#0b3d2e' }}>{data.perihal}</td></tr>
+                        <tr><td style={{ width: '100px', color: '#64748b', fontSize: '11pt' }}>Nomor</td><td style={{ width: '15px' }}>:</td><td style={{ fontWeight: 'bold' }}>{data.nomor || '___/___/___/___'}</td></tr>
+                        <tr><td style={{ color: '#64748b', fontSize: '11pt' }}>Lampiran</td><td>:</td><td>{data.lampiran}</td></tr>
+                        <tr><td style={{ color: '#64748b', fontSize: '11pt' }}>Perihal</td><td>:</td><td style={{ fontWeight: 'bold', textDecoration: 'underline', color: '#0b3d2e' }}>{data.perihal}</td></tr>
                     </tbody>
                 </table>
 
-                <div style={{ marginBottom: '40px' }}>
-                    <p style={{ marginBottom: '10px' }}>Kepada Yth.</p>
+                <div style={{ marginBottom: '25px' }}>
+                    <p style={{ marginBottom: '8px' }}>Kepada Yth.</p>
                     <p style={{ fontWeight: '900', fontSize: '14pt', margin: '0', color: '#0f172a' }}>{recipient.nama || '........................'}</p>
-                    {recipient.jabatan && <p style={{ fontWeight: '700', color: '#475569' }}>({recipient.jabatan})</p>}
-                    {recipient.instansi && <p style={{ fontWeight: '700', color: '#475569' }}>{recipient.instansi}</p>}
-                    <p style={{ marginTop: '15px', color: '#64748b' }}>di -</p>
-                    <p style={{ paddingLeft: '30px', fontWeight: 'bold', fontSize: '13pt' }}>{recipient.alamat || 'Tempat'}</p>
+                    {recipient.jabatan && <p style={{ fontWeight: '700', color: '#475569', fontSize: '11pt', margin: '2px 0' }}>{recipient.jabatan}</p>}
+                    {recipient.instansi && <p style={{ fontWeight: '700', color: '#475569', fontSize: '11pt', margin: '2px 0' }}>{recipient.instansi}</p>}
+                    <p style={{ marginTop: '10px', color: '#64748b' }}>di -</p>
+                    <p style={{ paddingLeft: '20px', fontWeight: 'bold', fontSize: '13pt' }}>{recipient.alamat || 'Tempat'}</p>
                 </div>
 
-                <div style={{ textAlign: 'justify', marginBottom: '40px', lineHeight: '1.8' }}>
+                <div style={{ textAlign: 'justify', marginBottom: '30px', lineHeight: '1.6' }}>
                     {data.suratPengantar?.split('\n').map((line, i) => (
-                        <p key={i} style={{ textIndent: i > 0 ? '40px' : '0', marginBottom: '15px' }}>{line}</p>
+                        <p key={i} style={{ textIndent: i > 0 ? '40px' : '0', marginBottom: '8px' }}>{line}</p>
                     ))}
                 </div>
 
@@ -207,25 +220,25 @@ export function Page1({ data, bulkRecipient, onNavigate }: { data: Partial<Propo
                     <p style={{ fontWeight: '700' }}>{data.tempat}, {data.tanggal}</p>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '30px', textAlign: 'center', marginBottom: '40px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', textAlign: 'center', marginBottom: '25px' }}>
                     <div onClick={() => onNavigate?.('struktur')} style={{ cursor: 'pointer' }}>
-                        <p style={{ fontWeight: '900', fontSize: '11pt', textTransform: 'uppercase', color: '#64748b', marginBottom: '10px' }}>Ketua DKM,</p>
-                        <div style={{ height: '80px' }}></div>
+                        <p style={{ fontWeight: '900', fontSize: '11pt', textTransform: 'uppercase', color: '#64748b', marginBottom: '5px' }}>Ketua DKM,</p>
+                        <div style={{ height: '65px' }}></div>
                         <p style={{ fontWeight: '900', textDecoration: 'underline', fontSize: '11pt', color: '#0f172a' }}>{data.namaKetua || '( ........................ )'}</p>
                     </div>
 
                     <div onClick={() => onNavigate?.('struktur')} style={{ cursor: 'pointer' }}>
-                        <p style={{ fontWeight: '900', fontSize: '11pt', textTransform: 'uppercase', color: '#64748b', marginBottom: '10px' }}>Sekretaris DKM,</p>
-                        <div style={{ height: '80px' }}></div>
+                        <p style={{ fontWeight: '900', fontSize: '11pt', textTransform: 'uppercase', color: '#64748b', marginBottom: '5px' }}>Sekretaris DKM,</p>
+                        <div style={{ height: '65px' }}></div>
                         <p style={{ fontWeight: '900', textDecoration: 'underline', fontSize: '11pt', color: '#0f172a' }}>{data.namaSekretaris || '( ........................ )'}</p>
                     </div>
                 </div>
 
                 <div style={{ textAlign: 'center' }}>
-                    <p style={{ fontSize: '11pt', margin: '0 0 10px 0', fontWeight: 'bold', color: '#64748b' }}>Mengetahui,</p>
+                    <p style={{ fontSize: '10pt', margin: '0 0 5px 0', fontWeight: 'bold', color: '#64748b' }}>Mengetahui,</p>
                     <div onClick={() => onNavigate?.('struktur')} style={{ cursor: 'pointer', display: 'inline-block' }}>
                         <p style={{ fontWeight: '900', fontSize: '12pt', margin: '0', color: '#0b3d2e' }}>Tokoh Masyarakat Masjid Al-Muhajirin</p>
-                        <div style={{ height: '70px' }}></div>
+                        <div style={{ height: '60px' }}></div>
                         <p style={{ fontWeight: '900', textDecoration: 'underline', fontSize: '11pt' }}>{data.namaTokohMasyarakat || '( ........................ )'}</p>
                     </div>
                 </div>
@@ -238,34 +251,34 @@ export function Page2({ data }: { data: Partial<ProposalData> }) {
     return (
         <PageWrapper data={data}>
             <div style={{ fontSize: '12pt' }}>
-                <h2 style={{ fontSize: '18pt', fontWeight: '900', borderLeft: '12px solid #0b3d2e', paddingLeft: '25px', marginBottom: '40px', textTransform: 'uppercase', color: '#0b3d2e', letterSpacing: '1px' }}>I. Pendahuluan</h2>
+                <h2 style={{ fontSize: '16pt', fontWeight: '900', borderLeft: '10px solid #0b3d2e', paddingLeft: '20px', marginBottom: '25px', textTransform: 'uppercase', color: '#0b3d2e' }}>I. Pendahuluan</h2>
                 
-                <h3 style={{ fontWeight: '900', color: '#334155', marginBottom: '15px', textTransform: 'uppercase', fontSize: '11pt', letterSpacing: '1.5px' }}>1.1 Latar Belakang</h3>
-                <div style={{ textAlign: 'justify', textIndent: '40px', marginBottom: '40px', lineHeight: '1.8', color: '#0f172a' }}>{data.latarBelakang}</div>
+                <h3 style={{ fontWeight: '900', color: '#334155', marginBottom: '10px', textTransform: 'uppercase', fontSize: '10pt' }}>1.1 Latar Belakang</h3>
+                <div style={{ textAlign: 'justify', textIndent: '40px', marginBottom: '25px', lineHeight: '1.6', color: '#0f172a' }}>{data.latarBelakang}</div>
 
-                <h3 style={{ fontWeight: '900', color: '#334155', marginBottom: '15px', textTransform: 'uppercase', fontSize: '11pt', letterSpacing: '1.5px' }}>1.2 Maksud dan Tujuan</h3>
-                <ul style={{ paddingLeft: '45px', marginBottom: '40px', lineHeight: '1.8', color: '#0f172a' }}>
+                <h3 style={{ fontWeight: '900', color: '#334155', marginBottom: '10px', textTransform: 'uppercase', fontSize: '10pt' }}>1.2 Maksud dan Tujuan</h3>
+                <ul style={{ paddingLeft: '40px', marginBottom: '25px', lineHeight: '1.6', color: '#0f172a' }}>
                     {data.tujuan?.map((t, i) => (
-                        <li key={i} style={{ marginBottom: '10px' }}>{t}</li>
+                        <li key={i} style={{ marginBottom: '6px' }}>{t}</li>
                     ))}
                 </ul>
 
                 {data.showWaktuTempat && (
                     <div style={{ marginTop: '30px' }}>
-                        <h3 style={{ fontWeight: '900', color: '#334155', marginBottom: '20px', textTransform: 'uppercase', fontSize: '11pt', letterSpacing: '1.5px' }}>1.3 Waktu dan Tempat Kegiatan</h3>
-                        <div style={{ paddingLeft: '20px', lineHeight: '2', color: '#0f172a' }}>
-                            <p style={{ marginBottom: '20px' }}>Insha Allah kegiatan ini akan dilaksanakan pada:</p>
-                            <table style={{ width: '100%', marginBottom: '25px' }}>
+                        <h3 style={{ fontWeight: '900', color: '#334155', marginBottom: '15px', textTransform: 'uppercase', fontSize: '10pt' }}>1.3 Waktu dan Tempat</h3>
+                        <div style={{ paddingLeft: '15px', lineHeight: '1.8', color: '#0f172a' }}>
+                            <p style={{ marginBottom: '12px' }}>Insha Allah kegiatan ini akan dilaksanakan pada:</p>
+                            <table style={{ width: '100%', marginBottom: '15px' }}>
                                 <tbody>
                                     <tr>
-                                        <td style={{ width: '180px', fontWeight: '900', color: '#475569' }}>Hari / Tanggal</td>
-                                        <td style={{ width: '25px' }}>:</td>
-                                        <td style={{ fontWeight: '700' }}>{data.waktuKegiatan || '        ........................'}</td>
+                                        <td style={{ width: '150px', fontWeight: '900', color: '#475569' }}>Hari / Tanggal</td>
+                                        <td style={{ width: '20px' }}>:</td>
+                                        <td style={{ fontWeight: '700' }}>{data.waktuKegiatan || '........................'}</td>
                                     </tr>
                                     <tr>
                                         <td style={{ fontWeight: '900', color: '#475569' }}>Tempat</td>
                                         <td>:</td>
-                                        <td style={{ fontWeight: '700' }}>{data.tempatKegiatan || '        ........................'}</td>
+                                        <td style={{ fontWeight: '700' }}>{data.tempatKegiatan || '........................'}</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -339,7 +352,7 @@ export function Page4({ data }: { data: Partial<ProposalData> }) {
     return (
         <PageWrapper data={data}>
             <div style={{ fontSize: '12pt' }}>
-                <h2 style={{ fontSize: '18pt', fontWeight: '900', borderLeft: '12px solid #0b3d2e', paddingLeft: '25px', marginBottom: '40px', textTransform: 'uppercase', color: '#0b3d2e', letterSpacing: '1px' }}>III. Rencana Anggaran Biaya</h2>
+                <h2 style={{ fontSize: '16pt', fontWeight: '900', borderLeft: '10px solid #0b3d2e', paddingLeft: '20px', marginBottom: '25px', textTransform: 'uppercase', color: '#0b3d2e' }}>III. Rencana Anggaran Biaya</h2>
                 
                 <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: '0 8px' }}>
                     <thead>
@@ -366,8 +379,8 @@ export function Page4({ data }: { data: Partial<ProposalData> }) {
                     <tfoot>
                         <tr><td colSpan={4} style={{ height: '20px' }}></td></tr>
                         <tr style={{ backgroundColor: '#f0fdf4' }}>
-                            <td colSpan={3} style={{ padding: '25px', textAlign: 'right', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '3px', color: '#064e3b', borderRadius: '25px 0 0 25px', fontSize: '11pt' }}>Total Estimasi Biaya :</td>
-                            <td style={{ padding: '25px', textAlign: 'right', fontSize: '18pt', fontWeight: '1000', color: '#0b3d2e', borderRadius: '0 25px 25px 0' }}>Rp {total.toLocaleString('id-ID')}</td>
+                            <td colSpan={3} style={{ padding: '15px 25px', textAlign: 'right', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '2px', color: '#064e3b', borderRadius: '15px 0 0 15px', fontSize: '10pt' }}>Total Estimasi Biaya :</td>
+                            <td style={{ padding: '15px 25px', textAlign: 'right', fontSize: '16pt', fontWeight: '1000', color: '#0b3d2e', borderRadius: '0 15px 15px 0' }}>Rp {total.toLocaleString('id-ID')}</td>
                         </tr>
                     </tfoot>
                 </table>
@@ -380,24 +393,24 @@ export function Page5({ data, onNavigate }: { data: Partial<ProposalData>, onNav
     return (
         <PageWrapper data={data}>
             <div style={{ fontSize: '12pt' }}>
-                <h2 style={{ fontSize: '18pt', fontWeight: '900', borderLeft: '12px solid #0b3d2e', paddingLeft: '25px', marginBottom: '40px', textTransform: 'uppercase', color: '#0b3d2e', letterSpacing: '1px' }}>IV. Penutup</h2>
-                <div style={{ textAlign: 'justify', textIndent: '40px', marginBottom: '60px', lineHeight: '2', color: '#0f172a' }}>{data.penutup}</div>
+                <h2 style={{ fontSize: '16pt', fontWeight: '900', borderLeft: '10px solid #0b3d2e', paddingLeft: '20px', marginBottom: '25px', textTransform: 'uppercase', color: '#0b3d2e' }}>IV. Penutup</h2>
+                <div style={{ textAlign: 'justify', textIndent: '40px', marginBottom: '35px', lineHeight: '1.7', color: '#0f172a' }}>{data.penutup}</div>
 
                 <div style={{ textAlign: 'right', marginBottom: '40px' }}>
                     <p style={{ fontStyle: 'italic', fontWeight: '900', color: '#475569', fontSize: '11pt' }}>{data.tempat}, {data.tanggal}</p>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '20px', textAlign: 'center', marginBottom: '60px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '15px', textAlign: 'center', marginBottom: '35px' }}>
                     <div onClick={() => onNavigate?.('struktur')} style={{ cursor: 'pointer' }}>
-                        <p style={{ fontSize: '11pt', fontWeight: '900', textTransform: 'uppercase', color: '#64748b', marginBottom: '10px' }}>Sekretaris DKM,</p>
-                        <div style={{ height: '90px' }}></div>
-                        <p style={{ fontWeight: '900', textDecoration: 'underline', fontSize: '12pt', color: '#0f172a' }}>{data.namaSekretaris || '( ........................ )'}</p>
+                        <p style={{ fontSize: '10pt', fontWeight: '900', textTransform: 'uppercase', color: '#64748b', marginBottom: '5px' }}>Sekretaris DKM,</p>
+                        <div style={{ height: '70px' }}></div>
+                        <p style={{ fontWeight: '900', textDecoration: 'underline', fontSize: '11pt', color: '#0f172a' }}>{data.namaSekretaris || '( ........................ )'}</p>
                     </div>
 
                     <div onClick={() => onNavigate?.('struktur')} style={{ cursor: 'pointer' }}>
-                        <p style={{ fontSize: '11pt', fontWeight: '900', textTransform: 'uppercase', color: '#64748b', marginBottom: '10px' }}>Ketua DKM,</p>
-                        <div style={{ height: '90px' }}></div>
-                        <p style={{ fontWeight: '900', textDecoration: 'underline', fontSize: '12pt', color: '#0f172a' }}>{data.namaKetua || '( ........................ )'}</p>
+                        <p style={{ fontSize: '10pt', fontWeight: '900', textTransform: 'uppercase', color: '#64748b', marginBottom: '5px' }}>Ketua DKM,</p>
+                        <div style={{ height: '70px' }}></div>
+                        <p style={{ fontWeight: '900', textDecoration: 'underline', fontSize: '11pt', color: '#0f172a' }}>{data.namaKetua || '( ........................ )'}</p>
                     </div>
                 </div>
 
