@@ -134,20 +134,9 @@ export function PageCover({ data }: { data: Partial<ProposalData> }) {
                position: 'relative'
              }}>
             
-            {/* Standard Header for Cover */}
-            <div style={{ width: '100%', marginBottom: '20px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                    <img src={data.logoKiri || "/logo.png"} alt="Logo" crossOrigin="anonymous" style={{ width: '70px', height: '70px', objectFit: 'contain' }} />
-                    <div style={{ textAlign: 'center', flex: 1, padding: '0 15px' }}>
-                        <h1 style={{ fontWeight: '900', fontSize: '14pt', margin: '0', textTransform: 'uppercase', color: '#0b3d2e' }}>{data.namaKopSurat}</h1>
-                        <p style={{ fontSize: '9pt', margin: '3px 0', color: '#334155', fontWeight: '500' }}>{data.alamatKopSurat}</p>
-                    </div>
-                    {data.logoKanan ? (
-                        <img src={data.logoKanan} alt="Logo" crossOrigin="anonymous" style={{ width: '70px', height: '70px', objectFit: 'contain' }} />
-                    ) : <div style={{ width: '70px' }} />}
-                </div>
-                <div style={{ height: '2.5px', background: '#0b3d2e', marginBottom: '1px' }}></div>
-                <div style={{ height: '0.8px', background: '#0b3d2e' }}></div>
+            {/* Centered Logo for Cover */}
+            <div style={{ width: '100%', textAlign: 'center', marginBottom: '40px', zIndex: 2 }}>
+                <img src={data.logoKiri || "/logo.png"} alt="Logo" crossOrigin="anonymous" style={{ width: '150px', height: '150px', objectFit: 'contain', margin: '0 auto' }} />
             </div>
 
             <div style={{ position: 'absolute', top: 0, right: 0, width: '450px', height: '450px', background: 'radial-gradient(circle at top right, #f0fdf4 0%, transparent 70%)', zIndex: 0 }}></div>
