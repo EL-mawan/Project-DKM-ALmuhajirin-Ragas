@@ -597,7 +597,7 @@ Pastikan setiap poin dimulai dengan kata kerja (Contoh: Menjalin, Meningkatkan, 
     }
   }
 
-  const generatePDF = async () => {
+  const generatePDF = async (forceSingle: boolean = false) => {
     const captureContainer = document.getElementById('proposal-capture-container')
     if (!captureContainer) {
         toast.error('Gagal memproses render PDF. Silakan coba lagi.')
@@ -609,7 +609,9 @@ Pastikan setiap poin dimulai dengan kata kerja (Contoh: Menjalin, Meningkatkan, 
       // Tunggu hingga font benar-benar terbaca
       await document.fonts.ready;
       
-      if (bulkRecipients.length > 0) {
+      const isBulk = bulkRecipients.length > 0 && !forceSingle;
+
+      if (isBulk) {
         setIsBulkProcessing(true)
         setBulkProgress(0)
         toast.info(`Menyiapkan ${bulkRecipients.length} PDF...`)
@@ -671,8 +673,11 @@ Pastikan setiap poin dimulai dengan kata kerja (Contoh: Menjalin, Meningkatkan, 
         setIsBulkProcessing(false)
         toast.success('Batch PDF berhasil diunduh dalam bentuk ZIP')
       } else {
-        toast.info('Sedang merender PDF premium...')
+        toast.info('Sedang merender PDF...')
         
+        // Beri waktu sejenak agar DOM stabil
+        await new Promise(resolve => setTimeout(resolve, 300))
+
         const captureContainer = document.getElementById('proposal-capture-container')
         if (!captureContainer) throw new Error('Capture container not found')
 
@@ -1356,22 +1361,53 @@ Pastikan setiap poin dimulai dengan kata kerja (Contoh: Menjalin, Meningkatkan, 
       <div className={isViewMode ? "fixed inset-0 overflow-y-auto flex justify-center py-12 px-6 bg-slate-100/80 backdrop-blur-md z-50 animate-in fade-in duration-500" : "w-full lg:w-[450px] xl:w-[550px] 2xl:w-[650px] shrink-0 sticky top-6 h-fit max-h-[calc(100vh-48px)] transition-all duration-500"}>
         <div className="w-full h-full flex flex-col">
           <div className="flex items-center justify-between mb-6">
-            <div className="flex flex-col">
+            <div className="flex flex-col gap-1">
               <h2 className="font-bold text-lg text-slate-800 uppercase tracking-tight flex items-center gap-2">
                 Preview <Badge className="bg-emerald-100 text-emerald-700 border-none font-bold text-[9px] px-2 py-0.5 rounded-full">PRO</Badge>
               </h2>
+              {bulkRecipients.length > 0 && (
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-1.5 bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-lg border border-emerald-100">
+                    <Users className="h-3 w-3" />
+                    <span className="text-[9px] font-black uppercase">{bulkRecipients.length} Penerima Excel</span>
+                  </div>
+                  {bulkRecipients.length > 1 && (
+                    <div className="flex items-center gap-1">
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-6 w-6 rounded-md hover:bg-slate-200"
+                        onClick={() => setCurrentRecipientIndex(prev => Math.max(0, prev - 1))}
+                        disabled={currentRecipientIndex === 0}
+                      >
+                        <ChevronLeft className="h-3 w-3" />
+                      </Button>
+                      <span className="text-[10px] font-bold text-slate-500">{currentRecipientIndex + 1} / {bulkRecipients.length}</span>
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-6 w-6 rounded-md hover:bg-slate-200"
+                        onClick={() => setCurrentRecipientIndex(prev => Math.min(bulkRecipients.length - 1, prev + 1))}
+                        disabled={currentRecipientIndex === bulkRecipients.length - 1}
+                      >
+                        <ChevronRight className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
             <div className="flex gap-2">
                 {isViewMode && (
                     <Button variant="outline" className="rounded-xl border-slate-300 font-bold" onClick={() => router.push('/admin/persuratan/proposal')}>Tutup</Button>
                 )}
                 {bulkRecipients.length > 1 && (
-                    <Button onClick={generatePDF} disabled={isGeneratingPDF} className="rounded-xl font-bold bg-emerald-600 text-white shadow-xl shadow-emerald-200 hover:scale-105 transition-transform active:scale-95">
-                        <Download className="mr-2 h-4 w-4" /> {isGeneratingPDF ? 'Mencetak...' : 'Unduh Massal'}
+                    <Button onClick={() => generatePDF(false)} disabled={isGeneratingPDF} className="rounded-xl font-bold bg-emerald-600 text-white shadow-xl shadow-emerald-200 hover:scale-105 transition-transform active:scale-95">
+                        <Download className="mr-2 h-4 w-4" /> {isGeneratingPDF ? 'Mencetak...' : 'Unduh ZIP'}
                     </Button>
                 )}
-                <Button onClick={generatePDF} disabled={isGeneratingPDF && bulkRecipients.length <= 1} className="rounded-xl font-bold bg-slate-900 shadow-xl shadow-slate-200 hover:scale-105 transition-transform active:scale-95">
-                    <Download className="mr-2 h-4 w-4" /> {isGeneratingPDF && bulkRecipients.length <= 1 ? 'Mencetak...' : 'Unduh PDF'}
+                <Button onClick={() => generatePDF(true)} disabled={isGeneratingPDF} className="rounded-xl font-bold bg-slate-900 shadow-xl shadow-slate-200 hover:scale-105 transition-transform active:scale-95 text-white">
+                    <Download className="mr-2 h-4 w-4" /> {isGeneratingPDF ? 'Mencetak...' : 'Unduh PDF'}
                 </Button>
             </div>
           </div>
