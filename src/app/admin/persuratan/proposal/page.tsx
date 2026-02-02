@@ -143,18 +143,19 @@ export default function PersuratanProposal() {
     doc.rect(15, 10, 180, 0.5, 'F')
     
     // DKM Text
-    doc.setFontSize(14)
+    doc.setFontSize(12)
     doc.setFont('times', 'bold')
     doc.setTextColor(dkmEmerald[0], dkmEmerald[1], dkmEmerald[2])
     doc.text('DEWAN KEMAKMURAN MASJID (DKM)', centerX, 22, { align: 'center', charSpace: 1 })
     
-    doc.setFontSize(22)
+    doc.setFontSize(18)
     doc.text('AL-MUHAJIRIN RAGAS GRENYANG', centerX, 32, { align: 'center' })
     
-    doc.setFontSize(9)
+    doc.setFontSize(12)
     doc.setFont('times', 'italic')
     doc.setTextColor(148, 163, 184)
     doc.text('Kp. Ragas Grenyang, Desa Argawana, Kec. Puloampel, Serang - Banten', centerX, 38, { align: 'center' })
+    doc.setFontSize(9)
     doc.text('Email: dkm.almuhajirin.ragas@gmail.com | Website: dkm-almuhajirin.vercel.app', centerX, 43, { align: 'center' })
     
     doc.setDrawColor(dkmEmerald[0], dkmEmerald[1], dkmEmerald[2])
