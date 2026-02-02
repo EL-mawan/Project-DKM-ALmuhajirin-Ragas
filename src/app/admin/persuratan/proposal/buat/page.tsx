@@ -611,7 +611,17 @@ Pastikan setiap poin dimulai dengan kata kerja (Contoh: Menjalin, Meningkatkan, 
       
       const isBulk = bulkRecipients.length > 0 && !forceSingle;
 
-      if (isBulk) {
+      // Konfigurasi Standar html2canvas untuk kecepatan
+      const canvasOptions = {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: '#ffffff',
+        width: 794,
+        height: 1123,
+        removeContainer: true,
+        imageTimeout: 0
+      };
         setIsBulkProcessing(true)
         setBulkProgress(0)
         toast.info(`Menyiapkan ${bulkRecipients.length} PDF...`)
@@ -625,36 +635,24 @@ Pastikan setiap poin dimulai dengan kata kerja (Contoh: Menjalin, Meningkatkan, 
           await new Promise(resolve => setTimeout(resolve, 400))
           
           // Gunakan container tersembunyi untuk penangkapan yang stabil
-          const captureContainer = document.getElementById('proposal-capture-container')
-          if (!captureContainer) throw new Error('Capture container not found')
-          
-          const doc = new jsPDF('p', 'mm', 'a4')
-          const pages = captureContainer.querySelectorAll('.proposal-page')
-          
-          for (let j = 0; j < pages.length; j++) {
-            const page = pages[j] as HTMLElement
-            const canvas = await html2canvas(page, {
-              scale: 2,
-              useCORS: true,
-              logging: false,
-              backgroundColor: '#ffffff',
-              width: 794,
-              height: 1123,
-              onclone: (clonedDoc, clonedElement) => {
-                // Sangat penting: Reset transform parent untuk menghindari distorsi/blur/pemotongan saat di-capture
-                const container = clonedElement.parentElement;
-                if (container) {
-                   container.style.transform = 'none';
-                   container.style.scale = '1';
-                   container.style.width = 'fit-content';
-                   container.style.height = 'fit-content';
-                   container.style.padding = '0';
-                   container.style.margin = '0';
+            const captureContainer = document.getElementById('proposal-capture-container')
+            if (!captureContainer) throw new Error('Capture container not found')
+            
+            const doc = new jsPDF('p', 'mm', 'a4')
+            const pages = captureContainer.querySelectorAll('.proposal-page')
+            
+            for (let j = 0; j < pages.length; j++) {
+              const page = pages[j] as HTMLElement
+              const canvas = await html2canvas(page, {
+                ...canvasOptions,
+                onclone: (clonedDoc, clonedElement) => {
+                  const container = clonedElement.parentElement;
+                  if (container) {
+                     container.style.transform = 'none';
+                     container.style.scale = '1';
+                  }
                 }
-                clonedElement.style.transform = 'none';
-                clonedElement.style.margin = '0';
-              }
-            })
+              })
             const imgData = canvas.toDataURL('image/jpeg', 0.95)
             if (j > 0) doc.addPage()
             doc.addImage(imgData, 'JPEG', 0, 0, 210, 297, undefined, 'MEDIUM')
@@ -687,25 +685,13 @@ Pastikan setiap poin dimulai dengan kata kerja (Contoh: Menjalin, Meningkatkan, 
         for (let i = 0; i < pages.length; i++) {
           const page = pages[i] as HTMLElement
           const canvas = await html2canvas(page, {
-            scale: 2,
-            useCORS: true,
-            logging: false,
-            backgroundColor: '#ffffff',
-            width: 794,
-            height: 1123,
+            ...canvasOptions,
             onclone: (clonedDoc, clonedElement) => {
-              // Sangat penting: Reset transform parent untuk menghindari distorsi/blur/pemotongan saat di-capture
               const container = clonedElement.parentElement;
               if (container) {
                  container.style.transform = 'none';
                  container.style.scale = '1';
-                 container.style.width = 'fit-content';
-                 container.style.height = 'fit-content';
-                 container.style.padding = '0';
-                 container.style.margin = '0';
               }
-              clonedElement.style.transform = 'none';
-              clonedElement.style.margin = '0';
             }
           })
           
@@ -1360,54 +1346,51 @@ Pastikan setiap poin dimulai dengan kata kerja (Contoh: Menjalin, Meningkatkan, 
       {/* PREVIEW SECTION */}
       <div className={isViewMode ? "fixed inset-0 overflow-y-auto flex justify-center py-12 px-6 bg-slate-100/80 backdrop-blur-md z-50 animate-in fade-in duration-500" : "w-full lg:w-[450px] xl:w-[550px] 2xl:w-[650px] shrink-0 sticky top-6 h-fit max-h-[calc(100vh-48px)] transition-all duration-500"}>
         <div className="w-full h-full flex flex-col">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex flex-col gap-1">
-              <h2 className="font-bold text-lg text-slate-800 uppercase tracking-tight flex items-center gap-2">
-                Preview <Badge className="bg-emerald-100 text-emerald-700 border-none font-bold text-[9px] px-2 py-0.5 rounded-full">PRO</Badge>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pt-2">
+            <div className="flex flex-col gap-1.5">
+              <h2 className="font-black text-xl text-slate-900 uppercase tracking-tight flex items-center gap-2">
+                Preview <Badge className="bg-emerald-100 text-emerald-700 border-none font-black text-[10px] px-2.5 py-0.5 rounded-full">LIVE</Badge>
               </h2>
               {bulkRecipients.length > 0 && (
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center gap-1.5 bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-lg border border-emerald-100">
-                    <Users className="h-3 w-3" />
-                    <span className="text-[9px] font-black uppercase">{bulkRecipients.length} Penerima Excel</span>
+                <div className="flex flex-wrap items-center gap-2">
+                  <div className="flex items-center gap-1.5 bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-xl border border-emerald-100">
+                    <Users className="h-3.5 w-3.5" />
+                    <span className="text-[10px] font-black uppercase tracking-wider">{bulkRecipients.length} Penerima Excel</span>
                   </div>
                   {bulkRecipients.length > 1 && (
-                    <div className="flex items-center gap-1">
+                    <div className="flex items-center gap-1.5 bg-white border border-slate-200 p-1 rounded-xl px-2 shadow-sm">
                       <Button 
                         variant="ghost" 
                         size="icon" 
-                        className="h-6 w-6 rounded-md hover:bg-slate-200"
+                        className="h-7 w-7 rounded-lg hover:bg-slate-100"
                         onClick={() => setCurrentRecipientIndex(prev => Math.max(0, prev - 1))}
                         disabled={currentRecipientIndex === 0}
                       >
-                        <ChevronLeft className="h-3 w-3" />
+                        <ChevronLeft className="h-4 w-4" />
                       </Button>
-                      <span className="text-[10px] font-bold text-slate-500">{currentRecipientIndex + 1} / {bulkRecipients.length}</span>
+                      <span className="text-xs font-bold text-slate-600 px-1 min-w-[40px] text-center">{currentRecipientIndex + 1} / {bulkRecipients.length}</span>
                       <Button 
                         variant="ghost" 
                         size="icon" 
-                        className="h-6 w-6 rounded-md hover:bg-slate-200"
+                        className="h-7 w-7 rounded-lg hover:bg-slate-100"
                         onClick={() => setCurrentRecipientIndex(prev => Math.min(bulkRecipients.length - 1, prev + 1))}
                         disabled={currentRecipientIndex === bulkRecipients.length - 1}
                       >
-                        <ChevronRight className="h-3 w-3" />
+                        <ChevronRight className="h-4 w-4" />
                       </Button>
                     </div>
                   )}
                 </div>
               )}
             </div>
-            <div className="flex gap-2">
-                {isViewMode && (
-                    <Button variant="outline" className="rounded-xl border-slate-300 font-bold" onClick={() => router.push('/admin/persuratan/proposal')}>Tutup</Button>
-                )}
+            <div className="flex items-center gap-2 w-full sm:w-auto">
                 {bulkRecipients.length > 1 && (
-                    <Button onClick={() => generatePDF(false)} disabled={isGeneratingPDF} className="rounded-xl font-bold bg-emerald-600 text-white shadow-xl shadow-emerald-200 hover:scale-105 transition-transform active:scale-95">
-                        <Download className="mr-2 h-4 w-4" /> {isGeneratingPDF ? 'Mencetak...' : 'Unduh ZIP'}
+                    <Button onClick={() => generatePDF(false)} disabled={isGeneratingPDF} className="flex-1 sm:flex-none h-11 px-5 rounded-2xl font-bold bg-emerald-600 text-white shadow-xl shadow-emerald-200 hover:bg-emerald-700 transition-all active:scale-95 text-xs">
+                        <Download className="mr-2 h-4 w-4" /> {isGeneratingPDF ? 'Proses...' : 'Unduh ZIP'}
                     </Button>
                 )}
-                <Button onClick={() => generatePDF(true)} disabled={isGeneratingPDF} className="rounded-xl font-bold bg-slate-900 shadow-xl shadow-slate-200 hover:scale-105 transition-transform active:scale-95 text-white">
-                    <Download className="mr-2 h-4 w-4" /> {isGeneratingPDF ? 'Mencetak...' : 'Unduh PDF'}
+                <Button onClick={() => generatePDF(true)} disabled={isGeneratingPDF} className="flex-1 sm:flex-none h-11 px-5 rounded-2xl font-bold bg-slate-900 border-none shadow-xl shadow-slate-200 hover:bg-slate-800 transition-all active:scale-95 text-white text-xs">
+                    <Download className="mr-2 h-4 w-4" /> {isGeneratingPDF ? 'Proses...' : 'Unduh PDF'}
                 </Button>
             </div>
           </div>
