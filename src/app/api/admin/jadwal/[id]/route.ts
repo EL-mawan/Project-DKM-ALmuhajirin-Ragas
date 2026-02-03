@@ -25,6 +25,16 @@ export async function PATCH(
 
     const body = await req.json()
 
+    // Check if db.jadwalTugas exists and is valid
+    if (!db || !('jadwalTugas' in db)) {
+      console.error('CRITICAL: db.jadwalTugas is missing from the Prisma Client instance.');
+      return NextResponse.json({ 
+        error: 'Database Schema Error', 
+        details: 'Prisma Client does not have the JadwalTugas model. Please regenerate Prisma Client.',
+        suggestion: 'Run "npx prisma generate" and redeploy.'
+      }, { status: 500 });
+    }
+
     const oldData = await db.jadwalTugas.findUnique({ where: { id } })
     if (!oldData) return NextResponse.json({ error: 'Not Found' }, { status: 404 })
 
@@ -74,6 +84,16 @@ export async function DELETE(
 
     if (!user || !checkPermission(user as any, 'jadwal', 'delete')) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
+
+    // Check if db.jadwalTugas exists and is valid
+    if (!db || !('jadwalTugas' in db)) {
+      console.error('CRITICAL: db.jadwalTugas is missing from the Prisma Client instance.');
+      return NextResponse.json({ 
+        error: 'Database Schema Error', 
+        details: 'Prisma Client does not have the JadwalTugas model. Please regenerate Prisma Client.',
+        suggestion: 'Run "npx prisma generate" and redeploy.'
+      }, { status: 500 });
     }
 
     const oldData = await db.jadwalTugas.findUnique({ where: { id } })
