@@ -613,14 +613,18 @@ Pastikan setiap poin dimulai dengan kata kerja (Contoh: Menjalin, Meningkatkan, 
 
       // Konfigurasi Standar html2canvas untuk kecepatan
       const canvasOptions = {
-        scale: 2,
+        scale: 2, // Standard scale for better reliability
         useCORS: true,
         logging: false,
         backgroundColor: '#ffffff',
         width: 794,
         height: 1123,
+        windowWidth: 794,
+        windowHeight: 1123,
+        scrollY: 0,
+        scrollX: 0,
         removeContainer: true,
-        imageTimeout: 0
+        imageTimeout: 15000, // Wait longer for images
       };
 
       if (isBulk) {
@@ -1411,7 +1415,7 @@ Pastikan setiap poin dimulai dengan kata kerja (Contoh: Menjalin, Meningkatkan, 
 
               {/* Hidden Container for PDF Capture (with cover) */}
               <div style={{ position: 'absolute', left: '-5000px', top: 0 }}>
-                <div id="proposal-capture-container" className="flex flex-col gap-0 font-serif" style={{ width: '794px' }}>
+                <div id="proposal-capture-container" className="flex flex-col gap-0" style={{ width: '794px', fontFamily: "'Crimson Pro', serif" }}>
                   <PageCover data={data} />
                   <Page1 data={data} bulkRecipient={bulkRecipients.length > 0 ? bulkRecipients[currentRecipientIndex] : null} />
                   <Page2 data={data} />

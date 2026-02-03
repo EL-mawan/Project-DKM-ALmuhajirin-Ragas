@@ -213,8 +213,9 @@ export default function JadwalTugasPage() {
     const tasksToShow = [
       { label: 'Imam Sholat', type: 'IMAM_JUMAT' },
       { label: 'Khotib', type: 'KHOTIB' },
-      { label: 'Bilal / Iqomah', type: 'BILAL' },
-      { label: 'Muadzin', type: 'ADZAN' }
+      { label: 'Bilal / Muadzin 1', type: 'BILAL' },
+      { label: 'Bilal / Muadzin 2', type: 'ADZAN' },
+      { label: 'Iqomah', type: 'IQOMAH' }
     ]
 
     tasksToShow.forEach((task, i) => {
@@ -244,7 +245,7 @@ export default function JadwalTugasPage() {
     })
 
     // --- SIGNATURE ---
-    const sigY = 110
+    const sigY = startY + (tasksToShow.length * rowHeight) + 20
     doc.setFont('times', 'normal')
     doc.text('Mengetahui,', 160, sigY, { align: 'center' })
     doc.text('Ketua DKM Al-Muhajirin', 160, sigY + 5, { align: 'center' })
@@ -451,9 +452,6 @@ export default function JadwalTugasPage() {
             <div>
               <CardTitle className="text-2xl font-black text-slate-900">
                 Daftar Penugasan 
-                <span className="ml-3 text-xs font-mono bg-slate-100 text-slate-500 px-2 py-1 rounded">
-                   Debug: Total={data.length} | Tab={activeTab} | Filtered={filteredData.length}
-                </span>
               </CardTitle>
               <p className="text-xs text-neutral-400 mt-1 italic font-medium">Monitoring tugas aktif masjid.</p>
             </div>

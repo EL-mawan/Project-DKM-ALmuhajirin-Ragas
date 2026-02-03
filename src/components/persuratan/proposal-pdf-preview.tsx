@@ -387,49 +387,53 @@ export function Page5({ data, onNavigate }: { data: Partial<ProposalData>, onNav
                 </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '15px', textAlign: 'center', marginBottom: '25px' }}>
-                    <div onClick={() => onNavigate?.('struktur')} style={{ cursor: 'pointer' }}>
+                    <div onClick={() => onNavigate?.('struktur')} style={{ cursor: 'pointer', position: 'relative' }}>
                         <p style={{ fontSize: '10pt', fontWeight: '900', textTransform: 'uppercase', color: '#64748b', marginBottom: '5px' }}>Sekretaris DKM,</p>
-                        <div style={{ height: '55px' }}></div>
-                        <p style={{ fontWeight: '900', textDecoration: 'underline', fontSize: '11pt', color: '#0f172a' }}>{data.namaSekretaris || '( ........................ )'}</p>
+                        <div style={{ height: '70px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <div style={{ width: '100px', height: '1px', background: 'transparent' }}></div>
+                        </div>
+                        <p style={{ fontWeight: '900', textDecoration: 'underline', fontSize: '11pt', color: '#1e293b' }}>{data.namaSekretaris || '( ........................ )'}</p>
                     </div>
 
-                    <div onClick={() => onNavigate?.('struktur')} style={{ cursor: 'pointer' }}>
+                    <div onClick={() => onNavigate?.('struktur')} style={{ cursor: 'pointer', position: 'relative' }}>
                         <p style={{ fontSize: '10pt', fontWeight: '900', textTransform: 'uppercase', color: '#64748b', marginBottom: '5px' }}>Ketua DKM,</p>
-                        <div style={{ height: '55px' }}></div>
-                        <p style={{ fontWeight: '900', textDecoration: 'underline', fontSize: '11pt', color: '#0f172a' }}>{data.namaKetua || '( ........................ )'}</p>
+                        <div style={{ height: '70px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                             <div style={{ width: '100px', height: '1px', background: 'transparent' }}></div>
+                        </div>
+                        <p style={{ fontWeight: '900', textDecoration: 'underline', fontSize: '11pt', color: '#1e293b' }}>{data.namaKetua || '( ........................ )'}</p>
                     </div>
                 </div>
 
                 <div style={{ textAlign: 'center', marginBottom: '25px' }}>
-                    <div style={{ display: 'inline-block', borderBottom: '3px solid #0b3d2e', paddingBottom: '8px' }}>
-                        <p style={{ fontWeight: '1000', fontSize: '14pt', textTransform: 'uppercase', letterSpacing: '5px', color: '#0b3d2e', margin: '0' }}>Mengetahui,</p>
+                    <div style={{ display: 'inline-block', borderBottom: '3px double #0b3d2e', paddingBottom: '4px', marginBottom: '15px' }}>
+                        <p style={{ fontWeight: '1000', fontSize: '12pt', textTransform: 'uppercase', letterSpacing: '4px', color: '#0b3d2e', margin: '0' }}>Mengetahui,</p>
                     </div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '35px 40px', textAlign: 'center' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '20px 40px', textAlign: 'center' }}>
                     <div onClick={() => onNavigate?.('struktur')} style={{ cursor: 'pointer' }}>
-                        <p style={{ fontSize: '11pt', fontWeight: '900', color: '#334155' }}>Ketua RT 015,</p>
-                        <p style={{ fontSize: '10pt', fontStyle: 'italic', color: '#64748b' }}>Kampung Ragas Grenyang</p>
+                        <p style={{ fontSize: '10pt', fontWeight: '900', color: '#475569', marginBottom: '2px' }}>Ketua RT 015,</p>
+                        <p style={{ fontSize: '8.5pt', fontStyle: 'italic', color: '#94a3b8', margin: '0' }}>Kampung Ragas Grenyang</p>
                         <div style={{ height: '55px' }}></div>
-                        <p style={{ fontSize: '11pt', fontWeight: '900', textDecoration: 'underline' }}>{data.namaKetuaRT || '( ........................ )'}</p>
+                        <p style={{ fontSize: '10pt', fontWeight: '900', textDecoration: 'underline' }}>{data.namaKetuaRT || '( ........................ )'}</p>
                     </div>
                     <div onClick={() => onNavigate?.('struktur')} style={{ cursor: 'pointer' }}>
-                        <p style={{ fontSize: '11pt', fontWeight: '900', color: '#334155' }}>Ketua RW 008,</p>
-                        <p style={{ fontSize: '10pt', fontStyle: 'italic', color: '#64748b' }}>Kampung Ragas Grenyang</p>
+                        <p style={{ fontSize: '10pt', fontWeight: '900', color: '#475569', marginBottom: '2px' }}>Ketua RW 008,</p>
+                        <p style={{ fontSize: '8.5pt', fontStyle: 'italic', color: '#94a3b8', margin: '0' }}>Kampung Ragas Grenyang</p>
                         <div style={{ height: '55px' }}></div>
-                        <p style={{ fontSize: '11pt', fontWeight: '900', textDecoration: 'underline' }}>{data.namaKetuaRW || '( ........................ )'}</p>
+                        <p style={{ fontSize: '10pt', fontWeight: '900', textDecoration: 'underline' }}>{data.namaKetuaRW || '( ........................ )'}</p>
                     </div>
                     <div onClick={() => onNavigate?.('struktur')} style={{ cursor: 'pointer' }}>
-                        <p style={{ fontSize: '12pt', fontWeight: '900', color: '#064e3b' }}>Tokoh Masyarakat,</p>
-                        <p style={{ fontSize: '11pt', fontStyle: 'italic', color: '#059669' }}>Masjid Al-Muhajirin</p>
+                        <p style={{ fontSize: '10pt', fontWeight: '900', color: '#0b3d2e', marginBottom: '2px' }}>Tokoh Masyarakat,</p>
+                        <p style={{ fontSize: '9pt', fontStyle: 'italic', color: '#059669', margin: '0' }}>Masjid Al-Muhajirin</p>
                         <div style={{ height: '55px' }}></div>
-                        <p style={{ fontWeight: '1000', textDecoration: 'underline', fontSize: '12pt' }}>{data.namaTokohMasyarakat || '( ........................ )'}</p>
+                        <p style={{ fontWeight: '1000', textDecoration: 'underline', fontSize: '11pt' }}>{data.namaTokohMasyarakat || '( ........................ )'}</p>
                     </div>
                     <div onClick={() => onNavigate?.('struktur')} style={{ cursor: 'pointer' }}>
-                        <p style={{ fontSize: '11pt', fontWeight: '900', color: '#334155' }}>Ketua Pemuda,</p>
-                        <p style={{ fontSize: '10pt', fontStyle: 'italic', color: '#64748b' }}>Kampung Ragas Grenyang</p>
+                        <p style={{ fontSize: '10pt', fontWeight: '900', color: '#475569', marginBottom: '2px' }}>Ketua Pemuda,</p>
+                        <p style={{ fontSize: '8.5pt', fontStyle: 'italic', color: '#94a3b8', margin: '0' }}>Kampung Ragas Grenyang</p>
                         <div style={{ height: '55px' }}></div>
-                        <p style={{ fontSize: '11pt', textDecoration: 'underline', fontWeight: '900' }}>{data.namaKetuaPemuda || '( ........................ )'}</p>
+                        <p style={{ fontSize: '10pt', textDecoration: 'underline', fontWeight: '900' }}>{data.namaKetuaPemuda || '( ........................ )'}</p>
                     </div>
 
                     {data.namaKepalaDesa && (

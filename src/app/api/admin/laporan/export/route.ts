@@ -55,10 +55,7 @@ export async function GET(request: NextRequest) {
           lte: endDate
         }
       },
-      orderBy: { date: 'asc' },
-      include: {
-        // Include creator info if needed
-      }
+      orderBy: { date: 'asc' }
     })
 
     const expenseData = await db.keuanganPengeluaran.findMany({
@@ -103,12 +100,12 @@ export async function GET(request: NextRequest) {
       incomeBreakdown: Object.entries(incomeBySource).map(([source, amount]) => ({
         source,
         amount,
-        percentage: ((amount / totalIncome) * 100).toFixed(2)
+        percentage: (((amount as number) / (totalIncome as number)) * 100).toFixed(2)
       })),
       expenseBreakdown: Object.entries(expenseByCategory).map(([category, amount]) => ({
         category,
         amount,
-        percentage: ((amount / totalExpense) * 100).toFixed(2)
+        percentage: (((amount as number) / (totalExpense as number)) * 100).toFixed(2)
       })),
       transactions: {
         income: incomeData.map(item => ({
