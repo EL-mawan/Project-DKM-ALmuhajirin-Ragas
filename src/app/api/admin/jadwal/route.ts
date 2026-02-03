@@ -71,13 +71,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
 
-    // Defensive check for Prisma client
-    if (!db.jadwalTugas) {
-      console.error('CRITICAL: db.jadwalTugas is undefined. Prisma Client may not be generated.')
+    // Check if db.jadwalTugas exists and is valid
+    if (!db || !('jadwalTugas' in db)) {
+      console.error('CRITICAL: db.jadwalTugas is missing from the Prisma Client instance.');
       return NextResponse.json({ 
-        error: 'Database configuration error', 
-        details: 'JadwalTugas model not found. Please regenerate Prisma Client.'
-      }, { status: 500 })
+        error: 'Database Schema Error', 
+        details: 'Prisma Client does not have the JadwalTugas model. This usually happens when the schema is updated but the client is not regenerated.',
+        suggestion: 'Run "npx prisma generate" and redeploy.'
+      }, { status: 500 });
     }
 
     const item = await db.jadwalTugas.create({
