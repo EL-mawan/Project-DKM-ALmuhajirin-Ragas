@@ -328,6 +328,22 @@ Salam silaturahmi kami sampaikan, teriring doa semoga bapak beserta keluarga sel
           scrollY: 0,
           scrollX: 0,
           onclone: (clonedDoc, clonedElement) => {
+             // Convert oklch() colors to hex for html2canvas compatibility
+             const style = clonedDoc.createElement('style');
+             style.textContent = `
+               :root {
+                 --background: #fafafa;
+                 --foreground: #262626;
+                 --primary: #0b3d2e;
+                 --primary-foreground: #fafafa;
+                 --muted: #f5f5f5;
+                 --muted-foreground: #737373;
+                 --border: #e5e5e5;
+                 --input: #f0f0f0;
+               }
+             `;
+             clonedDoc.head.appendChild(style);
+             
              clonedElement.style.borderRadius = '0'
              clonedElement.style.boxShadow = 'none'
              clonedElement.style.transform = 'none'

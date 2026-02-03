@@ -71,6 +71,15 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
 
+    // Defensive check for Prisma client
+    if (!db.jadwalTugas) {
+      console.error('CRITICAL: db.jadwalTugas is undefined. Prisma Client may not be generated.')
+      return NextResponse.json({ 
+        error: 'Database configuration error', 
+        details: 'JadwalTugas model not found. Please regenerate Prisma Client.'
+      }, { status: 500 })
+    }
+
     const item = await db.jadwalTugas.create({
       data: {
         date: new Date(date),

@@ -625,6 +625,23 @@ Pastikan setiap poin dimulai dengan kata kerja (Contoh: Menjalin, Meningkatkan, 
         scrollX: 0,
         removeContainer: true,
         imageTimeout: 15000, // Wait longer for images
+        onclone: (clonedDoc: Document) => {
+          // Convert oklch() colors to hex for html2canvas compatibility
+          const style = clonedDoc.createElement('style');
+          style.textContent = `
+            :root {
+              --background: #fafafa;
+              --foreground: #262626;
+              --primary: #0b3d2e;
+              --primary-foreground: #fafafa;
+              --muted: #f5f5f5;
+              --muted-foreground: #737373;
+              --border: #e5e5e5;
+              --input: #f0f0f0;
+            }
+          `;
+          clonedDoc.head.appendChild(style);
+        }
       };
 
       if (isBulk) {
