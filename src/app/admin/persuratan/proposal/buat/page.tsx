@@ -43,6 +43,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { AdminLayout } from '@/components/layout/admin-layout'
 import { useSession } from 'next-auth/react'
 import { 
@@ -163,6 +170,7 @@ function ProposalBuilderContent() {
   const [currentRecipientIndex, setCurrentRecipientIndex] = useState(0)
   const [bulkProgress, setBulkProgress] = useState(0)
   const previewRef = useRef<HTMLDivElement>(null)
+  const [strukturOrganisasi, setStrukturOrganisasi] = useState<{ name: string, position: string }[]>([])
 
   const generateAutoNomor = async () => {
     try {
@@ -193,6 +201,22 @@ function ProposalBuilderContent() {
         setData(prev => ({ ...prev, tanggal: formatted }))
     }
   }, [dateInput])
+
+  // Fetch struktur organisasi
+  useEffect(() => {
+    const fetchStruktur = async () => {
+      try {
+        const res = await fetch('/api/admin/struktur')
+        if (res.ok) {
+          const strukturData = await res.json()
+          setStrukturOrganisasi(strukturData.filter((s: any) => s.isActive).map((s: any) => ({ name: s.name, position: s.position })))
+        }
+      } catch (error) {
+        console.error('Failed to fetch struktur:', error)
+      }
+    }
+    fetchStruktur()
+  }, [])
 
   useEffect(() => {
     if (proposalId) {
@@ -1063,7 +1087,31 @@ Pastikan setiap poin dimulai dengan kata kerja (Contoh: Menjalin, Meningkatkan, 
                       {data.struktur.pimpinanAtas.map((p, i) => (
                         <div key={i} className="space-y-2 p-5 bg-slate-50/50 rounded-2xl border border-slate-100">
                            <Label className="text-[10px] uppercase text-slate-400 font-bold tracking-widest">{p.role}</Label>
-                           <Input value={p.name} className="h-11 rounded-xl bg-white" onChange={(e) => updateStrukturName('pimpinanAtas', i, e.target.value)} />
+                           <div className="space-y-2">
+                               <Select onValueChange={(val) => {
+                                   if (val) updateStrukturName('pimpinanAtas', i, val)
+                               }}>
+                                  <SelectTrigger className="h-9 text-xs rounded-lg bg-white border-slate-200">
+                                      <SelectValue placeholder="Pilih dari Struktur..." />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                      {strukturOrganisasi.map((s, idx) => (
+                                          <SelectItem key={idx} value={s.name}>
+                                              <div className="flex flex-col text-left">
+                                                  <span className="font-bold">{s.name}</span>
+                                                  <span className="text-[10px] text-slate-400">{s.position}</span>
+                                              </div>
+                                          </SelectItem>
+                                      ))}
+                                  </SelectContent>
+                               </Select>
+                               <Input 
+                                  value={p.name} 
+                                  className="h-11 rounded-xl bg-white font-medium" 
+                                  onChange={(e) => updateStrukturName('pimpinanAtas', i, e.target.value)} 
+                                  placeholder="Nama Pejabat..."
+                               />
+                           </div>
                         </div>
                       ))}
                     </div>
@@ -1075,7 +1123,31 @@ Pastikan setiap poin dimulai dengan kata kerja (Contoh: Menjalin, Meningkatkan, 
                       {data.struktur.administrasi.map((p, i) => (
                         <div key={i} className="space-y-2 p-5 bg-slate-50/50 rounded-2xl border border-slate-100">
                             <Label className="text-[10px] uppercase text-slate-400 font-bold tracking-widest">{p.role}</Label>
-                            <Input value={p.name} className="h-11 rounded-xl bg-white" onChange={(e) => updateStrukturName('administrasi', i, e.target.value)} />
+                            <div className="space-y-2">
+                               <Select onValueChange={(val) => {
+                                   if (val) updateStrukturName('administrasi', i, val)
+                               }}>
+                                  <SelectTrigger className="h-9 text-xs rounded-lg bg-white border-slate-200">
+                                      <SelectValue placeholder="Pilih dari Struktur..." />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                      {strukturOrganisasi.map((s, idx) => (
+                                          <SelectItem key={idx} value={s.name}>
+                                              <div className="flex flex-col text-left">
+                                                  <span className="font-bold">{s.name}</span>
+                                                  <span className="text-[10px] text-slate-400">{s.position}</span>
+                                              </div>
+                                          </SelectItem>
+                                      ))}
+                                  </SelectContent>
+                               </Select>
+                               <Input 
+                                  value={p.name} 
+                                  className="h-11 rounded-xl bg-white font-medium" 
+                                  onChange={(e) => updateStrukturName('administrasi', i, e.target.value)} 
+                                  placeholder="Nama Pejabat..."
+                               />
+                            </div>
                         </div>
                       ))}
                     </div>
@@ -1399,7 +1471,7 @@ Pastikan setiap poin dimulai dengan kata kerja (Contoh: Menjalin, Meningkatkan, 
 
 
       {/* PREVIEW SECTION */}
-      <div className={isViewMode ? "fixed inset-0 overflow-y-auto flex justify-center py-12 px-6 bg-slate-100/80 backdrop-blur-md z-50 animate-in fade-in duration-500" : "w-full lg:w-[450px] xl:w-[550px] 2xl:w-[650px] shrink-0 sticky top-6 h-fit max-h-[calc(100vh-48px)] transition-all duration-500"}>
+      <div className={isViewMode ? "fixed inset-0 overflow-y-auto flex justify-center py-12 px-6 bg-slate-100/80 backdrop-blur-md z-50 animate-in fade-in duration-500" : "w-full lg:w-[500px] xl:w-[650px] 2xl:w-[850px] shrink-0 sticky top-6 h-fit max-h-[calc(100vh-48px)] transition-all duration-500"}>
         <div className="w-full h-full flex flex-col">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pt-2">
             <div className="flex flex-col gap-1.5">
@@ -1451,7 +1523,7 @@ Pastikan setiap poin dimulai dengan kata kerja (Contoh: Menjalin, Meningkatkan, 
           </div>
 
           <div className="bg-slate-50 border border-slate-200 p-2 sm:p-6 rounded-[3rem] shadow-xl shadow-slate-200/30 overflow-x-hidden overflow-y-auto space-y-12 flex flex-col items-center custom-scrollbar scroll-smooth" style={{ maxHeight: 'calc(100vh - 180px)' }}>
-              <div ref={previewRef} id="proposal-preview-container" className="flex flex-col gap-10 scale-[0.35] sm:scale-[0.5] md:scale-[0.55] lg:scale-[0.6] xl:scale-[0.75] 2xl:scale-[1.0] origin-top transition-all duration-500">
+              <div ref={previewRef} id="proposal-preview-container" className="flex flex-col gap-10 scale-[0.35] sm:scale-[0.5] md:scale-[0.55] lg:scale-[0.55] xl:scale-[0.75] 2xl:scale-[1.0] origin-top transition-all duration-500">
                 {/* Visible Preview (with cover) */}
                 <PageCover data={data} />
                 <Page1 data={data} bulkRecipient={bulkRecipients.length > 0 ? bulkRecipients[currentRecipientIndex] : null} onNavigate={setActiveTab} />

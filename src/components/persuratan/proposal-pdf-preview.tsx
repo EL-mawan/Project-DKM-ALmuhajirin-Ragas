@@ -243,11 +243,11 @@ export function Page2({ data }: { data: Partial<ProposalData> }) {
                 <div style={{ textAlign: 'justify', textIndent: '40px', marginBottom: '25px', lineHeight: '1.6', color: '#0f172a' }}>{data.latarBelakang}</div>
 
                 <h3 style={{ fontWeight: '900', color: '#334155', marginBottom: '10px', textTransform: 'uppercase', fontSize: '10pt' }}>1.2 Maksud dan Tujuan</h3>
-                <ul style={{ paddingLeft: '40px', marginBottom: '25px', lineHeight: '1.6', color: '#0f172a' }}>
+                <ol style={{ paddingLeft: '40px', marginBottom: '25px', lineHeight: '1.6', color: '#0f172a', listStyleType: 'decimal' }}>
                     {data.tujuan?.map((t, i) => (
-                        <li key={i} style={{ marginBottom: '6px' }}>{t}</li>
+                        <li key={i} style={{ marginBottom: '6px', paddingLeft: '5px' }}>{t}</li>
                     ))}
-                </ul>
+                </ol>
 
                 {data.showWaktuTempat && (
                     <div style={{ marginTop: '30px' }}>

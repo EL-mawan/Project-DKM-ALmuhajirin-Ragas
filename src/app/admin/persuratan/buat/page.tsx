@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, Suspense } from 'react'
+import { useState, useRef, Suspense, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -32,6 +32,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Switch } from '@/components/ui/switch'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import jsPDF from 'jspdf'
 import html2canvas from 'html2canvas'
 
@@ -114,6 +121,25 @@ Salam silaturahmi kami sampaikan, teriring doa semoga bapak beserta keluarga sel
     ttdKetuaPadepokan: '',
     ttdKetuaDPDBandrong: ''
   })
+
+  // State for Organization Structure Data
+  const [strukturOrganisasi, setStrukturOrganisasi] = useState<{ name: string, position: string }[]>([])
+
+  // Fetch Structure Data
+  useEffect(() => {
+    const fetchStruktur = async () => {
+      try {
+        const res = await fetch('/api/admin/struktur')
+        if (res.ok) {
+          const strukturData = await res.json()
+          setStrukturOrganisasi(strukturData.filter((s: any) => s.isActive).map((s: any) => ({ name: s.name, position: s.position })))
+        }
+      } catch (error) {
+        console.error('Failed to fetch struktur:', error)
+      }
+    }
+    fetchStruktur()
+  }, [])
 
   // Helper for RAB calculations
   const totalRAB = formData.rabItems.reduce((acc, curr) => acc + curr.total, 0)
@@ -949,12 +975,33 @@ Salam silaturahmi kami sampaikan, teriring doa semoga bapak beserta keluarga sel
                                     {(item as any).subLabel && <span className="text-[8px] text-slate-300 uppercase block font-bold leading-none">{(item as any).subLabel}</span>}
                                   </div>
                                </div>
-                               <Input 
-                                 className="h-12 rounded-2xl border-none bg-slate-50/50 focus:bg-white text-center font-black text-xs tracking-tight placeholder:italic placeholder:font-normal" 
-                                 placeholder={`Nama ${(item as any).label}...`}
-                                 value={(formData as any)[item.field]} 
-                                 onChange={e => setFormData({...formData, [item.field]: e.target.value})} 
-                               />
+                               <div className="flex flex-col gap-2">
+                                  <Select onValueChange={(val) => {
+                                      setFormData(prev => ({ ...prev, [(item as any).field]: val }))
+                                  }}>
+                                     <SelectTrigger className="h-9 mb-1 text-xs rounded-xl bg-slate-50 border-none">
+                                         <SelectValue placeholder="Pilih dari Struktur..." />
+                                     </SelectTrigger>
+                                     <SelectContent>
+                                         <SelectItem value=" ">Reset / Manual</SelectItem>
+                                         {strukturOrganisasi.map((s, idx) => (
+                                             <SelectItem key={idx} value={s.name}>
+                                                 <div className="flex flex-col text-left">
+                                                     <span className="font-bold text-xs">{s.name}</span>
+                                                     <span className="text-[9px] text-slate-400">{s.position}</span>
+                                                 </div>
+                                             </SelectItem>
+                                         ))}
+                                     </SelectContent>
+                                  </Select>
+
+                                  <Input 
+                                    className="h-12 rounded-2xl border-none bg-slate-50/50 focus:bg-white text-center font-black text-xs tracking-tight placeholder:italic placeholder:font-normal" 
+                                    placeholder={`Nama ${(item as any).label}...`}
+                                    value={(formData as any)[(item as any).field]} 
+                                    onChange={e => setFormData({...formData, [(item as any).field]: e.target.value})} 
+                                  />
+                               </div>
                              </div>
                            ))}
                          </div>
