@@ -109,10 +109,10 @@ export default function AdminDashboard() {
           title: 'Sistem Kendali Utama',
           welcome: 'Kelola seluruh aspek sistem Al-Muhajirin.',
           stats: [
-            { label: 'Total Jamaah', value: stats.totalJamaah.toString(), icon: Users, color: 'text-blue-500' },
-            { label: 'Agenda Masjid', value: stats.totalKegiatan.toString(), icon: Calendar, color: 'text-emerald-500' },
+            { label: 'Total Jamaah', value: stats.totalJamaah.toString(), icon: Users, color: 'text-blue-500', href: '/admin/jamaah' },
+            { label: 'Agenda Masjid', value: stats.totalKegiatan.toString(), icon: Calendar, color: 'text-emerald-500', href: '/admin/kegiatan' },
             { label: 'Uptime Sistem', value: '99.9%', icon: TrendingUp, color: 'text-emerald-500' },
-            { label: 'Pemasukan/Bln', value: formatCurrency(stats.thisMonthIncome), icon: ArrowUpRight, color: 'text-emerald-500' }
+            { label: 'Pemasukan/Bln', value: formatCurrency(stats.thisMonthIncome), icon: ArrowUpRight, color: 'text-emerald-500', href: '/admin/keuangan' }
           ]
         }
       case 'Bendahara DKM':
@@ -120,10 +120,10 @@ export default function AdminDashboard() {
           title: 'Manajemen Perbendaharaan',
           welcome: 'Pantau arus kas dan transparansi dana umat.',
           stats: [
-            { label: 'Pemasukan/Bln', value: formatCurrency(stats.thisMonthIncome), icon: ArrowUpRight, color: 'text-emerald-500' },
-            { label: 'Pengeluaran/Bln', value: formatCurrency(stats.thisMonthExpense), icon: ArrowDownRight, color: 'text-rose-500' },
-            { label: 'Saldo Aktif', value: formatCurrency(stats.thisMonthIncome - stats.thisMonthExpense), icon: DollarSign, color: 'text-primary' },
-            { label: 'Laporan Pending', value: '0', icon: AlertCircle, color: 'text-amber-500' }
+            { label: 'Pemasukan/Bln', value: formatCurrency(stats.thisMonthIncome), icon: ArrowUpRight, color: 'text-emerald-500', href: '/admin/keuangan' },
+            { label: 'Pengeluaran/Bln', value: formatCurrency(stats.thisMonthExpense), icon: ArrowDownRight, color: 'text-rose-500', href: '/admin/keuangan' },
+            { label: 'Saldo Aktif', value: formatCurrency(stats.thisMonthIncome - stats.thisMonthExpense), icon: DollarSign, color: 'text-primary', href: '/admin/keuangan' },
+            { label: 'Laporan Pending', value: '0', icon: AlertCircle, color: 'text-amber-500', href: '/admin/laporan' }
           ]
         }
       case 'Ketua DKM':
@@ -131,10 +131,10 @@ export default function AdminDashboard() {
           title: 'Dashboard Kebijakan',
           welcome: 'Tinjau dan setujui program kerja serta laporan.',
           stats: [
-            { label: 'Kegiatan Aktif', value: stats.totalKegiatan.toString(), icon: Calendar, color: 'text-blue-500' },
-            { label: 'Total KK', value: stats.totalJamaah.toString(), icon: Users, color: 'text-primary' },
-            { label: 'Total Remaja', value: stats.totalRemaja.toString(), icon: Heart, color: 'text-rose-500' },
-            { label: 'Pesan Masuk', value: '0', icon: MessageSquare, color: 'text-indigo-500' }
+            { label: 'Kegiatan Aktif', value: stats.totalKegiatan.toString(), icon: Calendar, color: 'text-blue-500', href: '/admin/kegiatan' },
+            { label: 'Total KK', value: stats.totalJamaah.toString(), icon: Users, color: 'text-primary', href: '/admin/jamaah' },
+            { label: 'Total Remaja', value: stats.totalRemaja.toString(), icon: Heart, color: 'text-rose-500', href: '/admin/jamaah' },
+            { label: 'Pesan Masuk', value: stats.unreadNotifications?.toString() || '0', icon: MessageSquare, color: 'text-indigo-500', href: '/admin/kontak' }
           ]
         }
       default:
@@ -142,10 +142,10 @@ export default function AdminDashboard() {
           title: 'Panel Kendali Konten',
           welcome: 'Selamat datang kembali di sistem kolaborasi DKM.',
           stats: [
-            { label: 'Data KK', value: stats.totalJamaah.toString(), icon: Users, color: 'text-blue-500' },
-            { label: 'Agenda Masjid', value: stats.totalKegiatan.toString(), icon: Calendar, color: 'text-emerald-500' },
-            { label: 'Total Remaja', value: stats.totalRemaja.toString(), icon: Heart, color: 'text-rose-500' },
-            { label: 'Pesan', value: '0', icon: MessageSquare, color: 'text-indigo-500' }
+            { label: 'Data KK', value: stats.totalJamaah.toString(), icon: Users, color: 'text-blue-500', href: '/admin/jamaah' },
+            { label: 'Agenda Masjid', value: stats.totalKegiatan.toString(), icon: Calendar, color: 'text-emerald-500', href: '/admin/kegiatan' },
+            { label: 'Total Remaja', value: stats.totalRemaja.toString(), icon: Heart, color: 'text-rose-500', href: '/admin/jamaah' },
+            { label: 'Pesan', value: stats.unreadNotifications?.toString() || '0', icon: MessageSquare, color: 'text-indigo-500', href: '/admin/kontak' }
           ]
         }
     }
@@ -202,27 +202,58 @@ export default function AdminDashboard() {
 
         {/* Mobile-only Tiny Stats Grid */}
         <div className="grid grid-cols-2 gap-4 sm:hidden">
-          {roleStats.slice(0, 2).map((stat, idx) => (
-            <div key={idx} className="bg-white p-5 rounded-4xl border border-neutral-100 shadow-sm">
-              <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest">{stat.label}</p>
-              <p className="text-xl font-black text-neutral-900 mt-1">{stat.value}</p>
-            </div>
-          ))}
+          {roleStats.slice(0, 2).map((stat, idx) => {
+            const Content = (
+              <>
+                <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest">{stat.label}</p>
+                <p className="text-xl font-black text-neutral-900 mt-1">{stat.value}</p>
+              </>
+            )
+            
+            if (stat.href) {
+              return (
+                <Link key={idx} href={stat.href} className="bg-white p-5 rounded-4xl border border-neutral-100 shadow-sm block">
+                  {Content}
+                </Link>
+              )
+            }
+            return (
+              <div key={idx} className="bg-white p-5 rounded-4xl border border-neutral-100 shadow-sm">
+                {Content}
+              </div>
+            )
+          })}
         </div>
 
         {/* Desktop Stats Grid */}
         <div className="hidden sm:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {roleStats.map((stat, idx) => (
-            <div key={idx} className="bg-white p-6 rounded-3xl border border-neutral-100 shadow-sm hover:shadow-xl hover:shadow-primary/5 transition-all group">
-              <div className="flex justify-between items-start mb-4">
-                <div className={`p-3 rounded-2xl bg-neutral-50 border border-neutral-100 group-hover:scale-110 transition-transform ${stat.color}`}>
-                  <stat.icon className="h-6 w-6" />
+          {roleStats.map((stat, idx) => {
+             const CardContent = (
+              <>
+                <div className="flex justify-between items-start mb-4">
+                  <div className={`p-3 rounded-2xl bg-neutral-50 border border-neutral-100 group-hover:scale-110 transition-transform ${stat.color}`}>
+                    <stat.icon className="h-6 w-6" />
+                  </div>
                 </div>
-              </div>
-              <p className="text-sm font-medium text-neutral-400">{stat.label}</p>
-              <p className="text-3xl font-black text-neutral-900 mt-1 tracking-tight">{stat.value}</p>
-            </div>
-          ))}
+                <p className="text-sm font-medium text-neutral-400">{stat.label}</p>
+                <p className="text-3xl font-black text-neutral-900 mt-1 tracking-tight">{stat.value}</p>
+              </>
+             )
+             
+             if (stat.href) {
+                return (
+                  <Link key={idx} href={stat.href} className="bg-white p-6 rounded-3xl border border-neutral-100 shadow-sm hover:shadow-xl hover:shadow-primary/5 transition-all group block">
+                    {CardContent}
+                  </Link>
+                )
+             }
+             
+             return (
+               <div key={idx} className="bg-white p-6 rounded-3xl border border-neutral-100 shadow-sm hover:shadow-xl hover:shadow-primary/5 transition-all group">
+                 {CardContent}
+               </div>
+             )
+          })}
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 pb-20 sm:pb-0">
