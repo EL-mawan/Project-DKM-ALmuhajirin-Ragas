@@ -317,12 +317,16 @@ Salam silaturahmi kami sampaikan, teriring doa semoga bapak beserta keluarga sel
       for (let i = 0; i < pages.length; i++) {
         const page = pages[i] as HTMLElement
         const canvas = await html2canvas(page, {
-          scale: 3, 
+          scale: 2, 
           useCORS: true,
           logging: false,
           backgroundColor: '#ffffff',
           width: 794,
           height: 1123,
+          windowWidth: 794,
+          windowHeight: 1123,
+          scrollY: 0,
+          scrollX: 0,
           onclone: (clonedDoc, clonedElement) => {
              clonedElement.style.borderRadius = '0'
              clonedElement.style.boxShadow = 'none'

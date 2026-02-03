@@ -318,8 +318,8 @@ Format: Berikan HANYA dalam format JSON murni: {"tujuan": ["Poin 1", "Poin 2", "
 Pastikan setiap poin dimulai dengan kata kerja (Contoh: Menjalin, Meningkatkan, Mewujudkan, dsb).`
       };
 
-      console.log(`[AI] Dispatching fetch to /api/ai/generate with type: ${type}`);
-      const response = await fetch('/api/ai/generate', {
+      console.log(`[AI] Dispatching fetch to /api/ai/suggest with type: ${type}`);
+      const response = await fetch('/api/ai/suggest', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
