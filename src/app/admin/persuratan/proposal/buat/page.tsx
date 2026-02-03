@@ -802,6 +802,26 @@ Pastikan setiap poin dimulai dengan kata kerja (Contoh: Menjalin, Meningkatkan, 
     }
   }
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === 'Enter') {
+        const target = e.target as HTMLElement;
+        // Skip if it's a textarea to allow multiline or if explicitly prevented
+        if (target.tagName.toLowerCase() === 'textarea') return;
+        
+        e.preventDefault();
+        
+        const form = e.currentTarget;
+        const focusableElements = 'input:not([disabled]):not([readonly]), select:not([disabled]), textarea:not([disabled]), button:not([disabled])';
+        const elements = Array.from(form.querySelectorAll(focusableElements)) as HTMLElement[];
+        
+        const index = elements.indexOf(target);
+        if (index > -1 && index < elements.length - 1) {
+            const nextElement = elements[index + 1];
+            nextElement.focus();
+        }
+    }
+  }
+
   return (
     <AdminLayout title="Proposal Builder" subtitle="Buat proposal premium DKM Al-Muhajirin">
     <>
@@ -842,7 +862,7 @@ Pastikan setiap poin dimulai dengan kata kerja (Contoh: Menjalin, Meningkatkan, 
           </TabsList>
 
           <Card className="border-none shadow-2xl shadow-slate-200/50 rounded-[2.5rem] overflow-hidden bg-white">
-            <CardContent className="p-6 md:p-10">
+            <CardContent className="p-6 md:p-10" onKeyDown={handleKeyDown}>
               <TabsContent value="umum" className="space-y-8 mt-0">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">

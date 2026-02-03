@@ -397,6 +397,26 @@ Salam silaturahmi kami sampaikan, teriring doa semoga bapak beserta keluarga sel
     }
   }
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === 'Enter') {
+        const target = e.target as HTMLElement;
+        // Skip if it's a textarea to allow multiline or if explicitly prevented
+        if (target.tagName.toLowerCase() === 'textarea') return;
+        
+        e.preventDefault();
+        
+        const form = e.currentTarget;
+        const focusableElements = 'input:not([disabled]):not([readonly]), select:not([disabled]), textarea:not([disabled]), button:not([disabled])';
+        const elements = Array.from(form.querySelectorAll(focusableElements)) as HTMLElement[];
+        
+        const index = elements.indexOf(target);
+        if (index > -1 && index < elements.length - 1) {
+            const nextElement = elements[index + 1];
+            nextElement.focus();
+        }
+    }
+  }
+
   return (
     <AdminLayout title={`Pembuat ${getTypeLabel()} Digital`} subtitle="Format otomatis sesuai standar organisasi.">
       <div className="min-h-screen bg-slate-50/50">
@@ -413,7 +433,7 @@ Salam silaturahmi kami sampaikan, teriring doa semoga bapak beserta keluarga sel
         <div className="flex flex-col lg:flex-row min-h-screen">
           {/* LEFT: FORM INPUT */}
           <div className={`w-full lg:w-1/2 p-4 lg:p-8 overflow-y-auto ${showPreview ? 'hidden lg:block' : 'block'}`}>
-            <div className="max-w-3xl mx-auto space-y-6 pb-20">
+            <div className="max-w-3xl mx-auto space-y-6 pb-20" onKeyDown={handleKeyDown}>
               <div className="flex items-center gap-4 mb-8">
                 <Button variant="ghost" size="icon" onClick={() => router.back()} className="rounded-full">
                   <ArrowLeft className="h-5 w-5" />
