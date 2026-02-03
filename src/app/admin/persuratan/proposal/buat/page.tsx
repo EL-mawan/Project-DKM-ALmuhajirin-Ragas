@@ -28,7 +28,8 @@ import {
   Sparkles,
   AlertCircle,
   Wand2,
-  Wallet
+  Wallet,
+  Building
 } from 'lucide-react'
 
 import jsPDF from 'jspdf'
@@ -864,14 +865,65 @@ Pastikan setiap poin dimulai dengan kata kerja (Contoh: Menjalin, Meningkatkan, 
           <Card className="border-none shadow-2xl shadow-slate-200/50 rounded-[2.5rem] overflow-hidden bg-white">
             <CardContent className="p-6 md:p-10" onKeyDown={handleKeyDown}>
               <TabsContent value="umum" className="space-y-8 mt-0">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <Label className="font-bold text-slate-700 ml-1">Nama Kop Surat</Label>
-                    <Input value={data.namaKopSurat} onChange={(e) => setData({ ...data, namaKopSurat: e.target.value })} className="h-12 rounded-2xl border-slate-200 font-bold" />
+                <div className="space-y-6">
+                  {/* Logo Upload Section (Left & Right) */}
+                  <div className="flex flex-row gap-6">
+                      {/* Logo Kiri */}
+                      <div className="bg-slate-50 p-4 rounded-3xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center w-full sm:w-auto min-w-[140px]">
+                         <p className="text-[9px] text-slate-400 font-black mb-2 tracking-widest">LOGO KIRI</p>
+                         <div className="relative h-20 w-20 bg-white rounded-2xl overflow-hidden border border-slate-100 flex items-center justify-center mb-3 shadow-sm group">
+                             {data.logoKiri ? (
+                               <>
+                                   <img src={data.logoKiri} className="h-full w-full object-contain" />
+                                   <button onClick={() => setData({...data, logoKiri: ''})} className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <Trash2 className="h-6 w-6 text-white" />
+                                   </button>
+                               </>
+                             ) : (
+                               <Building className="h-8 w-8 text-slate-300" />
+                             )}
+                          </div>
+                          <Label htmlFor="logo-kiri-upload" className="cursor-pointer text-[10px] font-bold text-center text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-lg hover:bg-emerald-100 transition-colors w-full">
+                             Upload Kiri
+                             <Input id="logo-kiri-upload" type="file" accept="image/*" className="hidden" 
+                                onChange={(e) => handleLogoUpload(e, 'logoKiri')} 
+                             />
+                          </Label>
+                      </div>
+
+                      {/* Logo Kanan */}
+                      <div className="bg-slate-50 p-4 rounded-3xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center w-full sm:w-auto min-w-[140px]">
+                         <p className="text-[9px] text-slate-400 font-black mb-2 tracking-widest">LOGO KANAN</p>
+                         <div className="relative h-20 w-20 bg-white rounded-2xl overflow-hidden border border-slate-100 flex items-center justify-center mb-3 shadow-sm group">
+                             {data.logoKanan ? (
+                               <>
+                                   <img src={data.logoKanan} className="h-full w-full object-contain" />
+                                   <button onClick={() => setData({...data, logoKanan: ''})} className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <Trash2 className="h-6 w-6 text-white" />
+                                   </button>
+                               </>
+                             ) : (
+                               <Building className="h-8 w-8 text-slate-300" />
+                             )}
+                          </div>
+                          <Label htmlFor="logo-kanan-upload" className="cursor-pointer text-[10px] font-bold text-center text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-lg hover:bg-emerald-100 transition-colors w-full">
+                             Upload Kanan
+                             <Input id="logo-kanan-upload" type="file" accept="image/*" className="hidden" 
+                                onChange={(e) => handleLogoUpload(e, 'logoKanan')} 
+                             />
+                          </Label>
+                      </div>
                   </div>
-                  <div className="space-y-2">
-                    <Label className="font-bold text-slate-700 ml-1">Kontak Kop Surat</Label>
-                    <Input value={data.kontakKopSurat} onChange={(e) => setData({ ...data, kontakKopSurat: e.target.value })} className="h-12 rounded-2xl border-slate-200" />
+
+                  <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                        <Label className="font-bold text-slate-700 ml-1">Nama Kop Surat</Label>
+                        <Input value={data.namaKopSurat} onChange={(e) => setData({ ...data, namaKopSurat: e.target.value })} className="h-12 rounded-2xl border-slate-200 font-bold" />
+                    </div>
+                    <div className="space-y-2">
+                        <Label className="font-bold text-slate-700 ml-1">Kontak Kop Surat</Label>
+                        <Input value={data.kontakKopSurat} onChange={(e) => setData({ ...data, kontakKopSurat: e.target.value })} className="h-12 rounded-2xl border-slate-200" />
+                    </div>
                   </div>
                 </div>
                 <div className="space-y-2">
@@ -1109,31 +1161,12 @@ Pastikan setiap poin dimulai dengan kata kerja (Contoh: Menjalin, Meningkatkan, 
                       {data.struktur.pimpinanAtas.map((p, i) => (
                         <div key={i} className="space-y-2 p-5 bg-slate-50/50 rounded-2xl border border-slate-100">
                            <Label className="text-[10px] uppercase text-slate-400 font-bold tracking-widest">{p.role}</Label>
-                           <div className="space-y-2">
-                               <Select onValueChange={(val) => {
-                                   if (val) updateStrukturName('pimpinanAtas', i, val)
-                               }}>
-                                  <SelectTrigger className="h-9 text-xs rounded-lg bg-white border-slate-200">
-                                      <SelectValue placeholder="Pilih dari Struktur..." />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                      {strukturOrganisasi.map((s, idx) => (
-                                          <SelectItem key={idx} value={s.name}>
-                                              <div className="flex flex-col text-left">
-                                                  <span className="font-bold">{s.name}</span>
-                                                  <span className="text-[10px] text-slate-400">{s.position}</span>
-                                              </div>
-                                          </SelectItem>
-                                      ))}
-                                  </SelectContent>
-                               </Select>
-                               <Input 
-                                  value={p.name} 
-                                  className="h-11 rounded-xl bg-white font-medium" 
-                                  onChange={(e) => updateStrukturName('pimpinanAtas', i, e.target.value)} 
-                                  placeholder="Nama Pejabat..."
-                               />
-                           </div>
+                           <Input 
+                              value={p.name} 
+                              className="h-11 rounded-xl bg-white font-medium" 
+                              onChange={(e) => updateStrukturName('pimpinanAtas', i, e.target.value)} 
+                              placeholder="Nama Pejabat..."
+                           />
                         </div>
                       ))}
                     </div>
@@ -1145,31 +1178,12 @@ Pastikan setiap poin dimulai dengan kata kerja (Contoh: Menjalin, Meningkatkan, 
                       {data.struktur.administrasi.map((p, i) => (
                         <div key={i} className="space-y-2 p-5 bg-slate-50/50 rounded-2xl border border-slate-100">
                             <Label className="text-[10px] uppercase text-slate-400 font-bold tracking-widest">{p.role}</Label>
-                            <div className="space-y-2">
-                               <Select onValueChange={(val) => {
-                                   if (val) updateStrukturName('administrasi', i, val)
-                               }}>
-                                  <SelectTrigger className="h-9 text-xs rounded-lg bg-white border-slate-200">
-                                      <SelectValue placeholder="Pilih dari Struktur..." />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                      {strukturOrganisasi.map((s, idx) => (
-                                          <SelectItem key={idx} value={s.name}>
-                                              <div className="flex flex-col text-left">
-                                                  <span className="font-bold">{s.name}</span>
-                                                  <span className="text-[10px] text-slate-400">{s.position}</span>
-                                              </div>
-                                          </SelectItem>
-                                      ))}
-                                  </SelectContent>
-                               </Select>
-                               <Input 
+                            <Input 
                                   value={p.name} 
                                   className="h-11 rounded-xl bg-white font-medium" 
                                   onChange={(e) => updateStrukturName('administrasi', i, e.target.value)} 
                                   placeholder="Nama Pejabat..."
                                />
-                            </div>
                         </div>
                       ))}
                     </div>

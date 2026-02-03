@@ -132,7 +132,7 @@ export default function AdminDashboard() {
           welcome: 'Tinjau dan setujui program kerja serta laporan.',
           stats: [
             { label: 'Kegiatan Aktif', value: stats.totalKegiatan.toString(), icon: Calendar, color: 'text-blue-500' },
-            { label: 'Total Jamaah', value: stats.totalJamaah.toString(), icon: Users, color: 'text-primary' },
+            { label: 'Total KK', value: stats.totalJamaah.toString(), icon: Users, color: 'text-primary' },
             { label: 'Total Remaja', value: stats.totalRemaja.toString(), icon: Heart, color: 'text-rose-500' },
             { label: 'Pesan Masuk', value: '0', icon: MessageSquare, color: 'text-indigo-500' }
           ]
@@ -142,7 +142,7 @@ export default function AdminDashboard() {
           title: 'Panel Kendali Konten',
           welcome: 'Selamat datang kembali di sistem kolaborasi DKM.',
           stats: [
-            { label: 'Data Jamaah', value: stats.totalJamaah.toString(), icon: Users, color: 'text-blue-500' },
+            { label: 'Data KK', value: stats.totalJamaah.toString(), icon: Users, color: 'text-blue-500' },
             { label: 'Agenda Masjid', value: stats.totalKegiatan.toString(), icon: Calendar, color: 'text-emerald-500' },
             { label: 'Total Remaja', value: stats.totalRemaja.toString(), icon: Heart, color: 'text-rose-500' },
             { label: 'Pesan', value: '0', icon: MessageSquare, color: 'text-indigo-500' }

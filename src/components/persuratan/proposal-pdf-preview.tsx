@@ -141,7 +141,7 @@ export function PageCover({ data }: { data: Partial<ProposalData> }) {
 
             <div style={{ zIndex: 2, textAlign: 'center', width: '100%', position: 'relative', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
                 <div style={{ marginBottom: '50px' }}>
-                    <p style={{ fontSize: '16pt', fontWeight: 'bold', letterSpacing: '10px', color: '#94a3b8', margin: '0 0 15px 0', textTransform: 'uppercase' }}>PROPOSAL</p>
+                    <p style={{ fontSize: '32pt', fontWeight: 'bold', letterSpacing: '10px', color: '#94a3b8', margin: '0 0 15px 0', textTransform: 'uppercase' }}>PROPOSAL</p>
                     <div style={{ width: '80px', height: '3px', background: '#0b3d2e', margin: '0 auto' }}></div>
                 </div>
                 
@@ -178,8 +178,8 @@ export function Page1({ data, bulkRecipient, onNavigate }: { data: Partial<Propo
     const recipient = bulkRecipient || data.penerima || { nama: '', jabatan: '', instansi: '', alamat: '' }
     return (
         <PageWrapper data={data} pageNumber={1}>
-            <div style={{ fontSize: '12pt' }}>
-                <table style={{ width: '100%', marginBottom: '25px' }}>
+            <div style={{ fontSize: '11pt' }}>
+                <table style={{ width: '100%', marginBottom: '15px' }}>
                     <tbody>
                         <tr><td style={{ width: '100px', color: '#000000', fontSize: '11pt' }}>Nomor</td><td style={{ width: '15px' }}>:</td><td style={{ fontWeight: 'bold' }}>{data.nomor || '___/___/___/___'}</td></tr>
                         <tr><td style={{ color: '#000000', fontSize: '11pt' }}>Lampiran</td><td>:</td><td>{data.lampiran}</td></tr>
@@ -187,35 +187,35 @@ export function Page1({ data, bulkRecipient, onNavigate }: { data: Partial<Propo
                     </tbody>
                 </table>
 
-                <div style={{ marginBottom: '20px' }}>
-                    <p style={{ marginBottom: '8px' }}>Kepada Yth.</p>
-                    <p style={{ fontWeight: '900', fontSize: '14pt', margin: '0', color: '#0f172a' }}>{recipient.nama || '........................'}</p>
+                <div style={{ marginBottom: '10px' }}>
+                    <p style={{ marginBottom: '4px' }}>Kepada Yth.</p>
+                    <p style={{ fontWeight: '900', fontSize: '13pt', margin: '0', color: '#0f172a' }}>{recipient.nama || '........................'}</p>
                     {recipient.jabatan && <p style={{ fontWeight: '700', color: '#475569', fontSize: '11pt', margin: '2px 0' }}>{recipient.jabatan}</p>}
                     {recipient.instansi && <p style={{ fontWeight: '700', color: '#475569', fontSize: '11pt', margin: '2px 0' }}>{recipient.instansi}</p>}
-                    <p style={{ marginTop: '10px', color: '#64748b' }}>di -</p>
-                    <p style={{ paddingLeft: '20px', fontWeight: 'bold', fontSize: '13pt' }}>{recipient.alamat || 'Tempat'}</p>
+                    <p style={{ marginTop: '5px', color: '#64748b' }}>di -</p>
+                    <p style={{ paddingLeft: '20px', fontWeight: 'bold', fontSize: '12pt' }}>{recipient.alamat || 'Tempat'}</p>
                 </div>
 
-                <div style={{ textAlign: 'justify', marginBottom: '20px', lineHeight: '1.6' }}>
+                <div style={{ textAlign: 'justify', marginBottom: '10px', lineHeight: '1.4' }}>
                     {data.suratPengantar?.split('\n').map((line, i) => (
-                        <p key={i} style={{ textIndent: i > 0 ? '40px' : '0', marginBottom: '8px' }}>{line}</p>
+                        <p key={i} style={{ textIndent: i > 0 ? '40px' : '0', marginBottom: '4px' }}>{line}</p>
                     ))}
                 </div>
 
-                <div style={{ textAlign: 'right', marginBottom: '15px' }}>
+                <div style={{ textAlign: 'right', marginBottom: '10px' }}>
                     <p style={{ fontWeight: '700' }}>{data.tempat}, {data.tanggal}</p>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', textAlign: 'center', marginBottom: '15px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', textAlign: 'center', marginBottom: '10px' }}>
                     <div onClick={() => onNavigate?.('struktur')} style={{ cursor: 'pointer' }}>
                         <p style={{ fontWeight: '900', fontSize: '11pt', textTransform: 'uppercase', color: '#000000', marginBottom: '5px' }}>Ketua DKM,</p>
-                        <div style={{ height: '55px' }}></div>
+                        <div style={{ height: '40px' }}></div>
                         <p style={{ fontWeight: '900', textDecoration: 'underline', fontSize: '11pt', color: '#000000' }}>{data.namaKetua || '( ........................ )'}</p>
                     </div>
 
                     <div onClick={() => onNavigate?.('struktur')} style={{ cursor: 'pointer' }}>
                         <p style={{ fontWeight: '900', fontSize: '11pt', textTransform: 'uppercase', color: '#000000', marginBottom: '5px' }}>Sekretaris DKM,</p>
-                        <div style={{ height: '55px' }}></div>
+                        <div style={{ height: '40px' }}></div>
                         <p style={{ fontWeight: '900', textDecoration: 'underline', fontSize: '11pt', color: '#000000' }}>{data.namaSekretaris || '( ........................ )'}</p>
                     </div>
                 </div>
@@ -224,7 +224,7 @@ export function Page1({ data, bulkRecipient, onNavigate }: { data: Partial<Propo
                     <p style={{ fontSize: '10pt', margin: '0 0 5px 0', fontWeight: 'bold', color: '#000000' }}>Mengetahui,</p>
                     <div onClick={() => onNavigate?.('struktur')} style={{ cursor: 'pointer', display: 'inline-block' }}>
                         <p style={{ fontWeight: '900', fontSize: '12pt', margin: '0', color: '#000000' }}>Tokoh Masyarakat Masjid Al-Muhajirin</p>
-                        <div style={{ height: '50px' }}></div>
+                        <div style={{ height: '40px' }}></div>
                         <p style={{ fontWeight: '900', textDecoration: 'underline', fontSize: '11pt', color: '#000000' }}>{data.namaTokohMasyarakat || '( ........................ )'}</p>
                     </div>
                 </div>
