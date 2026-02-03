@@ -235,14 +235,14 @@ export default function PersuratanAdmin() {
       doc.setTextColor(dkmEmerald[0], dkmEmerald[1], dkmEmerald[2])
       doc.text('DEWAN KEMAKMURAN MASJID (DKM)', centerX, 22, { align: 'center' })
       
-      doc.setFontSize(22)
-      doc.text('AL-MUHAJIRIN RAGAS GRENYANG', centerX, 32, { align: 'center' })
+      doc.setFontSize(18)
+      doc.text('AL-MUHAJIRIN KP. RAGAS GRENYANG', centerX, 30, { align: 'center' })
       
       doc.setFontSize(9)
       doc.setFont('times', 'italic')
       doc.setTextColor(148, 163, 184)
-      doc.text('Kp. Ragas Grenyang, Desa Argawana, Kec. Puloampel, Serang - Banten', centerX, 38, { align: 'center' })
-      doc.text('Email: dkm.almuhajirin.ragas@gmail.com | Website: dkm-almuhajirin.vercel.app', centerX, 43, { align: 'center' })
+      doc.text('Desa Argawana, Kecamatan Puloampel Kabupaten Serang', centerX, 36, { align: 'center' })
+      doc.text('Provinsi Banten 42455', centerX, 41, { align: 'center' })
       
       doc.setDrawColor(dkmEmerald[0], dkmEmerald[1], dkmEmerald[2])
       doc.setLineWidth(0.8)

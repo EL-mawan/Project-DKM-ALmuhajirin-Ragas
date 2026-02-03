@@ -69,8 +69,8 @@ const IDR = ({ className }: { className?: string }) => (
 
 
 const initialData: ProposalData = {
-  namaKopSurat: 'DEWAN KEMAKMURAN MASJID (DKM) AL-MUHAJIRIN RAGAS GRENYANG',
-  alamatKopSurat: 'Kampung Ragas Grenyang, Desa Argawana\nKecamatan Puloampel Kabupaten\nSerang-Banten 42455',
+  namaKopSurat: 'DEWAN KEMAKMURAN MASJID (DKM)\nAL-MUHAJIRIN KP. RAGAS GRENYANG',
+  alamatKopSurat: 'Desa Argawana, Kecamatan Puloampel Kabupaten Serang\nProvinsi Banten 42455',
   kontakKopSurat: 'Email: dkm_almuhajirin@gmail.com | Website: dkm-almuhajirin-ragas.vercel.app',
   nomor: '',
   lampiran: '-',

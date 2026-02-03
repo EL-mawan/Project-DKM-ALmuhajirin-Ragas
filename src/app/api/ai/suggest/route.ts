@@ -21,11 +21,11 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // Initialize Gemini with latest stable model (2.0 Flash)
+    // Initialize Gemini with stable production model
     const genAI = new GoogleGenerativeAI(apiKey)
     const model = genAI.getGenerativeModel(
       { 
-        model: 'gemini-2.0-flash-exp',
+        model: 'gemini-1.5-flash',
         generationConfig: {
           temperature: 0.8,
           topP: 0.95,
@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
       }
     )
 
-    console.log(`[GEMINI-2.0] Generating content for: ${context?.perihal || 'N/A'}`)
+    console.log(`[GEMINI-1.5] Generating content for: ${context?.perihal || 'N/A'}`)
 
     // Generate content
     const result = await model.generateContent(prompt)

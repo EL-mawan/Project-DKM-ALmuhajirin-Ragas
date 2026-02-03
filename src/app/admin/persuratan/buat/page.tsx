@@ -47,8 +47,8 @@ function BuatPersuratanContent() {
 
   const [formData, setFormData] = useState({
     // Kop Surat
-    namaKopSurat: 'DEWAN KEMAKMURAN MASJID (DKM) AL-MUHAJIRIN RAGAS GRENYANG',
-    alamatKopSurat: 'Kp. Ragas Grenyang, Desa Argawana, Kec. Puloampel, Serang - Banten 42455',
+    namaKopSurat: 'DEWAN KEMAKMURAN MASJID (DKM)\nAL-MUHAJIRIN KP. RAGAS GRENYANG',
+    alamatKopSurat: 'Desa Argawana, Kecamatan Puloampel Kabupaten Serang\nProvinsi Banten 42455',
     kontakKopSurat: 'Jl. Puloampel KM 19 Ds. Argawana Kode Pos 42455 / no.Hp 0819 1114 1616',
     
     // Info Surat
