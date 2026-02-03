@@ -71,17 +71,18 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
 
-    // Check if db.jadwalTugas exists and is valid
-    if (!db || !('jadwalTugas' in db)) {
+    // Check if db.jadwalTugas exists
+    const model = (db as any).jadwalTugas;
+    if (!model) {
       console.error('CRITICAL: db.jadwalTugas is missing from the Prisma Client instance.');
       return NextResponse.json({ 
         error: 'Database Schema Error', 
-        details: 'Prisma Client does not have the JadwalTugas model. This usually happens when the schema is updated but the client is not regenerated.',
-        suggestion: 'Run "npx prisma generate" and redeploy.'
+        details: 'Prisma Client does not have the JadwalTugas model.',
+        suggestion: 'Ensure the deployment environment runs "prisma generate" or "prisma db push" correctly.'
       }, { status: 500 });
     }
 
-    const item = await db.jadwalTugas.create({
+    const item = await model.create({
       data: {
         date: new Date(date),
         type,
