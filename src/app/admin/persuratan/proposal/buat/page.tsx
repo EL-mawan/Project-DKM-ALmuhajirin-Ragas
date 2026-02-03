@@ -910,9 +910,10 @@ Pastikan setiap poin dimulai dengan kata kerja (Contoh: Menjalin, Meningkatkan, 
                         </a>
                         <Label 
                             htmlFor="excel-upload" 
-                            className="cursor-pointer flex items-center px-4 py-2 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 border border-emerald-600 rounded-xl transition-colors whitespace-nowrap shadow-sm shadow-emerald-200"
+                            className="cursor-pointer flex items-center px-3 sm:px-4 py-2 text-[10px] sm:text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 border border-emerald-600 rounded-xl transition-colors whitespace-nowrap shadow-sm shadow-emerald-200"
                         >
-                             <Upload className="h-4 w-4 mr-2" /> Upload Excel
+                             <Upload className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" /> 
+                             Upload <span className="hidden sm:inline ml-1">Excel</span>
                              <input id="excel-upload" type="file" accept=".xlsx, .xls" className="hidden" onChange={handleExcelUpload} />
                         </Label>
                         {bulkRecipients.length > 0 && (
