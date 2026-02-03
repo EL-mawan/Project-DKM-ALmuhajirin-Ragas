@@ -40,6 +40,9 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { AdminLayout } from '@/components/layout/admin-layout'
 import { ADMIN_MENU_ITEMS } from '@/lib/constants/admin-nav'
 import { cn, formatCurrency } from '@/lib/utils'
+import { Label } from '@/components/ui/label'
+import { Input } from '@/components/ui/input'
+import { toast } from 'sonner'
 
 export default function AdminDashboard() {
   const { data: session, status } = useSession()
@@ -248,6 +251,41 @@ export default function AdminDashboard() {
                   </Link>
                 ))}
               </div>
+            </div>
+
+            {/* Logo Masjid Widget */}
+            <div className="bg-white p-6 rounded-[2.5rem] border border-neutral-100 shadow-sm relative overflow-hidden group">
+               <div className="flex justify-between items-start mb-4">
+                 <div>
+                    <h3 className="text-lg font-bold text-[#0b3d2e]">Identitas Masjid</h3>
+                    <p className="text-xs text-neutral-400 font-medium">Logo & Kop Surat</p>
+                 </div>
+                 <div className="h-10 w-10 bg-emerald-50 rounded-full flex items-center justify-center text-emerald-600">
+                    <Building className="h-5 w-5" />
+                 </div>
+               </div>
+               
+               <div className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-neutral-200 rounded-3xl hover:border-emerald-200 hover:bg-emerald-50/30 transition-all cursor-pointer relative group/upload">
+                  <div className="h-24 w-24 relative mb-3">
+                     {/* Placeholder Logo or Actual Logo */}
+                     <div className="absolute inset-0 bg-neutral-100 rounded-full flex items-center justify-center overflow-hidden">
+                        <Building className="h-10 w-10 text-neutral-300" />
+                        {/* If logo exists, show image here (Logic to be implemented with DB) */}
+                     </div>
+                     <div className="absolute inset-x-0 bottom-0 top-[60%] bg-black/50 text-white text-[8px] flex items-center justify-center uppercase font-bold opacity-0 group-hover/upload:opacity-100 transition-opacity rounded-b-full">
+                        Ubah
+                     </div>
+                  </div>
+                  <Label htmlFor="logo-upload" className="cursor-pointer text-xs font-bold text-center text-emerald-600 bg-emerald-50 px-4 py-2 rounded-xl hover:bg-emerald-100 transition-colors">
+                     Upload Logo Baru
+                     <Input id="logo-upload" type="file" accept="image/*" className="hidden" 
+                        onChange={(e) => {
+                             const file = e.target.files?.[0]
+                             if(file) toast.success("Fitur simpan logo akan segera aktif") 
+                        }} 
+                     />
+                  </Label>
+               </div>
             </div>
 
             {/* Recent Activity List */}

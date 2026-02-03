@@ -90,11 +90,11 @@ const initialData: ProposalData = {
   },
   suratPengantar: `Assalamu'alaikum Warahmatullahi Wabarakatuh,
   
-  Puji syukur kita panjatkan ke hadirat Allah SWT. Semoga Bapak/Ibu senantiasa dalam lindungan-Nya.
+  Puji syukur kita panjatkan ke hadirat Allah SWT. Sholawat serta salam semoga senantiasa tercurah kepada Nabi Muhammad SAW. Teriring doa semoga Bapak/Ibu beserta keluarga senantiasa berada dalam lindungan-Nya dan sukses dalam setiap aktivitas.
   
-  Sehubungan dengan rencana kegiatan DKM Al-Muhajirin, kami bermaksud mengajukan permohonan dukungan demi kelancaran acara tersebut. Partisipasi Bapak/Ibu sangat kami harapkan sebagai bentuk syiar Islam dan kemaslahatan bersama.
+  Sehubungan dengan rencana kegiatan yang akan dilaksanakan oleh DKM Al-Muhajirin, kami bermaksud mengajukan permohonan dukungan demi kelancaran dan kesuksesan acara tersebut. Partisipasi dan dukungan Bapak/Ibu sangat kami harapkan sebagai bentuk kepedulian terhadap syiar Islam dan kemaslahatan umat di lingkungan kita.
   
-  Atas perhatian dan kerjasamanya, kami ucapkan terima kasih.
+  Atas perhatian, dukungan, dan kerjasamanya, kami ucapkan terima kasih yang sebesar-besarnya.
   Wassalamu'alaikum Warahmatullahi Wabarakatuh.`,
   penutup: `Demikian proposal ini kami sampaikan dengan harapan besar agar Bapak/Ibu dapat membersamai langkah mulia ini. Kami percaya bahwa setiap kontribusi dan dukungan yang diberikan merupakan bentuk investasi akhirat yang tak terputus.
 
