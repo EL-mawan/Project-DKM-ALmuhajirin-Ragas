@@ -181,9 +181,9 @@ export function Page1({ data, bulkRecipient, onNavigate }: { data: Partial<Propo
             <div style={{ fontSize: '12pt' }}>
                 <table style={{ width: '100%', marginBottom: '25px' }}>
                     <tbody>
-                        <tr><td style={{ width: '100px', color: '#64748b', fontSize: '11pt' }}>Nomor</td><td style={{ width: '15px' }}>:</td><td style={{ fontWeight: 'bold' }}>{data.nomor || '___/___/___/___'}</td></tr>
-                        <tr><td style={{ color: '#64748b', fontSize: '11pt' }}>Lampiran</td><td>:</td><td>{data.lampiran}</td></tr>
-                        <tr><td style={{ color: '#64748b', fontSize: '11pt' }}>Perihal</td><td>:</td><td style={{ fontWeight: 'bold', textDecoration: 'underline', color: '#0b3d2e' }}>{data.perihal}</td></tr>
+                        <tr><td style={{ width: '100px', color: '#000000', fontSize: '11pt' }}>Nomor</td><td style={{ width: '15px' }}>:</td><td style={{ fontWeight: 'bold' }}>{data.nomor || '___/___/___/___'}</td></tr>
+                        <tr><td style={{ color: '#000000', fontSize: '11pt' }}>Lampiran</td><td>:</td><td>{data.lampiran}</td></tr>
+                        <tr><td style={{ color: '#000000', fontSize: '11pt' }}>Perihal</td><td>:</td><td style={{ fontWeight: 'bold', textDecoration: 'underline', color: '#000000' }}>{data.perihal}</td></tr>
                     </tbody>
                 </table>
 
@@ -208,24 +208,24 @@ export function Page1({ data, bulkRecipient, onNavigate }: { data: Partial<Propo
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', textAlign: 'center', marginBottom: '15px' }}>
                     <div onClick={() => onNavigate?.('struktur')} style={{ cursor: 'pointer' }}>
-                        <p style={{ fontWeight: '900', fontSize: '11pt', textTransform: 'uppercase', color: '#64748b', marginBottom: '5px' }}>Ketua DKM,</p>
+                        <p style={{ fontWeight: '900', fontSize: '11pt', textTransform: 'uppercase', color: '#000000', marginBottom: '5px' }}>Ketua DKM,</p>
                         <div style={{ height: '55px' }}></div>
-                        <p style={{ fontWeight: '900', textDecoration: 'underline', fontSize: '11pt', color: '#0f172a' }}>{data.namaKetua || '( ........................ )'}</p>
+                        <p style={{ fontWeight: '900', textDecoration: 'underline', fontSize: '11pt', color: '#000000' }}>{data.namaKetua || '( ........................ )'}</p>
                     </div>
 
                     <div onClick={() => onNavigate?.('struktur')} style={{ cursor: 'pointer' }}>
-                        <p style={{ fontWeight: '900', fontSize: '11pt', textTransform: 'uppercase', color: '#64748b', marginBottom: '5px' }}>Sekretaris DKM,</p>
+                        <p style={{ fontWeight: '900', fontSize: '11pt', textTransform: 'uppercase', color: '#000000', marginBottom: '5px' }}>Sekretaris DKM,</p>
                         <div style={{ height: '55px' }}></div>
-                        <p style={{ fontWeight: '900', textDecoration: 'underline', fontSize: '11pt', color: '#0f172a' }}>{data.namaSekretaris || '( ........................ )'}</p>
+                        <p style={{ fontWeight: '900', textDecoration: 'underline', fontSize: '11pt', color: '#000000' }}>{data.namaSekretaris || '( ........................ )'}</p>
                     </div>
                 </div>
 
                 <div style={{ textAlign: 'center' }}>
-                    <p style={{ fontSize: '10pt', margin: '0 0 5px 0', fontWeight: 'bold', color: '#64748b' }}>Mengetahui,</p>
+                    <p style={{ fontSize: '10pt', margin: '0 0 5px 0', fontWeight: 'bold', color: '#000000' }}>Mengetahui,</p>
                     <div onClick={() => onNavigate?.('struktur')} style={{ cursor: 'pointer', display: 'inline-block' }}>
-                        <p style={{ fontWeight: '900', fontSize: '12pt', margin: '0', color: '#0b3d2e' }}>Tokoh Masyarakat Masjid Al-Muhajirin</p>
+                        <p style={{ fontWeight: '900', fontSize: '12pt', margin: '0', color: '#000000' }}>Tokoh Masyarakat Masjid Al-Muhajirin</p>
                         <div style={{ height: '50px' }}></div>
-                        <p style={{ fontWeight: '900', textDecoration: 'underline', fontSize: '11pt' }}>{data.namaTokohMasyarakat || '( ........................ )'}</p>
+                        <p style={{ fontWeight: '900', textDecoration: 'underline', fontSize: '11pt', color: '#000000' }}>{data.namaTokohMasyarakat || '( ........................ )'}</p>
                     </div>
                 </div>
             </div>
