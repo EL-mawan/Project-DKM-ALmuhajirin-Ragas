@@ -62,7 +62,29 @@ export interface ProposalData {
   showWaktuTempat: boolean
 }
 
+const calculateRABChunks = (data: Partial<ProposalData>) => {
+    const rabData = data.rab || []
+    const ITEMS_FIRST_PAGE = 8
+    const ITEMS_NEXT_PAGE = 12
+    
+    if (rabData.length === 0) return [[]]
+    
+    const chunks: RABItem[][] = []
+    let currentData = [...rabData]
+    chunks.push(currentData.splice(0, ITEMS_FIRST_PAGE))
+    
+    while (currentData.length > 0) {
+        chunks.push(currentData.splice(0, ITEMS_NEXT_PAGE))
+    }
+    return chunks
+}
+
 export function PageWrapper({ children, data, pageNumber }: { children: React.ReactNode, data: Partial<ProposalData>, pageNumber?: number }) {
+    const rabChunks = calculateRABChunks(data)
+    const rabPages = rabChunks.length
+    // Base pages (1,2,3) + RAB pages + Closing (1) + Photos (optional)
+    const totalPages = 3 + rabPages + 1 + (data.lampiranFoto && data.lampiranFoto.length > 0 ? 1 : 0)
+
     return (
        <div className="proposal-page relative flex flex-col" 
             style={{ 
@@ -80,7 +102,7 @@ export function PageWrapper({ children, data, pageNumber }: { children: React.Re
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
             <img src={data.logoKiri || "/logo.png"} alt="Logo Kiri" crossOrigin="anonymous" style={{ width: '85px', height: '85px', objectFit: 'contain' }} />
             <div style={{ textAlign: 'center', flex: 1, padding: '0 20px' }}>
-                <h1 style={{ fontWeight: '900', fontSize: '16pt', margin: '0', textTransform: 'uppercase', color: '#0b3d2e', letterSpacing: '0.5px' }}>{data.namaKopSurat}</h1>
+                <h1 style={{ fontWeight: '900', fontSize: '16pt', margin: '0', textTransform: 'uppercase', color: '#0b3d2e', letterSpacing: '0.5px', whiteSpace: 'pre-line', lineHeight: '1.2' }}>{data.namaKopSurat}</h1>
                 <p style={{ fontSize: '10pt', margin: '5px 0', whiteSpace: 'pre-line', color: '#334155', fontWeight: '500' }}>{data.alamatKopSurat}</p>
                 <p style={{ fontSize: '9pt', margin: '0', fontStyle: 'italic', color: '#64748b' }}>{data.kontakKopSurat}</p>
             </div>
@@ -114,7 +136,7 @@ export function PageWrapper({ children, data, pageNumber }: { children: React.Re
         }}>
           <span>DKM Al-Muhajirin Ragas Grenyang</span>
           {pageNumber !== undefined && (
-            <span style={{ color: '#0b3d2e', fontWeight: '800' }}>Halaman {pageNumber} dari {data.lampiranFoto && data.lampiranFoto.length > 0 ? '6' : '5'}</span>
+            <span style={{ color: '#0b3d2e', fontWeight: '800' }}>Halaman {pageNumber} dari {totalPages}</span>
           )}
         </div>
       </div>
@@ -158,7 +180,7 @@ export function PageCover({ data }: { data: Partial<ProposalData> }) {
                 
                 <div style={{ margin: '30px auto', maxWidth: '520px', backgroundColor: '#f8fafc', padding: '40px', borderRadius: '30px', border: '1px solid #f1f5f9' }}>
                     <p style={{ fontSize: '10pt', margin: '0 0 15px 0', color: '#64748b', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '2px' }}>Diajukan Oleh:</p>
-                    <p style={{ fontSize: '16pt', fontWeight: '900', margin: '0', textTransform: 'uppercase', color: '#0b3d2e', lineHeight: '1.3' }}>{data.namaKopSurat}</p>
+                <h1 style={{ fontWeight: '900', fontSize: '16pt', margin: '0', textTransform: 'uppercase', color: '#0b3d2e', letterSpacing: '0.5px', whiteSpace: 'pre-line', lineHeight: '1.2' }}>{data.namaKopSurat}</h1>
                     <div style={{ height: '2px', width: '100px', backgroundColor: '#cbd5e1', margin: '20px auto' }}></div>
                     <p style={{ fontSize: '11pt', color: '#475569', fontWeight: '500', lineHeight: '1.5' }}>
                         Kampung Ragas Grenyang, Desa Argawana<br/>
@@ -181,9 +203,9 @@ export function Page1({ data, bulkRecipient, onNavigate }: { data: Partial<Propo
             <div style={{ fontSize: '11pt' }}>
                 <table style={{ width: '100%', marginBottom: '15px' }}>
                     <tbody>
-                        <tr><td style={{ width: '100px', color: '#000000', fontSize: '11pt' }}>Nomor</td><td style={{ width: '15px' }}>:</td><td style={{ fontWeight: 'bold' }}>{data.nomor || '___/___/___/___'}</td></tr>
-                        <tr><td style={{ color: '#000000', fontSize: '11pt' }}>Lampiran</td><td>:</td><td>{data.lampiran}</td></tr>
-                        <tr><td style={{ color: '#000000', fontSize: '11pt' }}>Perihal</td><td>:</td><td style={{ fontWeight: 'bold', textDecoration: 'underline', color: '#000000' }}>{data.perihal}</td></tr>
+                        <tr><td style={{ width: '100px', color: '#000000', fontSize: '12pt' }}>Nomor</td><td style={{ width: '15px' }}>:</td><td style={{ fontWeight: 'bold', fontSize: '12pt' }}>{data.nomor || '___/___/___/___'}</td></tr>
+                        <tr><td style={{ color: '#000000', fontSize: '12pt' }}>Lampiran</td><td>:</td><td style={{ fontSize: '12pt' }}>{data.lampiran}</td></tr>
+                        <tr><td style={{ color: '#000000', fontSize: '12pt' }}>Perihal</td><td>:</td><td style={{ fontWeight: 'bold', textDecoration: 'underline', color: '#000000', fontSize: '12pt' }}>{data.perihal}</td></tr>
                     </tbody>
                 </table>
 
@@ -192,7 +214,7 @@ export function Page1({ data, bulkRecipient, onNavigate }: { data: Partial<Propo
                     <p style={{ fontWeight: '900', fontSize: '13pt', margin: '0', color: '#0f172a' }}>{recipient.nama || '........................'}</p>
                     {recipient.jabatan && <p style={{ fontWeight: '700', color: '#475569', fontSize: '11pt', margin: '2px 0' }}>{recipient.jabatan}</p>}
                     {recipient.instansi && <p style={{ fontWeight: '700', color: '#475569', fontSize: '11pt', margin: '2px 0' }}>{recipient.instansi}</p>}
-                    <p style={{ marginTop: '5px', color: '#64748b' }}>di -</p>
+                    <p style={{ marginTop: '5px', color: '#000000' }}>di_</p>
                     <p style={{ paddingLeft: '20px', fontWeight: 'bold', fontSize: '12pt' }}>{recipient.alamat || 'Tempat'}</p>
                 </div>
 
@@ -208,15 +230,15 @@ export function Page1({ data, bulkRecipient, onNavigate }: { data: Partial<Propo
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', textAlign: 'center', marginBottom: '10px' }}>
                     <div onClick={() => onNavigate?.('struktur')} style={{ cursor: 'pointer' }}>
-                        <p style={{ fontWeight: '900', fontSize: '11pt', textTransform: 'uppercase', color: '#000000', marginBottom: '5px' }}>Ketua DKM,</p>
-                        <div style={{ height: '40px' }}></div>
-                        <p style={{ fontWeight: '900', textDecoration: 'underline', fontSize: '11pt', color: '#000000' }}>{data.namaKetua || '( ........................ )'}</p>
-                    </div>
-
-                    <div onClick={() => onNavigate?.('struktur')} style={{ cursor: 'pointer' }}>
                         <p style={{ fontWeight: '900', fontSize: '11pt', textTransform: 'uppercase', color: '#000000', marginBottom: '5px' }}>Sekretaris DKM,</p>
                         <div style={{ height: '40px' }}></div>
                         <p style={{ fontWeight: '900', textDecoration: 'underline', fontSize: '11pt', color: '#000000' }}>{data.namaSekretaris || '( ........................ )'}</p>
+                    </div>
+
+                    <div onClick={() => onNavigate?.('struktur')} style={{ cursor: 'pointer' }}>
+                        <p style={{ fontWeight: '900', fontSize: '11pt', textTransform: 'uppercase', color: '#000000', marginBottom: '5px' }}>Ketua DKM,</p>
+                        <div style={{ height: '40px' }}></div>
+                        <p style={{ fontWeight: '900', textDecoration: 'underline', fontSize: '11pt', color: '#000000' }}>{data.namaKetua || '( ........................ )'}</p>
                     </div>
                 </div>
 
@@ -224,7 +246,7 @@ export function Page1({ data, bulkRecipient, onNavigate }: { data: Partial<Propo
                     <p style={{ fontSize: '10pt', margin: '0 0 5px 0', fontWeight: 'bold', color: '#000000' }}>Mengetahui,</p>
                     <div onClick={() => onNavigate?.('struktur')} style={{ cursor: 'pointer', display: 'inline-block' }}>
                         <p style={{ fontWeight: '900', fontSize: '12pt', margin: '0', color: '#000000' }}>Tokoh Masyarakat Masjid Al-Muhajirin</p>
-                        <div style={{ height: '40px' }}></div>
+                        <div style={{ height: '70px' }}></div>
                         <p style={{ fontWeight: '900', textDecoration: 'underline', fontSize: '11pt', color: '#000000' }}>{data.namaTokohMasyarakat || '( ........................ )'}</p>
                     </div>
                 </div>
@@ -335,61 +357,78 @@ export function Page3({ data }: { data: Partial<ProposalData> }) {
 
 export function Page4({ data }: { data: Partial<ProposalData> }) {
     const total = data.rab?.reduce((acc, curr) => acc + curr.totalHarga, 0) || 0
+    const chunks = calculateRABChunks(data)
+
     return (
-        <PageWrapper data={data} pageNumber={4}>
-            <div style={{ fontSize: '12pt' }}>
-                <h2 style={{ fontSize: '16pt', fontWeight: '900', borderLeft: '10px solid #0b3d2e', paddingLeft: '20px', marginBottom: '25px', textTransform: 'uppercase', color: '#0b3d2e' }}>III. Rencana Anggaran Biaya</h2>
-                
-                <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: '0 8px' }}>
-                    <thead>
-                        <tr style={{ backgroundColor: '#0b3d2e', color: 'white' }}>
-                            <th style={{ padding: '18px 15px', textAlign: 'left', borderRadius: '15px 0 0 15px', fontSize: '10pt', textTransform: 'uppercase', letterSpacing: '1.5px' }}>Uraian Item</th>
-                            <th style={{ padding: '18px 15px', textAlign: 'center', fontSize: '10pt', textTransform: 'uppercase', letterSpacing: '1.5px' }}>Qty</th>
-                            <th style={{ padding: '18px 15px', textAlign: 'right', fontSize: '10pt', textTransform: 'uppercase', letterSpacing: '1.5px' }}>Harga</th>
-                            <th style={{ padding: '18px 15px', textAlign: 'right', borderRadius: '0 15px 15px 0', fontSize: '10pt', textTransform: 'uppercase', letterSpacing: '1.5px' }}>Total</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {data.rab?.map((item, i) => (
-                            <tr key={i} style={{ backgroundColor: i % 2 === 0 ? '#f8fafc' : '#ffffff' }}>
-                                <td style={{ padding: '15px', borderBottom: '1px solid #f1f5f9', borderRadius: '15px 0 0 15px' }}>
-                                    <p style={{ fontWeight: '900', color: '#0f172a', margin: '0', fontSize: '11pt' }}>{item.nama}</p>
-                                    <p style={{ fontSize: '9pt', color: '#64748b', margin: '6px 0 0 0', fontStyle: 'italic' }}>{item.spesifikasi}</p>
-                                </td>
-                                <td style={{ padding: '15px', borderBottom: '1px solid #f1f5f9', textAlign: 'center', fontWeight: '700' }}>{item.jumlah} {item.satuan}</td>
-                                <td style={{ padding: '15px', borderBottom: '1px solid #f1f5f9', textAlign: 'right', color: '#475569' }}>Rp {item.hargaSatuan?.toLocaleString('id-ID')}</td>
-                                <td style={{ padding: '15px', borderBottom: '1px solid #f1f5f9', textAlign: 'right', fontWeight: '900', color: '#059669', borderRadius: '0 15px 15px 0' }}>Rp {item.totalHarga?.toLocaleString('id-ID')}</td>
-                            </tr>
-                        ))}
-                    </tbody>
-                    <tfoot>
-                        <tr><td colSpan={4} style={{ height: '20px' }}></td></tr>
-                        <tr style={{ backgroundColor: '#f0fdf4' }}>
-                            <td colSpan={3} style={{ padding: '15px 25px', textAlign: 'right', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '2px', color: '#064e3b', borderRadius: '15px 0 0 15px', fontSize: '10pt' }}>Total Estimasi Biaya :</td>
-                            <td style={{ padding: '15px 25px', textAlign: 'right', fontSize: '16pt', fontWeight: '1000', color: '#0b3d2e', borderRadius: '0 15px 15px 0' }}>Rp {total.toLocaleString('id-ID')}</td>
-                        </tr>
-                    </tfoot>
-                </table>
-            </div>
-        </PageWrapper>
+        <>
+            {chunks.map((chunk, pageIndex) => (
+                <PageWrapper key={pageIndex} data={data} pageNumber={4 + pageIndex}>
+                    <div style={{ fontSize: '12pt' }}>
+                        {pageIndex === 0 ? (
+                            <h2 style={{ fontSize: '16pt', fontWeight: '900', borderLeft: '10px solid #0b3d2e', paddingLeft: '20px', marginBottom: '25px', textTransform: 'uppercase', color: '#0b3d2e' }}>III. Rencana Anggaran Biaya</h2>
+                        ) : (
+                            <div style={{ marginBottom: '25px', borderBottom: '1px dashed #cbd5e1', paddingBottom: '10px' }}>
+                                <p style={{ fontWeight: '700', color: '#94a3b8', fontStyle: 'italic', fontSize: '10pt' }}>Lanjutan Rencana Anggaran Biaya...</p>
+                            </div>
+                        )}
+                        
+                        <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: '0 8px' }}>
+                            <thead>
+                                <tr style={{ backgroundColor: '#0b3d2e', color: 'white' }}>
+                                    <th style={{ padding: '18px 15px', textAlign: 'left', borderRadius: '15px 0 0 15px', fontSize: '10pt', textTransform: 'uppercase', letterSpacing: '1.5px' }}>Uraian Item</th>
+                                    <th style={{ padding: '18px 15px', textAlign: 'center', fontSize: '10pt', textTransform: 'uppercase', letterSpacing: '1.5px' }}>Qty</th>
+                                    <th style={{ padding: '18px 15px', textAlign: 'right', fontSize: '10pt', textTransform: 'uppercase', letterSpacing: '1.5px' }}>Harga</th>
+                                    <th style={{ padding: '18px 15px', textAlign: 'right', borderRadius: '0 15px 15px 0', fontSize: '10pt', textTransform: 'uppercase', letterSpacing: '1.5px' }}>Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {chunk.map((item, i) => (
+                                    <tr key={i} style={{ backgroundColor: i % 2 === 0 ? '#f8fafc' : '#ffffff' }}>
+                                        <td style={{ padding: '15px', borderBottom: '1px solid #f1f5f9', borderRadius: '15px 0 0 15px' }}>
+                                            <p style={{ fontWeight: '900', color: '#0f172a', margin: '0', fontSize: '11pt' }}>{item.nama}</p>
+                                            <p style={{ fontSize: '9pt', color: '#64748b', margin: '6px 0 0 0', fontStyle: 'italic' }}>{item.spesifikasi}</p>
+                                        </td>
+                                        <td style={{ padding: '15px', borderBottom: '1px solid #f1f5f9', textAlign: 'center', fontWeight: '700' }}>{item.jumlah} {item.satuan}</td>
+                                        <td style={{ padding: '15px', borderBottom: '1px solid #f1f5f9', textAlign: 'right', color: '#475569' }}>Rp {item.hargaSatuan?.toLocaleString('id-ID')}</td>
+                                        <td style={{ padding: '15px', borderBottom: '1px solid #f1f5f9', textAlign: 'right', fontWeight: '900', color: '#059669', borderRadius: '0 15px 15px 0' }}>Rp {item.totalHarga?.toLocaleString('id-ID')}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                            {pageIndex === chunks.length - 1 && (
+                                <tfoot>
+                                    <tr><td colSpan={4} style={{ height: '20px' }}></td></tr>
+                                    <tr style={{ backgroundColor: '#f0fdf4' }}>
+                                        <td colSpan={3} style={{ padding: '15px 25px', textAlign: 'right', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '2px', color: '#064e3b', borderRadius: '15px 0 0 15px', fontSize: '10pt' }}>Total Estimasi Biaya :</td>
+                                        <td style={{ padding: '15px 25px', textAlign: 'right', fontSize: '16pt', fontWeight: '1000', color: '#0b3d2e', borderRadius: '0 15px 15px 0' }}>Rp {total.toLocaleString('id-ID')}</td>
+                                    </tr>
+                                </tfoot>
+                            )}
+                        </table>
+                    </div>
+                </PageWrapper>
+            ))}
+        </>
     )
 }
 
 export function Page5({ data, onNavigate }: { data: Partial<ProposalData>, onNavigate?: (tab: string) => void }) {
-    return (
-        <PageWrapper data={data} pageNumber={5}>
-            <div style={{ fontSize: '12pt' }}>
-                <h2 style={{ fontSize: '16pt', fontWeight: '900', borderLeft: '10px solid #0b3d2e', paddingLeft: '20px', marginBottom: '25px', textTransform: 'uppercase', color: '#0b3d2e' }}>IV. Penutup</h2>
-                <div style={{ textAlign: 'justify', textIndent: '40px', marginBottom: '25px', lineHeight: '1.7', color: '#0f172a' }}>{data.penutup}</div>
+    const rabChunks = calculateRABChunks(data)
+    const pageNumber = 3 + rabChunks.length + 1
 
-                <div style={{ textAlign: 'right', marginBottom: '25px' }}>
+    return (
+        <PageWrapper data={data} pageNumber={pageNumber}>
+            <div style={{ fontSize: '12pt' }}>
+                <h2 style={{ fontSize: '16pt', fontWeight: '900', borderLeft: '10px solid #0b3d2e', paddingLeft: '20px', marginBottom: '15px', textTransform: 'uppercase', color: '#0b3d2e' }}>IV. Penutup</h2>
+                <div style={{ textAlign: 'justify', textIndent: '40px', marginBottom: '15px', lineHeight: '1.5', color: '#0f172a' }}>{data.penutup}</div>
+
+                <div style={{ textAlign: 'right', marginBottom: '15px' }}>
                     <p style={{ fontStyle: 'italic', fontWeight: '900', color: '#475569', fontSize: '11pt' }}>{data.tempat}, {data.tanggal}</p>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '15px', textAlign: 'center', marginBottom: '25px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '15px', textAlign: 'center', marginBottom: '15px' }}>
                     <div onClick={() => onNavigate?.('struktur')} style={{ cursor: 'pointer', position: 'relative' }}>
                         <p style={{ fontSize: '10pt', fontWeight: '900', textTransform: 'uppercase', color: '#64748b', marginBottom: '5px' }}>Sekretaris DKM,</p>
-                        <div style={{ height: '70px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <div style={{ height: '60px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                             <div style={{ width: '100px', height: '1px', background: 'transparent' }}></div>
                         </div>
                         <p style={{ fontWeight: '900', textDecoration: 'underline', fontSize: '11pt', color: '#1e293b' }}>{data.namaSekretaris || '( ........................ )'}</p>
@@ -397,50 +436,50 @@ export function Page5({ data, onNavigate }: { data: Partial<ProposalData>, onNav
 
                     <div onClick={() => onNavigate?.('struktur')} style={{ cursor: 'pointer', position: 'relative' }}>
                         <p style={{ fontSize: '10pt', fontWeight: '900', textTransform: 'uppercase', color: '#64748b', marginBottom: '5px' }}>Ketua DKM,</p>
-                        <div style={{ height: '70px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <div style={{ height: '60px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                              <div style={{ width: '100px', height: '1px', background: 'transparent' }}></div>
                         </div>
                         <p style={{ fontWeight: '900', textDecoration: 'underline', fontSize: '11pt', color: '#1e293b' }}>{data.namaKetua || '( ........................ )'}</p>
                     </div>
                 </div>
 
-                <div style={{ textAlign: 'center', marginBottom: '25px' }}>
-                    <div style={{ display: 'inline-block', borderBottom: '3px double #0b3d2e', paddingBottom: '4px', marginBottom: '15px' }}>
+                <div style={{ textAlign: 'center', marginBottom: '10px' }}>
+                    <div style={{ display: 'inline-block', borderBottom: '3px double #0b3d2e', paddingBottom: '2px', marginBottom: '5px' }}>
                         <p style={{ fontWeight: '1000', fontSize: '12pt', textTransform: 'uppercase', letterSpacing: '4px', color: '#0b3d2e', margin: '0' }}>Mengetahui,</p>
                     </div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '20px 40px', textAlign: 'center' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px 40px', textAlign: 'center' }}>
                     <div onClick={() => onNavigate?.('struktur')} style={{ cursor: 'pointer' }}>
                         <p style={{ fontSize: '10pt', fontWeight: '900', color: '#475569', marginBottom: '2px' }}>Ketua RT 015,</p>
                         <p style={{ fontSize: '8.5pt', fontStyle: 'italic', color: '#94a3b8', margin: '0' }}>Kampung Ragas Grenyang</p>
-                        <div style={{ height: '55px' }}></div>
+                        <div style={{ height: '50px' }}></div>
                         <p style={{ fontSize: '10pt', fontWeight: '900', textDecoration: 'underline' }}>{data.namaKetuaRT || '( ........................ )'}</p>
                     </div>
                     <div onClick={() => onNavigate?.('struktur')} style={{ cursor: 'pointer' }}>
                         <p style={{ fontSize: '10pt', fontWeight: '900', color: '#475569', marginBottom: '2px' }}>Ketua RW 008,</p>
                         <p style={{ fontSize: '8.5pt', fontStyle: 'italic', color: '#94a3b8', margin: '0' }}>Kampung Ragas Grenyang</p>
-                        <div style={{ height: '55px' }}></div>
+                        <div style={{ height: '50px' }}></div>
                         <p style={{ fontSize: '10pt', fontWeight: '900', textDecoration: 'underline' }}>{data.namaKetuaRW || '( ........................ )'}</p>
                     </div>
                     <div onClick={() => onNavigate?.('struktur')} style={{ cursor: 'pointer' }}>
                         <p style={{ fontSize: '10pt', fontWeight: '900', color: '#0b3d2e', marginBottom: '2px' }}>Tokoh Masyarakat,</p>
                         <p style={{ fontSize: '9pt', fontStyle: 'italic', color: '#059669', margin: '0' }}>Masjid Al-Muhajirin</p>
-                        <div style={{ height: '55px' }}></div>
+                        <div style={{ height: '50px' }}></div>
                         <p style={{ fontWeight: '1000', textDecoration: 'underline', fontSize: '11pt' }}>{data.namaTokohMasyarakat || '( ........................ )'}</p>
                     </div>
                     <div onClick={() => onNavigate?.('struktur')} style={{ cursor: 'pointer' }}>
                         <p style={{ fontSize: '10pt', fontWeight: '900', color: '#475569', marginBottom: '2px' }}>Ketua Pemuda,</p>
                         <p style={{ fontSize: '8.5pt', fontStyle: 'italic', color: '#94a3b8', margin: '0' }}>Kampung Ragas Grenyang</p>
-                        <div style={{ height: '55px' }}></div>
+                        <div style={{ height: '50px' }}></div>
                         <p style={{ fontSize: '10pt', textDecoration: 'underline', fontWeight: '900' }}>{data.namaKetuaPemuda || '( ........................ )'}</p>
                     </div>
 
                     {data.namaKepalaDesa && (
-                        <div style={{ gridColumn: '1 / -1', marginTop: '15px', cursor: 'pointer' }}>
+                        <div style={{ gridColumn: '1 / -1', marginTop: '10px', cursor: 'pointer' }}>
                             <div style={{ width: '300px', margin: '0 auto' }}>
                                 <p style={{ fontSize: '12pt', fontWeight: '900', color: '#0f172a' }}>Kepala Desa Argawana,</p>
-                                <div style={{ height: '60px' }}></div>
+                                <div style={{ height: '50px' }}></div>
                                 <p style={{ fontSize: '12pt', fontWeight: '900', textDecoration: 'underline', color: '#0f172a' }}>{data.namaKepalaDesa}</p>
                             </div>
                         </div>
@@ -452,8 +491,11 @@ export function Page5({ data, onNavigate }: { data: Partial<ProposalData>, onNav
 }
 
 export function Page6({ data }: { data: Partial<ProposalData> }) {
+    const rabChunks = calculateRABChunks(data)
+    const pageNumber = 3 + rabChunks.length + 1 + 1
+
     return (
-        <PageWrapper data={data} pageNumber={6}>
+        <PageWrapper data={data} pageNumber={pageNumber}>
             <div style={{ fontSize: '12pt' }}>
                 <h2 style={{ fontSize: '18pt', fontWeight: '900', borderLeft: '12px solid #0b3d2e', paddingLeft: '25px', marginBottom: '40px', textTransform: 'uppercase', color: '#0b3d2e', letterSpacing: '1px' }}>V. Lampiran Dokumentasi</h2>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '30px' }}>

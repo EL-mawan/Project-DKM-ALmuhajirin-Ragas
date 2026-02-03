@@ -256,7 +256,7 @@ export default function PersuratanAdmin() {
       // --- 2. DOCUMENT INFO ---
       const dateStr = new Date(item.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })
       doc.setFont('times', 'normal')
-      doc.setFontSize(11)
+      doc.setFontSize(12)
       doc.text(`${item.location || 'Bojonegara'}, ${dateStr}`, pageWidth - margin, curY, { align: 'right' })
       
       doc.text(`Nomor      : ${item.nomorSurat || '-'}`, margin, curY)
@@ -281,7 +281,7 @@ export default function PersuratanAdmin() {
         }
 
         doc.setFont('times', 'normal')
-        doc.text('di -', margin, curY + (formData.penerimaJabatan ? 17 : 12))
+        doc.text('di_', margin, curY + (formData.penerimaJabatan ? 17 : 12))
         doc.text(item.location || 'Tempat', margin + 5, curY + (formData.penerimaJabatan ? 22 : 18))
         curY += 35
       }
@@ -359,15 +359,16 @@ export default function PersuratanAdmin() {
       const ketuaName = formData.namaKetua || formData.ttdKetuaDKM || 'H. AGUNG GUNAWAN'
       const sekretarisName = formData.namaSekretaris || formData.ttdSekretarisDKM || '..........................'
 
-      doc.text('Ketua DKM,', colLeft, curY, { align: 'center' })
-      doc.text('Sekretaris,', colRight, curY, { align: 'center' })
+
+      doc.text('Sekretaris,', colLeft, curY, { align: 'center' })
+      doc.text('Ketua DKM,', colRight, curY, { align: 'center' })
       
       doc.setDrawColor(200)
       doc.line(colLeft - 25, curY + 22, colLeft + 25, curY + 22)
       doc.line(colRight - 25, curY + 22, colRight + 25, curY + 22)
       
-      doc.text(ketuaName, colLeft, curY + 28, { align: 'center' })
-      doc.text(sekretarisName, colRight, curY + 28, { align: 'center' })
+      doc.text(sekretarisName, colLeft, curY + 28, { align: 'center' })
+      doc.text(ketuaName, colRight, curY + 28, { align: 'center' })
 
       // Generate filename
       const filename = `${item.type}_${item.title.replace(/[^a-z0-9]/gi, '_')}.pdf`
