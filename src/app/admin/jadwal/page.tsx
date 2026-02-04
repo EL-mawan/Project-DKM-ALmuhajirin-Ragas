@@ -447,7 +447,7 @@ export default function JadwalTugasPage() {
       doc.setTextColor(255).setFontSize(10).text(task.label, 17, curY + 6.5)
       doc.setTextColor(0).setFontSize(11).text(':', 15 + labelWidth + 2, curY + 6.5)
       let name = items.find(it => it.type === task.type)?.name || '..................................................................'
-      if (!name.includes('.')) { name = name.toUpperCase(); doc.setFontSize(14).setFont('times', 'bold') } else doc.setFontSize(11)
+      if (!name.includes('.')) { name = name.toUpperCase(); doc.setFontSize(16).setFont('times', 'bold') } else doc.setFontSize(11)
       doc.text(name, 15 + labelWidth + 5, curY + 6.5).setFont('times', 'normal').setDrawColor(200).setLineWidth(0.1).line(15 + labelWidth + 4, curY + 8, 195, curY + 8, 'S')
     })
     
@@ -570,9 +570,10 @@ export default function JadwalTugasPage() {
         doc.setTextColor(255).setFontSize(10).text(task.label, 17, curY + 7.5)
         doc.setTextColor(0).setFontSize(11).text(':', 15 + labelWidth + 2, curY + 7.5)
         
-        const name = records.find(it => it.type === task.type)?.name || '..................................................................'
+        let name = records.find(it => it.type === task.type)?.name || '..................................................................'
+        if (!name.includes('.')) { name = name.toUpperCase(); doc.setFontSize(16).setFont('times', 'bold') } else doc.setFontSize(11)
         doc.text(name, 15 + labelWidth + 5, curY + 7.5)
-        doc.setDrawColor(200).setLineWidth(0.1).line(15 + labelWidth + 4, curY + 9, 195, curY + 9, 'S')
+        doc.setFont('times', 'normal').setDrawColor(200).setLineWidth(0.1).line(15 + labelWidth + 4, curY + 9, 195, curY + 9, 'S')
     })
 
     const footerY = startY + (tasks.length * rowHeight) + 20
