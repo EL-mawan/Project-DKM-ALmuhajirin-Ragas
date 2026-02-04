@@ -25,23 +25,12 @@ export async function PATCH(
 
     const body = await req.json()
 
-    // Check if db.jadwalTugas exists
-    const model = (db as any).jadwalTugas;
-    if (!model) {
-      console.error('CRITICAL: db.jadwalTugas is missing from the Prisma Client instance.');
-      return NextResponse.json({ 
-        error: 'Database Schema Error', 
-        details: 'Prisma Client does not have the JadwalTugas model.',
-        suggestion: 'Ensure the deployment environment runs "prisma generate" or "prisma db push" correctly.'
-      }, { status: 500 });
-    }
-
     const oldData = await db.jadwalTugas.findUnique({ where: { id } })
     if (!oldData) return NextResponse.json({ error: 'Not Found' }, { status: 404 })
 
     const { date, type, category, name, description } = body
 
-    const updated = await model.update({
+    const updated = await db.jadwalTugas.update({
       where: { id },
       data: {
         date: date ? new Date(date) : undefined,
@@ -87,21 +76,10 @@ export async function DELETE(
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
-    // Check if db.jadwalTugas exists
-    const model = (db as any).jadwalTugas;
-    if (!model) {
-      console.error('CRITICAL: db.jadwalTugas is missing from the Prisma Client instance.');
-      return NextResponse.json({ 
-        error: 'Database Schema Error', 
-        details: 'Prisma Client does not have the JadwalTugas model.',
-        suggestion: 'Ensure the deployment environment runs "prisma generate" or "prisma db push" correctly.'
-      }, { status: 500 });
-    }
-
-    const oldData = await model.findUnique({ where: { id } })
+    const oldData = await db.jadwalTugas.findUnique({ where: { id } })
     if (!oldData) return NextResponse.json({ error: 'Not Found' }, { status: 404 })
     
-    await model.delete({ where: { id } })
+    await db.jadwalTugas.delete({ where: { id } })
 
     // Log the action
     await createAuditLog({
