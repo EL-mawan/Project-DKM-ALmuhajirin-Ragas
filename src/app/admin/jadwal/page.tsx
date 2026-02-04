@@ -366,6 +366,16 @@ export default function JadwalTugasPage() {
     return acc;
   }, []);
 
+  const filledNights = new Set(
+    data
+      .filter(item => item.category === 'TARAWIH')
+      .map(item => {
+        const match = item.description?.match(/Malam Ke-(\d+)/);
+        return match ? match[1] : null;
+      })
+      .filter(Boolean) as string[]
+  );
+
   return (
     <AdminLayout title="Jadwal Tugas" subtitle="Kelola penugasan imam, khotib, dan petugas operasional masjid.">
       <div className="p-6 md:p-10 space-y-8">
@@ -414,24 +424,28 @@ export default function JadwalTugasPage() {
                         <div className="space-y-4 col-span-1 md:col-span-2">
                             <Label className="text-[10px] font-black uppercase text-[#0b3d2e] bg-emerald-50 px-3 py-1 rounded-full">Pilih Malam Ke (Bisa lebih dari satu)</Label>
                             <div className="grid grid-cols-5 sm:grid-cols-10 gap-2 p-4 bg-neutral-50 rounded-4xl border border-neutral-100 italic">
-                                {Array.from({ length: 30 }, (_, i) => i + 1).map(num => (
-                                    <label key={num} className="flex flex-col items-center gap-1 cursor-pointer group">
-                                        <input 
-                                            type="checkbox" 
-                                            className="w-5 h-5 rounded-lg border-neutral-300 text-[#0b3d2e] focus:ring-emerald-500 cursor-pointer transition-all"
-                                            checked={tarawihData.malamKe.includes(num.toString())}
-                                            onChange={(e) => {
-                                                const val = num.toString()
-                                                if (e.target.checked) {
-                                                    setTarawihData(prev => ({ ...prev, malamKe: [...prev.malamKe, val] }))
-                                                } else {
-                                                    setTarawihData(prev => ({ ...prev, malamKe: prev.malamKe.filter(n => n !== val) }))
-                                                }
-                                            }}
-                                        />
-                                        <span className="text-[9px] font-bold text-neutral-400 group-hover:text-emerald-700">{num}</span>
-                                    </label>
-                                ))}
+                                {Array.from({ length: 30 }, (_, i) => i + 1).map(num => {
+                                    const isFilled = filledNights.has(num.toString());
+                                    return (
+                                        <label key={num} className={`flex flex-col items-center gap-1 ${isFilled ? 'opacity-30 cursor-not-allowed' : 'cursor-pointer group'}`}>
+                                            <input 
+                                                type="checkbox" 
+                                                className={`w-5 h-5 rounded-lg border-neutral-300 text-[#0b3d2e] focus:ring-emerald-500 transition-all ${isFilled ? 'cursor-not-allowed' : 'cursor-pointer'}`}
+                                                checked={tarawihData.malamKe.includes(num.toString())}
+                                                disabled={isFilled}
+                                                onChange={(e) => {
+                                                    const val = num.toString()
+                                                    if (e.target.checked) {
+                                                        setTarawihData(prev => ({ ...prev, malamKe: [...prev.malamKe, val] }))
+                                                    } else {
+                                                        setTarawihData(prev => ({ ...prev, malamKe: prev.malamKe.filter(n => n !== val) }))
+                                                    }
+                                                }}
+                                            />
+                                            <span className={`text-[9px] font-bold ${isFilled ? 'text-neutral-300' : 'text-neutral-400 group-hover:text-emerald-700'}`}>{num}</span>
+                                        </label>
+                                    );
+                                })}
                             </div>
                         </div>
                     ) : (
