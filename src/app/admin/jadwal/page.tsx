@@ -815,12 +815,12 @@ export default function JadwalTugasPage() {
                   <Download className="h-3.5 w-3.5 mr-1.5" /> PDF Jumat
                 </Button>
               )}
-              {activeTab === 'TARAWIH' && (
+              {activeTab === 'TARAWIH' && filteredData.length > 0 && (
                 <Button variant="outline" size="sm" onClick={generateTarawihPDF} className="rounded-xl border-emerald-100 text-emerald-600 hover:bg-emerald-50 h-8 md:h-9 px-3 md:px-4 font-black uppercase text-[9px] md:text-[10px] tracking-widest flex-1 sm:flex-none">
                   <Download className="h-3.5 w-3.5 mr-1.5" /> Cetak Tarawih
                 </Button>
               )}
-              {(activeTab === 'IDUL_FITRI' || activeTab === 'IDUL_ADHA') && (
+              {(activeTab === 'IDUL_FITRI' || activeTab === 'IDUL_ADHA') && filteredData.length > 0 && (
                 <Button variant="outline" size="sm" onClick={() => generateEidPDF(activeTab)} className="rounded-xl border-emerald-100 text-emerald-600 hover:bg-emerald-50 h-8 md:h-9 px-3 md:px-4 font-black uppercase text-[9px] md:text-[10px] tracking-widest flex-1 sm:flex-none">
                   <Download className="h-3.5 w-3.5 mr-1.5" /> Cetak PDF
                 </Button>
@@ -848,10 +848,10 @@ export default function JadwalTugasPage() {
                   <table className="w-full text-left">
                     <thead>
                       <tr className="bg-neutral-50/50">
-                        {activeTab === 'TARAWIH' || activeTab === 'IDUL_FITRI' || activeTab === 'IDUL_ADHA' ? (
+                        {activeTab === 'TARAWIH' ? (
                           <>
                             <th className="px-10 py-6 text-[10px] font-black uppercase tracking-widest text-neutral-400">
-                                {activeTab === 'TARAWIH' ? 'Malam' : 'Detail Waktu'}
+                                Malam
                             </th>
                             <th className="px-10 py-6 text-[10px] font-black uppercase tracking-widest text-neutral-400">Daftar Petugas</th>
                             <th className="px-10 py-6 text-right text-[10px] font-black uppercase tracking-widest text-neutral-400">Aksi</th>
@@ -867,23 +867,16 @@ export default function JadwalTugasPage() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-neutral-50/50">
-                      {activeTab === 'TARAWIH' || activeTab === 'IDUL_FITRI' || activeTab === 'IDUL_ADHA' ? (
+                      {activeTab === 'TARAWIH' ? (
                         (() => {
                           const tarawihOrder: { [key: string]: number } = {
-                            'IMAM_TARAWIH': 1, 'BILAL_1': 2, 'BILAL_2': 3, 'KAMILIN': 4, 'DOA_WITIR': 5,
-                            'IMAM_SHOLAT': 1, 'KHOTIB': 2, 'BILAL': 3, 'IQOMAH': 4
+                            'IMAM_TARAWIH': 1, 'BILAL_1': 2, 'BILAL_2': 3, 'KAMILIN': 4, 'DOA_WITIR': 5
                           };
 
                           const nightGroups: { [key: string]: any[] } = {};
                           filteredData.forEach(item => {
-                            let key = 'Lainnya';
-                            if (activeTab === 'TARAWIH') {
-                                const m = item.description?.match(/(\d+)/);
-                                key = m ? m[0] : 'Lainnya';
-                            } else {
-                                // For Eid, group by description (which contains the custom date)
-                                key = item.description || 'Event';
-                            }
+                            const m = item.description?.match(/(\d+)/);
+                            const key = m ? m[0] : 'Lainnya';
                             if (!nightGroups[key]) nightGroups[key] = [];
                             nightGroups[key].push(item);
                           });
@@ -997,24 +990,18 @@ export default function JadwalTugasPage() {
 
                 {/* Mobile View (Cards) */}
                 <div className="md:hidden divide-y divide-neutral-50 px-6">
-                  {activeTab === 'TARAWIH' || activeTab === 'IDUL_FITRI' || activeTab === 'IDUL_ADHA' ? (
+                  {activeTab === 'TARAWIH' ? (
                     (() => {
                       const tarawihOrder: { [key: string]: number } = {
-                        'IMAM_TARAWIH': 1, 'BILAL_1': 2, 'BILAL_2': 3, 'KAMILIN': 4, 'DOA_WITIR': 5,
-                        'IMAM_SHOLAT': 1, 'KHOTIB': 2, 'BILAL': 3, 'IQOMAH': 4
+                        'IMAM_TARAWIH': 1, 'BILAL_1': 2, 'BILAL_2': 3, 'KAMILIN': 4, 'DOA_WITIR': 5
                       };
 
                       const nightGroups: { [key: string]: any[] } = {};
                       filteredData.forEach(item => {
-                        let key = 'Lainnya';
-                        if (activeTab === 'TARAWIH') {
-                            const m = item.description?.match(/(\d+)/);
-                            key = m ? m[0] : 'Lainnya';
-                        } else {
-                            key = item.description || 'Event';
-                        }
-                        if (!nightGroups[key]) nightGroups[key] = [];
-                        nightGroups[key].push(item);
+                        const m = item.description?.match(/(\d+)/);
+                        const night = m ? m[0] : 'Lainnya';
+                        if (!nightGroups[night]) nightGroups[night] = [];
+                        nightGroups[night].push(item);
                       });
 
                       const lineupGroups: { nights: (number|string)[], items: any[] }[] = [];
