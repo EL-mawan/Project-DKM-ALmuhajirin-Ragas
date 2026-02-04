@@ -84,6 +84,15 @@ export default function JadwalTugasPage() {
     iqomah: ''
   })
 
+  // State khusus untuk Sholat Jumat bulk
+  const [fridayData, setFridayData] = useState({
+    khotib: '',
+    imam: '',
+    bilal: '',
+    adzan: '',
+    iqomah: ''
+  })
+
   // State untuk melacak item grup yang sedang diedit (agar bisa dihapus sebelum simpan baru)
   const [editingGroupItems, setEditingGroupItems] = useState<any[] | null>(null)
 
@@ -135,7 +144,35 @@ export default function JadwalTugasPage() {
         }
       }
 
-      if (formData.category === 'TARAWIH' && !editingItem) {
+      if (formData.category === 'JUMAT' && !editingItem) {
+        // Bulk save for Friday
+        const roles = [
+          { type: 'KHOTIB', name: fridayData.khotib },
+          { type: 'IMAM_JUMAT', name: fridayData.imam },
+          { type: 'BILAL', name: fridayData.bilal },
+          { type: 'ADZAN', name: fridayData.adzan },
+          { type: 'IQOMAH', name: fridayData.iqomah }
+        ]
+
+        for (const role of roles) {
+          if (!role.name) continue
+          await fetch('/api/admin/jadwal', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              ...formData,
+              type: role.type,
+              name: role.name
+            })
+          })
+        }
+        setPopup({
+          isOpen: true,
+          type: 'success',
+          title: 'Berhasil!',
+          description: "Jadwal Sholat Jum'at telah berhasil diterbitkan."
+        })
+      } else if (formData.category === 'TARAWIH' && !editingItem) {
         // Bulk save for Tarawih
         const roles = [
           { type: 'IMAM_TARAWIH', name: tarawihData.imam },
@@ -338,6 +375,13 @@ export default function JadwalTugasPage() {
       imam: '',
       khotib: '',
       bilal: '',
+      iqomah: ''
+    })
+    setFridayData({
+      khotib: '',
+      imam: '',
+      bilal: '',
+      adzan: '',
       iqomah: ''
     })
     setEditingGroupItems(null)
@@ -627,6 +671,7 @@ export default function JadwalTugasPage() {
                 </Button>
               </DialogTrigger>
               <DialogContent className="sm:max-w-[600px] rounded-[2.5rem] p-0 overflow-hidden border-none shadow-2xl">
+                <>
                 <div className="bg-[#0b3d2e] p-8 text-white">
                   <DialogTitle className="text-2xl font-black">
                     {editingGroupItems ? `Update Jadwal ${categories.find(c => c.value === activeTab)?.label}` : (activeTab === 'TARAWIH' ? 'Setor Jadwal Tarawih' : (editingItem ? 'Edit Jadwal' : 'Tambah Jadwal'))}
@@ -635,13 +680,13 @@ export default function JadwalTugasPage() {
                     {activeTab === 'TARAWIH' ? 'Isi seluruh petugas untuk satu malam sekaligus.' : 'Input penugasan rutin DKM.'}
                   </p>
                 </div>
-                <form id="jadwal-form" onSubmit={handleSubmit} className="p-8 space-y-4 bg-white max-h-[70vh] overflow-y-auto">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {/* Date / Month Selection based on Tab */}
-                    {activeTab === 'TARAWIH' ? (
+                <form id="jadwal-form" onSubmit={handleSubmit} className="p-8 space-y-4 bg-white max-h-[75vh] overflow-y-auto">
+                  {/* Bagian 1: Pengaturan Waktu / Malam / Tanggal */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-b border-neutral-50 pb-6 mb-6">
+                    {activeTab === 'TARAWIH' && !editingItem ? (
                         <div className="space-y-4 col-span-1 md:col-span-2">
                             <Label className="text-[10px] font-black uppercase text-[#0b3d2e] bg-emerald-50 px-3 py-1 rounded-full text-center block">Pilih Malam Ke (Bisa lebih dari satu)</Label>
-                            <div className="grid grid-cols-5 sm:grid-cols-10 gap-2 p-4 bg-neutral-50 rounded-4xl border border-neutral-100 italic">
+                            <div className="grid grid-cols-5 sm:grid-cols-10 gap-2 p-4 bg-neutral-50 rounded-3xl border border-neutral-100 italic">
                                 {Array.from({ length: 30 }, (_, i) => i + 1).map(num => {
                                     const isFilled = filledNights.has(num.toString());
                                     return (
@@ -667,9 +712,9 @@ export default function JadwalTugasPage() {
                                 })}
                             </div>
                         </div>
-                    ) : (activeTab === 'IDUL_FITRI' || activeTab === 'IDUL_ADHA') ? (
+                    ) : (activeTab === 'IDUL_FITRI' || activeTab === 'IDUL_ADHA') && !editingItem ? (
                         <div className="space-y-4 col-span-1 md:col-span-2">
-                            <Label className="text-[10px] font-black uppercase text-[#0b3d2e] bg-emerald-50 px-3 py-1 rounded-full text-center block">Detail Hari Raya</Label>
+                            <Label className="text-[10px] font-black uppercase text-[#0b3d2e] bg-emerald-50 px-3 py-1 rounded-full text-center block">Detail Waktu Hari Raya</Label>
                             <div className="grid grid-cols-3 gap-4">
                                 <div className="space-y-1">
                                     <Label className="text-[10px] uppercase text-neutral-400">Tanggal</Label>
@@ -681,14 +726,14 @@ export default function JadwalTugasPage() {
                                 </div>
                                 <div className="space-y-1">
                                     <Label className="text-[10px] uppercase text-neutral-400">Tahun</Label>
-                                    <Input placeholder="Contoh: 1447 H" value={eidData.tahun} onChange={e => setEidData({...eidData, tahun: e.target.value})} className="h-11 rounded-xl" onKeyDown={handleKeyDown} />
+                                    <Input placeholder="Tahun..." value={eidData.tahun} onChange={e => setEidData({...eidData, tahun: e.target.value})} className="h-11 rounded-xl" onKeyDown={handleKeyDown} />
                                 </div>
                             </div>
                         </div>
                     ) : (
                         <>
                           <div className="space-y-1">
-                             <Label className="text-[10px] font-black uppercase text-neutral-400">Tanggal</Label>
+                             <Label className="text-[10px] font-black uppercase text-neutral-400">Tanggal Pelaksanaan</Label>
                              <Input type="date" value={formData.date} onChange={e => setFormData({...formData, date: e.target.value})} className="h-11 rounded-xl" required />
                           </div>
                           <div className="space-y-1">
@@ -700,91 +745,123 @@ export default function JadwalTugasPage() {
                           </div>
                         </>
                     )}
-                 </div>
+                  </div>
 
-                  {activeTab === 'TARAWIH' && !editingItem ? (
-                      <div className="grid grid-cols-1 gap-3 border-t pt-4 mt-4">
-                          <div className="space-y-1">
-                              <Label className="text-[10px] font-black uppercase text-neutral-400">Periode / Bulan (Untuk PDF)</Label>
-                              <Input 
-                                placeholder="Contoh: Ramadhan 1447 H" 
-                                value={tarawihData.bulan} 
-                                onChange={e => setTarawihData({...tarawihData, bulan: e.target.value})} 
-                                className="h-11 rounded-xl bg-neutral-50"
-                                onKeyDown={handleKeyDown}
-                              />
-                          </div>
-                          <div className="space-y-1">
-                              <Label className="text-[10px] font-black uppercase text-emerald-600">Nama Imam</Label>
-                              <Input 
-                                placeholder="Imam Tarawih..." 
-                                value={tarawihData.imam} 
-                                onChange={e => setTarawihData({...tarawihData, imam: e.target.value})} 
-                                className="h-11 rounded-xl font-bold" 
-                                required 
-                                onKeyDown={handleKeyDown}
-                              />
-                          </div>
-                          <div className="grid grid-cols-2 gap-3">
-                            <div className="space-y-1">
-                                <Label className="text-[10px] font-black uppercase text-neutral-400">Bilal 1</Label>
-                                <Input 
-                                    placeholder="Nama..." 
-                                    value={tarawihData.bilal1} 
-                                    onChange={e => setTarawihData({...tarawihData, bilal1: e.target.value})} 
-                                    className="h-11 rounded-xl" 
-                                    onKeyDown={handleKeyDown}
-                                />
-                            </div>
-                            <div className="space-y-1">
-                                <Label className="text-[10px] font-black uppercase text-neutral-400">Bilal 2</Label>
-                                <Input 
-                                    placeholder="Nama..." 
-                                    value={tarawihData.bilal2} 
-                                    onChange={e => setTarawihData({...tarawihData, bilal2: e.target.value})} 
-                                    className="h-11 rounded-xl" 
-                                    onKeyDown={handleKeyDown}
-                                />
-                            </div>
-                          </div>
-                          <div className="grid grid-cols-2 gap-3">
-                            <div className="space-y-1">
-                                <Label className="text-[10px] font-black uppercase text-neutral-400">Do'a Kamilin</Label>
-                                <Input 
-                                    placeholder="Nama..." 
-                                    value={tarawihData.kamilin} 
-                                    onChange={e => setTarawihData({...tarawihData, kamilin: e.target.value})} 
-                                    className="h-11 rounded-xl" 
-                                    onKeyDown={handleKeyDown}
-                                />
-                            </div>
-                            <div className="space-y-1">
-                                <Label className="text-[10px] font-black uppercase text-neutral-400">Do'a Witir</Label>
-                                <Input 
-                                    placeholder="Nama..." 
-                                    value={tarawihData.witir} 
-                                    onChange={e => setTarawihData({...tarawihData, witir: e.target.value})} 
-                                    className="h-11 rounded-xl" 
-                                    onKeyDown={handleKeyDown}
-                                />
-                            </div>
-                          </div>
-                      </div>
-                  ) : (
-                      <>
-                        <div className="space-y-2">
-                            <Label className="text-[10px] font-black uppercase text-neutral-400">Jenis Tugas</Label>
-                            <Select value={formData.type} onValueChange={v => setFormData({...formData, type: v})}>
-                                <SelectTrigger className="h-11 rounded-xl font-bold"><SelectValue /></SelectTrigger>
-                                <SelectContent>{getTaskTypesByCategory(formData.category).map(t => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}</SelectContent>
-                            </Select>
+                  {/* Bagian 2: Daftar Petugas (Input Satu-Satu) */}
+                  <div className="space-y-6">
+                    {!editingItem && activeTab === 'JUMAT' ? (
+                        <div className="space-y-4">
+                             <Label className="text-[10px] font-black uppercase text-[#0b3d2e] bg-emerald-50 px-3 py-1 rounded-full text-center block">Daftar Petugas Jum'at</Label>
+                             <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-1">
+                                    <Label className="text-[10px] font-black uppercase text-neutral-400">Khotib</Label>
+                                    <Input placeholder="Nama Khotib..." value={fridayData.khotib} onChange={e => setFridayData({...fridayData, khotib: e.target.value})} className="h-11 rounded-xl font-bold text-emerald-700" onKeyDown={handleKeyDown} />
+                                </div>
+                                <div className="space-y-1">
+                                    <Label className="text-[10px] font-black uppercase text-neutral-400">Imam Sholat</Label>
+                                    <Input placeholder="Nama Imam..." value={fridayData.imam} onChange={e => setFridayData({...fridayData, imam: e.target.value})} className="h-11 rounded-xl font-bold text-emerald-700" onKeyDown={handleKeyDown} />
+                                </div>
+                             </div>
+                             <div className="grid grid-cols-3 gap-3">
+                                <div className="space-y-1">
+                                    <Label className="text-[10px] font-black uppercase text-neutral-400">Bilal</Label>
+                                    <Input placeholder="Nama Bilal..." value={fridayData.bilal} onChange={e => setFridayData({...fridayData, bilal: e.target.value})} className="h-11 rounded-xl" onKeyDown={handleKeyDown} />
+                                </div>
+                                <div className="space-y-1">
+                                    <Label className="text-[10px] font-black uppercase text-neutral-400">Adzan</Label>
+                                    <Input placeholder="Nama Muadzin..." value={fridayData.adzan} onChange={e => setFridayData({...fridayData, adzan: e.target.value})} className="h-11 rounded-xl" onKeyDown={handleKeyDown} />
+                                </div>
+                                <div className="space-y-1">
+                                    <Label className="text-[10px] font-black uppercase text-neutral-400">Iqomah</Label>
+                                    <Input placeholder="Petugas Iqomah..." value={fridayData.iqomah} onChange={e => setFridayData({...fridayData, iqomah: e.target.value})} className="h-11 rounded-xl" onKeyDown={handleKeyDown} />
+                                </div>
+                             </div>
                         </div>
-                        <div className="space-y-2">
-                            <Label className="text-[10px] font-black uppercase text-neutral-400">Nama Petugas</Label>
-                            <Input placeholder="Masukkan nama..." value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="h-11 rounded-xl font-bold text-emerald-700" required />
+                    ) : !editingItem && (activeTab === 'IDUL_FITRI' || activeTab === 'IDUL_ADHA') ? (
+                        <div className="space-y-4">
+                            <Label className="text-[10px] font-black uppercase text-[#0b3d2e] bg-emerald-50 px-3 py-1 rounded-full text-center block">Daftar Petugas Sholat Id</Label>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-1">
+                                    <Label className="text-[10px] font-black uppercase text-neutral-400">Imam Sholat</Label>
+                                    <Input placeholder="Nama Imam..." value={eidData.imam} onChange={e => setEidData({...eidData, imam: e.target.value})} className="h-11 rounded-xl font-bold text-emerald-700" onKeyDown={handleKeyDown} />
+                                </div>
+                                <div className="space-y-1">
+                                    <Label className="text-[10px] font-black uppercase text-neutral-400">Khotib</Label>
+                                    <Input placeholder="Nama Khotib..." value={eidData.khotib} onChange={e => setEidData({...eidData, khotib: e.target.value})} className="h-11 rounded-xl font-bold text-emerald-700" onKeyDown={handleKeyDown} />
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-1">
+                                    <Label className="text-[10px] font-black uppercase text-neutral-400">Bilal Hari Raya</Label>
+                                    <Input placeholder="Nama Bilal..." value={eidData.bilal} onChange={e => setEidData({...eidData, bilal: e.target.value})} className="h-11 rounded-xl" onKeyDown={handleKeyDown} />
+                                </div>
+                                <div className="space-y-1">
+                                    <Label className="text-[10px] font-black uppercase text-neutral-400">Iqomah</Label>
+                                    <Input placeholder="Petugas Iqomah..." value={eidData.iqomah} onChange={e => setEidData({...eidData, iqomah: e.target.value})} className="h-11 rounded-xl" onKeyDown={handleKeyDown} />
+                                </div>
+                            </div>
                         </div>
-                      </>
-                  )}
+                    ) : !editingItem && activeTab === 'TARAWIH' ? (
+                        <div className="space-y-4">
+                            <Label className="text-[10px] font-black uppercase text-[#0b3d2e] bg-emerald-50 px-3 py-1 rounded-full text-center block">Daftar Petugas Tarawih</Label>
+                            <div className="space-y-1">
+                                <Label className="text-[10px] font-black uppercase text-neutral-400">Periode / Bulan (Untuk PDF)</Label>
+                                <Input 
+                                    placeholder="Contoh: Ramadhan 1447 H" 
+                                    value={tarawihData.bulan} 
+                                    onChange={e => setTarawihData({...tarawihData, bulan: e.target.value})} 
+                                    className="h-11 rounded-xl bg-neutral-50"
+                                    onKeyDown={handleKeyDown}
+                                />
+                            </div>
+                            <div className="space-y-1">
+                                <Label className="text-[10px] font-black uppercase text-emerald-600">Nama Imam</Label>
+                                <Input 
+                                    placeholder="Imam Tarawih..." 
+                                    value={tarawihData.imam} 
+                                    onChange={e => setTarawihData({...tarawihData, imam: e.target.value})} 
+                                    className="h-11 rounded-xl font-bold" 
+                                    required 
+                                    onKeyDown={handleKeyDown}
+                                />
+                            </div>
+                            <div className="grid grid-cols-2 gap-3">
+                                <div className="space-y-1">
+                                    <Label className="text-[10px] font-black uppercase text-neutral-400">Bilal 1</Label>
+                                    <Input placeholder="Nama..." value={tarawihData.bilal1} onChange={e => setTarawihData({...tarawihData, bilal1: e.target.value})} className="h-11 rounded-xl" onKeyDown={handleKeyDown} />
+                                </div>
+                                <div className="space-y-1">
+                                    <Label className="text-[10px] font-black uppercase text-neutral-400">Bilal 2</Label>
+                                    <Input placeholder="Nama..." value={tarawihData.bilal2} onChange={e => setTarawihData({...tarawihData, bilal2: e.target.value})} className="h-11 rounded-xl" onKeyDown={handleKeyDown} />
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-2 gap-3">
+                                <div className="space-y-1">
+                                    <Label className="text-[10px] font-black uppercase text-neutral-400">Do'a Kamilin</Label>
+                                    <Input placeholder="Nama..." value={tarawihData.kamilin} onChange={e => setTarawihData({...tarawihData, kamilin: e.target.value})} className="h-11 rounded-xl" onKeyDown={handleKeyDown} />
+                                </div>
+                                <div className="space-y-1">
+                                    <Label className="text-[10px] font-black uppercase text-neutral-400">Do'a Witir</Label>
+                                    <Input placeholder="Nama..." value={tarawihData.witir} onChange={e => setTarawihData({...tarawihData, witir: e.target.value})} className="h-11 rounded-xl" onKeyDown={handleKeyDown} />
+                                </div>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="space-y-4 pt-4 border-t border-dashed border-neutral-100">
+                             <div className="space-y-2">
+                                <Label className="text-[10px] font-black uppercase text-neutral-400">Jenis Penugasan</Label>
+                                <Select value={formData.type} onValueChange={v => setFormData({...formData, type: v})}>
+                                    <SelectTrigger className="h-11 rounded-xl font-bold"><SelectValue /></SelectTrigger>
+                                    <SelectContent>{getTaskTypesByCategory(formData.category).map(t => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}</SelectContent>
+                                </Select>
+                            </div>
+                            <div className="space-y-2">
+                                <Label className="text-[10px] font-black uppercase text-neutral-400">Nama Petugas</Label>
+                                <Input placeholder="Masukkan nama..." value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="h-11 rounded-xl font-bold text-emerald-700" required />
+                            </div>
+                        </div>
+                    )}
+                  </div>
 
                   <DialogFooter className="pt-4">
                     <Button form="jadwal-form" type="submit" disabled={loading} className="w-full h-14 rounded-2xl bg-[#0b3d2e] hover:bg-[#062c21] font-black uppercase tracking-widest text-sm shadow-xl">
@@ -792,6 +869,7 @@ export default function JadwalTugasPage() {
                     </Button>
                   </DialogFooter>
                 </form>
+                </>
               </DialogContent>
             </Dialog>
             )}
