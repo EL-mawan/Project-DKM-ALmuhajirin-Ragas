@@ -333,7 +333,11 @@ export default function JadwalTugasPage() {
     doc.setTextColor(0).setFont('times', 'normal')
     for (let i = 1; i <= 30; i++) {
         const rowY = startY + (i * rowHeight)
-        const nightData = tarawihRecords.filter(d => d.description?.includes(`Malam Ke-${i}`))
+        const nightData = tarawihRecords.filter(d => {
+            if (!d.description) return false;
+            const m = d.description.match(/(\d+)/);
+            return m && parseInt(m[0], 10) === i;
+        })
         
         let rowX = 15
         // Box for row
@@ -613,23 +617,23 @@ export default function JadwalTugasPage() {
 
         {/* Schedule List */}
         <Card className="rounded-[3rem] border-none shadow-2xl shadow-neutral-200/50 overflow-hidden bg-white">
-          <CardHeader className="p-10 border-b border-neutral-50 flex flex-row items-center justify-between">
+          <CardHeader className="p-6 md:p-10 border-b border-neutral-50 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
-              <CardTitle className="text-2xl font-black text-slate-900">Daftar Penugasan</CardTitle>
-              <p className="text-xs text-neutral-400 mt-1 italic font-medium">Monitoring tugas aktif masjid.</p>
+              <CardTitle className="text-xl md:text-2xl font-black text-slate-900">Daftar Penugasan</CardTitle>
+              <p className="text-[10px] md:text-xs text-neutral-400 mt-1 italic font-medium">Monitoring tugas aktif masjid.</p>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
               {activeTab === 'JUMAT' && filteredData.length > 0 && (
-                <Button variant="outline" size="sm" onClick={() => generateFridayPDF(new Date(filteredData[0].date).toISOString().split('T')[0])} className="rounded-xl border-emerald-100 text-emerald-600 hover:bg-emerald-50 h-9 px-4 font-black uppercase text-[10px] tracking-widest">
-                  <Download className="h-4 w-4 mr-2" /> Cetak PDF Jumat
+                <Button variant="outline" size="sm" onClick={() => generateFridayPDF(new Date(filteredData[0].date).toISOString().split('T')[0])} className="rounded-xl border-emerald-100 text-emerald-600 hover:bg-emerald-50 h-8 md:h-9 px-3 md:px-4 font-black uppercase text-[9px] md:text-[10px] tracking-widest flex-1 sm:flex-none">
+                  <Download className="h-3.5 w-3.5 mr-1.5" /> PDF Jumat
                 </Button>
               )}
               {activeTab === 'TARAWIH' && (
-                <Button variant="outline" size="sm" onClick={generateTarawihPDF} className="rounded-xl border-emerald-100 text-emerald-600 hover:bg-emerald-50 h-9 px-4 font-black uppercase text-[10px] tracking-widest">
-                  <Download className="h-4 w-4 mr-2" /> Cetak Tabel Tarawih
+                <Button variant="outline" size="sm" onClick={generateTarawihPDF} className="rounded-xl border-emerald-100 text-emerald-600 hover:bg-emerald-50 h-8 md:h-9 px-3 md:px-4 font-black uppercase text-[9px] md:text-[10px] tracking-widest flex-1 sm:flex-none">
+                  <Download className="h-3.5 w-3.5 mr-1.5" /> Cetak Tarawih
                 </Button>
               )}
-              <Button variant="outline" size="sm" onClick={fetchData} disabled={loading} className="rounded-xl border-neutral-200 text-neutral-500 hover:text-emerald-600 hover:bg-emerald-50 h-9 px-4 font-black uppercase text-[10px] tracking-widest">
+              <Button variant="outline" size="sm" onClick={fetchData} disabled={loading} className="rounded-xl border-neutral-200 text-neutral-500 hover:text-emerald-600 hover:bg-emerald-50 h-8 md:h-9 px-3 md:px-4 font-black uppercase text-[9px] md:text-[10px] tracking-widest flex-1 sm:flex-none">
                   Refresh
               </Button>
             </div>
