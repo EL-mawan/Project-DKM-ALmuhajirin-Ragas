@@ -3,6 +3,9 @@ import { getServerSession } from 'next-auth'
 import { db } from '@/lib/db'
 import { authOptions } from '@/lib/auth/config'
 
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
@@ -11,7 +14,7 @@ export async function GET(request: NextRequest) {
     const now = new Date()
     const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1)
     
-    // Execute multiple queries in parallel for better performance and to avoid timeouts
+    // Execute multiple queries in parallel with individual error handling
     const [
       totalJamaah,
       totalRemaja,
@@ -24,25 +27,25 @@ export async function GET(request: NextRequest) {
       unreadNotifications,
       activities
     ] = await Promise.all([
-      db.jamaahKepalaKeluarga.count({ where: { isActive: true } }),
-      db.jamaahRemaja.count({ where: { isActive: true } }),
-      db.kegiatan.count(),
-      db.jadwalTugas.count().catch(() => 0), // Fallback if table doesn't exist yet
+      db.jamaahKepalaKeluarga.count({ where: { isActive: true } }).catch(() => 0),
+      db.jamaahRemaja.count({ where: { isActive: true } }).catch(() => 0),
+      db.kegiatan.count().catch(() => 0),
+      db.jadwalTugas.count().catch(() => 0),
       db.keuanganPemasukan.aggregate({
         _sum: { amount: true },
         where: { date: { gte: thisMonthStart } }
-      }),
+      }).catch(() => ({ _sum: { amount: 0 } })),
       db.keuanganPengeluaran.aggregate({
         _sum: { amount: true },
         where: { date: { gte: thisMonthStart } }
-      }),
+      }).catch(() => ({ _sum: { amount: 0 } })),
       db.jamaahKepalaKeluarga.count({
         where: { createdAt: { gte: thisMonthStart }, isActive: true }
-      }),
+      }).catch(() => 0),
       db.jamaahKepalaKeluarga.count({
         where: { createdAt: { lt: thisMonthStart }, isActive: true }
-      }),
-      db.kontakMasuk.count({ where: { isRead: false } }),
+      }).catch(() => 0),
+      db.kontakMasuk.count({ where: { isRead: false } }).catch(() => 0),
       db.auditLog.findMany({
         orderBy: { createdAt: 'desc' },
         take: 10,

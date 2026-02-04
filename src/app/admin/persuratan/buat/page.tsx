@@ -294,19 +294,27 @@ Salam silaturahmi kami sampaikan, teriring doa semoga bapak beserta keluarga sel
     })
   }
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    
     try {
+      // Deep clone to sanitize data
+      const sanitizedData = JSON.parse(JSON.stringify(formData));
+      
       const res = await fetch('/api/admin/persuratan', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           type: type,
-          title: type === 'PROPOSAL' ? formData.perihal : formData.perihal,
-          nomorSurat: formData.nomorSurat,
-          date: formData.tanggalSurat,
-          content: JSON.stringify(formData),
-          recipient: formData.penerimaNama,
-          location: formData.tempatSurat
+          title: sanitizedData.perihal || 'Dokumen Tanpa Judul',
+          nomorSurat: sanitizedData.nomorSurat,
+          date: sanitizedData.tanggalSurat,
+          content: JSON.stringify(sanitizedData),
+          recipient: sanitizedData.penerimaNama,
+          location: sanitizedData.tempatSurat
         })
       })
 
@@ -314,10 +322,12 @@ Salam silaturahmi kami sampaikan, teriring doa semoga bapak beserta keluarga sel
         toast.success(`${getTypeLabel()} berhasil diajukan!`)
         router.push('/admin/persuratan')
       } else {
-        toast.error('Gagal mengajukan dokumen')
+        const err = await res.json()
+        toast.error(err.error || 'Gagal mengajukan dokumen')
       }
     } catch (error) {
-      toast.error('Terjadi kesalahan sistem')
+      console.error('Submit Error:', error)
+      toast.error('Terjadi kesalahan sistem saat menyimpan')
     }
   }
 
@@ -1031,7 +1041,7 @@ Salam silaturahmi kami sampaikan, teriring doa semoga bapak beserta keluarga sel
                         <Button variant="ghost" onClick={() => setActiveTab('rab')} className="text-slate-400 group">
                           <ArrowLeft className="h-4 w-4 mr-2 group-hover:-translate-x-1 transition-transform" /> Kembali
                         </Button>
-                        <Button onClick={handleSubmit} className="h-14 px-12 rounded-2xl bg-linear-to-r from-purple-600 to-indigo-600 text-white font-black uppercase tracking-[0.2em] shadow-xl shadow-purple-100 animate-pulse">
+                        <Button type="button" onClick={handleSubmit} className="h-14 px-12 rounded-2xl bg-linear-to-r from-purple-600 to-indigo-600 text-white font-black uppercase tracking-[0.2em] shadow-xl shadow-purple-100 animate-pulse">
                            Ajukan Proposal <ArrowRight className="h-4 w-4 ml-3" />
                         </Button>
                      </div>
@@ -1206,7 +1216,7 @@ Salam silaturahmi kami sampaikan, teriring doa semoga bapak beserta keluarga sel
                     </CardContent>
                   </Card>
 
-                  <Button onClick={handleSubmit} className="w-full h-14 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-black uppercase tracking-widest shadow-lg shadow-emerald-200">
+                  <Button type="button" onClick={handleSubmit} className="w-full h-14 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-black uppercase tracking-widest shadow-lg shadow-emerald-200">
                     Simpan & Ajukan Dokumen
                   </Button>
                 </div>

@@ -31,7 +31,8 @@ import {
   Moon,
   Plus,
   Wallet,
-  User
+  User,
+  RotateCcw
 } from 'lucide-react'
 import { Layout } from '@/components/layout'
 import Link from 'next/link'
@@ -328,13 +329,35 @@ export default function AdminDashboard() {
                 </Link>
               </div>
               <div className="bg-white rounded-[2.5rem] sm:rounded-4xl border border-neutral-100 overflow-hidden shadow-sm">
-                {!dashboardStats?.activities || dashboardStats.activities.length === 0 ? (
+                {loadingStats ? (
+                  <div className="p-8 space-y-4">
+                    {[1, 2, 3, 4, 5].map((i) => (
+                      <div key={i} className="flex items-center space-x-4 animate-pulse">
+                        <div className="h-10 w-10 bg-slate-100 rounded-xl" />
+                        <div className="flex-1 space-y-2">
+                          <div className="h-3 bg-slate-100 rounded-full w-3/4" />
+                          <div className="h-2 bg-slate-50 rounded-full w-1/2" />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : !dashboardStats?.activities || dashboardStats.activities.length === 0 ? (
                   <div className="p-10 text-center text-neutral-400 space-y-2">
                     <div className="h-16 w-16 bg-neutral-50 rounded-full flex items-center justify-center mx-auto mb-4">
                       <FileText className="h-8 w-8 opacity-20" />
                     </div>
-                    <p className="font-bold text-[#0b3d2e]/40">Belum ada aktivitas</p>
-                    <p className="text-xs">Aktivitas sistem akan muncul di sini secara otomatis.</p>
+                    <div className="space-y-1">
+                       <p className="font-bold text-[#0b3d2e]/40">Belum ada aktivitas</p>
+                       <p className="text-[10px] text-slate-400 font-medium">Log aktivitas sistem akan muncul di sini.</p>
+                    </div>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={fetchStats}
+                      className="mt-2 text-[10px] font-black uppercase tracking-widest text-emerald-600 hover:bg-emerald-50"
+                    >
+                      <RotateCcw className="h-3 w-3 mr-2" /> Refresh
+                    </Button>
                   </div>
                 ) : (
                   dashboardStats.activities.map((activity: any, i: number) => (

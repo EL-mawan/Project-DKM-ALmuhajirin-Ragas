@@ -14,6 +14,12 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+import { Crimson_Pro } from "next/font/google";
+const crimsonPro = Crimson_Pro({
+  variable: "--font-crimson-pro",
+  subsets: ["latin"],
+});
+
 export const metadata: Metadata = {
   title: "DKM Al-Muhajirin - Kp. Ragas Grenyang",
   description: "DKM Al-Muhajirin Kp. Ragas Grenyang - Pusat kegiatan spiritual, pendidikan, dan sosial untuk masyarakat. Informasi jadwal, kegiatan, laporan keuangan, dan layanan jamaah.",
@@ -44,7 +50,7 @@ export default function RootLayout({
   return (
     <html lang="id" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background text-foreground`}
+        className={`${geistSans.variable} ${geistMono.variable} ${crimsonPro.variable} antialiased bg-background text-foreground`}
       >
         <Providers>
           {children}

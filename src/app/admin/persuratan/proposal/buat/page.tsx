@@ -267,8 +267,13 @@ function ProposalBuilderContent() {
 
   const updateStrukturName = (category: 'pimpinanAtas' | 'administrasi', index: number, name: string) => {
     setData(prev => {
-      const newStruktur = { ...prev.struktur }
-      newStruktur[category][index].name = name
+      // Create a deep copy of the structure to avoid mutation
+      const newStruktur = {
+        ...prev.struktur,
+        [category]: prev.struktur[category].map((item, i) => 
+          i === index ? { ...item, name } : item
+        )
+      }
       
       const updates: Partial<ProposalData> = { struktur: newStruktur }
       
@@ -554,9 +559,19 @@ Pastikan setiap poin dimulai dengan kata kerja (Contoh: Menjalin, Meningkatkan, 
       }
   }
 
-  const handleSave = async () => {
+  const handleSave = async (e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    
     setIsSaving(true)
     try {
+      // Deep clone and sanitize data to remove any potential cross-origin or proxy objects
+      // that might cause issues in certain browsers (like Firefox with extensions)
+      const sanitizedData = JSON.parse(JSON.stringify(data));
+      const sanitizedBulkRecipients = JSON.parse(JSON.stringify(bulkRecipients));
+
       const url = proposalId ? `/api/admin/persuratan/${proposalId}` : '/api/admin/persuratan'
       const method = proposalId ? 'PATCH' : 'POST'
       
@@ -566,13 +581,13 @@ Pastikan setiap poin dimulai dengan kata kerja (Contoh: Menjalin, Meningkatkan, 
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          title: (data.perihal || 'Proposal Tanpa Judul').trim(),
+          title: (sanitizedData.perihal || 'Proposal Tanpa Judul').trim(),
           type: 'PROPOSAL',
           date: new Date(dateInput || new Date()).toISOString(),
-          content: JSON.stringify({ ...data, bulkRecipients }),
-          recipient: bulkRecipients.length > 0 ? `${bulkRecipients.length} Penerima` : (data.penerima.nama || 'Penerima'),
-          location: data.tempat,
-          nomorSurat: data.nomor,
+          content: JSON.stringify({ ...sanitizedData, bulkRecipients: sanitizedBulkRecipients }),
+          recipient: sanitizedBulkRecipients.length > 0 ? `${sanitizedBulkRecipients.length} Penerima` : (sanitizedData.penerima.nama || 'Penerima'),
+          location: sanitizedData.tempat,
+          nomorSurat: sanitizedData.nomor,
           status: 'pending'
         })
       })
@@ -581,10 +596,12 @@ Pastikan setiap poin dimulai dengan kata kerja (Contoh: Menjalin, Meningkatkan, 
         toast.success(proposalId ? 'Perubahan berhasil disimpan' : 'Proposal berhasil disimpan ke Riwayat Persuratan')
         setTimeout(() => router.push('/admin/persuratan/proposal'), 1500)
       } else {
-        toast.error('Gagal menyimpan proposal')
+        const errorData = await response.json();
+        toast.error(errorData.error || 'Gagal menyimpan proposal')
       }
     } catch (error) {
-      toast.error('Terjadi kesalahan koneksi')
+      console.error('Save Error:', error);
+      toast.error('Terjadi kesalahan koneksi saat menyimpan')
     } finally {
       setIsSaving(false)
     }
@@ -1485,6 +1502,7 @@ Pastikan setiap poin dimulai dengan kata kerja (Contoh: Menjalin, Meningkatkan, 
                    </Button>
                )}
                 <Button 
+                 type="button"
                  className="flex-1 h-16 rounded-3xl font-black bg-[#0b3d2e] hover:bg-[#062c21] shadow-xl shadow-emerald-100 text-white text-lg transition-all active:scale-95"
                  onClick={handleSave}
                  disabled={isSaving}
@@ -1581,9 +1599,8 @@ Pastikan setiap poin dimulai dengan kata kerja (Contoh: Menjalin, Meningkatkan, 
       </div>
     </div>
     <style jsx global>{`
-        @import url('https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;0,700;1,400&display=swap');
         .proposal-page {
-            font-family: 'Crimson Pro', serif !important;
+            font-family: var(--font-crimson-pro), serif !important;
             background: white !important;
             color: black !important;
             line-height: 1.5;
