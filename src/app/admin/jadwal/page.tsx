@@ -68,7 +68,8 @@ export default function JadwalTugasPage() {
     bilal2: '',
     kamilin: '',
     witir: '',
-    malamKe: [] as string[]
+    malamKe: [] as string[],
+    bulan: 'Ramadhan 1447 H'
   })
 
   useEffect(() => {
@@ -174,14 +175,29 @@ export default function JadwalTugasPage() {
       name: '',
       description: ''
     })
-    setTarawihData({
+    setTarawihData(prev => ({
+      ...prev,
       imam: '',
       bilal1: '',
       bilal2: '',
       kamilin: '',
       witir: '',
       malamKe: []
-    })
+    }))
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      const form = e.currentTarget.closest('form')
+      if (form) {
+        const index = Array.from(form.elements).indexOf(e.currentTarget as any)
+        if (index > -1 && index < form.elements.length - 1) {
+          e.preventDefault()
+          const next = form.elements[index + 1] as HTMLElement
+          if (next && next.focus) next.focus()
+        }
+      }
+    }
   }
 
   const openEdit = (item: any) => {
@@ -239,7 +255,7 @@ export default function JadwalTugasPage() {
   const generateTarawihPDF = () => {
     const doc = new jsPDF()
     const centerX = doc.internal.pageSize.getWidth() / 2
-    const tarawihData = data.filter(d => d.category === 'TARAWIH')
+    const tarawihRecords = data.filter(d => d.category === 'TARAWIH')
     
     try { doc.addImage('/logo.png', 'PNG', 30, 10, 18, 18) } catch (e) {}
 
@@ -247,7 +263,7 @@ export default function JadwalTugasPage() {
     doc.setFontSize(12).setFont('times', 'italic').text('Jadwal Tugas Sholat Tarawih', centerX + 10, 23, { align: 'center' })
     doc.setLineWidth(0.5).line(15, 28, 195, 28)
     
-    doc.setFontSize(10).setFont('times', 'normal').text('Bulan        : Ramadhan 1447 H', 15, 35)
+    doc.setFontSize(10).setFont('times', 'normal').text(`Bulan        : ${tarawihData.bulan}`, 15, 35)
 
     // Table Header
     const startY = 42
@@ -268,7 +284,7 @@ export default function JadwalTugasPage() {
     doc.setTextColor(0).setFont('times', 'normal')
     for (let i = 1; i <= 30; i++) {
         const rowY = startY + (i * rowHeight)
-        const nightData = tarawihData.filter(d => d.description?.includes(`Malam Ke-${i}`))
+        const nightData = tarawihRecords.filter(d => d.description?.includes(`Malam Ke-${i}`))
         
         let rowX = 15
         // Box for row
@@ -432,27 +448,68 @@ export default function JadwalTugasPage() {
                   {activeTab === 'TARAWIH' && !editingItem ? (
                       <div className="grid grid-cols-1 gap-3 border-t pt-4 mt-4">
                           <div className="space-y-1">
+                              <Label className="text-[10px] font-black uppercase text-neutral-400">Periode / Bulan (Untuk PDF)</Label>
+                              <Input 
+                                placeholder="Contoh: Ramadhan 1447 H" 
+                                value={tarawihData.bulan} 
+                                onChange={e => setTarawihData({...tarawihData, bulan: e.target.value})} 
+                                className="h-11 rounded-xl bg-neutral-50"
+                                onKeyDown={handleKeyDown}
+                              />
+                          </div>
+                          <div className="space-y-1">
                               <Label className="text-[10px] font-black uppercase text-emerald-600">Nama Imam</Label>
-                              <Input placeholder="Imam Tarawih..." value={tarawihData.imam} onChange={e => setTarawihData({...tarawihData, imam: e.target.value})} className="h-11 rounded-xl font-bold" required />
+                              <Input 
+                                placeholder="Imam Tarawih..." 
+                                value={tarawihData.imam} 
+                                onChange={e => setTarawihData({...tarawihData, imam: e.target.value})} 
+                                className="h-11 rounded-xl font-bold" 
+                                required 
+                                onKeyDown={handleKeyDown}
+                              />
                           </div>
                           <div className="grid grid-cols-2 gap-3">
                             <div className="space-y-1">
                                 <Label className="text-[10px] font-black uppercase text-neutral-400">Bilal 1</Label>
-                                <Input placeholder="Nama..." value={tarawihData.bilal1} onChange={e => setTarawihData({...tarawihData, bilal1: e.target.value})} className="h-11 rounded-xl" />
+                                <Input 
+                                    placeholder="Nama..." 
+                                    value={tarawihData.bilal1} 
+                                    onChange={e => setTarawihData({...tarawihData, bilal1: e.target.value})} 
+                                    className="h-11 rounded-xl" 
+                                    onKeyDown={handleKeyDown}
+                                />
                             </div>
                             <div className="space-y-1">
                                 <Label className="text-[10px] font-black uppercase text-neutral-400">Bilal 2</Label>
-                                <Input placeholder="Nama..." value={tarawihData.bilal2} onChange={e => setTarawihData({...tarawihData, bilal2: e.target.value})} className="h-11 rounded-xl" />
+                                <Input 
+                                    placeholder="Nama..." 
+                                    value={tarawihData.bilal2} 
+                                    onChange={e => setTarawihData({...tarawihData, bilal2: e.target.value})} 
+                                    className="h-11 rounded-xl" 
+                                    onKeyDown={handleKeyDown}
+                                />
                             </div>
                           </div>
                           <div className="grid grid-cols-2 gap-3">
                             <div className="space-y-1">
                                 <Label className="text-[10px] font-black uppercase text-neutral-400">Do'a Kamilin</Label>
-                                <Input placeholder="Nama..." value={tarawihData.kamilin} onChange={e => setTarawihData({...tarawihData, kamilin: e.target.value})} className="h-11 rounded-xl" />
+                                <Input 
+                                    placeholder="Nama..." 
+                                    value={tarawihData.kamilin} 
+                                    onChange={e => setTarawihData({...tarawihData, kamilin: e.target.value})} 
+                                    className="h-11 rounded-xl" 
+                                    onKeyDown={handleKeyDown}
+                                />
                             </div>
                             <div className="space-y-1">
                                 <Label className="text-[10px] font-black uppercase text-neutral-400">Do'a Witir</Label>
-                                <Input placeholder="Nama..." value={tarawihData.witir} onChange={e => setTarawihData({...tarawihData, witir: e.target.value})} className="h-11 rounded-xl" />
+                                <Input 
+                                    placeholder="Nama..." 
+                                    value={tarawihData.witir} 
+                                    onChange={e => setTarawihData({...tarawihData, witir: e.target.value})} 
+                                    className="h-11 rounded-xl" 
+                                    onKeyDown={handleKeyDown}
+                                />
                             </div>
                           </div>
                       </div>
@@ -567,7 +624,7 @@ export default function JadwalTugasPage() {
                             existing.nights.push(parseInt(night));
                           } else {
                             lineupGroups.push({ 
-                              nights: night === 'Lainnya' ? [] : [parseInt(night)], 
+                              nights: (night === 'Lainnya' ? [] : [parseInt(night)]) as number[], 
                               items 
                             });
                           }
@@ -577,7 +634,7 @@ export default function JadwalTugasPage() {
                           group.nights.sort((a, b) => a - b);
                           let nightLabel = "";
                           if (group.nights.length > 0) {
-                            const ranges = [];
+                            const ranges: string[] = [];
                             let s = group.nights[0], e = s;
                             for (let i = 1; i <= group.nights.length; i++) {
                               if (i < group.nights.length && group.nights[i] === e + 1) e = group.nights[i];
