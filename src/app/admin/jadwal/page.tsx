@@ -675,6 +675,14 @@ export default function JadwalTugasPage() {
                     <tbody className="divide-y divide-neutral-50/50">
                       {activeTab === 'TARAWIH' ? (
                         (() => {
+                          const tarawihOrder: { [key: string]: number } = {
+                            'IMAM_TARAWIH': 1,
+                            'BILAL_1': 2,
+                            'BILAL_2': 3,
+                            'KAMILIN': 4,
+                            'DOA_WITIR': 5
+                          };
+
                           const nightGroups: { [key: string]: any[] } = {};
                           filteredData.forEach(item => {
                             const m = item.description?.match(/(\d+)/);
@@ -685,10 +693,10 @@ export default function JadwalTugasPage() {
 
                           const lineupGroups: { nights: number[], items: any[] }[] = [];
                           Object.entries(nightGroups).forEach(([night, items]) => {
-                            const lineupKey = items.sort((a, b) => a.type.localeCompare(b.type))
-                                                  .map(it => `${it.type}:${it.name}`).join('|');
+                            const sortedItems = items.sort((a, b) => (tarawihOrder[a.type] || 99) - (tarawihOrder[b.type] || 99));
+                            const lineupKey = sortedItems.map(it => `${it.type}:${it.name}`).join('|');
                             const existing = lineupGroups.find(g => 
-                              g.items.sort((a, b) => a.type.localeCompare(b.type))
+                              g.items.sort((a, b) => (tarawihOrder[a.type] || 99) - (tarawihOrder[b.type] || 99))
                                      .map(it => `${it.type}:${it.name}`).join('|') === lineupKey
                             );
                             
@@ -697,7 +705,7 @@ export default function JadwalTugasPage() {
                             } else {
                               lineupGroups.push({ 
                                 nights: (night === 'Lainnya' ? [] : [parseInt(night)]) as number[], 
-                                items 
+                                items: sortedItems 
                               });
                             }
                           });
@@ -718,6 +726,8 @@ export default function JadwalTugasPage() {
                               nightLabel = `Malam Ke ${ranges.join(', ')}`;
                             } else nightLabel = "Lainnya";
 
+                            const sortedGroupItems = group.items.sort((a, b) => (tarawihOrder[a.type] || 99) - (tarawihOrder[b.type] || 99));
+
                             return (
                               <tr key={idx} className="hover:bg-neutral-50/20 transition-all group">
                                 <td className="px-10 py-8 font-black text-[#0b3d2e] whitespace-nowrap text-sm">
@@ -725,7 +735,7 @@ export default function JadwalTugasPage() {
                                 </td>
                                 <td className="px-10 py-8">
                                   <div className="grid grid-cols-1 gap-2">
-                                    {group.items.map(it => (
+                                    {sortedGroupItems.map(it => (
                                       <div key={it.id} className="flex items-center gap-2">
                                         <Badge variant="outline" className="text-[8px] font-black uppercase px-2 py-0 h-4 border-neutral-200 text-neutral-400">
                                           {allTaskTypes.find(t => t.value === it.type)?.label || it.type}
@@ -787,6 +797,14 @@ export default function JadwalTugasPage() {
                 <div className="md:hidden divide-y divide-neutral-50 px-6">
                   {activeTab === 'TARAWIH' ? (
                     (() => {
+                      const tarawihOrder: { [key: string]: number } = {
+                        'IMAM_TARAWIH': 1,
+                        'BILAL_1': 2,
+                        'BILAL_2': 3,
+                        'KAMILIN': 4,
+                        'DOA_WITIR': 5
+                      };
+
                       const nightGroups: { [key: string]: any[] } = {};
                       filteredData.forEach(item => {
                         const m = item.description?.match(/(\d+)/);
@@ -797,10 +815,10 @@ export default function JadwalTugasPage() {
 
                       const lineupGroups: { nights: number[], items: any[] }[] = [];
                       Object.entries(nightGroups).forEach(([night, items]) => {
-                        const lineupKey = items.sort((a, b) => a.type.localeCompare(b.type))
-                                              .map(it => `${it.type}:${it.name}`).join('|');
+                        const sortedItems = items.sort((a, b) => (tarawihOrder[a.type] || 99) - (tarawihOrder[b.type] || 99));
+                        const lineupKey = sortedItems.map(it => `${it.type}:${it.name}`).join('|');
                         const existing = lineupGroups.find(g => 
-                          g.items.sort((a, b) => a.type.localeCompare(b.type))
+                          g.items.sort((a, b) => (tarawihOrder[a.type] || 99) - (tarawihOrder[b.type] || 99))
                                  .map(it => `${it.type}:${it.name}`).join('|') === lineupKey
                         );
                         
@@ -809,7 +827,7 @@ export default function JadwalTugasPage() {
                         } else {
                           lineupGroups.push({ 
                             nights: (night === 'Lainnya' ? [] : [parseInt(night)]) as number[], 
-                            items 
+                            items: sortedItems 
                           });
                         }
                       });
@@ -830,6 +848,8 @@ export default function JadwalTugasPage() {
                           nightLabel = `Malam Ke ${ranges.join(', ')}`;
                         } else nightLabel = "Lainnya";
 
+                        const sortedGroupItems = group.items.sort((a, b) => (tarawihOrder[a.type] || 99) - (tarawihOrder[b.type] || 99));
+
                         return (
                           <div key={idx} className="py-8 space-y-4">
                             <div className="flex justify-between items-start">
@@ -840,7 +860,7 @@ export default function JadwalTugasPage() {
                                </div>
                             </div>
                             <div className="grid grid-cols-1 gap-2 bg-neutral-50 p-4 rounded-2xl border border-neutral-100 italic">
-                               {group.items.map(it => (
+                               {sortedGroupItems.map(it => (
                                   <div key={it.id} className="flex flex-col gap-0.5">
                                      <span className="text-[10px] font-black uppercase text-neutral-400">{allTaskTypes.find(t => t.value === it.type)?.label || it.type}</span>
                                      <span className="text-sm font-bold text-slate-700">{it.name}</span>
