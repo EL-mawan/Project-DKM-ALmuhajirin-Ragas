@@ -507,8 +507,12 @@ export default function JadwalTugasPage() {
                     ) : (
                         <div className="space-y-1">
                             <Label className="text-[10px] font-black uppercase text-neutral-400">Kategori</Label>
-                            <Select value={formData.category} onValueChange={v => setFormData({...formData, category: v})}>
-                                <SelectTrigger className="h-11 rounded-xl"><SelectValue /></SelectTrigger>
+                            <Select 
+                              value={formData.category} 
+                              onValueChange={v => setFormData({...formData, category: v})}
+                              disabled // Auto-lock category based on active tab
+                            >
+                                <SelectTrigger className="h-11 rounded-xl bg-neutral-50/50 border-neutral-100"><SelectValue /></SelectTrigger>
                                 <SelectContent>{categories.map(c => <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>)}</SelectContent>
                             </Select>
                         </div>
