@@ -783,10 +783,6 @@ export default function JadwalTugasPage() {
                             <Label className="text-[10px] font-black uppercase text-neutral-400">Nama Petugas</Label>
                             <Input placeholder="Masukkan nama..." value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="h-11 rounded-xl font-bold text-emerald-700" required />
                         </div>
-                        <div className="space-y-2">
-                            <Label className="text-[10px] font-black uppercase text-neutral-400">Keterangan / Malam Ke (Opsional)</Label>
-                            <Input placeholder="Contoh: Malam Ke-1..." value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} className="h-11 rounded-xl" />
-                        </div>
                       </>
                   )}
 
