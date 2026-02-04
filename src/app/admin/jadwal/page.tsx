@@ -68,7 +68,7 @@ export default function JadwalTugasPage() {
     bilal2: '',
     kamilin: '',
     witir: '',
-    malamKe: ''
+    malamKe: [] as string[]
   })
 
   useEffect(() => {
@@ -110,20 +110,22 @@ export default function JadwalTugasPage() {
           { type: 'DOA_WITIR', name: tarawihData.witir }
         ]
 
-        for (const role of roles) {
-          if (!role.name) continue
-          await fetch('/api/admin/jadwal', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              ...formData,
-              type: role.type,
-              name: role.name,
-              description: tarawihData.malamKe ? `Malam Ke-${tarawihData.malamKe}` : ''
+        for (const malam of tarawihData.malamKe) {
+          for (const role of roles) {
+            if (!role.name) continue
+            await fetch('/api/admin/jadwal', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                ...formData,
+                type: role.type,
+                name: role.name,
+                description: `Malam Ke-${malam}`
+              })
             })
-          })
+          }
         }
-        toast.success('Jadwal Tarawih berhasil disimpan')
+        toast.success(`Jadwal Tarawih (${tarawihData.malamKe.length} malam) berhasil disimpan`)
       } else {
         const url = editingItem ? `/api/admin/jadwal/${editingItem.id}` : '/api/admin/jadwal'
         const method = editingItem ? 'PATCH' : 'POST'
@@ -178,7 +180,7 @@ export default function JadwalTugasPage() {
       bilal2: '',
       kamilin: '',
       witir: '',
-      malamKe: ''
+      malamKe: []
     })
   }
 
@@ -393,23 +395,28 @@ export default function JadwalTugasPage() {
                       </div>
                     )}
                     {activeTab === 'TARAWIH' ? (
-                        <div className="space-y-1">
-                            <Label className="text-[10px] font-black uppercase text-neutral-400">Malam Ke (1-30)</Label>
-                            <Select 
-                              value={tarawihData.malamKe} 
-                              onValueChange={v => setTarawihData({...tarawihData, malamKe: v})}
-                            >
-                                <SelectTrigger className="h-11 rounded-xl font-bold italic">
-                                    <SelectValue placeholder="Pilih Malam..." />
-                                </SelectTrigger>
-                                <SelectContent className="max-h-[300px]">
-                                    {Array.from({ length: 30 }, (_, i) => i + 1).map(num => (
-                                        <SelectItem key={num} value={num.toString()}>
-                                            Malam Ke-{num}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
+                        <div className="space-y-4 col-span-1 md:col-span-2">
+                            <Label className="text-[10px] font-black uppercase text-[#0b3d2e] bg-emerald-50 px-3 py-1 rounded-full">Pilih Malam Ke (Bisa lebih dari satu)</Label>
+                            <div className="grid grid-cols-5 sm:grid-cols-10 gap-2 p-4 bg-neutral-50 rounded-[2rem] border border-neutral-100 italic">
+                                {Array.from({ length: 30 }, (_, i) => i + 1).map(num => (
+                                    <label key={num} className="flex flex-col items-center gap-1 cursor-pointer group">
+                                        <input 
+                                            type="checkbox" 
+                                            className="w-5 h-5 rounded-lg border-neutral-300 text-[#0b3d2e] focus:ring-emerald-500 cursor-pointer transition-all"
+                                            checked={tarawihData.malamKe.includes(num.toString())}
+                                            onChange={(e) => {
+                                                const val = num.toString()
+                                                if (e.target.checked) {
+                                                    setTarawihData(prev => ({ ...prev, malamKe: [...prev.malamKe, val] }))
+                                                } else {
+                                                    setTarawihData(prev => ({ ...prev, malamKe: prev.malamKe.filter(n => n !== val) }))
+                                                }
+                                            }}
+                                        />
+                                        <span className="text-[9px] font-bold text-neutral-400 group-hover:text-emerald-700">{num}</span>
+                                    </label>
+                                ))}
+                            </div>
                         </div>
                     ) : (
                         <div className="space-y-1">
