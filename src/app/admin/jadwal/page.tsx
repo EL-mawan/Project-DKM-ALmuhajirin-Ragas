@@ -397,7 +397,7 @@ export default function JadwalTugasPage() {
                     {activeTab === 'TARAWIH' ? (
                         <div className="space-y-4 col-span-1 md:col-span-2">
                             <Label className="text-[10px] font-black uppercase text-[#0b3d2e] bg-emerald-50 px-3 py-1 rounded-full">Pilih Malam Ke (Bisa lebih dari satu)</Label>
-                            <div className="grid grid-cols-5 sm:grid-cols-10 gap-2 p-4 bg-neutral-50 rounded-[2rem] border border-neutral-100 italic">
+                            <div className="grid grid-cols-5 sm:grid-cols-10 gap-2 p-4 bg-neutral-50 rounded-4xl border border-neutral-100 italic">
                                 {Array.from({ length: 30 }, (_, i) => i + 1).map(num => (
                                     <label key={num} className="flex flex-col items-center gap-1 cursor-pointer group">
                                         <input 
@@ -527,43 +527,126 @@ export default function JadwalTugasPage() {
                 <table className="w-full text-left">
                   <thead>
                     <tr className="bg-neutral-50/50">
-                      <th className="px-10 py-6 text-[10px] font-black uppercase tracking-widest text-neutral-400">Petugas</th>
-                      <th className="px-10 py-6 text-[10px] font-black uppercase tracking-widest text-neutral-400">Jenis Tugas</th>
-                      <th className="px-10 py-6 text-[10px] font-black uppercase tracking-widest text-neutral-400">Waktu / Tanggal</th>
-                      <th className="px-10 py-6 text-right text-[10px] font-black uppercase tracking-widest text-neutral-400">Aksi</th>
+                      {activeTab === 'TARAWIH' ? (
+                        <>
+                          <th className="px-10 py-6 text-[10px] font-black uppercase tracking-widest text-neutral-400">Malam</th>
+                          <th className="px-10 py-6 text-[10px] font-black uppercase tracking-widest text-neutral-400">Daftar Petugas</th>
+                          <th className="px-10 py-6 text-right text-[10px] font-black uppercase tracking-widest text-neutral-400">Keterangan</th>
+                        </>
+                      ) : (
+                        <>
+                          <th className="px-10 py-6 text-[10px] font-black uppercase tracking-widest text-neutral-400">Petugas</th>
+                          <th className="px-10 py-6 text-[10px] font-black uppercase tracking-widest text-neutral-400">Jenis Tugas</th>
+                          <th className="px-10 py-6 text-[10px] font-black uppercase tracking-widest text-neutral-400">Waktu / Tanggal</th>
+                          <th className="px-10 py-6 text-right text-[10px] font-black uppercase tracking-widest text-neutral-400">Aksi</th>
+                        </>
+                      )}
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-neutral-50/50">
-                    {filteredData.map((item) => (
-                      <tr key={item.id} className="hover:bg-neutral-50/20 transition-all group">
-                        <td className="px-10 py-8">
-                           <div className="flex items-center gap-4">
-                              <div className="h-12 w-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 border border-emerald-100"><UserIcon className="h-6 w-6" /></div>
-                              <div>
-                                 <span className="font-black text-slate-900 block uppercase tracking-tight">{item.name}</span>
-                                 <Badge className="mt-1 bg-white border border-neutral-100 text-neutral-400 text-[10px] font-bold py-0 h-5 px-2 rounded-lg">{categories.find(c => c.value === item.category)?.label || item.category}</Badge>
-                              </div>
-                           </div>
-                        </td>
-                        <td className="px-10 py-8">
-                          <Badge className={`rounded-xl px-4 py-1.5 font-black text-[9px] uppercase tracking-widest border-none ${item.type === 'KHOTIB' ? 'bg-orange-50 text-orange-600' : item.type.includes('IMAM') ? 'bg-indigo-50 text-indigo-600' : 'bg-emerald-50 text-emerald-600'}`}>
-                            {allTaskTypes.find(t => t.value === item.type)?.label || item.type}
-                          </Badge>
-                        </td>
-                        <td className="px-10 py-8">
-                           <div className="flex flex-col">
-                              <span className="text-sm font-black text-[#0b3d2e]">{new Date(item.date).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</span>
-                              <span className="text-[10px] text-neutral-400 font-medium italic mt-0.5">{item.description || 'Tanpa keterangan tambahan'}</span>
-                           </div>
-                        </td>
-                        <td className="px-10 py-8 text-right">
-                           <div className="flex justify-end gap-2">
-                               {canUpdate && <Button variant="ghost" size="icon" className="rounded-xl h-10 w-10 text-blue-500 hover:bg-blue-50" onClick={() => openEdit(item)}><Edit2 className="h-4 w-4" /></Button>}
-                               {canDelete && <Button variant="ghost" size="icon" className="rounded-xl h-10 w-10 text-rose-500 hover:bg-rose-50" onClick={() => handleDelete(item.id)}><Trash2 className="h-4 w-4" /></Button>}
-                           </div>
-                        </td>
-                      </tr>
-                    ))}
+                    {activeTab === 'TARAWIH' ? (
+                      (() => {
+                        const nightGroups: { [key: string]: any[] } = {};
+                        filteredData.forEach(item => {
+                          const m = item.description?.match(/Malam Ke-(\d+)/);
+                          const night = m ? m[1] : 'Lainnya';
+                          if (!nightGroups[night]) nightGroups[night] = [];
+                          nightGroups[night].push(item);
+                        });
+
+                        const lineupGroups: { nights: number[], items: any[] }[] = [];
+                        Object.entries(nightGroups).forEach(([night, items]) => {
+                          const lineupKey = items.sort((a, b) => a.type.localeCompare(b.type))
+                                                .map(it => `${it.type}:${it.name}`).join('|');
+                          const existing = lineupGroups.find(g => 
+                            g.items.sort((a, b) => a.type.localeCompare(b.type))
+                                   .map(it => `${it.type}:${it.name}`).join('|') === lineupKey
+                          );
+                          
+                          if (existing && night !== 'Lainnya') {
+                            existing.nights.push(parseInt(night));
+                          } else {
+                            lineupGroups.push({ 
+                              nights: night === 'Lainnya' ? [] : [parseInt(night)], 
+                              items 
+                            });
+                          }
+                        });
+
+                        return lineupGroups.sort((a, b) => (a.nights[0] || 0) - (b.nights[0] || 0)).map((group, idx) => {
+                          group.nights.sort((a, b) => a - b);
+                          let nightLabel = "";
+                          if (group.nights.length > 0) {
+                            const ranges = [];
+                            let s = group.nights[0], e = s;
+                            for (let i = 1; i <= group.nights.length; i++) {
+                              if (i < group.nights.length && group.nights[i] === e + 1) e = group.nights[i];
+                              else {
+                                ranges.push(s === e ? s.toString() : `${s}-${e}`);
+                                if (i < group.nights.length) s = group.nights[i], e = s;
+                              }
+                            }
+                            nightLabel = `Malam Ke ${ranges.join(', ')}`;
+                          } else nightLabel = "Lainnya";
+
+                          return (
+                            <tr key={idx} className="hover:bg-neutral-50/20 transition-all group">
+                              <td className="px-10 py-8 font-black text-[#0b3d2e] whitespace-nowrap">
+                                {nightLabel}
+                              </td>
+                              <td className="px-10 py-8">
+                                <div className="grid grid-cols-1 gap-2">
+                                  {group.items.map(it => (
+                                    <div key={it.id} className="flex items-center gap-2">
+                                      <Badge variant="outline" className="text-[8px] font-black uppercase px-2 py-0 h-4 border-neutral-200 text-neutral-400">
+                                        {allTaskTypes.find(t => t.value === it.type)?.label || it.type}
+                                      </Badge>
+                                      <span className="text-sm font-bold text-slate-700">{it.name}</span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </td>
+                              <td className="px-10 py-8 text-right">
+                                <span className="text-[10px] text-neutral-300 italic">Pengecekan via tabel rekap PDF</span>
+                              </td>
+                            </tr>
+                          );
+                        });
+                      })()
+                    ) : (
+                      filteredData.map((item) => (
+                        <tr key={item.id} className="hover:bg-neutral-50/20 transition-all group">
+                          <td className="px-10 py-8">
+                             <div className="flex items-center gap-4">
+                                <div className="h-12 w-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 border border-emerald-100 group-hover:scale-110 transition-transform">
+                                   <UserIcon className="h-6 w-6" />
+                                </div>
+                                <div>
+                                   <span className="font-black text-slate-900 block uppercase tracking-tight">{item.name}</span>
+                                   <Badge className="mt-1 bg-white border border-neutral-100 text-neutral-400 text-[10px] font-bold py-0 h-5 px-2 rounded-lg">{categories.find(c => c.value === item.category)?.label || item.category}</Badge>
+                                </div>
+                             </div>
+                          </td>
+                          <td className="px-10 py-8">
+                            <Badge className={`rounded-xl px-4 py-1.5 font-black text-[9px] uppercase tracking-widest border-none ${item.type === 'KHOTIB' ? 'bg-orange-50 text-orange-600' : item.type.includes('IMAM') ? 'bg-indigo-50 text-indigo-600' : 'bg-emerald-50 text-emerald-600'}`}>
+                              {allTaskTypes.find(t => t.value === item.type)?.label || item.type}
+                            </Badge>
+                          </td>
+                          <td className="px-10 py-8">
+                             <div className="flex flex-col">
+                                <span className="text-sm font-black text-[#0b3d2e]">{new Date(item.date).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</span>
+                                <span className="text-[10px] text-neutral-400 font-medium italic mt-0.5">{item.description || 'Tanpa keterangan tambahan'}</span>
+                             </div>
+                          </td>
+                          <td className="px-10 py-8 text-right">
+                             <div className="flex justify-end gap-2">
+                                 {canUpdate && <Button variant="ghost" size="icon" className="rounded-xl h-10 w-10 text-blue-500 hover:bg-blue-50" onClick={() => openEdit(item)}><Edit2 className="h-4 w-4" /></Button>}
+                                 {canDelete && <Button variant="ghost" size="icon" className="rounded-xl h-10 w-10 text-rose-500 hover:bg-rose-50" onClick={() => handleDelete(item.id)}><Trash2 className="h-4 w-4" /></Button>}
+                             </div>
+                          </td>
+                        </tr>
+                      ))
+                    )}
                   </tbody>
                 </table>
               </div>
