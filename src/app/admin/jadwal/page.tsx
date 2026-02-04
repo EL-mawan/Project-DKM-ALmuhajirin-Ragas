@@ -370,8 +370,10 @@ export default function JadwalTugasPage() {
     data
       .filter(item => item.category === 'TARAWIH')
       .map(item => {
-        const match = item.description?.match(/Malam Ke-(\d+)/);
-        return match ? match[1] : null;
+        if (!item.description) return null;
+        // Robust regex to extract the first number from description (assuming it's the night number)
+        const match = item.description.match(/(\d+)/);
+        return match ? parseInt(match[0], 10).toString() : null;
       })
       .filter(Boolean) as string[]
   );
@@ -427,11 +429,11 @@ export default function JadwalTugasPage() {
                                 {Array.from({ length: 30 }, (_, i) => i + 1).map(num => {
                                     const isFilled = filledNights.has(num.toString());
                                     return (
-                                        <label key={num} className={`flex flex-col items-center gap-1 ${isFilled ? 'opacity-30 cursor-not-allowed' : 'cursor-pointer group'}`}>
+                                        <label key={num} className={`flex flex-col items-center gap-1 relative ${isFilled ? 'opacity-30 cursor-not-allowed' : 'cursor-pointer group'}`}>
                                             <input 
                                                 type="checkbox" 
-                                                className={`w-5 h-5 rounded-lg border-neutral-300 text-[#0b3d2e] focus:ring-emerald-500 transition-all ${isFilled ? 'cursor-not-allowed' : 'cursor-pointer'}`}
-                                                checked={tarawihData.malamKe.includes(num.toString())}
+                                                className={`w-5 h-5 rounded-lg border-neutral-300 text-[#0b3d2e] focus:ring-emerald-500 transition-all ${isFilled ? 'cursor-not-allowed bg-neutral-200' : 'cursor-pointer'}`}
+                                                checked={isFilled ? true : tarawihData.malamKe.includes(num.toString())}
                                                 disabled={isFilled}
                                                 onChange={(e) => {
                                                     const val = num.toString()
@@ -442,7 +444,8 @@ export default function JadwalTugasPage() {
                                                     }
                                                 }}
                                             />
-                                            <span className={`text-[9px] font-bold ${isFilled ? 'text-neutral-300' : 'text-neutral-400 group-hover:text-emerald-700'}`}>{num}</span>
+                                            <span className={`text-[9px] font-black ${isFilled ? 'text-[#0b3d2e]/50' : 'text-neutral-400 group-hover:text-emerald-700'}`}>{num}</span>
+                                            {isFilled && <div className="absolute -top-1 -right-1 h-2 w-2 bg-emerald-500 rounded-full border border-white shadow-sm"></div>}
                                         </label>
                                     );
                                 })}
