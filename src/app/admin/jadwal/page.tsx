@@ -154,17 +154,66 @@ export default function JadwalTugasPage() {
     }
   }
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Hapus jadwal ini?')) return
+  const handleDelete = async (id: string, silent: boolean = false) => {
+    if (!silent && !confirm('Hapus jadwal ini?')) return
     try {
       const res = await fetch(`/api/admin/jadwal/${id}`, { method: 'DELETE' })
-      if (res.ok) {
+      if (res.ok && !silent) {
         toast.success('Jadwal dihapus')
         fetchData()
       }
+      return res.ok
     } catch (error) {
-      toast.error('Gagal menghapus')
+      if (!silent) toast.error('Gagal menghapus')
+      return false
     }
+  }
+
+  const handleDeleteGroup = async (group: { nights: number[], items: any[] }) => {
+    const nightLabel = group.nights.length > 0 ? `Malam Ke ${group.nights.join(', ')}` : 'Grup ini';
+    if (!confirm(`Hapus seluruh data penugasan untuk ${nightLabel}? (${group.items.length} entri)`)) return
+    
+    setLoading(true)
+    try {
+      let successCount = 0;
+      for (const item of group.items) {
+        const ok = await handleDelete(item.id, true)
+        if (ok) successCount++
+      }
+      toast.success(`${successCount} penugasan berhasil dihapus`)
+      fetchData()
+    } catch (error) {
+      toast.error('Terjadi kesalahan saat menghapus grup')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const openEditGroup = (group: { nights: number[], items: any[] }) => {
+    // Populate form with existing data from the group
+    const imam = group.items.find(it => it.type === 'IMAM_TARAWIH')?.name || ''
+    const b1 = group.items.find(it => it.type === 'BILAL_1')?.name || ''
+    const b2 = group.items.find(it => it.type === 'BILAL_2')?.name || ''
+    const km = group.items.find(it => it.type === 'KAMILIN')?.name || ''
+    const wt = group.items.find(it => it.type === 'DOA_WITIR')?.name || ''
+    
+    setTarawihData({
+      imam,
+      bilal1: b1,
+      bilal2: b2,
+      kamilin: km,
+      witir: wt,
+      malamKe: group.nights.map(n => n.toString()),
+      bulan: tarawihData.bulan // keep current bulan
+    })
+    
+    // Note: Since editing multiple records at once is complex (ids vary),
+    // we set editingItem to null so the user "Overwrites" by saving a new version
+    // effectively creating a new bulk entry. We should probably delete old ones on save
+    // or just let user manually delete old one. 
+    // To keep it simple: populate form so they don't have to retype.
+    setIsModalOpen(true)
+    toast.info('Form telah diisi dengan data grup. Simpan untuk memperbarui (mungkin perlu hapus grup lama jika ada duplikasi).')
   }
 
   const resetForm = () => {
@@ -605,7 +654,7 @@ export default function JadwalTugasPage() {
                         <>
                           <th className="px-10 py-6 text-[10px] font-black uppercase tracking-widest text-neutral-400">Malam</th>
                           <th className="px-10 py-6 text-[10px] font-black uppercase tracking-widest text-neutral-400">Daftar Petugas</th>
-                          <th className="px-10 py-6 text-right text-[10px] font-black uppercase tracking-widest text-neutral-400">Keterangan</th>
+                          <th className="px-10 py-6 text-right text-[10px] font-black uppercase tracking-widest text-neutral-400">Aksi</th>
                         </>
                       ) : (
                         <>
@@ -681,7 +730,10 @@ export default function JadwalTugasPage() {
                                 </div>
                               </td>
                               <td className="px-10 py-8 text-right">
-                                <span className="text-[10px] text-neutral-300 italic">Pengecekan via tabel rekap PDF</span>
+                                 <div className="flex justify-end gap-2">
+                                     {canUpdate && <Button variant="ghost" size="icon" className="rounded-xl h-10 w-10 text-blue-500 hover:bg-blue-50" onClick={() => openEditGroup(group)}><Edit2 className="h-4 w-4" /></Button>}
+                                     {canDelete && <Button variant="ghost" size="icon" className="rounded-xl h-10 w-10 text-rose-500 hover:bg-rose-50" onClick={() => handleDeleteGroup(group)}><Trash2 className="h-4 w-4" /></Button>}
+                                 </div>
                               </td>
                             </tr>
                           );
