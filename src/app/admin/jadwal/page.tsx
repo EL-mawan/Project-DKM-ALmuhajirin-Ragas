@@ -426,7 +426,9 @@ export default function JadwalTugasPage() {
     doc.setFontSize(12).text('Kp. Ragas Grenyang Desa Argawana Kecamatan Puloampel', centerX + 10, 25, { align: 'center' })
     doc.setFontSize(11).setFont('times', 'italic').text('Jadwal Tugas Sholat Jum\'at', centerX, 35, { align: 'center' })
     doc.setLineWidth(0.8).line(15, 38, 195, 38)
-    doc.setFont('times', 'normal').setFontSize(11).text(`Tanggal :        ${formattedDate}`, 30, 48)
+    doc.setFont('times', 'normal').setFontSize(11)
+    doc.text('Tanggal', 30, 48)
+    doc.text(`: ${formattedDate}`, 48, 48)
 
     const startY = 55
     const rowHeight = 10
@@ -464,7 +466,9 @@ export default function JadwalTugasPage() {
     doc.setFontSize(12).setFont('times', 'italic').text('Jadwal Tugas Sholat Tarawih', centerX + 10, 23, { align: 'center' })
     doc.setLineWidth(0.5).line(15, 28, 195, 28)
     
-    doc.setFontSize(10).setFont('times', 'normal').text(`Bulan        : ${tarawihData.bulan}`, 15, 35)
+    doc.setFontSize(10).setFont('times', 'normal')
+    doc.text('Bulan', 15, 35)
+    doc.text(`: ${tarawihData.bulan}`, 35, 35)
 
     // Table Header
     const startY = 42
@@ -542,9 +546,12 @@ export default function JadwalTugasPage() {
     doc.setLineWidth(0.5).line(15, 35, 195, 35)
     
     doc.setFontSize(11).setFont('times', 'normal')
-    doc.text(`Tanggal     : ${tgl}`, 15, 45)
-    doc.text(`Bulan        : ${bln}`, 15, 52)
-    doc.text(`Tahun        : ${thn}`, 15, 59)
+    doc.text('Tanggal', 15, 45)
+    doc.text(`: ${tgl}`, 35, 45)
+    doc.text('Bulan', 15, 52)
+    doc.text(`: ${bln}`, 35, 52)
+    doc.text('Tahun', 15, 59)
+    doc.text(`: ${thn}`, 35, 59)
 
     const startY = 68
     const rowHeight = 12
