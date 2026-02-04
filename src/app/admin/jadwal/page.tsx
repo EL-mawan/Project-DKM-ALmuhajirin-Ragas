@@ -181,9 +181,14 @@ export default function JadwalTugasPage() {
     const pageWidth = doc.internal.pageSize.getWidth()
     const centerX = pageWidth / 2
 
-    // --- LOGO PLACEHOLDER ---
-    doc.setDrawColor(0)
-    doc.circle(30, 20, 10, 'S') // Placeholder for the circular logo
+    // --- LOGO ---
+    try {
+      doc.addImage('/logo.png', 'PNG', 20, 10, 20, 20)
+    } catch (e) {
+      console.error('Failed to load logo in PDF:', e)
+      doc.setDrawColor(0)
+      doc.circle(30, 20, 10, 'S')
+    }
 
     // --- HEADER ---
     doc.setFontSize(14)
