@@ -525,7 +525,7 @@ export default function JadwalTugasPage() {
                            </div>
                         </td>
                         <td className="px-10 py-8 text-right">
-                           <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all translate-x-2 group-hover:translate-x-0">
+                           <div className="flex justify-end gap-2">
                               {item.category === 'JUMAT' && (
                                 <Button variant="ghost" size="icon" className="rounded-xl h-10 w-10 text-emerald-600 hover:bg-emerald-50" onClick={() => generatePDF(new Date(item.date).toISOString().split('T')[0])}>
                                    <Download className="h-4 w-4" />
