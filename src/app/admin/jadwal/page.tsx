@@ -472,9 +472,21 @@ export default function JadwalTugasPage() {
               </CardTitle>
               <p className="text-xs text-neutral-400 mt-1 italic font-medium">Monitoring tugas aktif masjid.</p>
             </div>
-            <Button variant="outline" size="sm" onClick={fetchData} disabled={loading} className="rounded-xl border-neutral-200 text-neutral-500 hover:text-emerald-600 hover:bg-emerald-50">
-                Refresh
-            </Button>
+            <div className="flex items-center gap-2">
+              {activeTab === 'JUMAT' && filteredData.length > 0 && (
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => generatePDF(new Date(filteredData[0].date).toISOString().split('T')[0])} 
+                  className="rounded-xl border-emerald-100 text-emerald-600 hover:bg-emerald-50 h-9 px-4 font-black uppercase text-[10px] tracking-widest"
+                >
+                  <Download className="h-4 w-4 mr-2" /> Cetak PDF
+                </Button>
+              )}
+              <Button variant="outline" size="sm" onClick={fetchData} disabled={loading} className="rounded-xl border-neutral-200 text-neutral-500 hover:text-emerald-600 hover:bg-emerald-50 h-9 px-4 font-black uppercase text-[10px] tracking-widest">
+                  Refresh
+              </Button>
+            </div>
           </CardHeader>
           <CardContent className="p-0">
             {loading ? (
@@ -543,21 +555,16 @@ export default function JadwalTugasPage() {
                         </td>
                         <td className="px-10 py-8 text-right">
                            <div className="flex justify-end gap-2">
-                              {item.category === 'JUMAT' && (
-                                <Button variant="ghost" size="icon" className="rounded-xl h-10 w-10 text-emerald-600 hover:bg-emerald-50" onClick={() => generatePDF(new Date(item.date).toISOString().split('T')[0])}>
-                                   <Download className="h-4 w-4" />
-                                </Button>
-                              )}
-                              {canUpdate && (
-                                <Button variant="ghost" size="icon" className="rounded-xl h-10 w-10 text-blue-500 hover:bg-blue-50" onClick={() => openEdit(item)}>
-                                   <Edit2 className="h-4 w-4" />
-                                </Button>
-                              )}
-                              {canDelete && (
-                                <Button variant="ghost" size="icon" className="rounded-xl h-10 w-10 text-rose-500 hover:bg-rose-50" onClick={() => handleDelete(item.id)}>
-                                   <Trash2 className="h-4 w-4" />
-                                </Button>
-                              )}
+                               {canUpdate && (
+                                 <Button variant="ghost" size="icon" className="rounded-xl h-10 w-10 text-blue-500 hover:bg-blue-50" onClick={() => openEdit(item)}>
+                                    <Edit2 className="h-4 w-4" />
+                                 </Button>
+                               )}
+                               {canDelete && (
+                                 <Button variant="ghost" size="icon" className="rounded-xl h-10 w-10 text-rose-500 hover:bg-rose-50" onClick={() => handleDelete(item.id)}>
+                                    <Trash2 className="h-4 w-4" />
+                                 </Button>
+                               )}
                            </div>
                         </td>
                       </tr>
