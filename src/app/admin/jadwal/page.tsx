@@ -871,9 +871,23 @@ export default function JadwalTugasPage() {
                     )}
                   </div>
 
-                  <DialogFooter className="pt-4">
-                    <Button form="jadwal-form" type="submit" disabled={loading} className="w-full h-14 rounded-2xl bg-[#0b3d2e] hover:bg-[#062c21] font-black uppercase tracking-widest text-sm shadow-xl">
-                      {loading ? 'Menyimpan...' : (editingItem ? 'Simpan Perubahan' : 'Terbitkan Jadwal')}
+                  <DialogFooter className="pt-4 gap-3 flex-row sm:justify-end">
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      onClick={() => setIsModalOpen(false)} 
+                      disabled={loading}
+                      className="flex-1 h-14 rounded-2xl border-neutral-200 text-neutral-400 hover:text-red-600 hover:bg-red-50 font-black uppercase tracking-widest text-[10px] sm:text-xs"
+                    >
+                      Batal
+                    </Button>
+                    <Button 
+                      form="jadwal-form" 
+                      type="submit" 
+                      disabled={loading} 
+                      className="flex-[2] h-14 rounded-2xl bg-[#0b3d2e] hover:bg-[#062c21] font-black uppercase tracking-widest text-[10px] sm:text-xs shadow-xl"
+                    >
+                      {loading ? 'Menyimpan...' : (editingItem ? 'Simpan' : 'Terbitkan')}
                     </Button>
                   </DialogFooter>
                 </form>
