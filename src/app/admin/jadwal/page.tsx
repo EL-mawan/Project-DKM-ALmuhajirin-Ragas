@@ -646,136 +646,238 @@ export default function JadwalTugasPage() {
                  <p className="text-lg font-bold text-neutral-300 italic">{search ? `Tidak ada hasil untuk "${search}"` : 'Belum ada jadwal di kategori ini'}</p>
               </div>
             ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-left">
-                  <thead>
-                    <tr className="bg-neutral-50/50">
+              <>
+                {/* Desktop View (Table) */}
+                <div className="hidden md:block overflow-x-auto">
+                  <table className="w-full text-left">
+                    <thead>
+                      <tr className="bg-neutral-50/50">
+                        {activeTab === 'TARAWIH' ? (
+                          <>
+                            <th className="px-10 py-6 text-[10px] font-black uppercase tracking-widest text-neutral-400">Malam</th>
+                            <th className="px-10 py-6 text-[10px] font-black uppercase tracking-widest text-neutral-400">Daftar Petugas</th>
+                            <th className="px-10 py-6 text-right text-[10px] font-black uppercase tracking-widest text-neutral-400">Aksi</th>
+                          </>
+                        ) : (
+                          <>
+                            <th className="px-10 py-6 text-[10px] font-black uppercase tracking-widest text-neutral-400">Petugas</th>
+                            <th className="px-10 py-6 text-[10px] font-black uppercase tracking-widest text-neutral-400">Jenis Tugas</th>
+                            <th className="px-10 py-6 text-[10px] font-black uppercase tracking-widest text-neutral-400">Waktu / Tanggal</th>
+                            <th className="px-10 py-6 text-right text-[10px] font-black uppercase tracking-widest text-neutral-400">Aksi</th>
+                          </>
+                        )}
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-neutral-50/50">
                       {activeTab === 'TARAWIH' ? (
-                        <>
-                          <th className="px-10 py-6 text-[10px] font-black uppercase tracking-widest text-neutral-400">Malam</th>
-                          <th className="px-10 py-6 text-[10px] font-black uppercase tracking-widest text-neutral-400">Daftar Petugas</th>
-                          <th className="px-10 py-6 text-right text-[10px] font-black uppercase tracking-widest text-neutral-400">Aksi</th>
-                        </>
-                      ) : (
-                        <>
-                          <th className="px-10 py-6 text-[10px] font-black uppercase tracking-widest text-neutral-400">Petugas</th>
-                          <th className="px-10 py-6 text-[10px] font-black uppercase tracking-widest text-neutral-400">Jenis Tugas</th>
-                          <th className="px-10 py-6 text-[10px] font-black uppercase tracking-widest text-neutral-400">Waktu / Tanggal</th>
-                          <th className="px-10 py-6 text-right text-[10px] font-black uppercase tracking-widest text-neutral-400">Aksi</th>
-                        </>
-                      )}
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-neutral-50/50">
-                    {activeTab === 'TARAWIH' ? (
-                      (() => {
-                        const nightGroups: { [key: string]: any[] } = {};
-                        filteredData.forEach(item => {
-                          const m = item.description?.match(/Malam Ke-(\d+)/);
-                          const night = m ? m[1] : 'Lainnya';
-                          if (!nightGroups[night]) nightGroups[night] = [];
-                          nightGroups[night].push(item);
-                        });
+                        (() => {
+                          const nightGroups: { [key: string]: any[] } = {};
+                          filteredData.forEach(item => {
+                            const m = item.description?.match(/(\d+)/);
+                            const night = m ? m[0] : 'Lainnya';
+                            if (!nightGroups[night]) nightGroups[night] = [];
+                            nightGroups[night].push(item);
+                          });
 
-                        const lineupGroups: { nights: number[], items: any[] }[] = [];
-                        Object.entries(nightGroups).forEach(([night, items]) => {
-                          const lineupKey = items.sort((a, b) => a.type.localeCompare(b.type))
-                                                .map(it => `${it.type}:${it.name}`).join('|');
-                          const existing = lineupGroups.find(g => 
-                            g.items.sort((a, b) => a.type.localeCompare(b.type))
-                                   .map(it => `${it.type}:${it.name}`).join('|') === lineupKey
-                          );
-                          
-                          if (existing && night !== 'Lainnya') {
-                            existing.nights.push(parseInt(night));
-                          } else {
-                            lineupGroups.push({ 
-                              nights: (night === 'Lainnya' ? [] : [parseInt(night)]) as number[], 
-                              items 
-                            });
-                          }
-                        });
-
-                        return lineupGroups.sort((a, b) => (a.nights[0] || 0) - (b.nights[0] || 0)).map((group, idx) => {
-                          group.nights.sort((a, b) => a - b);
-                          let nightLabel = "";
-                          if (group.nights.length > 0) {
-                            const ranges: string[] = [];
-                            let s = group.nights[0], e = s;
-                            for (let i = 1; i <= group.nights.length; i++) {
-                              if (i < group.nights.length && group.nights[i] === e + 1) e = group.nights[i];
-                              else {
-                                ranges.push(s === e ? s.toString() : `${s}-${e}`);
-                                if (i < group.nights.length) s = group.nights[i], e = s;
-                              }
+                          const lineupGroups: { nights: number[], items: any[] }[] = [];
+                          Object.entries(nightGroups).forEach(([night, items]) => {
+                            const lineupKey = items.sort((a, b) => a.type.localeCompare(b.type))
+                                                  .map(it => `${it.type}:${it.name}`).join('|');
+                            const existing = lineupGroups.find(g => 
+                              g.items.sort((a, b) => a.type.localeCompare(b.type))
+                                     .map(it => `${it.type}:${it.name}`).join('|') === lineupKey
+                            );
+                            
+                            if (existing && night !== 'Lainnya') {
+                              existing.nights.push(parseInt(night));
+                            } else {
+                              lineupGroups.push({ 
+                                nights: (night === 'Lainnya' ? [] : [parseInt(night)]) as number[], 
+                                items 
+                              });
                             }
-                            nightLabel = `Malam Ke ${ranges.join(', ')}`;
-                          } else nightLabel = "Lainnya";
+                          });
 
-                          return (
-                            <tr key={idx} className="hover:bg-neutral-50/20 transition-all group">
-                              <td className="px-10 py-8 font-black text-[#0b3d2e] whitespace-nowrap">
-                                {nightLabel}
-                              </td>
-                              <td className="px-10 py-8">
-                                <div className="grid grid-cols-1 gap-2">
-                                  {group.items.map(it => (
-                                    <div key={it.id} className="flex items-center gap-2">
-                                      <Badge variant="outline" className="text-[8px] font-black uppercase px-2 py-0 h-4 border-neutral-200 text-neutral-400">
-                                        {allTaskTypes.find(t => t.value === it.type)?.label || it.type}
-                                      </Badge>
-                                      <span className="text-sm font-bold text-slate-700">{it.name}</span>
-                                    </div>
-                                  ))}
-                                </div>
-                              </td>
-                              <td className="px-10 py-8 text-right">
-                                 <div className="flex justify-end gap-2">
-                                     {canUpdate && <Button variant="ghost" size="icon" className="rounded-xl h-10 w-10 text-blue-500 hover:bg-blue-50" onClick={() => openEditGroup(group)}><Edit2 className="h-4 w-4" /></Button>}
-                                     {canDelete && <Button variant="ghost" size="icon" className="rounded-xl h-10 w-10 text-rose-500 hover:bg-rose-50" onClick={() => handleDeleteGroup(group)}><Trash2 className="h-4 w-4" /></Button>}
-                                 </div>
-                              </td>
-                            </tr>
-                          );
-                        });
-                      })()
-                    ) : (
-                      filteredData.map((item) => (
-                        <tr key={item.id} className="hover:bg-neutral-50/20 transition-all group">
-                          <td className="px-10 py-8">
-                             <div className="flex items-center gap-4">
-                                <div className="h-12 w-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 border border-emerald-100 group-hover:scale-110 transition-transform">
-                                   <UserIcon className="h-6 w-6" />
-                                </div>
-                                <div>
-                                   <span className="font-black text-slate-900 block uppercase tracking-tight">{item.name}</span>
-                                   <Badge className="mt-1 bg-white border border-neutral-100 text-neutral-400 text-[10px] font-bold py-0 h-5 px-2 rounded-lg">{categories.find(c => c.value === item.category)?.label || item.category}</Badge>
-                                </div>
-                             </div>
-                          </td>
-                          <td className="px-10 py-8">
-                            <Badge className={`rounded-xl px-4 py-1.5 font-black text-[9px] uppercase tracking-widest border-none ${item.type === 'KHOTIB' ? 'bg-orange-50 text-orange-600' : item.type.includes('IMAM') ? 'bg-indigo-50 text-indigo-600' : 'bg-emerald-50 text-emerald-600'}`}>
-                              {allTaskTypes.find(t => t.value === item.type)?.label || item.type}
-                            </Badge>
-                          </td>
-                          <td className="px-10 py-8">
-                             <div className="flex flex-col">
-                                <span className="text-sm font-black text-[#0b3d2e]">{new Date(item.date).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</span>
-                                <span className="text-[10px] text-neutral-400 font-medium italic mt-0.5">{item.description || 'Tanpa keterangan tambahan'}</span>
-                             </div>
-                          </td>
-                          <td className="px-10 py-8 text-right">
-                             <div className="flex justify-end gap-2">
-                                 {canUpdate && <Button variant="ghost" size="icon" className="rounded-xl h-10 w-10 text-blue-500 hover:bg-blue-50" onClick={() => openEdit(item)}><Edit2 className="h-4 w-4" /></Button>}
-                                 {canDelete && <Button variant="ghost" size="icon" className="rounded-xl h-10 w-10 text-rose-500 hover:bg-rose-50" onClick={() => handleDelete(item.id)}><Trash2 className="h-4 w-4" /></Button>}
-                             </div>
-                          </td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-              </div>
+                          return lineupGroups.sort((a, b) => (a.nights[0] || 0) - (b.nights[0] || 0)).map((group, idx) => {
+                            group.nights.sort((a, b) => a - b);
+                            let nightLabel = "";
+                            if (group.nights.length > 0) {
+                              const ranges: string[] = [];
+                              let s = group.nights[0], e = s;
+                              for (let i = 1; i <= group.nights.length; i++) {
+                                if (i < group.nights.length && group.nights[i] === e + 1) e = group.nights[i];
+                                else {
+                                  ranges.push(s === e ? s.toString() : `${s}-${e}`);
+                                  if (i < group.nights.length) s = group.nights[i], e = s;
+                                }
+                              }
+                              nightLabel = `Malam Ke ${ranges.join(', ')}`;
+                            } else nightLabel = "Lainnya";
+
+                            return (
+                              <tr key={idx} className="hover:bg-neutral-50/20 transition-all group">
+                                <td className="px-10 py-8 font-black text-[#0b3d2e] whitespace-nowrap text-sm">
+                                  {nightLabel}
+                                </td>
+                                <td className="px-10 py-8">
+                                  <div className="grid grid-cols-1 gap-2">
+                                    {group.items.map(it => (
+                                      <div key={it.id} className="flex items-center gap-2">
+                                        <Badge variant="outline" className="text-[8px] font-black uppercase px-2 py-0 h-4 border-neutral-200 text-neutral-400">
+                                          {allTaskTypes.find(t => t.value === it.type)?.label || it.type}
+                                        </Badge>
+                                        <span className="text-sm font-bold text-slate-700">{it.name}</span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </td>
+                                <td className="px-10 py-8 text-right">
+                                   <div className="flex justify-end gap-2">
+                                       {canUpdate && <Button variant="ghost" size="icon" className="rounded-xl h-10 w-10 text-blue-500 hover:bg-blue-50" onClick={() => openEditGroup(group)}><Edit2 className="h-4 w-4" /></Button>}
+                                       {canDelete && <Button variant="ghost" size="icon" className="rounded-xl h-10 w-10 text-rose-500 hover:bg-rose-50" onClick={() => handleDeleteGroup(group)}><Trash2 className="h-4 w-4" /></Button>}
+                                   </div>
+                                </td>
+                              </tr>
+                            );
+                          });
+                        })()
+                      ) : (
+                        filteredData.map((item) => (
+                          <tr key={item.id} className="hover:bg-neutral-50/20 transition-all group">
+                            <td className="px-10 py-8">
+                               <div className="flex items-center gap-4">
+                                  <div className="h-12 w-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 border border-emerald-100 group-hover:scale-110 transition-transform">
+                                     <UserIcon className="h-6 w-6" />
+                                  </div>
+                                  <div>
+                                     <span className="font-black text-slate-900 block uppercase tracking-tight">{item.name}</span>
+                                     <Badge className="mt-1 bg-white border border-neutral-100 text-neutral-400 text-[10px] font-bold py-0 h-5 px-2 rounded-lg">{categories.find(c => c.value === item.category)?.label || item.category}</Badge>
+                                  </div>
+                               </div>
+                            </td>
+                            <td className="px-10 py-8">
+                              <Badge className={`rounded-xl px-4 py-1.5 font-black text-[9px] uppercase tracking-widest border-none ${item.type === 'KHOTIB' ? 'bg-orange-50 text-orange-600' : item.type.includes('IMAM') ? 'bg-indigo-50 text-indigo-600' : 'bg-emerald-50 text-emerald-600'}`}>
+                                {allTaskTypes.find(t => t.value === item.type)?.label || item.type}
+                              </Badge>
+                            </td>
+                            <td className="px-10 py-8">
+                               <div className="flex flex-col">
+                                  <span className="text-sm font-black text-[#0b3d2e]">{new Date(item.date).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</span>
+                                  <span className="text-[10px] text-neutral-400 font-medium italic mt-0.5">{item.description || 'Tanpa keterangan tambahan'}</span>
+                               </div>
+                            </td>
+                            <td className="px-10 py-8 text-right">
+                               <div className="flex justify-end gap-2">
+                                   {canUpdate && <Button variant="ghost" size="icon" className="rounded-xl h-10 w-10 text-blue-500 hover:bg-blue-50" onClick={() => openEdit(item)}><Edit2 className="h-4 w-4" /></Button>}
+                                   {canDelete && <Button variant="ghost" size="icon" className="rounded-xl h-10 w-10 text-rose-500 hover:bg-rose-50" onClick={() => handleDelete(item.id)}><Trash2 className="h-4 w-4" /></Button>}
+                               </div>
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Mobile View (Cards) */}
+                <div className="md:hidden divide-y divide-neutral-50 px-6">
+                  {activeTab === 'TARAWIH' ? (
+                    (() => {
+                      const nightGroups: { [key: string]: any[] } = {};
+                      filteredData.forEach(item => {
+                        const m = item.description?.match(/(\d+)/);
+                        const night = m ? m[0] : 'Lainnya';
+                        if (!nightGroups[night]) nightGroups[night] = [];
+                        nightGroups[night].push(item);
+                      });
+
+                      const lineupGroups: { nights: number[], items: any[] }[] = [];
+                      Object.entries(nightGroups).forEach(([night, items]) => {
+                        const lineupKey = items.sort((a, b) => a.type.localeCompare(b.type))
+                                              .map(it => `${it.type}:${it.name}`).join('|');
+                        const existing = lineupGroups.find(g => 
+                          g.items.sort((a, b) => a.type.localeCompare(b.type))
+                                 .map(it => `${it.type}:${it.name}`).join('|') === lineupKey
+                        );
+                        
+                        if (existing && night !== 'Lainnya') {
+                          existing.nights.push(parseInt(night));
+                        } else {
+                          lineupGroups.push({ 
+                            nights: (night === 'Lainnya' ? [] : [parseInt(night)]) as number[], 
+                            items 
+                          });
+                        }
+                      });
+
+                      return lineupGroups.sort((a, b) => (a.nights[0] || 0) - (b.nights[0] || 0)).map((group, idx) => {
+                        group.nights.sort((a, b) => a - b);
+                        let nightLabel = "";
+                        if (group.nights.length > 0) {
+                          const ranges: string[] = [];
+                          let s = group.nights[0], e = s;
+                          for (let i = 1; i <= group.nights.length; i++) {
+                            if (i < group.nights.length && group.nights[i] === e + 1) e = group.nights[i];
+                            else {
+                              ranges.push(s === e ? s.toString() : `${s}-${e}`);
+                              if (i < group.nights.length) s = group.nights[i], e = s;
+                            }
+                          }
+                          nightLabel = `Malam Ke ${ranges.join(', ')}`;
+                        } else nightLabel = "Lainnya";
+
+                        return (
+                          <div key={idx} className="py-8 space-y-4">
+                            <div className="flex justify-between items-start">
+                               <h3 className="font-black text-emerald-900 uppercase tracking-tight text-base">{nightLabel}</h3>
+                               <div className="flex gap-2">
+                                  {canUpdate && <Button variant="ghost" size="icon" className="h-8 w-8 text-blue-500 bg-blue-50 rounded-lg" onClick={() => openEditGroup(group)}><Edit2 className="h-4 w-4" /></Button>}
+                                  {canDelete && <Button variant="ghost" size="icon" className="h-8 w-8 text-rose-500 bg-rose-50 rounded-lg" onClick={() => handleDeleteGroup(group)}><Trash2 className="h-4 w-4" /></Button>}
+                               </div>
+                            </div>
+                            <div className="grid grid-cols-1 gap-2 bg-neutral-50 p-4 rounded-2xl border border-neutral-100 italic">
+                               {group.items.map(it => (
+                                  <div key={it.id} className="flex flex-col gap-0.5">
+                                     <span className="text-[10px] font-black uppercase text-neutral-400">{allTaskTypes.find(t => t.value === it.type)?.label || it.type}</span>
+                                     <span className="text-sm font-bold text-slate-700">{it.name}</span>
+                                  </div>
+                               ))}
+                            </div>
+                          </div>
+                        )
+                      })
+                    })()
+                  ) : (
+                    filteredData.map((item) => (
+                      <div key={item.id} className="py-8 space-y-4">
+                         <div className="flex items-center gap-4">
+                            <div className="h-10 w-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 border border-emerald-100"><UserIcon className="h-5 w-5" /></div>
+                            <div className="flex-1 min-w-0">
+                               <span className="font-black text-slate-900 block uppercase tracking-tight truncate">{item.name}</span>
+                               <div className="flex items-center gap-2 mt-0.5">
+                                  <Badge className={`rounded-lg px-2 py-0 h-4 font-black text-[8px] uppercase tracking-widest border-none ${item.type === 'KHOTIB' ? 'bg-orange-50 text-orange-600' : item.type.includes('IMAM') ? 'bg-indigo-50 text-indigo-600' : 'bg-emerald-50 text-emerald-600'}`}>
+                                    {allTaskTypes.find(t => t.value === item.type)?.label || item.type}
+                                  </Badge>
+                                  <span className="text-[9px] text-neutral-400 font-bold uppercase tracking-wider">{categories.find(c => c.value === item.category)?.label}</span>
+                               </div>
+                            </div>
+                            <div className="flex gap-1">
+                               {canUpdate && <Button variant="ghost" size="icon" className="h-8 w-8 text-blue-500" onClick={() => openEdit(item)}><Edit2 className="h-4 w-4" /></Button>}
+                               {canDelete && <Button variant="ghost" size="icon" className="h-8 w-8 text-rose-500" onClick={() => handleDelete(item.id)}><Trash2 className="h-4 w-4" /></Button>}
+                            </div>
+                         </div>
+                         <div className="bg-neutral-50 p-4 rounded-2xl border border-neutral-100 flex flex-col gap-1 italic">
+                            <div className="flex items-center gap-2 text-[#0b3d2e]">
+                               <Calendar className="h-3 w-3" />
+                               <span className="text-xs font-black">{new Date(item.date).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</span>
+                            </div>
+                            <p className="text-[10px] text-neutral-400 font-medium pl-5">{item.description || 'Tanpa keterangan tambahan'}</p>
+                         </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </>
             )}
           </CardContent>
         </Card>
