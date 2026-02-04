@@ -233,14 +233,26 @@ export default function JadwalTugasPage() {
       // Label Text
       doc.setTextColor(255)
       doc.setFont('times', 'normal')
+      doc.setFontSize(10)
       doc.text(task.label, 17, curY + 6.5)
       
       // Value Cell
       doc.setTextColor(0)
+      doc.setFontSize(11)
       doc.text(':', 15 + labelWidth + 2, curY + 6.5)
       
       // Find the name for this task
-      const assigned = items.find(it => it.type === task.type)?.name || '..................................................................'
+      let assigned = items.find(it => it.type === task.type)?.name || '..................................................................'
+      
+      // Apply Uppercase and 14pt as requested
+      if (assigned.includes('...')) {
+        doc.setFontSize(11)
+      } else {
+        assigned = assigned.toUpperCase()
+        doc.setFontSize(14)
+        doc.setFont('times', 'bold')
+      }
+      
       doc.text(assigned, 15 + labelWidth + 5, curY + 6.5)
       
       // Underline/Border
