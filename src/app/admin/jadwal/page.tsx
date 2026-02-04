@@ -42,6 +42,7 @@ import {
 import { toast } from 'sonner'
 import { useSession } from 'next-auth/react'
 import jsPDF from 'jspdf'
+import { StatusPopup } from '@/components/ui/status-popup'
 
 export default function JadwalTugasPage() {
   const router = useRouter()
@@ -83,6 +84,21 @@ export default function JadwalTugasPage() {
     iqomah: ''
   })
 
+  // State untuk melacak item grup yang sedang diedit (agar bisa dihapus sebelum simpan baru)
+  const [editingGroupItems, setEditingGroupItems] = useState<any[] | null>(null)
+
+  // Status Popup State
+  const [popup, setPopup] = useState<{
+    isOpen: boolean
+    type: 'success' | 'error' | 'loading'
+    title: string
+    description?: string
+  }>({
+    isOpen: false,
+    type: 'success',
+    title: ''
+  })
+
   useEffect(() => {
     setFormData(prev => ({ ...prev, category: activeTab }))
   }, [activeTab])
@@ -112,6 +128,13 @@ export default function JadwalTugasPage() {
     e.preventDefault()
     setLoading(true)
     try {
+      // Jika sedang edit grup, hapus item lama terlebih dahulu
+      if (editingGroupItems) {
+        for (const it of editingGroupItems) {
+          await fetch(`/api/admin/jadwal/${it.id}`, { method: 'DELETE' })
+        }
+      }
+
       if (formData.category === 'TARAWIH' && !editingItem) {
         // Bulk save for Tarawih
         const roles = [
@@ -137,7 +160,12 @@ export default function JadwalTugasPage() {
             })
           }
         }
-        toast.success(`Jadwal Tarawih (${tarawihData.malamKe.length} malam) berhasil disimpan`)
+        setPopup({
+          isOpen: true,
+          type: 'success',
+          title: 'Berhasil!',
+          description: `Jadwal Tarawih (${tarawihData.malamKe.length} malam) telah berhasil disimpan ke sistem.`
+        })
       } else if ((formData.category === 'IDUL_FITRI' || formData.category === 'IDUL_ADHA') && !editingItem) {
         // Bulk save for Eid
         const roles = [
@@ -160,7 +188,12 @@ export default function JadwalTugasPage() {
             })
           });
         }
-        toast.success(`Jadwal ${categories.find(c => c.value === formData.category)?.label} berhasil disimpan`);
+        setPopup({
+          isOpen: true,
+          type: 'success',
+          title: 'Berhasil!',
+          description: `Jadwal ${categories.find(c => c.value === formData.category)?.label} telah berhasil diterbitkan.`
+        })
       } else {
         const url = editingItem ? `/api/admin/jadwal/${editingItem.id}` : '/api/admin/jadwal'
         const method = editingItem ? 'PATCH' : 'POST'
@@ -171,7 +204,12 @@ export default function JadwalTugasPage() {
         })
 
         if (res.ok) {
-          toast.success(editingItem ? 'Jadwal diperbarui' : 'Jadwal berhasil diterbitkan')
+          setPopup({
+            isOpen: true,
+            type: 'success',
+            title: editingItem ? 'Update Berhasil!' : 'Jadwal Terbit!',
+            description: editingItem ? 'Perubahan pada jadwal tugas telah disimpan.' : 'Penugasan baru telah berhasil ditambahkan.'
+          })
         } else {
           throw new Error('Gagal simpan')
         }
@@ -193,7 +231,12 @@ export default function JadwalTugasPage() {
     try {
       const res = await fetch(`/api/admin/jadwal/${id}`, { method: 'DELETE' })
       if (res.ok && !silent) {
-        toast.success('Jadwal dihapus')
+        setPopup({
+          isOpen: true,
+          type: 'success',
+          title: 'Terhapus!',
+          description: 'Data penugasan jadwal telah dihapus dari sistem.'
+        })
         fetchData()
       }
       return res.ok
@@ -214,7 +257,12 @@ export default function JadwalTugasPage() {
         const ok = await handleDelete(item.id, true)
         if (ok) successCount++
       }
-      toast.success(`${successCount} penugasan berhasil dihapus`)
+      setPopup({
+        isOpen: true,
+        type: 'success',
+        title: 'Grup Dihapus!',
+        description: `${successCount} penugasan dalam grup ini telah berhasil dihapus.`
+      })
       fetchData()
     } catch (error) {
       toast.error('Terjadi kesalahan saat menghapus grup')
@@ -261,8 +309,9 @@ export default function JadwalTugasPage() {
       })
     }
     
+    setEditingGroupItems(group.items)
     setIsModalOpen(true)
-    toast.info('Form telah diisi dengan data grup. Simpan untuk memperbarui (mungkin perlu hapus grup lama jika ada duplikasi).')
+    toast.info('Form telah diisi dengan data grup. Simpan untuk memperbarui.')
   }
 
   const resetForm = () => {
@@ -291,6 +340,7 @@ export default function JadwalTugasPage() {
       bilal: '',
       iqomah: ''
     })
+    setEditingGroupItems(null)
   }
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -570,7 +620,7 @@ export default function JadwalTugasPage() {
               <Input placeholder="Cari nama petugas..." value={search} onChange={e => setSearch(e.target.value)} className="pl-11 h-12 rounded-2xl border-neutral-100 bg-white" />
             </div>
             {canCreate && (
-            <Dialog open={isModalOpen} onOpenChange={(open) => { setIsModalOpen(open); if (!open) { setEditingItem(null); resetForm(); } }}>
+            <Dialog open={isModalOpen} onOpenChange={(open) => { setIsModalOpen(open); if (!open) { setEditingItem(null); setEditingGroupItems(null); resetForm(); } }}>
               <DialogTrigger asChild>
                 <Button className="h-12 px-6 rounded-2xl bg-[#0b3d2e] hover:bg-[#062c21] font-black uppercase tracking-widest text-xs">
                   <Plus className="h-4 w-4 mr-2" /> Tambah Jadwal
@@ -578,7 +628,9 @@ export default function JadwalTugasPage() {
               </DialogTrigger>
               <DialogContent className="sm:max-w-[600px] rounded-[2.5rem] p-0 overflow-hidden border-none shadow-2xl">
                 <div className="bg-[#0b3d2e] p-8 text-white">
-                  <DialogTitle className="text-2xl font-black">{activeTab === 'TARAWIH' ? 'Setor Jadwal Tarawih' : (editingItem ? 'Edit Jadwal' : 'Tambah Jadwal')}</DialogTitle>
+                  <DialogTitle className="text-2xl font-black">
+                    {editingGroupItems ? `Update Jadwal ${categories.find(c => c.value === activeTab)?.label}` : (activeTab === 'TARAWIH' ? 'Setor Jadwal Tarawih' : (editingItem ? 'Edit Jadwal' : 'Tambah Jadwal'))}
+                  </DialogTitle>
                   <p className="text-emerald-100/60 text-xs mt-1 italic">
                     {activeTab === 'TARAWIH' ? 'Isi seluruh petugas untuk satu malam sekaligus.' : 'Input penugasan rutin DKM.'}
                   </p>
@@ -1063,6 +1115,14 @@ export default function JadwalTugasPage() {
           </CardContent>
         </Card>
       </div>
+
+      <StatusPopup 
+        isOpen={popup.isOpen}
+        onClose={() => setPopup(prev => ({ ...prev, isOpen: false }))}
+        type={popup.type}
+        title={popup.title}
+        description={popup.description}
+      />
     </AdminLayout>
   )
 }
