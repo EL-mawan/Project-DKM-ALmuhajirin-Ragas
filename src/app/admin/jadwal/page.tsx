@@ -72,6 +72,17 @@ export default function JadwalTugasPage() {
     bulan: 'Ramadhan 1447 H'
   })
 
+  // State khusus untuk Idul Fitri / Idul Adha
+  const [eidData, setEidData] = useState({
+    tanggal: '',
+    bulan: '',
+    tahun: '',
+    imam: '',
+    khotib: '',
+    bilal: '',
+    iqomah: ''
+  })
+
   useEffect(() => {
     setFormData(prev => ({ ...prev, category: activeTab }))
   }, [activeTab])
@@ -127,6 +138,29 @@ export default function JadwalTugasPage() {
           }
         }
         toast.success(`Jadwal Tarawih (${tarawihData.malamKe.length} malam) berhasil disimpan`)
+      } else if ((formData.category === 'IDUL_FITRI' || formData.category === 'IDUL_ADHA') && !editingItem) {
+        // Bulk save for Eid
+        const roles = [
+          { type: 'IMAM_SHOLAT', name: eidData.imam },
+          { type: 'KHOTIB', name: eidData.khotib },
+          { type: 'BILAL', name: eidData.bilal },
+          { type: 'IQOMAH', name: eidData.iqomah }
+        ];
+
+        for (const role of roles) {
+          if (!role.name) continue;
+          await fetch('/api/admin/jadwal', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              ...formData,
+              type: role.type,
+              name: role.name,
+              description: `Tanggal: ${eidData.tanggal}, Bulan: ${eidData.bulan}, Tahun: ${eidData.tahun}`
+            })
+          });
+        }
+        toast.success(`Jadwal ${categories.find(c => c.value === formData.category)?.label} berhasil disimpan`);
       } else {
         const url = editingItem ? `/api/admin/jadwal/${editingItem.id}` : '/api/admin/jadwal'
         const method = editingItem ? 'PATCH' : 'POST'
@@ -169,8 +203,8 @@ export default function JadwalTugasPage() {
     }
   }
 
-  const handleDeleteGroup = async (group: { nights: number[], items: any[] }) => {
-    const nightLabel = group.nights.length > 0 ? `Malam Ke ${group.nights.join(', ')}` : 'Grup ini';
+  const handleDeleteGroup = async (group: { nights: any[], items: any[] }) => {
+    const nightLabel = group.nights.length > 0 ? (typeof group.nights[0] === 'number' ? `Malam Ke ${group.nights.join(', ')}` : group.nights[0]) : 'Grup ini';
     if (!confirm(`Hapus seluruh data penugasan untuk ${nightLabel}? (${group.items.length} entri)`)) return
     
     setLoading(true)
@@ -189,29 +223,44 @@ export default function JadwalTugasPage() {
     }
   }
 
-  const openEditGroup = (group: { nights: number[], items: any[] }) => {
+  const openEditGroup = (group: { nights: any[], items: any[] }) => {
     // Populate form with existing data from the group
-    const imam = group.items.find(it => it.type === 'IMAM_TARAWIH')?.name || ''
-    const b1 = group.items.find(it => it.type === 'BILAL_1')?.name || ''
-    const b2 = group.items.find(it => it.type === 'BILAL_2')?.name || ''
-    const km = group.items.find(it => it.type === 'KAMILIN')?.name || ''
-    const wt = group.items.find(it => it.type === 'DOA_WITIR')?.name || ''
+    if (group.items[0].category === 'TARAWIH') {
+      const imam = group.items.find(it => it.type === 'IMAM_TARAWIH')?.name || ''
+      const b1 = group.items.find(it => it.type === 'BILAL_1')?.name || ''
+      const b2 = group.items.find(it => it.type === 'BILAL_2')?.name || ''
+      const km = group.items.find(it => it.type === 'KAMILIN')?.name || ''
+      const wt = group.items.find(it => it.type === 'DOA_WITIR')?.name || ''
+      
+      setTarawihData({
+        imam,
+        bilal1: b1,
+        bilal2: b2,
+        kamilin: km,
+        witir: wt,
+        malamKe: group.nights.map(n => n.toString()),
+        bulan: tarawihData.bulan // keep current bulan
+      })
+    } else if (group.items[0].category === 'IDUL_FITRI' || group.items[0].category === 'IDUL_ADHA') {
+      const imam = group.items.find(it => it.type === 'IMAM_SHOLAT')?.name || ''
+      const khotib = group.items.find(it => it.type === 'KHOTIB')?.name || ''
+      const bilal = group.items.find(it => it.type === 'BILAL')?.name || ''
+      const iqomah = group.items.find(it => it.type === 'IQOMAH')?.name || ''
+      
+      const desc = group.items[0].description || ''
+      const mt = desc.match(/Tanggal: (.*?), Bulan: (.*?), Tahun: (.*)/)
+
+      setEidData({
+        tanggal: mt ? mt[1] : '',
+        bulan: mt ? mt[2] : '',
+        tahun: mt ? mt[3] : '',
+        imam,
+        khotib,
+        bilal,
+        iqomah
+      })
+    }
     
-    setTarawihData({
-      imam,
-      bilal1: b1,
-      bilal2: b2,
-      kamilin: km,
-      witir: wt,
-      malamKe: group.nights.map(n => n.toString()),
-      bulan: tarawihData.bulan // keep current bulan
-    })
-    
-    // Note: Since editing multiple records at once is complex (ids vary),
-    // we set editingItem to null so the user "Overwrites" by saving a new version
-    // effectively creating a new bulk entry. We should probably delete old ones on save
-    // or just let user manually delete old one. 
-    // To keep it simple: populate form so they don't have to retype.
     setIsModalOpen(true)
     toast.info('Form telah diisi dengan data grup. Simpan untuk memperbarui (mungkin perlu hapus grup lama jika ada duplikasi).')
   }
@@ -233,6 +282,15 @@ export default function JadwalTugasPage() {
       witir: '',
       malamKe: []
     }))
+    setEidData({
+      tanggal: '',
+      bulan: '',
+      tahun: '',
+      imam: '',
+      khotib: '',
+      bilal: '',
+      iqomah: ''
+    })
   }
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -367,6 +425,64 @@ export default function JadwalTugasPage() {
     doc.save('Jadwal_Tarawih.pdf')
   }
 
+  // PDF Idul Fitri / Idul Adha
+  const generateEidPDF = (category: string) => {
+    const doc = new jsPDF()
+    const centerX = doc.internal.pageSize.getWidth() / 2
+    const label = categories.find(c => c.value === category)?.label || 'Sholat Hari Raya'
+    const records = data.filter(d => d.category === category)
+    
+    // Attempt to extract date info from first record's description if any
+    let tgl = eidData.tanggal || '....', bln = eidData.bulan || '....', thn = eidData.tahun || '....'
+    if (records.length > 0 && records[0].description) {
+        const d = records[0].description;
+        const mt = d.match(/Tanggal: (.*?), Bulan: (.*?), Tahun: (.*)/);
+        if (mt) { tgl = mt[1]; bln = mt[2]; thn = mt[3]; }
+    }
+
+    try { doc.addImage('/logo.png', 'PNG', 30, 10, 18, 18) } catch (e) { doc.circle(39, 19, 9, 'S') }
+
+    doc.setFontSize(14).setFont('times', 'bold').text('Dewan Kemakmuran Masjid (DKM) Al-Muhajirin', centerX + 10, 17, { align: 'center' })
+    doc.setFontSize(12).text('Kp. Ragas Grenyang Desa Argawana Kecamatan Puloampel', centerX + 10, 23, { align: 'center' })
+    doc.setFontSize(11).setFont('times', 'italic').text(`Jadwal Tugas ${label}`, centerX, 32, { align: 'center' })
+    doc.setLineWidth(0.5).line(15, 35, 195, 35)
+    
+    doc.setFontSize(11).setFont('times', 'normal')
+    doc.text(`Tanggal     : ${tgl}`, 15, 45)
+    doc.text(`Bulan        : ${bln}`, 15, 52)
+    doc.text(`Tahun        : ${thn}`, 15, 59)
+
+    const startY = 68
+    const rowHeight = 12
+    const labelWidth = 60
+
+    const tasks = [
+        { label: 'Imam Sholat', type: 'IMAM_SHOLAT' },
+        { label: 'Khotib', type: 'KHOTIB' },
+        { label: 'Bilal', type: 'BILAL' },
+        { label: 'Iqomah', type: 'IQOMAH' }
+    ]
+
+    tasks.forEach((task, i) => {
+        const curY = startY + (i * rowHeight)
+        doc.setFillColor(64, 86, 50).rect(15, curY, labelWidth, rowHeight, 'F')
+        doc.setTextColor(255).setFontSize(10).text(task.label, 17, curY + 7.5)
+        doc.setTextColor(0).setFontSize(11).text(':', 15 + labelWidth + 2, curY + 7.5)
+        
+        const name = records.find(it => it.type === task.type)?.name || '..................................................................'
+        doc.text(name, 15 + labelWidth + 5, curY + 7.5)
+        doc.setDrawColor(200).setLineWidth(0.1).line(15 + labelWidth + 4, curY + 9, 195, curY + 9, 'S')
+    })
+
+    const footerY = startY + (tasks.length * rowHeight) + 20
+    doc.text('Mengetahui,', 160, footerY, { align: 'center' })
+    doc.text('Ketua DKM Al-Muhajirin', 160, footerY + 5, { align: 'center' })
+    doc.setFont('times', 'bold').text('H. Agung Gunawan', 160, footerY + 25, { align: 'center' })
+    doc.setLineWidth(0.2).line(140, footerY + 26, 180, footerY + 26)
+
+    doc.save(`Jadwal_${label.replace(/ /g, '_')}.pdf`)
+  }
+
   const filteredData = data.filter(item => {
     const matchSearch = item.name.toLowerCase().includes(search.toLowerCase()) || 
                       item.type.toLowerCase().includes(search.toLowerCase())
@@ -401,7 +517,7 @@ export default function JadwalTugasPage() {
         ]
       default:
         return [
-          { value: 'IMAM', label: 'Imam' },
+          { value: 'IMAM_SHOLAT', label: 'Imam' },
           { value: 'KHOTIB', label: 'Khotib' },
           { value: 'BILAL', label: 'Bilal' },
           { value: 'IQOMAH', label: 'Iqomah' }
@@ -469,15 +585,10 @@ export default function JadwalTugasPage() {
                 </div>
                 <form id="jadwal-form" onSubmit={handleSubmit} className="p-8 space-y-4 bg-white max-h-[70vh] overflow-y-auto">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {activeTab !== 'TARAWIH' && (
-                      <div className="space-y-1">
-                         <Label className="text-[10px] font-black uppercase text-neutral-400">Tanggal</Label>
-                         <Input type="date" value={formData.date} onChange={e => setFormData({...formData, date: e.target.value})} className="h-11 rounded-xl" required />
-                      </div>
-                    )}
+                    {/* Date / Month Selection based on Tab */}
                     {activeTab === 'TARAWIH' ? (
                         <div className="space-y-4 col-span-1 md:col-span-2">
-                            <Label className="text-[10px] font-black uppercase text-[#0b3d2e] bg-emerald-50 px-3 py-1 rounded-full">Pilih Malam Ke (Bisa lebih dari satu)</Label>
+                            <Label className="text-[10px] font-black uppercase text-[#0b3d2e] bg-emerald-50 px-3 py-1 rounded-full text-center block">Pilih Malam Ke (Bisa lebih dari satu)</Label>
                             <div className="grid grid-cols-5 sm:grid-cols-10 gap-2 p-4 bg-neutral-50 rounded-4xl border border-neutral-100 italic">
                                 {Array.from({ length: 30 }, (_, i) => i + 1).map(num => {
                                     const isFilled = filledNights.has(num.toString());
@@ -504,20 +615,40 @@ export default function JadwalTugasPage() {
                                 })}
                             </div>
                         </div>
+                    ) : (activeTab === 'IDUL_FITRI' || activeTab === 'IDUL_ADHA') ? (
+                        <div className="space-y-4 col-span-1 md:col-span-2">
+                            <Label className="text-[10px] font-black uppercase text-[#0b3d2e] bg-emerald-50 px-3 py-1 rounded-full text-center block">Detail Hari Raya</Label>
+                            <div className="grid grid-cols-3 gap-4">
+                                <div className="space-y-1">
+                                    <Label className="text-[10px] uppercase text-neutral-400">Tanggal</Label>
+                                    <Input placeholder="Contoh: 1" value={eidData.tanggal} onChange={e => setEidData({...eidData, tanggal: e.target.value})} className="h-11 rounded-xl" onKeyDown={handleKeyDown} />
+                                </div>
+                                <div className="space-y-1">
+                                    <Label className="text-[10px] uppercase text-neutral-400">Bulan</Label>
+                                    <Input placeholder="Contoh: Syawal" value={eidData.bulan} onChange={e => setEidData({...eidData, bulan: e.target.value})} className="h-11 rounded-xl" onKeyDown={handleKeyDown} />
+                                </div>
+                                <div className="space-y-1">
+                                    <Label className="text-[10px] uppercase text-neutral-400">Tahun</Label>
+                                    <Input placeholder="Contoh: 1447 H" value={eidData.tahun} onChange={e => setEidData({...eidData, tahun: e.target.value})} className="h-11 rounded-xl" onKeyDown={handleKeyDown} />
+                                </div>
+                            </div>
+                        </div>
                     ) : (
-                        <div className="space-y-1">
-                            <Label className="text-[10px] font-black uppercase text-neutral-400">Kategori</Label>
-                            <Select 
-                              value={formData.category} 
-                              onValueChange={v => setFormData({...formData, category: v})}
-                              disabled // Auto-lock category based on active tab
-                            >
+                        <>
+                          <div className="space-y-1">
+                             <Label className="text-[10px] font-black uppercase text-neutral-400">Tanggal</Label>
+                             <Input type="date" value={formData.date} onChange={e => setFormData({...formData, date: e.target.value})} className="h-11 rounded-xl" required />
+                          </div>
+                          <div className="space-y-1">
+                             <Label className="text-[10px] font-black uppercase text-neutral-400">Kategori</Label>
+                             <Select value={formData.category} disabled onValueChange={v => setFormData({...formData, category: v})}>
                                 <SelectTrigger className="h-11 rounded-xl bg-neutral-50/50 border-neutral-100"><SelectValue /></SelectTrigger>
                                 <SelectContent>{categories.map(c => <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>)}</SelectContent>
-                            </Select>
-                        </div>
+                             </Select>
+                          </div>
+                        </>
                     )}
-                  </div>
+                 </div>
 
                   {activeTab === 'TARAWIH' && !editingItem ? (
                       <div className="grid grid-cols-1 gap-3 border-t pt-4 mt-4">
@@ -637,6 +768,11 @@ export default function JadwalTugasPage() {
                   <Download className="h-3.5 w-3.5 mr-1.5" /> Cetak Tarawih
                 </Button>
               )}
+              {(activeTab === 'IDUL_FITRI' || activeTab === 'IDUL_ADHA') && (
+                <Button variant="outline" size="sm" onClick={() => generateEidPDF(activeTab)} className="rounded-xl border-emerald-100 text-emerald-600 hover:bg-emerald-50 h-8 md:h-9 px-3 md:px-4 font-black uppercase text-[9px] md:text-[10px] tracking-widest flex-1 sm:flex-none">
+                  <Download className="h-3.5 w-3.5 mr-1.5" /> Cetak PDF
+                </Button>
+              )}
               <Button variant="outline" size="sm" onClick={fetchData} disabled={loading} className="rounded-xl border-neutral-200 text-neutral-500 hover:text-emerald-600 hover:bg-emerald-50 h-8 md:h-9 px-3 md:px-4 font-black uppercase text-[9px] md:text-[10px] tracking-widest flex-1 sm:flex-none">
                   Refresh
               </Button>
@@ -660,9 +796,11 @@ export default function JadwalTugasPage() {
                   <table className="w-full text-left">
                     <thead>
                       <tr className="bg-neutral-50/50">
-                        {activeTab === 'TARAWIH' ? (
+                        {activeTab === 'TARAWIH' || activeTab === 'IDUL_FITRI' || activeTab === 'IDUL_ADHA' ? (
                           <>
-                            <th className="px-10 py-6 text-[10px] font-black uppercase tracking-widest text-neutral-400">Malam</th>
+                            <th className="px-10 py-6 text-[10px] font-black uppercase tracking-widest text-neutral-400">
+                                {activeTab === 'TARAWIH' ? 'Malam' : 'Detail Waktu'}
+                            </th>
                             <th className="px-10 py-6 text-[10px] font-black uppercase tracking-widest text-neutral-400">Daftar Petugas</th>
                             <th className="px-10 py-6 text-right text-[10px] font-black uppercase tracking-widest text-neutral-400">Aksi</th>
                           </>
@@ -677,26 +815,29 @@ export default function JadwalTugasPage() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-neutral-50/50">
-                      {activeTab === 'TARAWIH' ? (
+                      {activeTab === 'TARAWIH' || activeTab === 'IDUL_FITRI' || activeTab === 'IDUL_ADHA' ? (
                         (() => {
                           const tarawihOrder: { [key: string]: number } = {
-                            'IMAM_TARAWIH': 1,
-                            'BILAL_1': 2,
-                            'BILAL_2': 3,
-                            'KAMILIN': 4,
-                            'DOA_WITIR': 5
+                            'IMAM_TARAWIH': 1, 'BILAL_1': 2, 'BILAL_2': 3, 'KAMILIN': 4, 'DOA_WITIR': 5,
+                            'IMAM_SHOLAT': 1, 'KHOTIB': 2, 'BILAL': 3, 'IQOMAH': 4
                           };
 
                           const nightGroups: { [key: string]: any[] } = {};
                           filteredData.forEach(item => {
-                            const m = item.description?.match(/(\d+)/);
-                            const night = m ? m[0] : 'Lainnya';
-                            if (!nightGroups[night]) nightGroups[night] = [];
-                            nightGroups[night].push(item);
+                            let key = 'Lainnya';
+                            if (activeTab === 'TARAWIH') {
+                                const m = item.description?.match(/(\d+)/);
+                                key = m ? m[0] : 'Lainnya';
+                            } else {
+                                // For Eid, group by description (which contains the custom date)
+                                key = item.description || 'Event';
+                            }
+                            if (!nightGroups[key]) nightGroups[key] = [];
+                            nightGroups[key].push(item);
                           });
 
-                          const lineupGroups: { nights: number[], items: any[] }[] = [];
-                          Object.entries(nightGroups).forEach(([night, items]) => {
+                          const lineupGroups: { nights: (number|string)[], items: any[] }[] = [];
+                          Object.entries(nightGroups).forEach(([key, items]) => {
                             const sortedItems = items.sort((a, b) => (tarawihOrder[a.type] || 99) - (tarawihOrder[b.type] || 99));
                             const lineupKey = sortedItems.map(it => `${it.type}:${it.name}`).join('|');
                             const existing = lineupGroups.find(g => 
@@ -704,38 +845,43 @@ export default function JadwalTugasPage() {
                                      .map(it => `${it.type}:${it.name}`).join('|') === lineupKey
                             );
                             
-                            if (existing && night !== 'Lainnya') {
-                              existing.nights.push(parseInt(night));
+                            if (existing && activeTab === 'TARAWIH' && key !== 'Lainnya') {
+                              existing.nights.push(parseInt(key));
                             } else {
                               lineupGroups.push({ 
-                                nights: (night === 'Lainnya' ? [] : [parseInt(night)]) as number[], 
+                                nights: [activeTab === 'TARAWIH' && key !== 'Lainnya' ? parseInt(key) : key], 
                                 items: sortedItems 
                               });
                             }
                           });
 
-                          return lineupGroups.sort((a, b) => (a.nights[0] || 0) - (b.nights[0] || 0)).map((group, idx) => {
-                            group.nights.sort((a, b) => a - b);
-                            let nightLabel = "";
-                            if (group.nights.length > 0) {
-                              const ranges: string[] = [];
-                              let s = group.nights[0], e = s;
-                              for (let i = 1; i <= group.nights.length; i++) {
-                                if (i < group.nights.length && group.nights[i] === e + 1) e = group.nights[i];
-                                else {
-                                  ranges.push(s === e ? s.toString() : `${s}-${e}`);
-                                  if (i < group.nights.length) s = group.nights[i], e = s;
+                          return lineupGroups.sort((a, b) => {
+                              if (activeTab === 'TARAWIH') return (a.nights[0] as number || 0) - (b.nights[0] as number || 0);
+                              return 0;
+                          }).map((group, idx) => {
+                            let label = "";
+                            if (activeTab === 'TARAWIH') {
+                                group.nights.sort((a, b) => (a as number) - (b as number));
+                                const ranges: string[] = [];
+                                let s = group.nights[0] as number, e = s;
+                                for (let i = 1; i <= group.nights.length; i++) {
+                                  if (i < group.nights.length && group.nights[i] === e + 1) e = group.nights[i] as number;
+                                  else {
+                                    ranges.push(s === e ? s.toString() : `${s}-${e}`);
+                                    if (i < group.nights.length) s = group.nights[i] as number, e = s;
+                                  }
                                 }
-                              }
-                              nightLabel = `Malam Ke ${ranges.join(', ')}`;
-                            } else nightLabel = "Lainnya";
+                                label = `Malam Ke ${ranges.join(', ')}`;
+                            } else {
+                                label = group.nights[0] as string;
+                            }
 
                             const sortedGroupItems = group.items.sort((a, b) => (tarawihOrder[a.type] || 99) - (tarawihOrder[b.type] || 99));
 
                             return (
                               <tr key={idx} className="hover:bg-neutral-50/20 transition-all group">
                                 <td className="px-10 py-8 font-black text-[#0b3d2e] whitespace-nowrap text-sm">
-                                  {nightLabel}
+                                  {label}
                                 </td>
                                 <td className="px-10 py-8">
                                   <div className="grid grid-cols-1 gap-2">
@@ -799,26 +945,28 @@ export default function JadwalTugasPage() {
 
                 {/* Mobile View (Cards) */}
                 <div className="md:hidden divide-y divide-neutral-50 px-6">
-                  {activeTab === 'TARAWIH' ? (
+                  {activeTab === 'TARAWIH' || activeTab === 'IDUL_FITRI' || activeTab === 'IDUL_ADHA' ? (
                     (() => {
                       const tarawihOrder: { [key: string]: number } = {
-                        'IMAM_TARAWIH': 1,
-                        'BILAL_1': 2,
-                        'BILAL_2': 3,
-                        'KAMILIN': 4,
-                        'DOA_WITIR': 5
+                        'IMAM_TARAWIH': 1, 'BILAL_1': 2, 'BILAL_2': 3, 'KAMILIN': 4, 'DOA_WITIR': 5,
+                        'IMAM_SHOLAT': 1, 'KHOTIB': 2, 'BILAL': 3, 'IQOMAH': 4
                       };
 
                       const nightGroups: { [key: string]: any[] } = {};
                       filteredData.forEach(item => {
-                        const m = item.description?.match(/(\d+)/);
-                        const night = m ? m[0] : 'Lainnya';
-                        if (!nightGroups[night]) nightGroups[night] = [];
-                        nightGroups[night].push(item);
+                        let key = 'Lainnya';
+                        if (activeTab === 'TARAWIH') {
+                            const m = item.description?.match(/(\d+)/);
+                            key = m ? m[0] : 'Lainnya';
+                        } else {
+                            key = item.description || 'Event';
+                        }
+                        if (!nightGroups[key]) nightGroups[key] = [];
+                        nightGroups[key].push(item);
                       });
 
-                      const lineupGroups: { nights: number[], items: any[] }[] = [];
-                      Object.entries(nightGroups).forEach(([night, items]) => {
+                      const lineupGroups: { nights: (number|string)[], items: any[] }[] = [];
+                      Object.entries(nightGroups).forEach(([key, items]) => {
                         const sortedItems = items.sort((a, b) => (tarawihOrder[a.type] || 99) - (tarawihOrder[b.type] || 99));
                         const lineupKey = sortedItems.map(it => `${it.type}:${it.name}`).join('|');
                         const existing = lineupGroups.find(g => 
@@ -826,38 +974,43 @@ export default function JadwalTugasPage() {
                                  .map(it => `${it.type}:${it.name}`).join('|') === lineupKey
                         );
                         
-                        if (existing && night !== 'Lainnya') {
-                          existing.nights.push(parseInt(night));
+                        if (existing && activeTab === 'TARAWIH' && key !== 'Lainnya') {
+                          existing.nights.push(parseInt(key));
                         } else {
                           lineupGroups.push({ 
-                            nights: (night === 'Lainnya' ? [] : [parseInt(night)]) as number[], 
+                            nights: [activeTab === 'TARAWIH' && key !== 'Lainnya' ? parseInt(key) : key], 
                             items: sortedItems 
                           });
                         }
                       });
 
-                      return lineupGroups.sort((a, b) => (a.nights[0] || 0) - (b.nights[0] || 0)).map((group, idx) => {
-                        group.nights.sort((a, b) => a - b);
-                        let nightLabel = "";
-                        if (group.nights.length > 0) {
-                          const ranges: string[] = [];
-                          let s = group.nights[0], e = s;
-                          for (let i = 1; i <= group.nights.length; i++) {
-                            if (i < group.nights.length && group.nights[i] === e + 1) e = group.nights[i];
-                            else {
-                              ranges.push(s === e ? s.toString() : `${s}-${e}`);
-                              if (i < group.nights.length) s = group.nights[i], e = s;
+                      return lineupGroups.sort((a, b) => {
+                          if (activeTab === 'TARAWIH') return (a.nights[0] as number || 0) - (b.nights[0] as number || 0);
+                          return 0;
+                      }).map((group, idx) => {
+                        let label = "";
+                        if (activeTab === 'TARAWIH') {
+                            group.nights.sort((a, b) => (a as number) - (b as number));
+                            const ranges: string[] = [];
+                            let s = group.nights[0] as number, e = s;
+                            for (let i = 1; i <= group.nights.length; i++) {
+                              if (i < group.nights.length && group.nights[i] === e + 1) e = group.nights[i] as number;
+                              else {
+                                ranges.push(s === e ? s.toString() : `${s}-${e}`);
+                                if (i < group.nights.length) s = group.nights[i] as number, e = s;
+                              }
                             }
-                          }
-                          nightLabel = `Malam Ke ${ranges.join(', ')}`;
-                        } else nightLabel = "Lainnya";
+                            label = `Malam Ke ${ranges.join(', ')}`;
+                        } else {
+                            label = group.nights[0] as string;
+                        }
 
                         const sortedGroupItems = group.items.sort((a, b) => (tarawihOrder[a.type] || 99) - (tarawihOrder[b.type] || 99));
 
                         return (
                           <div key={idx} className="py-8 space-y-4">
                             <div className="flex justify-between items-start">
-                               <h3 className="font-black text-emerald-900 uppercase tracking-tight text-base">{nightLabel}</h3>
+                               <h3 className="font-black text-emerald-900 uppercase tracking-tight text-base">{label}</h3>
                                <div className="flex gap-2">
                                   {canUpdate && <Button variant="ghost" size="icon" className="h-8 w-8 text-blue-500 bg-blue-50 rounded-lg" onClick={() => openEditGroup(group)}><Edit2 className="h-4 w-4" /></Button>}
                                   {canDelete && <Button variant="ghost" size="icon" className="h-8 w-8 text-rose-500 bg-rose-50 rounded-lg" onClick={() => handleDeleteGroup(group)}><Trash2 className="h-4 w-4" /></Button>}
