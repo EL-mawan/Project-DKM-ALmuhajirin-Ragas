@@ -61,6 +61,20 @@ export default function JadwalTugasPage() {
     description: ''
   })
 
+  // State khusus untuk bulk input Tarawih
+  const [tarawihData, setTarawihData] = useState({
+    imam: '',
+    bilal1: '',
+    bilal2: '',
+    kamilin: '',
+    witir: '',
+    malamKe: ''
+  })
+
+  useEffect(() => {
+    setFormData(prev => ({ ...prev, category: activeTab }))
+  }, [activeTab])
+
   const canCreate = session?.user?.role && ['Master Admin', 'Ketua DKM', 'Sekretaris DKM', 'RISMA (Remaja Islam)'].includes(session.user.role)
   const canUpdate = canCreate
   const canDelete = session?.user?.role && ['Master Admin', 'Ketua DKM', 'Sekretaris DKM'].includes(session.user.role)
@@ -84,39 +98,56 @@ export default function JadwalTugasPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setLoading(true) // Show loading indicator
+    setLoading(true)
     try {
-      const url = editingItem ? `/api/admin/jadwal/${editingItem.id}` : '/api/admin/jadwal'
-      const method = editingItem ? 'PATCH' : 'POST'
-      
-      const res = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
-      })
+      if (formData.category === 'TARAWIH' && !editingItem) {
+        // Bulk save for Tarawih
+        const roles = [
+          { type: 'IMAM_TARAWIH', name: tarawihData.imam },
+          { type: 'BILAL_1', name: tarawihData.bilal1 },
+          { type: 'BILAL_2', name: tarawihData.bilal2 },
+          { type: 'KAMILIN', name: tarawihData.kamilin },
+          { type: 'DOA_WITIR', name: tarawihData.witir }
+        ]
 
-      console.log('Submission Response Status:', res.status)
-      const result = await res.json()
-      console.log('Submission Result:', result)
-
-      if (res.ok) {
-        toast.success(editingItem ? 'Jadwal diperbarui' : 'Jadwal berhasil diterbitkan')
-        setIsModalOpen(false)
-        setEditingItem(null)
-        resetForm()
-        await fetchData()
+        for (const role of roles) {
+          if (!role.name) continue
+          await fetch('/api/admin/jadwal', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              ...formData,
+              type: role.type,
+              name: role.name,
+              description: tarawihData.malamKe ? `Malam Ke-${tarawihData.malamKe}` : ''
+            })
+          })
+        }
+        toast.success('Jadwal Tarawih berhasil disimpan')
       } else {
-        const errorMsg = result.error || 'Gagal menyimpan data'
-        const debugInfo = result.details || result.stack || 'No debug info'
-        alert(`GAGAL MENERBITKAN JADWAL!\n\nError: ${errorMsg}\nDetail: ${debugInfo}\nStatus: ${res.status}`)
-        toast.error(errorMsg)
+        const url = editingItem ? `/api/admin/jadwal/${editingItem.id}` : '/api/admin/jadwal'
+        const method = editingItem ? 'PATCH' : 'POST'
+        const res = await fetch(url, {
+          method,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData)
+        })
+
+        if (res.ok) {
+          toast.success(editingItem ? 'Jadwal diperbarui' : 'Jadwal berhasil diterbitkan')
+        } else {
+          throw new Error('Gagal simpan')
+        }
       }
+
+      setIsModalOpen(false)
+      setEditingItem(null)
+      resetForm()
+      await fetchData()
     } catch (error) {
-      console.error('Submission error:', error)
-      alert(`NETWORK ERROR: ${error}`)
-      toast.error('Terjadi kesalahan jaringan atau server')
+      toast.error('Terjadi kesalahan saat menyimpan')
     } finally {
-        setLoading(false)
+      setLoading(false)
     }
   }
 
@@ -141,6 +172,14 @@ export default function JadwalTugasPage() {
       name: '',
       description: ''
     })
+    setTarawihData({
+      imam: '',
+      bilal1: '',
+      bilal2: '',
+      kamilin: '',
+      witir: '',
+      malamKe: ''
+    })
   }
 
   const openEdit = (item: any) => {
@@ -155,67 +194,25 @@ export default function JadwalTugasPage() {
     setIsModalOpen(true)
   }
 
-  // Effect to reset type if it doesn't match new category in form
-  useEffect(() => {
-    const validTypes = getTaskTypesByCategory(formData.category)
-    if (!validTypes.some(t => t.value === formData.type)) {
-      setFormData(prev => ({ ...prev, type: validTypes[0]?.value || '' }))
-    }
-  }, [formData.category])
-
-  // PDF Generation Function matching the image
-  const generatePDF = (targetDate: string) => {
+  // PDF Jumat
+  const generateFridayPDF = (targetDate: string) => {
     const doc = new jsPDF()
-    const dkmEmerald = [11, 61, 46] // #0b3d2e
-    const dkmDarkGreen = [58, 90, 64] // A forest green for the table headers
-    
-    // Find all tasks for this date in JUMAT category
-    const items = data.filter(d => 
-      new Date(d.date).toISOString().split('T')[0] === targetDate && 
-      d.category === 'JUMAT'
-    )
+    const items = data.filter(d => new Date(d.date).toISOString().split('T')[0] === targetDate && d.category === 'JUMAT')
+    const formattedDate = new Date(targetDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })
+    const centerX = doc.internal.pageSize.getWidth() / 2
 
-    const dateObj = new Date(targetDate)
-    const formattedDate = dateObj.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })
-    
-    const pageWidth = doc.internal.pageSize.getWidth()
-    const centerX = pageWidth / 2
+    try { doc.addImage('/logo.png', 'PNG', 20, 10, 20, 20) } catch (e) { doc.circle(30, 20, 10, 'S') }
 
-    // --- LOGO ---
-    try {
-      doc.addImage('/logo.png', 'PNG', 20, 10, 20, 20)
-    } catch (e) {
-      console.error('Failed to load logo in PDF:', e)
-      doc.setDrawColor(0)
-      doc.circle(30, 20, 10, 'S')
-    }
+    doc.setFontSize(14).setFont('times', 'bold').text('Dewan Kemakmuran Masjid (DKM) Al-Muhajirin', centerX + 10, 18, { align: 'center' })
+    doc.setFontSize(12).text('Kp. Ragas Grenyang Desa Argawana Kecamatan Puloampel', centerX + 10, 25, { align: 'center' })
+    doc.setFontSize(11).setFont('times', 'italic').text('Jadwal Tugas Sholat Jum\'at', centerX, 35, { align: 'center' })
+    doc.setLineWidth(0.8).line(15, 38, 195, 38)
+    doc.setFont('times', 'normal').setFontSize(11).text(`Tanggal :        ${formattedDate}`, 30, 48)
 
-    // --- HEADER ---
-    doc.setFontSize(14)
-    doc.setFont('times', 'bold')
-    doc.text('Dewan Kemakmuran Masjid (DKM) Al-Muhajirin', centerX + 10, 18, { align: 'center' })
-    doc.setFontSize(12)
-    doc.text('Kp. Ragas Grenyang Desa Argawana Kecamatan Puloampel', centerX + 10, 25, { align: 'center' })
-    
-    doc.setFontSize(11)
-    doc.setFont('times', 'italic')
-    doc.text('Jadwal Tugas Sholat Jum\'at', centerX, 35, { align: 'center' })
-
-    doc.setLineWidth(0.8)
-    doc.line(15, 38, 195, 38)
-
-    // --- DATE ---
-    doc.setFont('times', 'normal')
-    doc.setFontSize(11)
-    doc.text(`Tanggal :        ${formattedDate}`, 30, 48)
-
-    // --- TABLE STRUCTURE ---
     const startY = 55
     const rowHeight = 10
     const labelWidth = 50
-    const valueWidth = 115
-    
-    const tasksToShow = [
+    const tasks = [
       { label: 'Imam Sholat', type: 'IMAM_JUMAT' },
       { label: 'Khotib', type: 'KHOTIB' },
       { label: 'Bilal / Muadzin 1', type: 'BILAL' },
@@ -223,56 +220,80 @@ export default function JadwalTugasPage() {
       { label: 'Iqomah', type: 'IQOMAH' }
     ]
 
-    tasksToShow.forEach((task, i) => {
+    tasks.forEach((task, i) => {
       const curY = startY + (i * rowHeight)
-      
-      // Label Background (Dark Green)
-      doc.setFillColor(64, 86, 50) // Matching the image's dark green
-      doc.rect(15, curY, labelWidth, rowHeight, 'F')
-      
-      // Label Text
-      doc.setTextColor(255)
-      doc.setFont('times', 'normal')
-      doc.setFontSize(10)
-      doc.text(task.label, 17, curY + 6.5)
-      
-      // Value Cell
-      doc.setTextColor(0)
-      doc.setFontSize(11)
-      doc.text(':', 15 + labelWidth + 2, curY + 6.5)
-      
-      // Find the name for this task
-      let assigned = items.find(it => it.type === task.type)?.name || '..................................................................'
-      
-      // Apply Uppercase and 14pt as requested
-      if (assigned.includes('...')) {
-        doc.setFontSize(11)
-      } else {
-        assigned = assigned.toUpperCase()
-        doc.setFontSize(14)
-        doc.setFont('times', 'bold')
-      }
-      
-      doc.text(assigned, 15 + labelWidth + 5, curY + 6.5)
-      
-      // Underline/Border
-      doc.setDrawColor(200)
-      doc.setLineWidth(0.1)
-      doc.line(15 + labelWidth + 4, curY + 8, 195, curY + 8, 'S')
+      doc.setFillColor(64, 86, 50).rect(15, curY, labelWidth, rowHeight, 'F')
+      doc.setTextColor(255).setFontSize(10).text(task.label, 17, curY + 6.5)
+      doc.setTextColor(0).setFontSize(11).text(':', 15 + labelWidth + 2, curY + 6.5)
+      let name = items.find(it => it.type === task.type)?.name || '..................................................................'
+      if (!name.includes('.')) { name = name.toUpperCase(); doc.setFontSize(14).setFont('times', 'bold') } else doc.setFontSize(11)
+      doc.text(name, 15 + labelWidth + 5, curY + 6.5).setFont('times', 'normal').setDrawColor(200).setLineWidth(0.1).line(15 + labelWidth + 4, curY + 8, 195, curY + 8, 'S')
+    })
+    
+    doc.save(`Jadwal_Jumat_${targetDate}.pdf`)
+  }
+
+  // PDF Tarawih
+  const generateTarawihPDF = () => {
+    const doc = new jsPDF()
+    const centerX = doc.internal.pageSize.getWidth() / 2
+    const tarawihData = data.filter(d => d.category === 'TARAWIH')
+    
+    try { doc.addImage('/logo.png', 'PNG', 30, 10, 18, 18) } catch (e) {}
+
+    doc.setFontSize(14).setFont('times', 'bold').text('DKM Al-Muhajirin Kp. Ragas Grenyang', centerX + 10, 17, { align: 'center' })
+    doc.setFontSize(12).setFont('times', 'italic').text('Jadwal Tugas Sholat Tarawih', centerX + 10, 23, { align: 'center' })
+    doc.setLineWidth(0.5).line(15, 28, 195, 28)
+    
+    doc.setFontSize(10).setFont('times', 'normal').text('Bulan        : Ramadhan 1447 H', 15, 35)
+
+    // Table Header
+    const startY = 42
+    const colWidths = [15, 35, 35, 35, 30, 30] // Malam, Imam, Bilal1, Bilal2, Kamilin, Witir
+    const headers = ['Malam', 'Imam', 'Bilal 1', 'Bilal 2', "Do'a Kamilin", "Do'a Witir"]
+    const rowHeight = 7
+
+    doc.setFillColor(64, 86, 50).rect(15, startY, 180, rowHeight, 'F')
+    doc.setTextColor(255).setFontSize(9).setFont('times', 'bold')
+    
+    let curX = 15
+    headers.forEach((h, i) => {
+      doc.text(h, curX + colWidths[i]/2, startY + 5, { align: 'center' })
+      curX += colWidths[i]
     })
 
-    // --- SIGNATURE ---
-    const sigY = startY + (tasksToShow.length * rowHeight) + 20
-    doc.setFont('times', 'normal')
-    doc.text('Mengetahui,', 160, sigY, { align: 'center' })
-    doc.text('Ketua DKM Al-Muhajirin', 160, sigY + 5, { align: 'center' })
-    
-    doc.setFont('times', 'bold')
-    doc.text('H. Agung Gunawan', 160, sigY + 25, { align: 'center' })
-    doc.setLineWidth(0.2)
-    doc.line(140, sigY + 26, 180, sigY + 26)
+    // Rows (30 Malam)
+    doc.setTextColor(0).setFont('times', 'normal')
+    for (let i = 1; i <= 30; i++) {
+        const rowY = startY + (i * rowHeight)
+        const nightData = tarawihData.filter(d => d.description?.includes(`Malam Ke-${i}`))
+        
+        let rowX = 15
+        // Box for row
+        doc.setDrawColor(0).setLineWidth(0.1)
+        
+        // Column 1: Malam
+        doc.rect(rowX, rowY, colWidths[0], rowHeight)
+        doc.text(i.toString(), rowX + colWidths[0]/2, rowY + 5, { align: 'center' })
+        rowX += colWidths[0]
 
-    doc.save(`Jadwal_Jumat_${targetDate}.pdf`)
+        // Other Columns
+        const roles = ['IMAM_TARAWIH', 'BILAL_1', 'BILAL_2', 'KAMILIN', 'DOA_WITIR']
+        roles.forEach((role, idx) => {
+            doc.rect(rowX, rowY, colWidths[idx+1], rowHeight)
+            const val = nightData.find(d => d.type === role)?.name || ''
+            doc.setFontSize(8).text(val, rowX + 2, rowY + 5)
+            rowX += colWidths[idx+1]
+        })
+    }
+
+    const footerY = 265
+    doc.setFontSize(9).text('Mengetahui,', 165, footerY, { align: 'center' })
+    doc.text('Ketua DKM Al-Muhajirin', 165, footerY + 4, { align: 'center' })
+    doc.setFont('times', 'bold').text('H. Agung Gunawan', 165, footerY + 20, { align: 'center' })
+    doc.line(145, footerY + 21, 185, footerY + 21)
+
+    doc.save('Jadwal_Tarawih.pdf')
   }
 
   const filteredData = data.filter(item => {
@@ -289,7 +310,6 @@ export default function JadwalTugasPage() {
     { value: 'IDUL_ADHA', label: 'Sholat Idul Adha' }
   ]
 
-  // Task types mapped to categories
   const getTaskTypesByCategory = (cat: string) => {
     switch(cat) {
       case 'JUMAT':
@@ -305,154 +325,152 @@ export default function JadwalTugasPage() {
           { value: 'IMAM_TARAWIH', label: 'Imam Tarawih' },
           { value: 'BILAL_1', label: 'Bilal 1' },
           { value: 'BILAL_2', label: 'Bilal 2' },
-          { value: 'KAMILIN', label: 'Kamilin' },
+          { value: 'KAMILIN', label: 'Do\'a Kamilin' },
           { value: 'DOA_WITIR', label: 'Do\'a Witir' }
         ]
-      case 'IDUL_FITRI':
-      case 'IDUL_ADHA':
+      default:
         return [
           { value: 'IMAM', label: 'Imam' },
           { value: 'KHOTIB', label: 'Khotib' },
           { value: 'BILAL', label: 'Bilal' },
           { value: 'IQOMAH', label: 'Iqomah' }
         ]
-      default:
-        return []
     }
   }
 
-  // Flattened labels for table display
   const allTaskTypes = [
     ...getTaskTypesByCategory('JUMAT'),
     ...getTaskTypesByCategory('TARAWIH'),
     ...getTaskTypesByCategory('IDUL_FITRI'),
     ...getTaskTypesByCategory('IDUL_ADHA')
   ].reduce((acc: any[], current) => {
-    const x = acc.find(item => item.value === current.value);
-    if (!x) return acc.concat([current]);
+    if (!acc.find(item => item.value === current.value)) return acc.concat([current]);
     return acc;
   }, []);
 
   return (
     <AdminLayout title="Jadwal Tugas" subtitle="Kelola penugasan imam, khotib, dan petugas operasional masjid.">
       <div className="p-6 md:p-10 space-y-8">
-
-
         {/* Actions & Filters */}
         <div className="flex flex-col lg:flex-row justify-between items-center gap-6">
           <div className="flex bg-white p-1.5 rounded-3xl border border-neutral-100 shadow-sm overflow-x-auto w-full lg:w-auto">
-             {categories.map(cat => {
-               const count = data.filter(d => d.category === cat.value).length
-               return (
+             {categories.map(cat => (
                <button 
                  key={cat.value}
                  onClick={() => setActiveTab(cat.value)}
                  className={`px-6 py-2.5 rounded-2xl text-xs font-black uppercase tracking-widest transition-all flex items-center gap-2 ${activeTab === cat.value ? 'bg-[#0b3d2e] text-white' : 'text-neutral-400 hover:text-[#0b3d2e]'}`}
                >
                  {cat.label}
-                 {count > 0 && (
-                   <span className={`px-1.5 py-0.5 rounded-md text-[9px] font-bold ${activeTab === cat.value ? 'bg-white/20 text-white' : 'bg-emerald-50 text-emerald-600'}`}>
-                     {count}
-                   </span>
-                 )}
                </button>
-             )})}
+             ))}
           </div>
 
           <div className="flex items-center gap-3 w-full lg:w-auto">
             <div className="relative flex-1 lg:w-80">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-300" />
-              <Input 
-                placeholder="Cari nama petugas..." 
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-                className="pl-11 h-12 rounded-2xl border-neutral-100 bg-white"
-              />
+              <Input placeholder="Cari nama petugas..." value={search} onChange={e => setSearch(e.target.value)} className="pl-11 h-12 rounded-2xl border-neutral-100 bg-white" />
             </div>
-            
             {canCreate && (
-            <Dialog open={isModalOpen} onOpenChange={(open) => {
-              setIsModalOpen(open)
-              if (!open) {
-                setEditingItem(null)
-                resetForm()
-              }
-            }}>
+            <Dialog open={isModalOpen} onOpenChange={(open) => { setIsModalOpen(open); if (!open) { setEditingItem(null); resetForm(); } }}>
               <DialogTrigger asChild>
                 <Button className="h-12 px-6 rounded-2xl bg-[#0b3d2e] hover:bg-[#062c21] font-black uppercase tracking-widest text-xs">
                   <Plus className="h-4 w-4 mr-2" /> Tambah Jadwal
                 </Button>
               </DialogTrigger>
-              <DialogContent className="sm:max-w-[500px] rounded-[2.5rem] p-0 overflow-hidden border-none shadow-2xl">
+              <DialogContent className="sm:max-w-[600px] rounded-[2.5rem] p-0 overflow-hidden border-none shadow-2xl">
                 <div className="bg-[#0b3d2e] p-8 text-white">
-                  <DialogTitle className="text-2xl font-black">{editingItem ? 'Edit Jadwal Tugas' : 'Tambah Jadwal Tugas'}</DialogTitle>
-                  <p className="text-emerald-100/60 text-xs mt-1 italic font-medium">Input penugasan rutin atau khusus DKM.</p>
+                  <DialogTitle className="text-2xl font-black">{activeTab === 'TARAWIH' ? 'Setor Jadwal Tarawih' : (editingItem ? 'Edit Jadwal' : 'Tambah Jadwal')}</DialogTitle>
+                  <p className="text-emerald-100/60 text-xs mt-1 italic">
+                    {activeTab === 'TARAWIH' ? 'Isi seluruh petugas untuk satu malam sekaligus.' : 'Input penugasan rutin DKM.'}
+                  </p>
                 </div>
-                <form id="jadwal-form" onSubmit={handleSubmit} className="p-8 space-y-6 bg-white">
-                  <div className="grid grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                       <Label className="text-[10px] font-black uppercase tracking-widest text-neutral-400">Tanggal</Label>
-                       <Input type="date" value={formData.date} onChange={e => setFormData({...formData, date: e.target.value})} className="h-12 rounded-xl" required />
-                    </div>
-                    <div className="space-y-2">
-                       <Label className="text-[10px] font-black uppercase tracking-widest text-neutral-400">Kategori</Label>
-                       <Select 
-                        value={formData.category} 
-                        onValueChange={v => setFormData({...formData, category: v})}
-                       >
-                         <SelectTrigger className="h-12 rounded-xl">
-                           <SelectValue placeholder="Pilih Kategori" />
-                         </SelectTrigger>
-                         <SelectContent className="rounded-xl">
-                           {categories.map(c => <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>)}
-                         </SelectContent>
-                       </Select>
-                    </div>
+                <form id="jadwal-form" onSubmit={handleSubmit} className="p-8 space-y-4 bg-white max-h-[70vh] overflow-y-auto">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {activeTab !== 'TARAWIH' && (
+                      <div className="space-y-1">
+                         <Label className="text-[10px] font-black uppercase text-neutral-400">Tanggal</Label>
+                         <Input type="date" value={formData.date} onChange={e => setFormData({...formData, date: e.target.value})} className="h-11 rounded-xl" required />
+                      </div>
+                    )}
+                    {activeTab === 'TARAWIH' ? (
+                        <div className="space-y-1">
+                            <Label className="text-[10px] font-black uppercase text-neutral-400">Malam Ke (1-30)</Label>
+                            <Select 
+                              value={tarawihData.malamKe} 
+                              onValueChange={v => setTarawihData({...tarawihData, malamKe: v})}
+                            >
+                                <SelectTrigger className="h-11 rounded-xl font-bold italic">
+                                    <SelectValue placeholder="Pilih Malam..." />
+                                </SelectTrigger>
+                                <SelectContent className="max-h-[300px]">
+                                    {Array.from({ length: 30 }, (_, i) => i + 1).map(num => (
+                                        <SelectItem key={num} value={num.toString()}>
+                                            Malam Ke-{num}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    ) : (
+                        <div className="space-y-1">
+                            <Label className="text-[10px] font-black uppercase text-neutral-400">Kategori</Label>
+                            <Select value={formData.category} onValueChange={v => setFormData({...formData, category: v})}>
+                                <SelectTrigger className="h-11 rounded-xl"><SelectValue /></SelectTrigger>
+                                <SelectContent>{categories.map(c => <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>)}</SelectContent>
+                            </Select>
+                        </div>
+                    )}
                   </div>
 
-                  <div className="space-y-2">
-                     <Label className="text-[10px] font-black uppercase tracking-widest text-neutral-400">Jenis Tugas</Label>
-                     <Select 
-                      value={formData.type} 
-                      onValueChange={v => setFormData({...formData, type: v})}
-                     >
-                       <SelectTrigger className="h-12 rounded-xl font-bold">
-                         <SelectValue placeholder="Pilih Tugas" />
-                       </SelectTrigger>
-                       <SelectContent className="rounded-xl">
-                         {getTaskTypesByCategory(formData.category).map(t => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}
-                       </SelectContent>
-                     </Select>
-                  </div>
-
-                  <div className="space-y-2">
-                     <Label className="text-[10px] font-black uppercase tracking-widest text-neutral-400">Nama Petugas</Label>
-                     <Input 
-                      placeholder="Masukkan nama petugas..." 
-                      value={formData.name} 
-                      onChange={e => setFormData({...formData, name: e.target.value})}
-                      className="h-12 rounded-xl font-bold text-emerald-700"
-                      required
-                     />
-                  </div>
-
-                  <div className="space-y-2">
-                     <Label className="text-[10px] font-black uppercase tracking-widest text-neutral-400">Keterangan (Opsional)</Label>
-                     <Input 
-                      placeholder="Tambahan detail tugas..." 
-                      value={formData.description} 
-                      onChange={e => setFormData({...formData, description: e.target.value})}
-                      className="h-12 rounded-xl"
-                     />
-                  </div>
+                  {activeTab === 'TARAWIH' && !editingItem ? (
+                      <div className="grid grid-cols-1 gap-3 border-t pt-4 mt-4">
+                          <div className="space-y-1">
+                              <Label className="text-[10px] font-black uppercase text-emerald-600">Nama Imam</Label>
+                              <Input placeholder="Imam Tarawih..." value={tarawihData.imam} onChange={e => setTarawihData({...tarawihData, imam: e.target.value})} className="h-11 rounded-xl font-bold" required />
+                          </div>
+                          <div className="grid grid-cols-2 gap-3">
+                            <div className="space-y-1">
+                                <Label className="text-[10px] font-black uppercase text-neutral-400">Bilal 1</Label>
+                                <Input placeholder="Nama..." value={tarawihData.bilal1} onChange={e => setTarawihData({...tarawihData, bilal1: e.target.value})} className="h-11 rounded-xl" />
+                            </div>
+                            <div className="space-y-1">
+                                <Label className="text-[10px] font-black uppercase text-neutral-400">Bilal 2</Label>
+                                <Input placeholder="Nama..." value={tarawihData.bilal2} onChange={e => setTarawihData({...tarawihData, bilal2: e.target.value})} className="h-11 rounded-xl" />
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-2 gap-3">
+                            <div className="space-y-1">
+                                <Label className="text-[10px] font-black uppercase text-neutral-400">Do'a Kamilin</Label>
+                                <Input placeholder="Nama..." value={tarawihData.kamilin} onChange={e => setTarawihData({...tarawihData, kamilin: e.target.value})} className="h-11 rounded-xl" />
+                            </div>
+                            <div className="space-y-1">
+                                <Label className="text-[10px] font-black uppercase text-neutral-400">Do'a Witir</Label>
+                                <Input placeholder="Nama..." value={tarawihData.witir} onChange={e => setTarawihData({...tarawihData, witir: e.target.value})} className="h-11 rounded-xl" />
+                            </div>
+                          </div>
+                      </div>
+                  ) : (
+                      <>
+                        <div className="space-y-2">
+                            <Label className="text-[10px] font-black uppercase text-neutral-400">Jenis Tugas</Label>
+                            <Select value={formData.type} onValueChange={v => setFormData({...formData, type: v})}>
+                                <SelectTrigger className="h-11 rounded-xl font-bold"><SelectValue /></SelectTrigger>
+                                <SelectContent>{getTaskTypesByCategory(formData.category).map(t => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}</SelectContent>
+                            </Select>
+                        </div>
+                        <div className="space-y-2">
+                            <Label className="text-[10px] font-black uppercase text-neutral-400">Nama Petugas</Label>
+                            <Input placeholder="Masukkan nama..." value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="h-11 rounded-xl font-bold text-emerald-700" required />
+                        </div>
+                        <div className="space-y-2">
+                            <Label className="text-[10px] font-black uppercase text-neutral-400">Keterangan / Malam Ke (Opsional)</Label>
+                            <Input placeholder="Contoh: Malam Ke-1..." value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} className="h-11 rounded-xl" />
+                        </div>
+                      </>
+                  )}
 
                   <DialogFooter className="pt-4">
-                    <Button 
-                      form="jadwal-form"
-                      type="submit" 
-                      disabled={loading}
-                      className="w-full h-14 rounded-2xl bg-[#0b3d2e] hover:bg-[#062c21] font-black uppercase tracking-widest text-sm shadow-xl shadow-emerald-900/10"
-                    >
+                    <Button form="jadwal-form" type="submit" disabled={loading} className="w-full h-14 rounded-2xl bg-[#0b3d2e] hover:bg-[#062c21] font-black uppercase tracking-widest text-sm shadow-xl">
                       {loading ? 'Menyimpan...' : (editingItem ? 'Simpan Perubahan' : 'Terbitkan Jadwal')}
                     </Button>
                   </DialogFooter>
@@ -467,20 +485,18 @@ export default function JadwalTugasPage() {
         <Card className="rounded-[3rem] border-none shadow-2xl shadow-neutral-200/50 overflow-hidden bg-white">
           <CardHeader className="p-10 border-b border-neutral-50 flex flex-row items-center justify-between">
             <div>
-              <CardTitle className="text-2xl font-black text-slate-900">
-                Daftar Penugasan 
-              </CardTitle>
+              <CardTitle className="text-2xl font-black text-slate-900">Daftar Penugasan</CardTitle>
               <p className="text-xs text-neutral-400 mt-1 italic font-medium">Monitoring tugas aktif masjid.</p>
             </div>
             <div className="flex items-center gap-2">
               {activeTab === 'JUMAT' && filteredData.length > 0 && (
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={() => generatePDF(new Date(filteredData[0].date).toISOString().split('T')[0])} 
-                  className="rounded-xl border-emerald-100 text-emerald-600 hover:bg-emerald-50 h-9 px-4 font-black uppercase text-[10px] tracking-widest"
-                >
-                  <Download className="h-4 w-4 mr-2" /> Cetak PDF
+                <Button variant="outline" size="sm" onClick={() => generateFridayPDF(new Date(filteredData[0].date).toISOString().split('T')[0])} className="rounded-xl border-emerald-100 text-emerald-600 hover:bg-emerald-50 h-9 px-4 font-black uppercase text-[10px] tracking-widest">
+                  <Download className="h-4 w-4 mr-2" /> Cetak PDF Jumat
+                </Button>
+              )}
+              {activeTab === 'TARAWIH' && (
+                <Button variant="outline" size="sm" onClick={generateTarawihPDF} className="rounded-xl border-emerald-100 text-emerald-600 hover:bg-emerald-50 h-9 px-4 font-black uppercase text-[10px] tracking-widest">
+                  <Download className="h-4 w-4 mr-2" /> Cetak Tabel Tarawih
                 </Button>
               )}
               <Button variant="outline" size="sm" onClick={fetchData} disabled={loading} className="rounded-xl border-neutral-200 text-neutral-500 hover:text-emerald-600 hover:bg-emerald-50 h-9 px-4 font-black uppercase text-[10px] tracking-widest">
@@ -496,17 +512,8 @@ export default function JadwalTugasPage() {
               </div>
             ) : filteredData.length === 0 ? (
               <div className="p-20 text-center">
-                 <div className="h-20 w-20 bg-neutral-50 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <Calendar className="h-10 w-10 text-neutral-200" />
-                 </div>
-                 <p className="text-lg font-bold text-neutral-300 italic">
-                    {search ? `Tidak ada hasil untuk "${search}"` : 'Belum ada jadwal di kategori ini'}
-                 </p>
-                 {!search && (
-                    <button className="text-emerald-600 text-xs font-black uppercase mt-2 tracking-widest hover:underline" onClick={() => { setIsModalOpen(true); resetForm(); }}>
-                        + Buat Jadwal Baru
-                    </button>
-                 )}
+                 <div className="h-20 w-20 bg-neutral-50 rounded-full flex items-center justify-center mx-auto mb-6"><Calendar className="h-10 w-10 text-neutral-200" /></div>
+                 <p className="text-lg font-bold text-neutral-300 italic">{search ? `Tidak ada hasil untuk "${search}"` : 'Belum ada jadwal di kategori ini'}</p>
               </div>
             ) : (
               <div className="overflow-x-auto">
@@ -524,47 +531,28 @@ export default function JadwalTugasPage() {
                       <tr key={item.id} className="hover:bg-neutral-50/20 transition-all group">
                         <td className="px-10 py-8">
                            <div className="flex items-center gap-4">
-                              <div className="h-12 w-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 border border-emerald-100 group-hover:scale-110 transition-transform">
-                                 <UserIcon className="h-6 w-6" />
-                              </div>
+                              <div className="h-12 w-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 border border-emerald-100"><UserIcon className="h-6 w-6" /></div>
                               <div>
                                  <span className="font-black text-slate-900 block uppercase tracking-tight">{item.name}</span>
-                                 <Badge className="mt-1 bg-white border border-neutral-100 text-neutral-400 text-[10px] font-bold py-0 h-5 px-2 rounded-lg">
-                                    {categories.find(c => c.value === item.category)?.label || item.category}
-                                 </Badge>
+                                 <Badge className="mt-1 bg-white border border-neutral-100 text-neutral-400 text-[10px] font-bold py-0 h-5 px-2 rounded-lg">{categories.find(c => c.value === item.category)?.label || item.category}</Badge>
                               </div>
                            </div>
                         </td>
                         <td className="px-10 py-8">
-                          <Badge className={`rounded-xl px-4 py-1.5 font-black text-[9px] uppercase tracking-widest border-none ${
-                            item.type === 'KHOTIB' ? 'bg-orange-50 text-orange-600' :
-                            item.type.includes('IMAM') ? 'bg-indigo-50 text-indigo-600' :
-                            item.type === 'ADZAN' ? 'bg-emerald-50 text-emerald-600' :
-                            'bg-slate-50 text-slate-600'
-                          }`}>
+                          <Badge className={`rounded-xl px-4 py-1.5 font-black text-[9px] uppercase tracking-widest border-none ${item.type === 'KHOTIB' ? 'bg-orange-50 text-orange-600' : item.type.includes('IMAM') ? 'bg-indigo-50 text-indigo-600' : 'bg-emerald-50 text-emerald-600'}`}>
                             {allTaskTypes.find(t => t.value === item.type)?.label || item.type}
                           </Badge>
                         </td>
                         <td className="px-10 py-8">
                            <div className="flex flex-col">
-                              <span className="text-sm font-black text-[#0b3d2e]">
-                                {new Date(item.date).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
-                              </span>
+                              <span className="text-sm font-black text-[#0b3d2e]">{new Date(item.date).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</span>
                               <span className="text-[10px] text-neutral-400 font-medium italic mt-0.5">{item.description || 'Tanpa keterangan tambahan'}</span>
                            </div>
                         </td>
                         <td className="px-10 py-8 text-right">
                            <div className="flex justify-end gap-2">
-                               {canUpdate && (
-                                 <Button variant="ghost" size="icon" className="rounded-xl h-10 w-10 text-blue-500 hover:bg-blue-50" onClick={() => openEdit(item)}>
-                                    <Edit2 className="h-4 w-4" />
-                                 </Button>
-                               )}
-                               {canDelete && (
-                                 <Button variant="ghost" size="icon" className="rounded-xl h-10 w-10 text-rose-500 hover:bg-rose-50" onClick={() => handleDelete(item.id)}>
-                                    <Trash2 className="h-4 w-4" />
-                                 </Button>
-                               )}
+                               {canUpdate && <Button variant="ghost" size="icon" className="rounded-xl h-10 w-10 text-blue-500 hover:bg-blue-50" onClick={() => openEdit(item)}><Edit2 className="h-4 w-4" /></Button>}
+                               {canDelete && <Button variant="ghost" size="icon" className="rounded-xl h-10 w-10 text-rose-500 hover:bg-rose-50" onClick={() => handleDelete(item.id)}><Trash2 className="h-4 w-4" /></Button>}
                            </div>
                         </td>
                       </tr>
