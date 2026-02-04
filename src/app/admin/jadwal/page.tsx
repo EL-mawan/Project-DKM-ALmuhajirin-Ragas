@@ -885,7 +885,7 @@ export default function JadwalTugasPage() {
                       form="jadwal-form" 
                       type="submit" 
                       disabled={loading} 
-                      className="flex-[2] h-14 rounded-2xl bg-[#0b3d2e] hover:bg-[#062c21] font-black uppercase tracking-widest text-[10px] sm:text-xs shadow-xl"
+                      className="flex-2 h-14 rounded-2xl bg-[#0b3d2e] hover:bg-[#062c21] font-black uppercase tracking-widest text-[10px] sm:text-xs shadow-xl"
                     >
                       {loading ? 'Menyimpan...' : (editingItem ? 'Simpan' : 'Terbitkan')}
                     </Button>

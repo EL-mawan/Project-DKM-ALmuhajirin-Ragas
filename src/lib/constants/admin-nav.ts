@@ -20,7 +20,7 @@ export const ADMIN_MENU_ITEMS = [
   { icon: Heart, label: 'Kaum Dhuafa', href: '/admin/dhuafa', roles: ['Master Admin', 'Ketua DKM', 'Sekretaris DKM', 'RISMA (Remaja Islam)', 'Tokoh Masyarakat'], color: 'text-rose-500 bg-rose-50 border-rose-100' },
   { icon: Calendar, label: 'Agenda Kegiatan', href: '/admin/kegiatan', roles: ['Master Admin', 'Ketua DKM', 'Sekretaris DKM', 'RISMA (Remaja Islam)', 'Tokoh Masyarakat'], color: 'text-violet-500 bg-violet-50 border-violet-100' },
   { icon: DollarSign, label: 'Keuangan', href: '/admin/keuangan', roles: ['Master Admin', 'Bendahara DKM'], color: 'text-cyan-500 bg-cyan-50 border-cyan-100' },
-  { icon: FileText, label: 'Cetak LPJ', href: '/admin/laporan', roles: ['Master Admin', 'Tokoh Masyarakat', 'Ketua DKM', 'Bendahara DKM', 'Sekretaris DKM', 'RISMA (Remaja Islam)'], color: 'text-slate-500 bg-slate-50 border-slate-100' },
+  { icon: FileText, label: 'Cetak LPJ', href: '/admin/laporan', roles: ['Master Admin', 'Bendahara DKM', 'RISMA (Remaja Islam)'], color: 'text-slate-500 bg-slate-50 border-slate-100' },
   { icon: Newspaper, label: 'Berita & Artikel', href: '/admin/berita', roles: ['Master Admin', 'Ketua DKM', 'Sekretaris DKM', 'RISMA (Remaja Islam)', 'Tokoh Masyarakat'], color: 'text-orange-500 bg-orange-50 border-orange-100' },
   { icon: Image, label: 'Galeri Foto', href: '/admin/galeri', roles: ['Master Admin', 'Tokoh Masyarakat', 'Ketua DKM', 'Bendahara DKM', 'Sekretaris DKM', 'RISMA (Remaja Islam)'], color: 'text-pink-500 bg-pink-50 border-pink-100' },
   { icon: MessageSquare, label: 'Kontak Pesan', href: '/admin/kontak', roles: ['Master Admin', 'Tokoh Masyarakat', 'Ketua DKM', 'Bendahara DKM', 'Sekretaris DKM', 'RISMA (Remaja Islam)'], color: 'text-teal-500 bg-teal-50 border-teal-100' },

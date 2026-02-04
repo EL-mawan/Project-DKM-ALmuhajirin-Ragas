@@ -27,6 +27,8 @@ export default function LaporanAdmin() {
   const [isExportingPDF, setIsExportingPDF] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   
+  const canManage = session?.user?.role && ['Master Admin', 'Bendahara DKM', 'RISMA (Remaja Islam)'].includes(session.user.role)
+
   const [formData, setFormData] = useState({
     title: '',
     period: 'monthly',
@@ -502,6 +504,7 @@ export default function LaporanAdmin() {
             <p className="text-muted-foreground text-sm hidden sm:block">Total {filteredReports.length} laporan dipublikasikan.</p>
           </div>
           
+          {canManage && (
           <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
             <DialogTrigger asChild>
               <Button className="rounded-xl shadow-lg w-full sm:w-auto py-6 sm:py-2">
@@ -657,6 +660,7 @@ export default function LaporanAdmin() {
               </form>
             </DialogContent>
           </Dialog>
+          )}
         </div>
 
         <Card className="rounded-[2.5rem] border-none shadow-xl overflow-hidden shadow-gray-200/50">
@@ -729,14 +733,16 @@ export default function LaporanAdmin() {
                         </td>
                         <td className="px-8 py-6 text-right">
                           <div className="flex justify-end space-x-2">
-                            <Button 
-                              variant="ghost" 
-                              size="icon" 
-                              className="rounded-xl h-10 w-10 text-indigo-600 hover:bg-indigo-50"
-                              onClick={() => reprintReport(report)}
-                            >
-                              <Printer className="h-4 w-4" />
-                            </Button>
+                            {canManage && (
+                              <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                className="rounded-xl h-10 w-10 text-indigo-600 hover:bg-indigo-50"
+                                onClick={() => reprintReport(report)}
+                              >
+                                <Printer className="h-4 w-4" />
+                              </Button>
+                            )}
                             <Button 
                               variant="ghost" 
                               size="icon" 
@@ -745,14 +751,16 @@ export default function LaporanAdmin() {
                             >
                               <a href={report.fileUrl} target="_blank" rel="noreferrer"><Download className="h-4 w-4" /></a>
                             </Button>
-                            <Button 
-                              variant="ghost" 
-                              size="icon" 
-                              className="rounded-xl h-10 w-10 text-rose-400 hover:bg-rose-50 hover:text-rose-600"
-                              onClick={() => handleDelete(report.id)}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
+                            {canManage && (
+                              <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                className="rounded-xl h-10 w-10 text-rose-400 hover:bg-rose-50 hover:text-rose-600"
+                                onClick={() => handleDelete(report.id)}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            )}
                           </div>
                         </td>
                       </tr>
