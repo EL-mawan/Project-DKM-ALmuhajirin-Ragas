@@ -104,6 +104,12 @@ export const PERMISSIONS = {
   JADWAL_UPDATE: { resource: 'jadwal', action: 'update' },
   JADWAL_DELETE: { resource: 'jadwal', action: 'delete' },
   
+  // Content Management
+  CONTENT_CREATE: { resource: 'content', action: 'create' },
+  CONTENT_READ: { resource: 'content', action: 'read' },
+  CONTENT_UPDATE: { resource: 'content', action: 'update' },
+  CONTENT_DELETE: { resource: 'content', action: 'delete' },
+  
   // Audit Logs
   AUDIT_READ: { resource: 'audit', action: 'read' },
 } as const

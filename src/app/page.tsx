@@ -29,21 +29,28 @@ import { cn, formatCurrency } from '@/lib/utils'
 
 export default function Home() {
   const [data, setData] = useState<any>(null)
+  const [content, setContent] = useState<any>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const fetchStats = async () => {
+    const fetchData = async () => {
       try {
-        const res = await fetch('/api/public/stats')
-        const json = await res.json()
-        setData(json)
+        // Fetch stats
+        const statsRes = await fetch('/api/public/stats')
+        const statsJson = await statsRes.json()
+        setData(statsJson)
+
+        // Fetch homepage content
+        const contentRes = await fetch('/api/public/content')
+        const contentJson = await contentRes.json()
+        setContent(contentJson)
       } catch (err) {
         console.error(err)
       } finally {
         setLoading(false)
       }
     }
-    fetchStats()
+    fetchData()
   }, [])
 
   const stats = [
@@ -82,10 +89,10 @@ export default function Home() {
               
               <div className="space-y-6">
                 <h1 className="text-5xl lg:text-7xl font-extrabold tracking-tight text-foreground leading-[1.1]">
-                  Membangun Umat,
+                  Memakmurkan Masjid,
                   <br />
                   <span className="bg-clip-text text-transparent bg-linear-to-r from-primary via-primary/80 to-accent">
-                    Menebar Rahmat
+                    Mendekatkan Diri Kepada Allah
                   </span>
                 </h1>
                 <p className="text-xl text-muted-foreground leading-relaxed max-w-xl">
@@ -115,8 +122,8 @@ export default function Home() {
               <div className="relative z-10 aspect-4/5 rounded-4xl overflow-hidden shadow-2xl shadow-primary/20 rotate-3 group-hover:rotate-0 transition-transform duration-700">
                 <div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent z-10" />
                 <img 
-                  src="https://images.unsplash.com/photo-1542332213-31f87348057f?q=80&w=2670&auto=format&fit=crop" 
-                  alt="Beautiful Mosque Interior" 
+                  src="/WhatsApp Image 2026-02-06 at 20.29.40.jpeg" 
+                  alt="Masjid Al-Muhajirin Ragas" 
                   className="w-full h-full object-cover scale-110 group-hover:scale-100 transition-transform duration-700"
                 />
                 <div className="absolute bottom-10 left-10 z-20 space-y-2">
@@ -232,7 +239,7 @@ export default function Home() {
                 <div key={index} className="group relative bg-background rounded-4xl border border-border/50 overflow-hidden hover:shadow-2xl transition-all duration-500">
                   <div className="aspect-16/10 relative overflow-hidden">
                     <img 
-                      src={activity.image || 'https://images.unsplash.com/photo-1542332213-31f87348057f?q=80&w=2670&auto=format&fit=crop'} 
+                      src={activity.image || '/WhatsApp Image 2026-02-06 at 20.29.40.jpeg'} 
                       alt={activity.title}
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                     />
@@ -333,7 +340,7 @@ export default function Home() {
               ))
             ) : (
               [1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-                <img key={i} src={`https://images.unsplash.com/photo-1542332213-31f87348057f?q=80&w=2670&auto=format&fit=crop`} alt={`Placeholder ${i}`} className="rounded-3xl" />
+                <img key={i} src={`/WhatsApp Image 2026-02-06 at 20.29.40.jpeg`} alt={`Masjid Al-Muhajirin ${i}`} className="rounded-3xl" />
               ))
             )}
           </div>
