@@ -127,8 +127,8 @@ export default function Home() {
                   className="w-full h-full object-cover scale-110 group-hover:scale-100 transition-transform duration-700"
                 />
                 <div className="absolute bottom-10 left-10 z-20 space-y-2">
-                  <Badge className="bg-white/20 backdrop-blur-md text-white border-white/30">Hadirin Pekan Ini</Badge>
-                  <p className="text-2xl font-bold text-white uppercase tracking-wider">Kajian Rutin</p>
+                  <Badge className="bg-white/20 backdrop-blur-md text-white border-white/30">Masjid AL-Muhajirin</Badge>
+                  <p className="text-2xl font-bold text-white uppercase tracking-wider">Kp. Ragas Grenyang</p>
                 </div>
               </div>
               {/* Decorative blobs */}
@@ -367,7 +367,7 @@ export default function Home() {
                     <Phone className="mr-2 h-5 w-5" />
                     WhatsApp Layanan
                   </Button>
-                  <Button variant="outline" size="lg" className="border-white/20 text-white hover:bg-white/10 h-14 px-8 rounded-2xl">
+                  <Button variant="outline" size="lg" className="border-white/20 text-primary hover:bg-white/10 h-14 px-8 rounded-2xl">
                     <Mail className="mr-2 h-5 w-5" />
                     Kirim Email
                   </Button>

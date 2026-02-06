@@ -3,7 +3,6 @@ import {
   MapPin, 
   Phone, 
   Mail, 
-  Clock, 
   Facebook, 
   Instagram, 
   Youtube,
@@ -127,16 +126,16 @@ export function Footer() {
                 <MapPin className="h-5 w-5 text-muted-foreground mt-0.5 shrink-0" />
                 <div>
                   <p className="text-sm text-muted-foreground">
-                    Jl. Ragas Grenyang No. 123<br />
-                    Kec. Ragajaya, Kab. Bogor<br />
-                    Jawa Barat 16913
+                    Kp. Ragas Grenyang<br />
+                    Desa Argawana, Kec. Puloampel<br />
+                    Serang - Banten 42455
                   </p>
                 </div>
               </div>
               <div className="flex items-center space-x-3">
                 <Phone className="h-5 w-5 text-muted-foreground shrink-0" />
                 <p className="text-sm text-muted-foreground">
-                  (0251) 1234-5678
+                  +62 896-4756-5908
                 </p>
               </div>
               <div className="flex items-center space-x-3">
@@ -144,16 +143,6 @@ export function Footer() {
                 <p className="text-sm text-muted-foreground">
                   info@almuhajirin.com
                 </p>
-              </div>
-              <div className="flex items-center space-x-3">
-                <Clock className="h-5 w-5 text-muted-foreground shrink-0" />
-                <div>
-                  <p className="text-sm text-muted-foreground">
-                    <strong>Admin Office:</strong><br />
-                    Senin - Jumat: 08:00 - 16:00<br />
-                    Sabtu: 08:00 - 12:00
-                  </p>
-                </div>
               </div>
             </div>
           </div>
