@@ -1322,39 +1322,37 @@ Salam silaturahmi kami sampaikan, teriring doa semoga bapak beserta keluarga sel
                 </div>
 
                 {/* CONTENT */}
-                <div className="text-[12pt] space-y-6 text-slate-900 leading-[1.8] flex-1">
+                <div className="text-[12pt] space-y-6 text-slate-900 leading-[1.8] flex-1 font-serif">
                   {type === 'PROPOSAL' ? (
                     <>
-                      <p className="font-bold">Assalamu'alaikum Warahmatullahi Wabarakatuh,</p>
                       <div className="whitespace-pre-wrap text-justify">{formData.isiSuratPengantar || '[Isi Surat Pengantar Belum Diisi]'}</div>
                       
                       {formData.waktuTempatAktif && formData.namaAcara && (
-                        <div className="ml-8 space-y-1.5 py-4 text-slate-900 italic border-l-2 border-slate-100 pl-6 bg-slate-50/50 rounded-r-2xl">
-                          <div className="flex"><span className="w-32 inline-block font-bold">Hari / Tanggal</span><span>: {formData.hariAcara}, {formData.tanggalAcara}</span></div>
-                          <div className="flex"><span className="w-32 inline-block font-bold">Waktu</span><span>: {formData.waktuAcara}</span></div>
-                          <div className="flex"><span className="w-32 inline-block font-bold">Tempat</span><span>: {formData.lokasiAcara}</span></div>
-                          <div className="flex"><span className="w-32 inline-block font-bold uppercase">Acara</span><span>: <span className="font-bold underline decoration-slate-400 decoration-2">{formData.namaAcara}</span></span></div>
+                        <div className="ml-16 space-y-1 my-4">
+                          <div className="flex"><span className="w-32 inline-block">Hari, Tanggal</span><span>: {formData.hariAcara}, {formData.tanggalAcara}</span></div>
+                          <div className="flex"><span className="w-32 inline-block">Waktu</span><span>: {formData.waktuAcara}</span></div>
+                          <div className="flex"><span className="w-32 inline-block">Tempat</span><span>: {formData.lokasiAcara}</span></div>
+                          <div className="flex"><span className="w-32 inline-block">Acara</span><span>: {formData.namaAcara}</span></div>
                         </div>
                       )}
 
-                      <p className="whitespace-pre-wrap text-justify">{formData.kalimatPenutup}</p>
+                      <div className="whitespace-pre-wrap text-justify">{formData.kalimatPenutup}</div>
                       <p className="font-bold">Wassalamu'alaikum Warahmatullahi Wabarakatuh.</p>
                     </>
                   ) : (
                     <>
-                      <p className="font-bold">Assalamu'alaikum Warahmatullahi Wabarakatuh,</p>
-                      <p className="whitespace-pre-wrap text-justify">{formData.pembuka}</p>
+                      <div className="whitespace-pre-wrap text-justify">{formData.pembuka}</div>
 
-                      {type === 'UNDANGAN' && formData.namaAcara && (
-                        <div className="ml-8 space-y-1.5 py-4 text-slate-900 italic border-l-2 border-slate-100 pl-6 bg-slate-50/50 rounded-r-2xl">
-                          <div className="flex"><span className="w-32 inline-block font-bold">Hari / Tanggal</span><span>: {formData.hariAcara}, {formData.tanggalAcara}</span></div>
-                          <div className="flex"><span className="w-32 inline-block font-bold">Waktu</span><span>: {formData.waktuAcara}</span></div>
-                          <div className="flex"><span className="w-32 inline-block font-bold">Tempat</span><span>: {formData.lokasiAcara}</span></div>
-                          <div className="flex"><span className="w-32 inline-block font-bold uppercase">Acara</span><span>: <span className="font-bold underline decoration-slate-400 decoration-2">{formData.namaAcara}</span></span></div>
+                      {formData.namaAcara && (
+                        <div className="ml-16 space-y-1 my-4">
+                          <div className="flex"><span className="w-32 inline-block">Hari, Tanggal</span><span>: {formData.hariAcara}, {formData.tanggalAcara}</span></div>
+                          <div className="flex"><span className="w-32 inline-block">Waktu</span><span>: {formData.waktuAcara}</span></div>
+                          <div className="flex"><span className="w-32 inline-block">Tempat</span><span>: {formData.lokasiAcara}</span></div>
+                          <div className="flex"><span className="w-32 inline-block">Acara</span><span>: {formData.namaAcara}</span></div>
                         </div>
                       )}
 
-                      <p className="whitespace-pre-wrap text-justify">{formData.penutup}</p>
+                      <div className="whitespace-pre-wrap text-justify">{formData.penutup}</div>
                       <p className="font-bold">Wassalamu'alaikum Warahmatullahi Wabarakatuh.</p>
                     </>
                   )}
