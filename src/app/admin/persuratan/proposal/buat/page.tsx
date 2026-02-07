@@ -165,6 +165,7 @@ function ProposalBuilderContent() {
   const [isBulkProcessing, setIsBulkProcessing] = useState(false)
   const [currentRecipientIndex, setCurrentRecipientIndex] = useState(0)
   const [bulkProgress, setBulkProgress] = useState(0)
+  const [isRecipientsDialogOpen, setIsRecipientsDialogOpen] = useState(false)
   const previewRef = useRef<HTMLDivElement>(null)
   const [strukturOrganisasi, setStrukturOrganisasi] = useState<{ name: string, position: string }[]>([])
 
@@ -1159,7 +1160,7 @@ Pastikan setiap poin dimulai dengan kata kerja (Contoh: Menjalin, Meningkatkan, 
                 <div className="flex justify-end pt-8 border-t border-slate-100">
                   <Button 
                     onClick={() => setActiveTab('struktur')} 
-                    className="h-12 px-10 rounded-full bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-black uppercase tracking-widest text-[10px] hover:shadow-xl hover:shadow-emerald-100 group transition-all">
+                    className="h-12 px-10 rounded-full bg-linear-to-r from-emerald-600 to-teal-600 text-white font-black uppercase tracking-widest text-[10px] hover:shadow-xl hover:shadow-emerald-100 group transition-all">
                     Lanjut ke Struktur <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
                   </Button>
                 </div>
@@ -1252,7 +1253,7 @@ Pastikan setiap poin dimulai dengan kata kerja (Contoh: Menjalin, Meningkatkan, 
                     </Button>
                     <Button 
                       onClick={() => setActiveTab('rab')} 
-                      className="h-12 px-10 rounded-full bg-gradient-to-r from-indigo-600 to-blue-600 text-white font-black uppercase tracking-widest text-[10px] hover:shadow-xl hover:shadow-indigo-100 group transition-all">
+                      className="h-12 px-10 rounded-full bg-linear-to-r from-indigo-600 to-blue-600 text-white font-black uppercase tracking-widest text-[10px] hover:shadow-xl hover:shadow-indigo-100 group transition-all">
                       Lanjut ke RAB <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
                     </Button>
                   </div>
@@ -1358,7 +1359,7 @@ Pastikan setiap poin dimulai dengan kata kerja (Contoh: Menjalin, Meningkatkan, 
                   </Button>
                   <Button 
                     onClick={() => setActiveTab('ttd')} 
-                    className="h-12 px-10 rounded-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-black uppercase tracking-widest text-[10px] hover:shadow-xl hover:shadow-purple-100 group transition-all">
+                    className="h-12 px-10 rounded-full bg-linear-to-r from-purple-600 to-indigo-600 text-white font-black uppercase tracking-widest text-[10px] hover:shadow-xl hover:shadow-purple-100 group transition-all">
                     Lanjut ke Tanda Tangan <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
                   </Button>
                 </div>
@@ -1421,7 +1422,7 @@ Pastikan setiap poin dimulai dengan kata kerja (Contoh: Menjalin, Meningkatkan, 
                     </Button>
                     <Button 
                       onClick={() => setActiveTab('foto')} 
-                      className="h-12 px-10 rounded-full bg-gradient-to-r from-pink-600 to-rose-600 text-white font-black uppercase tracking-widest text-[10px] hover:shadow-xl hover:shadow-pink-100 group transition-all">
+                       className="h-12 px-10 rounded-full bg-linear-to-r from-pink-600 to-rose-600 text-white font-black uppercase tracking-widest text-[10px] hover:shadow-xl hover:shadow-pink-100 group transition-all">
                       Lanjut ke Lampiran Foto <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
                     </Button>
                   </div>
@@ -1559,13 +1560,12 @@ Pastikan setiap poin dimulai dengan kata kerja (Contoh: Menjalin, Meningkatkan, 
               )}
             </div>
             <div className="flex items-center gap-2 w-full sm:w-auto">
-                {bulkRecipients.length > 1 && (
-                    <Button onClick={() => generatePDF(false)} disabled={isGeneratingPDF} className="flex-1 sm:flex-none h-11 px-5 rounded-2xl font-bold bg-emerald-600 text-white shadow-xl shadow-emerald-200 hover:bg-emerald-700 transition-all active:scale-95 text-xs">
-                        <Download className="mr-2 h-4 w-4" /> {isGeneratingPDF ? 'Proses...' : 'Unduh ZIP'}
-                    </Button>
-                )}
-                <Button onClick={() => generatePDF(true)} disabled={isGeneratingPDF} className="flex-1 sm:flex-none h-11 px-5 rounded-2xl font-bold bg-slate-900 border-none shadow-xl shadow-slate-200 hover:bg-slate-800 transition-all active:scale-95 text-white text-xs">
-                    <Download className="mr-2 h-4 w-4" /> {isGeneratingPDF ? 'Proses...' : 'Unduh PDF'}
+                <Button 
+                  onClick={() => setIsRecipientsDialogOpen(true)} 
+                  className="flex-1 sm:flex-none h-11 px-5 rounded-2xl font-black bg-white border-2 border-slate-200 text-slate-700 shadow-xl shadow-slate-100 hover:bg-slate-50 transition-all active:scale-95 text-[10px] uppercase tracking-widest"
+                >
+                    <Users className="mr-2 h-4 w-4 text-emerald-600" /> 
+                    View {bulkRecipients.length > 0 ? bulkRecipients.length : 1} Tujuan Penerima
                 </Button>
             </div>
           </div>
@@ -1644,6 +1644,87 @@ Pastikan setiap poin dimulai dengan kata kerja (Contoh: Menjalin, Meningkatkan, 
             <div className="flex justify-center">
                 <RotateCcw className="h-6 w-6 text-emerald-600 animate-spin" />
             </div>
+        </DialogContent>
+    </Dialog>
+
+    {/* RECIPIENTS LIST DIALOG */}
+    <Dialog open={isRecipientsDialogOpen} onOpenChange={setIsRecipientsDialogOpen}>
+        <DialogContent className="sm:max-w-2xl bg-white rounded-[2.5rem] p-0 border-none shadow-2xl overflow-hidden">
+            <div className="p-8 bg-slate-50/50 border-b border-slate-100">
+                <DialogHeader>
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                            <div className="h-12 w-12 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center">
+                                <Users className="h-6 w-6" />
+                            </div>
+                            <div>
+                                <DialogTitle className="text-xl font-black text-slate-900">Daftar Tujuan Penerima</DialogTitle>
+                                <DialogDescription className="text-xs font-bold text-slate-500 uppercase tracking-widest">
+                                    Total {bulkRecipients.length > 0 ? bulkRecipients.length : 1} Dokumentasi Terdata
+                                </DialogDescription>
+                            </div>
+                        </div>
+                        <div className="flex gap-2">
+                           {bulkRecipients.length > 1 && (
+                             <Button size="sm" onClick={() => { generatePDF(false); setIsRecipientsDialogOpen(false); }} className="h-10 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10px] uppercase gap-2 px-4 shadow-lg shadow-emerald-100">
+                                <Download className="h-3.5 w-3.5" /> Unduh ZIP
+                             </Button>
+                           )}
+                           <Button size="sm" onClick={() => { generatePDF(true); setIsRecipientsDialogOpen(false); }} className="h-10 rounded-xl bg-slate-900 hover:bg-black text-white font-bold text-[10px] uppercase gap-2 px-4 shadow-lg shadow-slate-200">
+                                <Download className="h-3.5 w-3.5" /> Unduh PDF
+                           </Button>
+                        </div>
+                    </div>
+                </DialogHeader>
+            </div>
+            <div className="p-6 max-h-[60vh] overflow-y-auto custom-scrollbar">
+                <div className="space-y-3">
+                    {bulkRecipients.length > 0 ? (
+                        bulkRecipients.map((rec, idx) => (
+                            <div key={idx} className="flex items-center justify-between p-4 rounded-2xl bg-white border border-slate-100 hover:border-emerald-200 transition-all group">
+                                <div className="flex items-center gap-4">
+                                    <div className="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center text-[10px] font-black text-slate-400 group-hover:bg-emerald-50 group-hover:text-emerald-600 transition-colors">
+                                        {idx + 1}
+                                    </div>
+                                    <div>
+                                        <p className="font-black text-sm text-slate-900 capitalize">{rec.nama}</p>
+                                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">{rec.jabatan} | {rec.alamat}</p>
+                                    </div>
+                                </div>
+                                <Button 
+                                    variant="ghost" 
+                                    size="sm" 
+                                    className="h-8 rounded-lg text-emerald-600 hover:bg-emerald-50 font-bold text-[10px] uppercase"
+                                    onClick={() => {
+                                        setCurrentRecipientIndex(idx);
+                                        setIsRecipientsDialogOpen(false);
+                                    }}
+                                >
+                                    Pilih Preview
+                                </Button>
+                            </div>
+                        ))
+                    ) : (
+                        <div className="p-6 rounded-2xl bg-white border border-slate-100 flex items-center justify-between">
+                            <div className="flex items-center gap-4">
+                                <div className="h-10 w-10 rounded-xl bg-emerald-50 flex items-center justify-center text-[10px] font-black text-emerald-600">
+                                    01
+                                </div>
+                                <div>
+                                    <p className="font-black text-sm text-slate-900 capitalize">{data.penerima.nama || '[Belum Diisi]'}</p>
+                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">{data.penerima.jabatan || '-'} | {data.penerima.alamat || '-'}</p>
+                                </div>
+                            </div>
+                            <Badge className="bg-emerald-50 text-emerald-600 border-none font-black text-[9px] px-3">SINGLE RECIPEINT</Badge>
+                        </div>
+                    )}
+                </div>
+            </div>
+            <DialogFooter className="p-6 bg-slate-50 border-t border-slate-100">
+                <p className="text-[9px] text-slate-400 font-bold uppercase tracking-[0.2em] italic">
+                    * Untuk mengubah daftar penerima massal, silakan unggah ulang file Excel pada tab UMUM.
+                </p>
+            </DialogFooter>
         </DialogContent>
     </Dialog>
     </>

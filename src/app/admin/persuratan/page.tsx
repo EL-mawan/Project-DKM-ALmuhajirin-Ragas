@@ -24,7 +24,10 @@ import {
   XCircle,
   Clock,
   Eye,
-  Paperclip
+  Paperclip,
+  MoreHorizontal,
+  Check,
+  X
 } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { AdminLayout } from '@/components/layout/admin-layout'
@@ -36,6 +39,14 @@ import {
   DialogTitle, 
   DialogTrigger 
 } from '@/components/ui/dialog'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { StatusPopup } from '@/components/ui/status-popup'
 import { useStatusPopup } from '@/lib/hooks/use-status-popup'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -130,15 +141,10 @@ export default function PersuratanAdmin() {
   const [activePDFData, setActivePDFData] = useState<any>(null)
 
   const generatePDF = async (item: any) => {
-    if (item.type !== 'PROPOSAL') {
-        // Fallback to old manual generation for other types for now
-        return generateManualPDF(item)
-    }
-
     try {
       setIsGeneratingPDF(true)
       setActivePDFData(item)
-      toast.info('Menyiapkan render PDF premium...')
+      toast.info(`Menyiapkan render PDF ${item.type.toLowerCase()}...`)
 
       // Wait for React to render the hidden preview
       await new Promise(resolve => setTimeout(resolve, 800))
@@ -149,6 +155,11 @@ export default function PersuratanAdmin() {
       const doc = new jsPDF('p', 'mm', 'a4')
       const pages = previewContainer.querySelectorAll('.proposal-page')
       
+      if (pages.length === 0) {
+        // Fallback if no pages found (e.g. not a proposal or component failure)
+        return generateManualPDF(item)
+      }
+
       for (let i = 0; i < pages.length; i++) {
         const page = pages[i] as HTMLElement
         const canvas = await html2canvas(page, {
@@ -159,7 +170,6 @@ export default function PersuratanAdmin() {
           height: 1123,
           logging: false,
           onclone: (clonedDoc: Document) => {
-            // Convert oklch() colors to hex for html2canvas compatibility
             const style = clonedDoc.createElement('style');
             style.textContent = `
               :root {
@@ -182,12 +192,13 @@ export default function PersuratanAdmin() {
         doc.addImage(imgData, 'JPEG', 0, 0, 210, 297)
       }
 
-      const fileName = `Proposal_${item.title.replace(/[^a-z0-9]/gi, '_')}.pdf`
+      const fileName = `${item.type}_${item.title.replace(/[^a-z0-9]/gi, '_')}.pdf`
       doc.save(fileName)
-      toast.success('PDF Proposal premium berhasil diunduh')
+      toast.success('PDF berhasil diunduh')
     } catch (error) {
       console.error(error)
-      toast.error('Gagal membuat PDF premium')
+      toast.error('Gagal membuat PDF premium, menggunakan metode standar...')
+      generateManualPDF(item)
     } finally {
       setIsGeneratingPDF(false)
       setActivePDFData(null)
@@ -210,7 +221,7 @@ export default function PersuratanAdmin() {
       const pageWidth = doc.internal.pageSize.getWidth()
       const pageHeight = doc.internal.pageSize.getHeight()
       const centerX = pageWidth / 2
-      const margin = 15
+      const margin = 20
 
       // Parse Content if JSON
       let formData: any = {}
@@ -221,75 +232,62 @@ export default function PersuratanAdmin() {
       }
 
       // --- 1. PREMIUM HEADER / KOP ---
-      // Decorative side bar
-      doc.setFillColor(dkmEmerald[0], dkmEmerald[1], dkmEmerald[2])
-      doc.rect(0, 0, 5, pageHeight, 'F')
-      
-      // Header Line
-      doc.setFillColor(dkmGold[0], dkmGold[1], dkmGold[2])
-      doc.rect(margin, 10, pageWidth - (margin * 2), 0.5, 'F')
-      
       // DKM Text
       doc.setFontSize(14)
       doc.setFont('times', 'bold')
       doc.setTextColor(dkmEmerald[0], dkmEmerald[1], dkmEmerald[2])
-      doc.text('DEWAN KEMAKMURAN MASJID (DKM)', centerX, 22, { align: 'center' })
+      doc.text(formData.namaKopSurat?.split('\n')[0] || 'DEWAN KEMAKMURAN MASJID (DKM)', centerX, 22, { align: 'center' })
       
       doc.setFontSize(18)
-      doc.text('AL-MUHAJIRIN KP. RAGAS GRENYANG', centerX, 30, { align: 'center' })
+      doc.text(formData.namaKopSurat?.split('\n')[1] || 'AL-MUHAJIRIN KP. RAGAS GRENYANG', centerX, 30, { align: 'center' })
       
       doc.setFontSize(9)
       doc.setFont('times', 'italic')
-      doc.setTextColor(148, 163, 184)
-      doc.text('Desa Argawana, Kecamatan Puloampel Kabupaten Serang', centerX, 36, { align: 'center' })
-      doc.text('Provinsi Banten 42455', centerX, 41, { align: 'center' })
+      doc.setTextColor(100, 116, 139)
+      const alamatLines = doc.splitTextToSize(formData.alamatKopSurat || 'Desa Argawana, Kecamatan Puloampel Kabupaten Serang Provinsi Banten 42455', pageWidth - 60)
+      doc.text(alamatLines, centerX, 36, { align: 'center' })
       
       doc.setDrawColor(dkmEmerald[0], dkmEmerald[1], dkmEmerald[2])
-      doc.setLineWidth(0.8)
+      doc.setLineWidth(1)
       doc.line(margin, 48, pageWidth - margin, 48)
       doc.setLineWidth(0.2)
-      doc.line(margin, 50, pageWidth - margin, 50)
+      doc.line(margin, 49.5, pageWidth - margin, 49.5)
 
-      let curY = 65
+      let curY = 60
       doc.setTextColor(dkmSlate[0], dkmSlate[1], dkmSlate[2])
 
       // --- 2. DOCUMENT INFO ---
       const dateStr = new Date(item.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })
-      doc.setFont('times', 'normal')
-      doc.setFontSize(12)
-      doc.text(`${item.location || 'Bojonegara'}, ${dateStr}`, pageWidth - margin, curY, { align: 'right' })
+      doc.setFont('times', 'bold')
+      doc.setFontSize(11)
+      doc.text(`${item.location || 'Argawana'}, ${dateStr}`, pageWidth - margin, curY, { align: 'right' })
       
+      doc.setFont('times', 'normal')
       doc.text(`Nomor      : ${item.nomorSurat || '-'}`, margin, curY)
-      doc.text(`Lampiran  : -`, margin, curY + 6)
+      doc.text(`Lampiran  : ${formData.lampiran || '-'}`, margin, curY + 6)
       doc.setFont('times', 'bold')
       doc.text(`Perihal      : ${item.title.toUpperCase()}`, margin, curY + 12)
       
       curY += 25
 
       // Recipient Section
-      if (item.recipient) {
-        doc.setFont('times', 'normal')
-        doc.text('Kepada Yth.', margin, curY)
-        doc.setFont('times', 'bold')
-        doc.text(item.recipient, margin, curY + 6)
-        
-        if (formData.penerimaJabatan) {
-          doc.setFont('times', 'italic')
-          doc.setFontSize(10)
-          doc.text(formData.penerimaJabatan, margin, curY + 11)
-          doc.setFontSize(11)
-        }
-
-        doc.setFont('times', 'normal')
-        doc.text('di_', margin, curY + (formData.penerimaJabatan ? 17 : 12))
-        doc.text(item.location || 'Tempat', margin + 5, curY + (formData.penerimaJabatan ? 22 : 18))
-        curY += 35
+      doc.setFont('times', 'normal')
+      doc.text('Kepada Yth.', margin, curY)
+      doc.setFont('times', 'bold')
+      doc.text(item.recipient || '............................', margin, curY + 6)
+      
+      if (formData.penerimaJabatan) {
+        doc.setFont('times', 'italic')
+        doc.setFontSize(10)
+        doc.text(formData.penerimaJabatan, margin, curY + 11)
+        doc.setFontSize(11)
       }
 
-      // --- 3. GREETING ---
       doc.setFont('times', 'normal')
-      doc.text('Assalamu\'alaikum Warahmatullahi Wabarakatuh,', margin, curY)
-      curY += 10
+      doc.text('di_', margin, curY + (formData.penerimaJabatan ? 17 : 12))
+      doc.setFont('times', 'bold')
+      doc.text(formData.penerimaLokasi || 'Tempat', margin + 5, curY + (formData.penerimaJabatan ? 22 : 18))
+      curY += 35
 
       // --- 4. CONTENT RENDERING ---
       const renderContent = (text: string, fontSize = 11, fontStyle: any = 'normal') => {
@@ -299,97 +297,75 @@ export default function PersuratanAdmin() {
         const maxWidth = pageWidth - (margin * 2)
         const split = doc.splitTextToSize(text, maxWidth)
         doc.text(split, margin, curY, { align: 'justify', lineHeightFactor: 1.5 })
-        curY += (split.length * 6) + 3
+        curY += (split.length * 7) + 3
       }
 
-      // If it's a proposal from the builder, it might have specific structure
-      if (item.type === 'PROPOSAL') {
-        const pData = formData
-        renderContent(pData.suratPengantar || pData.perihal || item.title)
-      } else {
-        // Standard Letter types (Undangan, Surat Resmi)
-        if (formData.isiSuratPengantar) renderContent(formData.isiSuratPengantar)
+      // Handle both Builder Schema and old schema
+      const pembuka = formData.pembuka || formData.isiSuratPengantar || ''
+      const penutup = formData.penutup || formData.kalimatPenutup || ''
+
+      renderContent(pembuka)
+
+      // Event Details for Undangan/Surat
+      if (formData.waktuTempatAktif) {
+        const detailsX = margin + 15
+        doc.setFont('times', 'normal')
         
-        if (formData.latarBelakang) {
-          renderContent('Dasar Pemikiran:', 11, 'bold')
-          renderContent(formData.latarBelakang)
-        }
+        const rows = [
+          ['Hari, Tanggal', `: ${formData.hariAcara || ''}${formData.hariAcara && formData.tanggalAcara ? ', ' : ''}${formData.tanggalAcara || ''}`],
+          ['Waktu', `: ${formData.waktuAcara || ''}`],
+          ['Tempat', `: ${formData.lokasiAcara || ''}`],
+          ['Acara', `: ${formData.namaAcara || ''}`]
+        ]
 
-        if (formData.maksudTujuanList && Array.isArray(formData.maksudTujuanList) && formData.maksudTujuanList.length > 0) {
-          renderContent('Maksud dan Tujuan:', 11, 'bold')
-          formData.maksudTujuanList.forEach((point: string, idx: number) => {
-            const maxWidth = pageWidth - (margin * 2) - 5
-            const splitPoint = doc.splitTextToSize(`${idx + 1}. ${point}`, maxWidth)
-            doc.text(splitPoint, margin + 5, curY)
-            curY += (splitPoint.length * 6)
-          })
-          curY += 3
-        }
-
-        // Fallback if no specific fields
-        if (!formData.isiSuratPengantar && !formData.latarBelakang) {
-          renderContent(item.content || item.title)
-        }
+        rows.forEach(([label, value]) => {
+          doc.text(label, detailsX, curY)
+          doc.text(value, detailsX + 35, curY)
+          curY += 7
+        })
+        curY += 5
       }
 
-      // Closing
-      doc.setFont('times', 'normal')
-      doc.setFontSize(11)
+      renderContent(penutup)
+
+      // Signature Block
       if (curY > pageHeight - 60) { 
         doc.addPage()
         curY = 30
+      } else {
+        curY += 10
       }
-      
-      const closingText = doc.splitTextToSize('Demikian surat ini kami sampaikan, atas perhatian dan kerjasamanya kami ucapkan terima kasih.', pageWidth - (margin * 2))
-      doc.text(closingText, margin, curY)
-      curY += (closingText.length * 6) + 3
-      doc.text('Wassalamu\'alaikum Warahmatullahi Wabarakatuh,', margin, curY)
-      curY += 10
-      
-      // --- 5. SIGNATURE BLOCK ---
-      if (curY > pageHeight - 50) { 
-        doc.addPage()
-        curY = 30
-      }
+
+      const colLeft = 55
+      const colRight = pageWidth - 55
 
       doc.setFont('times', 'bold')
-      const colLeft = 50
-      const colRight = pageWidth - 50
-
-      const ketuaName = formData.namaKetua || formData.ttdKetuaDKM || 'H. AGUNG GUNAWAN'
-      const sekretarisName = formData.namaSekretaris || formData.ttdSekretarisDKM || '..........................'
-
-
-      doc.text('Sekretaris,', colLeft, curY, { align: 'center' })
+      doc.text('Sekretaris DKM,', colLeft, curY, { align: 'center' })
       doc.text('Ketua DKM,', colRight, curY, { align: 'center' })
       
-      doc.setDrawColor(200)
-      doc.line(colLeft - 25, curY + 22, colLeft + 25, curY + 22)
-      doc.line(colRight - 25, curY + 22, colRight + 25, curY + 22)
-      
-      doc.text(sekretarisName, colLeft, curY + 28, { align: 'center' })
-      doc.text(ketuaName, colRight, curY + 28, { align: 'center' })
+      curY += 25
+      doc.text(`( ${formData.ttdSekretarisDKM || '............................'} )`, colLeft, curY, { align: 'center' })
+      doc.text(`( ${formData.ttdKetuaDKM || '............................'} )`, colRight, curY, { align: 'center' })
+
+      if (formData.ttdTokohMasyarakat) {
+        curY += 15
+        doc.setFontSize(10)
+        doc.text('Mengetahui,', centerX, curY, { align: 'center' })
+        doc.text('Tokoh Masyarakat Masjid Al-Muhajirin', centerX, curY + 5, { align: 'center' })
+        curY += 25
+        doc.text(`( ${formData.ttdTokohMasyarakat} )`, centerX, curY, { align: 'center' })
+      }
 
       // Generate filename
       const filename = `${item.type}_${item.title.replace(/[^a-z0-9]/gi, '_')}.pdf`
-      
-      // Use blob method for better download reliability
-      const pdfBlob = doc.output('blob')
-      const url = URL.createObjectURL(pdfBlob)
-      const link = document.createElement('a')
-      link.href = url
-      link.download = filename
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
-      URL.revokeObjectURL(url)
-      
+      doc.save(filename)
       toast.success('PDF berhasil diunduh!')
     } catch (error) {
       console.error('Error generating PDF:', error)
       toast.error('Gagal mengunduh PDF')
     }
   }
+
 
   return (
     <AdminLayout title="Administrasi & Persuratan" subtitle="Pembuatan Proposal, Undangan, dan Surat Resmi DKM.">
@@ -492,130 +468,149 @@ export default function PersuratanAdmin() {
                     <Card key={item.id} className="group relative overflow-hidden rounded-[2.5rem] border-none shadow-xl shadow-slate-200/40 hover:shadow-2xl hover:shadow-indigo-100/40 transition-all duration-500 bg-white border border-slate-50">
                       
                       <CardContent className="p-8 space-y-6">
-                        {/* Status Header */}
-                        <div className="flex justify-between items-center">
-                           <Badge className={`rounded-xl px-4 py-1.5 font-black text-[10px] uppercase tracking-widest border-none ${
-                             item.type === 'PROPOSAL' ? 'bg-indigo-50 text-indigo-600' : 
-                             item.type === 'UNDANGAN' ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'
-                           }`}>
-                             {item.type}
-                           </Badge>
-                           <StatusBadge status={item.status} />
+                        {/* Top Section: Badges & Actions */}
+                        <div className="flex justify-between items-start">
+                          <div className="flex flex-col gap-2">
+                             <Badge className={`rounded-xl px-3 py-1 font-black text-[9px] w-fit uppercase tracking-widest border-none ${
+                               item.type === 'PROPOSAL' ? 'bg-indigo-50 text-indigo-600' : 
+                               item.type === 'UNDANGAN' ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'
+                             }`}>
+                               {item.type}
+                             </Badge>
+                             <StatusBadge status={item.status} />
+                          </div>
+
+                          <div className="flex items-center gap-2">
+                             {/* Primary Action Button (View) - Accessible directly for better UX */}
+                             <Button 
+                               variant="ghost" 
+                               size="icon" 
+                               className="h-10 w-10 rounded-2xl bg-white shadow-sm hover:shadow-md hover:bg-white text-indigo-600 transition-all duration-300"
+                               onClick={() => router.push(item.type === 'PROPOSAL' ? `/admin/persuratan/proposal/buat?id=${item.id}&mode=view` : `/admin/persuratan/buat?type=${item.type}&id=${item.id}&mode=view`)}
+                               title="Lihat Detail"
+                             >
+                               <Eye className="h-5 w-5" />
+                             </Button>
+
+                             {/* Secondary Actions (Kebab Menu) */}
+                             <DropdownMenu>
+                               <DropdownMenuTrigger asChild>
+                                 <Button variant="ghost" size="icon" className="h-10 w-10 rounded-2xl bg-slate-50/50 hover:bg-white hover:shadow-md transition-all">
+                                   <MoreHorizontal className="h-5 w-5 text-slate-400" />
+                                 </Button>
+                               </DropdownMenuTrigger>
+                               <DropdownMenuContent align="end" className="w-56 rounded-2xl p-2 border-none shadow-2xl">
+                                 <DropdownMenuLabel className="text-[10px] uppercase tracking-widest text-slate-400 px-3 py-2">Opsi Dokumen</DropdownMenuLabel>
+                                 
+                                 {canValidate && item.status === 'pending' && (
+                                   <>
+                                     <DropdownMenuItem 
+                                       onClick={() => handleValidate(item.id, 'validate')} 
+                                       className="rounded-xl h-11 px-3 text-emerald-600 focus:text-emerald-700 focus:bg-emerald-50 cursor-pointer font-bold transition-colors"
+                                     >
+                                       <CheckCircle className="h-4 w-4 mr-3" />
+                                       Validasi Sekarang
+                                     </DropdownMenuItem>
+                                     <DropdownMenuItem 
+                                       onClick={() => handleValidate(item.id, 'reject')} 
+                                       className="rounded-xl h-11 px-3 text-rose-600 focus:text-rose-700 focus:bg-rose-50 cursor-pointer font-bold transition-colors"
+                                     >
+                                       <XCircle className="h-4 w-4 mr-3" />
+                                       Tolak Dokumen
+                                     </DropdownMenuItem>
+                                     <DropdownMenuSeparator className="my-2 bg-slate-50" />
+                                   </>
+                                 )}
+
+                                 <DropdownMenuItem 
+                                   onClick={() => generatePDF(item)}
+                                   disabled={item.status !== 'validated'}
+                                   className="rounded-xl h-11 px-3 cursor-pointer font-bold text-slate-600 hover:text-blue-600 transition-colors"
+                                 >
+                                   <Download className="h-4 w-4 mr-3 text-blue-500" />
+                                   Download PDF
+                                 </DropdownMenuItem>
+
+                                 <DropdownMenuItem 
+                                   onClick={() => router.push(item.type === 'PROPOSAL' ? `/admin/persuratan/proposal/buat?id=${item.id}` : `/admin/persuratan/buat?type=${item.type}&id=${item.id}`)} 
+                                   className="rounded-xl h-11 px-3 cursor-pointer font-bold text-slate-600 hover:text-emerald-600 transition-colors"
+                                 >
+                                   <Edit2 className="h-4 w-4 mr-3 text-emerald-500" />
+                                   Edit Konten
+                                 </DropdownMenuItem>
+
+                                 <DropdownMenuSeparator className="my-2 bg-slate-50" />
+
+                                 <DropdownMenuItem 
+                                   onClick={() => handleDelete(item.id)} 
+                                   className="rounded-xl h-11 px-3 text-rose-400 focus:text-rose-600 focus:bg-rose-50 cursor-pointer font-bold transition-colors"
+                                 >
+                                   <Trash2 className="h-4 w-4 mr-3" />
+                                   Hapus Permanen
+                                 </DropdownMenuItem>
+                               </DropdownMenuContent>
+                             </DropdownMenu>
+                          </div>
                         </div>
 
                         {/* Title Section */}
-                        <div className="space-y-2">
-                           <h4 className="font-black text-[#5e17eb] text-xl leading-tight transition-colors line-clamp-2">
+                        <div className="space-y-3">
+                           <h4 className="font-black text-[#0b3d2e] text-xl leading-snug group-hover:text-indigo-600 transition-colors line-clamp-2">
                              {item.title}
                            </h4>
-                           {item.nomorSurat && (
-                             <p className="text-[11px] font-bold text-slate-400 tracking-wider">
-                               {item.nomorSurat}
-                             </p>
+                           {item.nomorSurat ? (
+                             <div className="flex items-center gap-2">
+                               <Paperclip className="h-3 w-3 text-slate-300" />
+                               <p className="text-[11px] font-bold text-slate-400 tracking-wider">
+                                 {item.nomorSurat}
+                               </p>
+                             </div>
+                           ) : (
+                             <div className="h-4" /> // Spacer to keep height consistent
                            )}
                         </div>
 
                         {/* Detail Info */}
-                        <div className="space-y-4 pt-2">
-                           <div className="flex items-center gap-3 text-slate-600">
-                             <div className="h-9 w-9 rounded-xl bg-slate-50 flex items-center justify-center shrink-0">
-                               <Send className="h-4 w-4 text-slate-400" />
+                        <div className="bg-slate-50/30 rounded-3xl p-5 space-y-3 border border-slate-50">
+                           <div className="flex items-center gap-3">
+                             <div className="h-8 w-8 rounded-xl bg-white shadow-sm flex items-center justify-center shrink-0">
+                               <Send className="h-3.5 w-3.5 text-slate-400" />
                              </div>
-                             <p className="text-sm font-medium text-slate-600 line-clamp-1">
+                             <p className="text-xs font-bold text-slate-600 line-clamp-1">
                                {item.recipient || 'Tanpa Penerima'}
                              </p>
                            </div>
 
-                           <div className="flex items-center gap-3 text-slate-600">
-                             <div className="h-9 w-9 rounded-xl bg-slate-50 flex items-center justify-center shrink-0">
-                               <Calendar className="h-4 w-4 text-slate-400" />
+                           <div className="flex items-center gap-3">
+                             <div className="h-8 w-8 rounded-xl bg-white shadow-sm flex items-center justify-center shrink-0">
+                               <Calendar className="h-3.5 w-3.5 text-slate-400" />
                              </div>
-                             <p className="text-sm font-medium text-slate-600">
+                             <p className="text-xs font-bold text-slate-600">
                                {new Date(item.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
                              </p>
                            </div>
                         </div>
 
-                        {/* Footer Divider (Subtle) */}
-                        <div className="h-px w-full bg-slate-50" />
-
-                        {/* Bottom Row: Author & Actions */}
-                        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2">
-                           <div className="flex items-center gap-3 w-full sm:w-auto">
-                              <div className="h-10 w-10 rounded-full bg-indigo-50 flex items-center justify-center text-[#5e17eb] font-black text-sm border-2 border-white shadow-sm shrink-0">
+                        {/* Bottom Row: Author */}
+                        <div className="flex items-center justify-between pt-2">
+                           <div className="flex items-center gap-3">
+                              <div className="h-10 w-10 rounded-2xl bg-indigo-50 flex items-center justify-center text-[#5e17eb] font-black text-xs border-2 border-white shadow-sm shrink-0">
                                 {item.creator?.name?.charAt(0) || 'D'}
                               </div>
-                              <p className="text-xs font-bold text-slate-400">
-                                <span className="font-medium mr-1 uppercase text-[10px]">By</span> 
-                                <span className="text-slate-500 font-bold">{item.creator?.name || 'DKM Admin'}</span>
-                              </p>
+                              <div>
+                                <p className="text-[9px] font-black text-slate-300 uppercase leading-none mb-1">Diterbitkan Oleh</p>
+                                <p className="text-[11px] font-bold text-slate-500">{item.creator?.name || 'DKM Admin'}</p>
+                              </div>
                            </div>
-
-                           <div className="flex items-center gap-1 justify-end w-full sm:w-auto">
-                              {/* Validation Actions for Admins */}
-                              {canValidate && item.status === 'pending' && (
-                                <div className="flex items-center gap-1 mr-2 pr-2 border-r border-slate-100">
-                                  <Button 
-                                    variant="ghost" 
-                                    size="icon" 
-                                    className="h-10 w-10 rounded-xl text-emerald-600 hover:bg-emerald-50"
-                                    onClick={() => handleValidate(item.id, 'validate')}
-                                  >
-                                    <CheckCircle className="h-5 w-5" />
-                                  </Button>
-                                  <Button 
-                                    variant="ghost" 
-                                    size="icon" 
-                                    className="h-10 w-10 rounded-xl text-rose-600 hover:bg-rose-50"
-                                    onClick={() => handleValidate(item.id, 'reject')}
-                                  >
-                                    <XCircle className="h-5 w-5" />
-                                  </Button>
-                                </div>
-                              )}
-
-                              <Button 
-                                variant="ghost" 
-                                size="icon" 
-                                className="h-10 w-10 rounded-xl text-slate-300 hover:text-indigo-600 hover:bg-indigo-50 transition-all duration-300"
-                                onClick={() => router.push(item.type === 'PROPOSAL' ? `/admin/persuratan/proposal/buat?id=${item.id}&mode=view` : `/admin/persuratan/buat?type=${item.type}&id=${item.id}&mode=view`)}
-                                title="Lihat Detail"
-                              >
-                                <Eye className="h-5 w-5" />
-                              </Button>
-
-                              <Button 
-                                variant="ghost" 
-                                size="icon"
-                                disabled={item.status !== 'validated'}
-                                className="h-10 w-10 rounded-xl text-slate-300 hover:text-blue-600 hover:bg-blue-50 disabled:opacity-30 transition-all duration-300"
-                                onClick={() => generatePDF(item)}
-                                title="Unduh PDF"
-                              >
-                                <Download className="h-5 w-5" />
-                              </Button>
-
-                              <Button 
-                                variant="ghost" 
-                                size="icon" 
-                                className="h-10 w-10 rounded-xl text-slate-300 hover:text-emerald-600 hover:bg-emerald-50 transition-all duration-300"
-                                onClick={() => router.push(item.type === 'PROPOSAL' ? `/admin/persuratan/proposal/buat?id=${item.id}` : `/admin/persuratan/buat?type=${item.type}&id=${item.id}`)}
-                                title="Edit Dokumen"
-                              >
-                                <Edit2 className="h-5 w-5" />
-                              </Button>
-
-                              <Button 
-                                variant="ghost" 
-                                size="icon" 
-                                className="h-10 w-10 rounded-xl text-slate-300 hover:text-rose-600 hover:bg-rose-50 transition-all duration-300"
-                                onClick={() => handleDelete(item.id)}
-                                title="Hapus Dokumen"
-                              >
-                                <Trash2 className="h-5 w-5" />
-                              </Button>
+                           
+                           {/* Decorative icon based on type */}
+                           <div className="h-10 w-10 rounded-2xl bg-slate-50 flex items-center justify-center opacity-40 group-hover:opacity-100 transition-opacity">
+                             {item.type === 'PROPOSAL' ? <FileText className="h-5 w-5 text-indigo-400" /> : 
+                              item.type === 'UNDANGAN' ? <Mail className="h-5 w-5 text-emerald-400" /> : 
+                              <CheckCircle2 className="h-5 w-5 text-amber-400" />}
                            </div>
                         </div>
+
                       </CardContent>
                     </Card>
                   ))}
@@ -635,17 +630,92 @@ export default function PersuratanAdmin() {
               ? JSON.parse(activePDFData.content) 
               : activePDFData.content;
             
-            return (
-              <div className="flex flex-col gap-0 font-serif" style={{ width: '794px' }}>
-                <PageCover data={formData} />
-                <Page1 data={formData} />
-                <Page2 data={formData} />
-                <Page3 data={formData} />
-                <Page4 data={formData} />
-                <Page5 data={formData} />
-                {formData.lampiranFoto?.length > 0 && <Page6 data={formData} />}
-              </div>
-            )
+            if (activePDFData.type === 'PROPOSAL') {
+              return (
+                <div className="flex flex-col gap-0 font-serif" style={{ width: '794px' }}>
+                  <PageCover data={formData} />
+                  <Page1 data={formData} />
+                  <Page2 data={formData} />
+                  <Page3 data={formData} />
+                  <Page4 data={formData} />
+                  <Page5 data={formData} />
+                  {formData.lampiranFoto && formData.lampiranFoto.length > 0 && <Page6 data={formData} />}
+                </div>
+              )
+            } else {
+              // Undangan / Surat Resmi Premium Layout
+              return (
+                <div className="proposal-page relative flex flex-col" 
+                     style={{ 
+                       width: '794px', 
+                       height: '1123px', 
+                       padding: '60px 80px', 
+                       boxSizing: 'border-box',
+                       background: 'white',
+                       fontFamily: "'Times New Roman', Times, serif"
+                     }}>
+                  {/* Header */}
+                  <div style={{ display: 'flex', alignItems: 'center', borderBottom: '3px solid #0b3d2e', paddingBottom: '15px', marginBottom: '30px' }}>
+                    <img src="/logo.png" style={{ width: '90px', height: '90px', objectFit: 'contain' }} />
+                    <div style={{ flex: 1, textAlign: 'center', paddingRight: '40px' }}>
+                      <h1 style={{ fontSize: '18pt', fontWeight: 'bold', margin: 0, color: '#0b3d2e', textTransform: 'uppercase' }}>{formData.namaKopSurat || 'DKM AL-MUHAJIRIN'}</h1>
+                      <p style={{ fontSize: '10pt', margin: '5px 0' }}>{formData.alamatKopSurat}</p>
+                      <p style={{ fontSize: '9pt', fontStyle: 'italic', color: '#64748b' }}>{formData.kontakKopSurat}</p>
+                    </div>
+                  </div>
+
+                  {/* Info */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '40px', fontSize: '12pt' }}>
+                    <div>
+                      <p>Nomor : {activePDFData.nomorSurat}</p>
+                      <p>Lampiran : {formData.lampiran || '-'}</p>
+                      <p>Perihal : <span style={{ fontWeight: 'bold' }}>{activePDFData.title.toUpperCase()}</span></p>
+                    </div>
+                    <p style={{ fontWeight: 'bold' }}>{activePDFData.location}, {new Date(activePDFData.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
+                  </div>
+
+                  {/* Recipient */}
+                  <div style={{ marginBottom: '40px', fontSize: '12pt' }}>
+                    <p>Kepada Yth.</p>
+                    <p style={{ fontWeight: 'bold', fontSize: '13pt' }}>{activePDFData.recipient}</p>
+                    <p style={{ fontStyle: 'italic' }}>{formData.penerimaJabatan}</p>
+                    <p style={{ marginTop: '10px' }}>di - <span style={{ fontWeight: 'bold' }}>{formData.penerimaLokasi || 'Tempat'}</span></p>
+                  </div>
+
+                  {/* Body */}
+                  <div style={{ flex: 1, fontSize: '12pt', lineHeight: 1.6, textAlign: 'justify' }}>
+                    <p style={{ marginBottom: '20px' }}>{formData.pembuka || formData.isiSuratPengantar}</p>
+                    
+                    {formData.waktuTempatAktif && (
+                      <div style={{ marginLeft: '60px', marginBottom: '20px' }}>
+                        <table style={{ width: '100%' }}>
+                          <tbody>
+                            <tr><td style={{ width: '120px' }}>Hari, Tanggal</td><td>: {formData.hariAcara}, {formData.tanggalAcara}</td></tr>
+                            <tr><td>Waktu</td><td>: {formData.waktuAcara}</td></tr>
+                            <tr><td>Tempat</td><td>: {formData.lokasiAcara}</td></tr>
+                            <tr><td>Acara</td><td>: {formData.namaAcara}</td></tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+
+                    <p>{formData.penutup || formData.kalimatPenutup}</p>
+                  </div>
+
+                  {/* Signature */}
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', textAlign: 'center', fontSize: '12pt', marginTop: '40px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '60px' }}>
+                      <p style={{ fontWeight: 'bold' }}>SEKRETARIS DKM,</p>
+                      <p style={{ fontWeight: 'bold', textDecoration: 'underline' }}>{formData.ttdSekretarisDKM || '........................'}</p>
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '60px' }}>
+                      <p style={{ fontWeight: 'bold' }}>KETUA DKM,</p>
+                      <p style={{ fontWeight: 'bold', textDecoration: 'underline' }}>{formData.ttdKetuaDKM || '........................'}</p>
+                    </div>
+                  </div>
+                </div>
+              )
+            }
           })()}
         </div>
       </div>
