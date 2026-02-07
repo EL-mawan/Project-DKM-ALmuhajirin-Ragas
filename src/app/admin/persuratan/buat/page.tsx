@@ -1300,7 +1300,7 @@ Salam silaturahmi kami sampaikan, teriring doa semoga bapak beserta keluarga sel
                 </div>
 
                 {/* INFO */}
-                <div className="flex justify-between items-start text-[13px] mb-10 leading-relaxed">
+                <div className="flex justify-between items-start text-[12pt] mb-10 leading-relaxed">
                   <div className="space-y-1">
                     <div className="flex"><span className="w-20 inline-block">Nomor</span><span>: <span className="font-bold">{formData.nomorSurat}</span></span></div>
                     <div className="flex"><span className="w-20 inline-block">Lampiran</span><span>: <span>{formData.lampiran || '-'}</span></span></div>
@@ -1312,17 +1312,17 @@ Salam silaturahmi kami sampaikan, teriring doa semoga bapak beserta keluarga sel
                 </div>
 
                 {/* RECIPIENT */}
-                <div className="text-[13px] mb-10 leading-relaxed">
+                <div className="text-[12pt] mb-10 leading-relaxed">
                   <p className="font-bold">Kepada Yth.</p>
                   <div className="mt-1 border-b border-black/10 inline-block pb-1 min-w-[200px]">
-                    <p className="font-bold uppercase text-sm tracking-tight">{formData.penerimaNama || '............................'}</p>
+                    <p className="font-bold uppercase text-[12pt] tracking-tight">{formData.penerimaNama || '............................'}</p>
                   </div>
                   {formData.penerimaJabatan && <p className="italic text-slate-700">{formData.penerimaJabatan}</p>}
                   <p className="mt-2 font-bold italic">di - <span className="border-b border-black/20 pb-0.5">{formData.penerimaLokasi || 'Tempat'}</span></p>
                 </div>
 
                 {/* CONTENT */}
-                <div className="text-[14px] space-y-5 text-slate-900 leading-[1.8] flex-1">
+                <div className="text-[12pt] space-y-6 text-slate-900 leading-[1.8] flex-1">
                   {type === 'PROPOSAL' ? (
                     <>
                       <p className="font-bold">Assalamu'alaikum Warahmatullahi Wabarakatuh,</p>
@@ -1362,14 +1362,14 @@ Salam silaturahmi kami sampaikan, teriring doa semoga bapak beserta keluarga sel
 
                 {/* SIGNATURES */}
                 <div className="mt-12">
-                   <div className="flex justify-between text-[13px] font-bold text-center">
+                   <div className="flex justify-between text-[12pt] font-bold text-center">
                       <div className="w-1/2" />
                       <div className="w-1/2 mb-12">
                         <p>{formData.tempatSurat}, {new Date(formData.tanggalSurat).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
                       </div>
                    </div>
                    
-                   <div className="grid grid-cols-2 gap-x-20 text-[13px] text-center font-bold">
+                   <div className="grid grid-cols-2 gap-x-20 text-[12pt] text-center font-bold">
                       <div className="space-y-20">
                         <p className="uppercase tracking-wider">SEKRETARIS DKM,</p>
                         <div>
