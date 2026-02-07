@@ -1145,7 +1145,7 @@ Salam silaturahmi kami sampaikan, teriring doa semoga bapak beserta keluarga sel
                       <div className="flex gap-2">
                         <a href="/template_penerima_proposal.xlsx" download>
                            <Button variant="outline" size="sm" className="h-7 text-[9px] uppercase font-bold rounded-lg border-purple-200 text-purple-600 hover:bg-purple-50 gap-2">
-                              <FileDown className="h-3 w-3" /> Template
+                              <FileDown className="h-3 w-3" /> TEMPLATE EXCEL
                            </Button>
                         </a>
                         <Button variant="outline" size="sm" className="h-7 text-[9px] uppercase font-bold rounded-lg border-purple-200 text-purple-600 hover:bg-purple-50 gap-2">
