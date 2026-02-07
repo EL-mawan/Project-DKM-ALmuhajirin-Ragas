@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { AdminLayout } from '@/components/layout/admin-layout'
 import { 
-  ArrowLeft, 
+  ArrowLeft, FileDown, 
   FileText, 
   Users, 
   DollarSign, 
@@ -1143,7 +1143,14 @@ Salam silaturahmi kami sampaikan, teriring doa semoga bapak beserta keluarga sel
                         <Users className="h-4 w-4" /> Penerima
                       </CardTitle>
                       <div className="flex gap-2">
-                        <Button variant="outline" size="sm" className="h-7 text-[9px] uppercase font-bold rounded-lg border-purple-200 text-purple-600"><Upload className="h-3 w-3 mr-1" /> Upload Excel</Button>
+                        <a href="/template_penerima_proposal.xlsx" download>
+                           <Button variant="outline" size="sm" className="h-7 text-[9px] uppercase font-bold rounded-lg border-purple-200 text-purple-600 hover:bg-purple-50">
+                              <FileDown className="h-3 w-3 mr-1" /> Template
+                           </Button>
+                        </a>
+                        <Button variant="outline" size="sm" className="h-7 text-[9px] uppercase font-bold rounded-lg border-purple-200 text-purple-600 hover:bg-purple-50">
+                           <Upload className="h-3 w-3 mr-1" /> Upload Excel
+                        </Button>
                       </div>
                     </CardHeader>
                     <CardContent className="p-6 space-y-4">
@@ -1177,35 +1184,50 @@ Salam silaturahmi kami sampaikan, teriring doa semoga bapak beserta keluarga sel
                         <Textarea className="rounded-xl border-gray-100 bg-gray-50/50 min-h-[100px]" value={formData.pembuka} onChange={e => setFormData({...formData, pembuka: e.target.value})} />
                       </div>
 
-                      {type === 'UNDANGAN' && (
-                        <div className="p-4 rounded-2xl bg-orange-50/30 border border-orange-100 space-y-4">
-                          <h4 className="text-[10px] font-black text-orange-800 uppercase tracking-widest flex items-center gap-2">
-                            <Calendar className="h-3 w-3" /> Detail Acara
-                          </h4>
-                          <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-1">
-                              <Label className="text-[9px] font-bold uppercase text-gray-400">Hari</Label>
-                              <Input className="h-9 rounded-lg border-gray-100 bg-white" placeholder="Senin" value={formData.hariAcara} onChange={e => setFormData({...formData, hariAcara: e.target.value})} />
-                            </div>
-                            <div className="space-y-1">
-                              <Label className="text-[9px] font-bold uppercase text-gray-400">Tanggal</Label>
-                              <Input className="h-9 rounded-lg border-gray-100 bg-white" placeholder="10 Januari 2026" value={formData.tanggalAcara} onChange={e => setFormData({...formData, tanggalAcara: e.target.value})} />
-                            </div>
-                            <div className="space-y-1">
-                              <Label className="text-[9px] font-bold uppercase text-gray-400">Waktu</Label>
-                              <Input className="h-9 rounded-lg border-gray-100 bg-white" placeholder="09:00 WIB s/d Selesai" value={formData.waktuAcara} onChange={e => setFormData({...formData, waktuAcara: e.target.value})} />
-                            </div>
-                            <div className="space-y-1">
-                              <Label className="text-[9px] font-bold uppercase text-gray-400">Tempat</Label>
-                              <Input className="h-9 rounded-lg border-gray-100 bg-white" placeholder="Lokasi Acara" value={formData.lokasiAcara} onChange={e => setFormData({...formData, lokasiAcara: e.target.value})} />
-                            </div>
-                          </div>
-                          <div className="space-y-1">
-                            <Label className="text-[9px] font-bold uppercase text-gray-400">Nama Kegiatan / Agenda</Label>
-                            <Input className="h-9 rounded-lg border-gray-100 bg-white" placeholder="Agenda Rapat" value={formData.namaAcara} onChange={e => setFormData({...formData, namaAcara: e.target.value})} />
+                      <div className="pt-2">
+                        <div className="flex items-center justify-between mb-4">
+                          <Label className="text-[10px] font-bold uppercase text-gray-500">Detail Acara (Opsional)</Label>
+                          <div className="flex items-center gap-2">
+                            <span className={`text-[9px] font-bold transition-colors ${formData.waktuTempatAktif ? 'text-orange-600' : 'text-gray-400'}`}>
+                              {formData.waktuTempatAktif ? 'Ditampilkan' : 'Disembunyikan'}
+                            </span>
+                            <Switch 
+                              checked={formData.waktuTempatAktif} 
+                              onCheckedChange={(val) => setFormData({...formData, waktuTempatAktif: val})} 
+                            />
                           </div>
                         </div>
-                      )}
+
+                        {formData.waktuTempatAktif && (
+                          <div className="p-4 rounded-2xl bg-orange-50/30 border border-orange-100 space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
+                            <h4 className="text-[10px] font-black text-orange-800 uppercase tracking-widest flex items-center gap-2">
+                              <Calendar className="h-3 w-3" /> Detail Acara
+                            </h4>
+                            <div className="grid grid-cols-2 gap-4">
+                              <div className="space-y-1">
+                                <Label className="text-[9px] font-bold uppercase text-gray-400">Hari</Label>
+                                <Input className="h-9 rounded-lg border-gray-100 bg-white" placeholder="Senin" value={formData.hariAcara} onChange={e => setFormData({...formData, hariAcara: e.target.value})} />
+                              </div>
+                              <div className="space-y-1">
+                                <Label className="text-[9px] font-bold uppercase text-gray-400">Tanggal</Label>
+                                <Input className="h-9 rounded-lg border-gray-100 bg-white" placeholder="10 Januari 2026" value={formData.tanggalAcara} onChange={e => setFormData({...formData, tanggalAcara: e.target.value})} />
+                              </div>
+                              <div className="space-y-1">
+                                <Label className="text-[9px] font-bold uppercase text-gray-400">Waktu</Label>
+                                <Input className="h-9 rounded-lg border-gray-100 bg-white" placeholder="09:00 WIB s/d Selesai" value={formData.waktuAcara} onChange={e => setFormData({...formData, waktuAcara: e.target.value})} />
+                              </div>
+                              <div className="space-y-1">
+                                <Label className="text-[9px] font-bold uppercase text-gray-400">Tempat</Label>
+                                <Input className="h-9 rounded-lg border-gray-100 bg-white" placeholder="Lokasi Acara" value={formData.lokasiAcara} onChange={e => setFormData({...formData, lokasiAcara: e.target.value})} />
+                              </div>
+                            </div>
+                            <div className="space-y-1">
+                              <Label className="text-[9px] font-bold uppercase text-gray-400">Nama Kegiatan / Agenda</Label>
+                              <Input className="h-9 rounded-lg border-gray-100 bg-white" placeholder="Agenda Rapat" value={formData.namaAcara} onChange={e => setFormData({...formData, namaAcara: e.target.value})} />
+                            </div>
+                          </div>
+                        )}
+                      </div>
 
                       <div className="space-y-2">
                         <Label className="text-[10px] font-bold uppercase text-gray-500">Penutup</Label>
@@ -1327,7 +1349,7 @@ Salam silaturahmi kami sampaikan, teriring doa semoga bapak beserta keluarga sel
                     <>
                       <div className="whitespace-pre-wrap text-justify">{formData.isiSuratPengantar || '[Isi Surat Pengantar Belum Diisi]'}</div>
                       
-                      {formData.waktuTempatAktif && formData.namaAcara && (
+                      {formData.waktuTempatAktif && (
                         <div className="ml-16 space-y-1 my-4">
                           <div className="flex"><span className="w-32 inline-block">Hari, Tanggal</span><span>: {formData.hariAcara}, {formData.tanggalAcara}</span></div>
                           <div className="flex"><span className="w-32 inline-block">Waktu</span><span>: {formData.waktuAcara}</span></div>
@@ -1343,7 +1365,7 @@ Salam silaturahmi kami sampaikan, teriring doa semoga bapak beserta keluarga sel
                     <>
                       <div className="whitespace-pre-wrap text-justify">{formData.pembuka}</div>
 
-                      {formData.namaAcara && (
+                      {formData.waktuTempatAktif && (
                         <div className="ml-16 space-y-1 my-4">
                           <div className="flex"><span className="w-32 inline-block">Hari, Tanggal</span><span>: {formData.hariAcara}, {formData.tanggalAcara}</span></div>
                           <div className="flex"><span className="w-32 inline-block">Waktu</span><span>: {formData.waktuAcara}</span></div>
