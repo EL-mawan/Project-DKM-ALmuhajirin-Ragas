@@ -1406,7 +1406,6 @@ Salam silaturahmi kami sampaikan, teriring doa semoga bapak beserta keluarga sel
                       )}
 
                       <div className="whitespace-pre-wrap text-justify">{formData.penutup}</div>
-                      <p className="font-bold">Wassalamu'alaikum Warahmatullahi Wabarakatuh.</p>
                     </>
                   )}
                 </div>
@@ -1420,7 +1419,7 @@ Salam silaturahmi kami sampaikan, teriring doa semoga bapak beserta keluarga sel
                       </div>
                    </div>
                    
-                   <div className="grid grid-cols-2 gap-x-20 text-[12pt] text-center font-bold">
+                   <div className="grid grid-cols-2 gap-x-20 text-[12pt] text-center">
                       <div className="space-y-20">
                         <p className="uppercase tracking-wider">SEKRETARIS DKM,</p>
                         <div>
@@ -1441,7 +1440,7 @@ Salam silaturahmi kami sampaikan, teriring doa semoga bapak beserta keluarga sel
                    </div>
 
                    {formData.ttdTokohMasyarakat && (
-                      <div className="mt-12 flex flex-col items-center text-[13px] text-center font-bold">
+                      <div className="mt-12 flex flex-col items-center text-[13px] text-center">
                         <div className="space-y-20 w-fit">
                           <div>
                             <p className="uppercase text-[11px] font-medium text-slate-500 mb-1">Mengetahui,</p>
