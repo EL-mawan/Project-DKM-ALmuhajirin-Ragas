@@ -445,7 +445,7 @@ export default function PersuratanProposal() {
                               </div>
                            </div>
 
-                           <div className="flex items-center gap-1.5 bg-slate-50/80 p-1.5 rounded-2xl border border-slate-100">
+                           <div className="flex flex-wrap items-center gap-1.5 bg-slate-50/80 p-1.5 rounded-2xl border border-slate-100">
                               {/* Validation Logic */}
                               {canValidate && item.status === 'pending' && (
                                 <div className="flex gap-1 pr-1 border-r border-slate-200 mr-1">
@@ -454,16 +454,18 @@ export default function PersuratanProposal() {
                                     size="icon" 
                                     className="h-9 w-9 rounded-xl text-emerald-600 hover:bg-emerald-50 bg-white shadow-sm hover:scale-110 transition-transform"
                                     onClick={() => handleValidate(item.id, 'validate')}
+                                    title="Validasi"
                                   >
-                                    <CheckCircle className="h-5 w-5" />
+                                    <CheckCircle className="h-4 w-4 md:h-5 md:w-5" />
                                   </Button>
                                   <Button 
                                     variant="ghost" 
                                     size="icon" 
                                     className="h-9 w-9 rounded-xl text-rose-600 hover:bg-rose-50 bg-white shadow-sm hover:scale-110 transition-transform"
                                     onClick={() => handleValidate(item.id, 'reject')}
+                                    title="Tolak"
                                   >
-                                    <XCircle className="h-5 w-5" />
+                                    <XCircle className="h-4 w-4 md:h-5 md:w-5" />
                                   </Button>
                                 </div>
                               )}
@@ -475,7 +477,7 @@ export default function PersuratanProposal() {
                                 onClick={() => router.push(item.type === 'PROPOSAL' ? `/admin/persuratan/proposal/buat?id=${item.id}&mode=view` : `/admin/persuratan/buat?type=${item.type}&id=${item.id}&mode=view`)}
                                 title="Lihat"
                               >
-                                <Eye className="h-5 w-5" />
+                                <Eye className="h-4 w-4 md:h-5 md:w-5" />
                               </Button>
 
                               <Button 
@@ -486,7 +488,7 @@ export default function PersuratanProposal() {
                                 onClick={() => generatePDF(item)}
                                 title="Download"
                               >
-                                <Download className="h-5 w-5" />
+                                <Download className="h-4 w-4 md:h-5 md:w-5" />
                               </Button>
 
                               <Button 
@@ -496,7 +498,7 @@ export default function PersuratanProposal() {
                                 onClick={() => router.push(item.type === 'PROPOSAL' ? `/admin/persuratan/proposal/buat?id=${item.id}` : `/admin/persuratan/buat?type=${item.type}&id=${item.id}`)}
                                 title="Edit"
                               >
-                                <Edit2 className="h-5 w-5" />
+                                <Edit2 className="h-4 w-4 md:h-5 md:w-5" />
                               </Button>
 
                               <Button 
@@ -506,7 +508,7 @@ export default function PersuratanProposal() {
                                 onClick={() => handleDelete(item.id)}
                                 title="Hapus"
                               >
-                                <Trash2 className="h-5 w-5" />
+                                <Trash2 className="h-4 w-4 md:h-5 md:w-5" />
                               </Button>
                            </div>
                         </div>
