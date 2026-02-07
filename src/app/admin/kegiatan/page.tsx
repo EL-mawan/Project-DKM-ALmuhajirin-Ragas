@@ -11,7 +11,10 @@ import {
   Trash2, 
   Calendar,
   MapPin,
-  Loader2
+  Loader2,
+  Check,
+  Upload,
+  Image as ImageIcon
 } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { toast } from 'sonner'
@@ -20,12 +23,14 @@ import {
   Dialog, 
   DialogContent, 
   DialogHeader, 
+  DialogFooter,
   DialogTitle, 
   DialogTrigger 
 } from '@/components/ui/dialog'
 import { StatusPopup } from '@/components/ui/status-popup'
 import { useStatusPopup } from '@/lib/hooks/use-status-popup'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { cn } from '@/lib/utils'
 
 interface Kegiatan {
   id: string
@@ -35,7 +40,9 @@ interface Kegiatan {
   date: string
   location: string
   status: string
+  image?: string
   createdAt: string
+  creator?: { name: string }
 }
 
 export default function KegiatanAdmin() {
@@ -51,7 +58,7 @@ export default function KegiatanAdmin() {
     title: '',
     category: 'PHBI',
     description: '',
-    date: '',
+    date: new Date().toISOString().slice(0, 16),
     location: '',
     memperingati: '',
     setiapHari: 'Senin',
@@ -60,6 +67,7 @@ export default function KegiatanAdmin() {
     kitab: '',
     materi: '',
     target: '',
+    image: '',
   })
 
   // Helper for Enter key navigation
@@ -121,10 +129,12 @@ export default function KegiatanAdmin() {
       let finalDescription = formData.description
 
       if (formData.category === 'PHBI') {
-        finalTitle = `PHBI: ${formData.memperingati}`
+        finalTitle = formData.memperingati ? `PHBI: ${formData.memperingati}` : formData.title
       } else if (formData.category === 'Pengajian Rutin') {
         finalTitle = `Pengajian: ${formData.kitab}`
         finalDescription = `Pemateri: ${formData.pemateri.filter((p: string) => p).join(', ')}\nJadwal: Setiap ${formData.setiapHari} Pukul ${formData.waktu}\n\n${formData.description}`
+        // If no date is set for recurring, use today
+        if (!finalDate) finalDate = new Date().toISOString()
       } else if (formData.category === 'Pendidikan') {
         finalTitle = `Pendidikan: ${formData.materi}`
         finalDescription = `Pemateri: ${formData.pemateri[0] || '-'}\nTarget: ${formData.target}\n\n${formData.description}`
@@ -139,7 +149,8 @@ export default function KegiatanAdmin() {
           description: finalDescription,
           date: finalDate,
           location: formData.location,
-          status: 'approved'
+          image: formData.image,
+          status: editingItem ? undefined : 'approved' // Automatically approve new ones for simplicity, or keep pending
         })
       })
 
@@ -154,12 +165,49 @@ export default function KegiatanAdmin() {
         fetchData()
       } else {
         const err = await res.json()
-        showError('Gagal Menyimpan', err.error || 'Server Neon sedang mengalami gangguan koneksi.')
+        showError('Gagal Menyimpan', err.error || 'Terjadi kesalahan saat menyimpan data.')
       }
     } catch (error) {
-      showError('Kesalahan Pemuatan', 'Maaf, sistem tidak dapat memproses agenda saat ini.')
+      showError('Kesalahan Sistem', 'Maaf, sistem tidak dapat memproses agenda saat ini.')
     } finally {
       setIsSubmitting(false)
+    }
+  }
+
+  const handleApprove = async (id: string) => {
+    try {
+      const res = await fetch(`/api/admin/kegiatan/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'approved' })
+      })
+      if (res.ok) {
+        toast.success('Kegiatan berhasil diaktifkan')
+        fetchData()
+      }
+    } catch (error) {
+      toast.error('Gagal mengaktifkan kegiatan')
+    }
+  }
+
+  const handleImageUpload = async (file: File) => {
+    const uploadFormData = new FormData()
+    uploadFormData.append('file', file)
+    uploadFormData.append('section', 'kegiatan')
+
+    try {
+      const res = await fetch('/api/admin/content/upload', {
+        method: 'POST',
+        body: uploadFormData
+      })
+
+      if (res.ok) {
+        const { url } = await res.json()
+        setFormData({ ...formData, image: url })
+        toast.success('Gambar berhasil diunggah')
+      }
+    } catch (error) {
+      toast.error('Gagal mengunggah gambar')
     }
   }
 
@@ -169,7 +217,7 @@ export default function KegiatanAdmin() {
       title: '',
       category: 'PHBI',
       description: '',
-      date: '',
+      date: new Date().toISOString().slice(0, 16),
       location: '',
       memperingati: '',
       setiapHari: 'Senin',
@@ -178,6 +226,7 @@ export default function KegiatanAdmin() {
       kitab: '',
       materi: '',
       target: '',
+      image: '',
     })
   }
 
@@ -410,21 +459,47 @@ export default function KegiatanAdmin() {
                   )}
 
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-[#0b3d2e]/60">Lokasi Kegiatan*</label>
-                    <Input 
-                      required 
-                      className="rounded-xl h-12"
-                      placeholder="Contoh: Aula Masjid / Teras Masjid" 
-                      value={formData.location}
-                      onChange={e => setFormData({...formData, location: e.target.value})}
-                    />
+                    <label className="text-[10px] font-black uppercase tracking-widest text-[#0b3d2e]/60">Poster / Foto Kegiatan</label>
+                    <div className="flex gap-4 items-center">
+                      <div className="relative h-24 w-32 rounded-xl border-2 border-dashed border-emerald-100 bg-emerald-50/30 flex items-center justify-center overflow-hidden">
+                        {formData.image ? (
+                          <img src={formData.image} alt="Preview" className="h-full w-full object-cover" />
+                        ) : (
+                          <ImageIcon className="h-8 w-8 text-emerald-200" />
+                        )}
+                      </div>
+                      <div className="flex-1 space-y-2">
+                        <Input 
+                          placeholder="URL Gambar (Opsional)"
+                          className="rounded-xl h-10 text-xs"
+                          value={formData.image}
+                          onChange={e => setFormData({...formData, image: e.target.value})}
+                        />
+                        <label className="cursor-pointer">
+                          <input 
+                            type="file" 
+                            className="hidden" 
+                            accept="image/*"
+                            onChange={e => {
+                              const file = e.target.files?.[0]
+                              if (file) handleImageUpload(file)
+                            }}
+                          />
+                          <Button type="button" variant="outline" size="sm" className="w-full rounded-xl border-emerald-100 hover:bg-emerald-50 text-emerald-600 font-bold h-10" asChild>
+                            <span>
+                              <Upload className="h-4 w-4 mr-2" /> Upload File
+                            </span>
+                          </Button>
+                        </label>
+                      </div>
+                    </div>
                   </div>
 
                   <div className="space-y-2">
                     <label className="text-[10px] font-black uppercase tracking-widest text-[#0b3d2e]/60">Deskripsi / Detail Acara*</label>
                     <textarea 
                       required 
-                      className="w-full min-h-[100px] rounded-2xl border border-emerald-50 bg-neutral-50 p-4 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                      className="w-full min-h-[80px] rounded-2xl border border-emerald-50 bg-neutral-50 p-4 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
                       placeholder="Berikan detail tambahan mengenai kegiatan..." 
                       value={formData.description}
                       onChange={e => setFormData({...formData, description: e.target.value})}
@@ -474,8 +549,8 @@ export default function KegiatanAdmin() {
                 <table className="w-full text-left border-collapse">
                   <thead>
                     <tr className="bg-gray-50/50 text-[10px] uppercase tracking-[0.2em] font-bold text-gray-400">
-                      <th className="px-8 py-5">Nama Kegiatan</th>
-                      <th className="px-8 py-5">Kategori</th>
+                      <th className="px-8 py-5">Info Kegiatan</th>
+                      <th className="px-8 py-5">Kategori & Status</th>
                       <th className="px-8 py-5 hidden md:table-cell">Waktu & Lokasi</th>
                       <th className="px-8 py-5 text-right">Aksi</th>
                     </tr>
@@ -484,16 +559,31 @@ export default function KegiatanAdmin() {
                     {filteredData.map((item) => (
                       <tr key={item.id} className="hover:bg-gray-50/30 transition-colors group">
                         <td className="px-8 py-6">
-                          <div className="font-bold text-[#0b3d2e]">{item.title}</div>
-                          <div className="text-[10px] text-muted-foreground line-clamp-1 mt-1 uppercase font-bold tracking-widest md:hidden">
-                            {new Date(item.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })} • {item.location}
+                          <div className="flex items-center gap-4">
+                            <div className="h-12 w-12 rounded-xl overflow-hidden bg-gray-100 shrink-0">
+                               <img src={item.image || '/WhatsApp Image 2026-02-06 at 20.29.40.jpeg'} className="h-full w-full object-cover" />
+                            </div>
+                            <div>
+                              <div className="font-bold text-[#0b3d2e]">{item.title}</div>
+                              <div className="text-[10px] text-muted-foreground line-clamp-1 mt-1 uppercase font-bold tracking-widest">
+                                Oleh: {item.creator?.name || 'Admin'} • {new Date(item.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })} • {item.location}
+                              </div>
+                              <div className="text-xs text-muted-foreground line-clamp-1 mt-1 hidden md:block">{item.description}</div>
+                            </div>
                           </div>
-                          <div className="text-xs text-muted-foreground line-clamp-1 mt-1 hidden md:block">{item.description}</div>
                         </td>
                         <td className="px-8 py-6">
-                          <Badge className="rounded-full px-3 py-1 font-bold tracking-wider text-[9px] uppercase bg-primary/5 text-primary border-primary/10">
-                            {item.category || 'Lainnya'}
-                          </Badge>
+                          <div className="flex flex-col gap-2">
+                             <Badge className="w-fit rounded-full px-3 py-1 font-bold tracking-wider text-[9px] uppercase bg-primary/5 text-primary border-primary/10">
+                              {item.category || 'Lainnya'}
+                            </Badge>
+                            <Badge className={cn(
+                              "w-fit rounded-full px-3 py-1 font-bold tracking-wider text-[9px] uppercase border",
+                              item.status === 'approved' ? "bg-emerald-50 text-emerald-600 border-emerald-100" : "bg-amber-50 text-amber-600 border-amber-100"
+                            )}>
+                              {item.status === 'approved' ? 'Aktif' : 'Pending'}
+                            </Badge>
+                          </div>
                         </td>
                         <td className="px-8 py-6 hidden md:table-cell">
                           <div className="flex flex-col space-y-2">
@@ -509,6 +599,17 @@ export default function KegiatanAdmin() {
                         </td>
                         <td className="px-8 py-6 text-right">
                           <div className="flex justify-end space-x-2">
+                            {item.status !== 'approved' && (
+                              <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                className="rounded-xl bg-emerald-50 text-emerald-600 hover:bg-emerald-100 h-10 w-10 shadow-sm"
+                                onClick={() => handleApprove(item.id)}
+                                title="Aktifkan Kegiatan"
+                              >
+                                <Check className="h-4 w-4" />
+                              </Button>
+                            )}
                             <Button 
                               variant="ghost" 
                               size="icon" 
@@ -520,7 +621,8 @@ export default function KegiatanAdmin() {
                                   category: item.category || 'PHBI',
                                   description: item.description,
                                   date: new Date(item.date).toISOString().slice(0, 16),
-                                  location: item.location
+                                  location: item.location,
+                                  image: item.image || ''
                                 })
                                 setIsModalOpen(true)
                               }}

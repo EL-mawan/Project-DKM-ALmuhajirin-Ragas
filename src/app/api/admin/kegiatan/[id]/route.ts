@@ -46,17 +46,24 @@ export async function PATCH(
     const body = await request.json()
     const { title, category, description, date, location, image, status } = body
 
+    const updateData: any = {
+      title,
+      category,
+      description,
+      date: date ? new Date(date) : undefined,
+      location,
+      image,
+      status
+    }
+
+    if (status === 'approved') {
+      updateData.approvedBy = user.id
+      updateData.approvedAt = new Date()
+    }
+
     const updated = await db.kegiatan.update({
       where: { id: params.id },
-      data: {
-        title,
-        category,
-        description,
-        date: date ? new Date(date) : undefined,
-        location,
-        image,
-        status
-      }
+      data: updateData
     })
 
     return NextResponse.json(updated)

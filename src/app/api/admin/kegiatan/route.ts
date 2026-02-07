@@ -33,6 +33,11 @@ export async function GET(request: NextRequest) {
     const [kegiatan, total] = await Promise.all([
       db.kegiatan.findMany({
         where,
+        include: {
+          creator: {
+            select: { name: true }
+          }
+        },
         orderBy: {
           date: 'desc'
         },
