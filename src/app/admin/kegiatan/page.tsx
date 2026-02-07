@@ -616,13 +616,69 @@ export default function KegiatanAdmin() {
                               className="rounded-xl hover:bg-primary/5 hover:text-primary h-10 w-10"
                               onClick={() => {
                                 setEditingItem(item)
+                                
+                                // Reset parsing variables
+                                let parsingMemperingati = ''
+                                let parsingKitab = ''
+                                let parsingMateri = ''
+                                let parsingPemateri = ['']
+                                let parsingTarget = ''
+                                let parsingSetiapHari = 'Senin'
+                                let parsingWaktu = ''
+                                let parsingTitle = item.title
+                                let parsingDesc = item.description
+
+                                // Parse back based on category and title prefix
+                                if (item.category === 'PHBI') {
+                                  parsingMemperingati = item.title.startsWith('PHBI: ') ? item.title.replace('PHBI: ', '') : item.title
+                                } else if (item.category === 'Pengajian Rutin') {
+                                  parsingKitab = item.title.startsWith('Pengajian: ') ? item.title.replace('Pengajian: ', '') : item.title
+                                  // Parse description parts
+                                  const descParts = item.description.split('\n\n')
+                                  if (descParts.length > 1) {
+                                    const metaPart = descParts[0]
+                                    parsingDesc = descParts.slice(1).join('\n\n')
+                                    
+                                    // Parse Pemateri
+                                    const pemateriMatch = metaPart.match(/Pemateri: (.*)/)
+                                    if (pemateriMatch) parsingPemateri = pemateriMatch[1].split(', ')
+                                    
+                                    // Parse Jadwal
+                                    const jadwalMatch = metaPart.match(/Jadwal: Setiap (.*) Pukul (.*)/)
+                                    if (jadwalMatch) {
+                                      parsingSetiapHari = jadwalMatch[1]
+                                      parsingWaktu = jadwalMatch[2]
+                                    }
+                                  }
+                                } else if (item.category === 'Pendidikan') {
+                                  parsingMateri = item.title.startsWith('Pendidikan: ') ? item.title.replace('Pendidikan: ', '') : item.title
+                                  const descParts = item.description.split('\n\n')
+                                  if (descParts.length > 1) {
+                                    const metaPart = descParts[0]
+                                    parsingDesc = descParts.slice(1).join('\n\n')
+                                    
+                                    const pemateriMatch = metaPart.match(/Pemateri: (.*)/)
+                                    if (pemateriMatch) parsingPemateri = [pemateriMatch[1]]
+                                    
+                                    const targetMatch = metaPart.match(/Target: (.*)/)
+                                    if (targetMatch) parsingTarget = targetMatch[1]
+                                  }
+                                }
+
                                 setFormData({
-                                  title: item.title,
+                                  title: parsingTitle,
                                   category: item.category || 'PHBI',
-                                  description: item.description,
+                                  description: parsingDesc,
                                   date: new Date(item.date).toISOString().slice(0, 16),
                                   location: item.location,
-                                  image: item.image || ''
+                                  image: item.image || '',
+                                  memperingati: parsingMemperingati,
+                                  setiapHari: parsingSetiapHari,
+                                  waktu: parsingWaktu,
+                                  pemateri: parsingPemateri,
+                                  kitab: parsingKitab,
+                                  materi: parsingMateri,
+                                  target: parsingTarget
                                 })
                                 setIsModalOpen(true)
                               }}
@@ -634,6 +690,7 @@ export default function KegiatanAdmin() {
                               size="icon" 
                               className="rounded-xl hover:bg-rose-50 hover:text-rose-600 h-10 w-10 text-rose-400"
                               onClick={() => handleDelete(item.id)}
+                              title="Hapus Agenda"
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>
