@@ -13,7 +13,9 @@ import {
   ExternalLink,
   Film,
   Camera,
-  Loader2
+  Loader2,
+  Upload,
+  X
 } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { toast } from 'sonner'
@@ -107,6 +109,29 @@ export default function GaleriAdmin() {
     }
   }
 
+  const handleImageUpload = async (file: File) => {
+    const uploadFormData = new FormData()
+    uploadFormData.append('file', file)
+    uploadFormData.append('section', 'galeri')
+
+    try {
+      const res = await fetch('/api/admin/content/upload', {
+        method: 'POST',
+        body: uploadFormData
+      })
+
+      if (res.ok) {
+        const { url } = await res.json()
+        setFormData({ ...formData, url: url })
+        toast.success('Media berhasil diunggah')
+      } else {
+        toast.error('Gagal mengunggah media')
+      }
+    } catch (error) {
+      toast.error('Kesalahan koneksi saat mengunggah')
+    }
+  }
+
   const resetForm = () => {
     setEditingItem(null)
     setFormData({ title: '', url: '', type: 'image', category: 'Kegiatan' })
@@ -167,15 +192,56 @@ export default function GaleriAdmin() {
                       onChange={e => setFormData({...formData, title: e.target.value})}
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label>URL Media (Image/Video)</Label>
-                    <Input 
-                      required 
-                      className="rounded-xl h-12"
-                      placeholder="https://..."
-                      value={formData.url}
-                      onChange={e => setFormData({...formData, url: e.target.value})}
-                    />
+                  <div className="space-y-4">
+                    <Label className="text-[10px] font-black uppercase tracking-widest text-[#0b3d2e]/60">File Media (Foto/Video)</Label>
+                    
+                    {formData.url ? (
+                      <div className="relative group rounded-2xl overflow-hidden border-2 border-emerald-100 bg-neutral-50 aspect-video">
+                        {formData.type === 'video' ? (
+                          <div className="w-full h-full flex flex-col items-center justify-center text-emerald-900/40">
+                            <Film className="w-12 h-12 mb-2 opacity-20" />
+                            <span className="text-[10px] uppercase font-bold tracking-widest">Video Uploaded</span>
+                            <span className="text-[8px] mt-1 opacity-50 truncate max-w-[200px]">{formData.url}</span>
+                          </div>
+                        ) : (
+                          <img 
+                            src={formData.url} 
+                            alt="Preview" 
+                            className="w-full h-full object-cover"
+                          />
+                        )}
+                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                          <Button 
+                            type="button" 
+                            variant="destructive" 
+                            size="sm"
+                            className="rounded-full h-8 px-4 text-[10px] font-bold"
+                            onClick={() => setFormData({...formData, url: ''})}
+                          >
+                            <X className="w-3 h-3 mr-1" /> Hapus
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <label className="flex flex-col items-center justify-center w-full aspect-video rounded-3xl border-2 border-dashed border-emerald-100 bg-emerald-50/30 hover:bg-emerald-50 transition-all cursor-pointer group">
+                        <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                          <div className="p-4 rounded-2xl bg-white shadow-sm mb-4 group-hover:scale-110 transition-transform">
+                            <Upload className="w-6 h-6 text-emerald-600" />
+                          </div>
+                          <p className="text-xs font-bold text-emerald-900/60 uppercase tracking-widest mb-1">Klik untuk Upload</p>
+                          <p className="text-[10px] text-emerald-900/40">Maksimal 10MB (JPG, PNG, MP4)</p>
+                        </div>
+                        <input 
+                          type="file" 
+                          className="hidden" 
+                          accept={formData.type === 'video' ? 'video/*' : 'image/*'}
+                          onChange={(e) => {
+                            const file = e.target.files?.[0]
+                            if (file) handleImageUpload(file)
+                          }}
+                        />
+                      </label>
+                    )}
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">

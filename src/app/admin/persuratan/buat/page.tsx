@@ -1225,123 +1225,147 @@ Salam silaturahmi kami sampaikan, teriring doa semoga bapak beserta keluarga sel
           </div>
 
           {/* RIGHT: DIGITAL PREVIEW */}
-          <div className={`w-full lg:w-1/2 bg-slate-200/50 p-4 lg:p-8 overflow-y-auto lg:sticky lg:top-0 lg:h-screen ${showPreview ? 'block' : 'hidden lg:block'}`}>
-            <div ref={previewRef} className="max-w-2xl mx-auto space-y-4">
-              <div className="flex items-center justify-between mb-4 no-print">
-                <h2 className="text-xl font-black text-slate-800 uppercase tracking-widest">Digital Preview</h2>
+          <div className={`w-full lg:w-3/5 bg-[#f8fafc] p-4 lg:p-12 overflow-y-auto lg:sticky lg:top-0 lg:h-screen ${showPreview ? 'block' : 'hidden lg:block'}`}>
+            <div className="max-w-3xl mx-auto space-y-6">
+              <div className="flex items-center justify-between mb-8 no-print bg-white/50 backdrop-blur-md p-4 rounded-3xl border border-white/20 shadow-sm">
+                <div className="flex items-center gap-3">
+                  <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                  <h2 className="text-sm font-black text-slate-800 uppercase tracking-[0.2em]">Live Preview</h2>
+                  <Badge variant="outline" className="bg-emerald-50 text-emerald-600 border-emerald-100 text-[9px] font-black px-2 py-0">LIVE</Badge>
+                </div>
                 <div className="flex gap-2">
-                  <Badge className="bg-emerald-100 text-emerald-700 border-none px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest">Ready</Badge>
-                  <Button size="sm" onClick={generatePreviewPDF} className="h-9 rounded-xl bg-white text-slate-900 border border-slate-200 shadow-sm hover:bg-slate-50"><Download className="h-4 w-4 mr-2" /> Download PDF</Button>
+                  <Button size="sm" onClick={generatePreviewPDF} className="h-10 rounded-2xl bg-[#1e293b] text-white hover:bg-black transition-all shadow-lg shadow-slate-200 gap-2 px-6">
+                    <Download className="h-4 w-4" /> 
+                    <span className="text-[10px] font-black uppercase tracking-widest">Unduh PDF</span>
+                  </Button>
                 </div>
               </div>
 
               {/* PAPER PREVIEW - PAGE 1 */}
-              <div className="pdf-page bg-white shadow-2xl rounded-[2.5rem] p-8 lg:p-12 min-h-[842px] relative overflow-hidden mb-8">
+              <div 
+                ref={previewRef}
+                className="pdf-page bg-white shadow-[0_20px_50px_rgba(0,0,0,0.1)] rounded-sm p-12 lg:p-16 min-h-[1123px] w-full relative overflow-hidden flex flex-col mx-auto"
+                style={{ fontFamily: "'Times New Roman', Times, serif" }}
+              >
                 {/* LOGO & KOP */}
-                <div className="flex justify-between items-center border-b-2 border-slate-900 pb-4 mb-6">
-                  <div className="h-16 w-16 bg-slate-100 rounded-full flex items-center justify-center border-2 border-slate-900">
-                    <FileText className="h-8 w-8 text-slate-400" />
+                <div className="flex items-center gap-6 border-b-[3px] border-[#0b3d2e] pb-4 mb-8">
+                  <div className="h-24 w-24 shrink-0">
+                    <img 
+                      src="/logo.png" 
+                      alt="Logo DKM" 
+                      className="w-full h-full object-contain"
+                      onError={(e: any) => e.target.style.display = 'none'}
+                    />
                   </div>
-                  <div className="text-center flex-1 px-4">
-                    <h1 className="font-black text-slate-900 text-sm leading-tight uppercase tracking-tight">{formData.namaKopSurat}</h1>
-                    <p className="text-[9px] text-slate-600 mt-1 leading-tight">{formData.alamatKopSurat}</p>
-                    <p className="text-[8px] text-slate-500 mt-1 italic">{formData.kontakKopSurat}</p>
+                  <div className="text-center flex-1 pr-12">
+                    <h1 className="font-bold text-[#0b3d2e] text-2xl leading-tight uppercase tracking-tight mb-1">
+                      {formData.namaKopSurat || 'DEWAN KEMAKMURAN MASJID (DKM)\nAL-MUHAJIRIN KP. RAGAS GRENYANG'}
+                    </h1>
+                    <p className="text-xs text-slate-700 font-medium leading-tight">
+                      {formData.alamatKopSurat || 'Desa Argawana, Kecamatan Puloampel Kabupaten Serang Provinsi Banten 42455'}
+                    </p>
+                    <p className="text-[10px] text-slate-500 mt-1 italic">
+                      Email: dkm_almuhajirin@gmail.com / Website: dkm-almuhajirin-ragas.vercel.app
+                    </p>
                   </div>
-                  <div className="h-16 w-16 bg-slate-50 rounded-full flex items-center justify-center border border-slate-200 text-[8px] font-bold text-slate-300">LOGO</div>
                 </div>
 
                 {/* INFO */}
-                <div className="flex justify-between items-start text-[10px] mb-8">
+                <div className="flex justify-between items-start text-[13px] mb-10 leading-relaxed">
                   <div className="space-y-1">
-                    <p><span className="w-16 inline-block">No</span> : <span className="font-bold">{formData.nomorSurat}</span></p>
-                    <p><span className="w-16 inline-block">Lampiran</span> : <span className="font-bold">{formData.lampiran || '-'}</span></p>
-                    <p><span className="w-16 inline-block">Perihal</span> : <span className="font-bold underline uppercase">{formData.perihal || '...'}</span></p>
+                    <div className="flex"><span className="w-20 inline-block">Nomor</span><span>: <span className="font-bold">{formData.nomorSurat}</span></span></div>
+                    <div className="flex"><span className="w-20 inline-block">Lampiran</span><span>: <span>{formData.lampiran || '-'}</span></span></div>
+                    <div className="flex"><span className="w-20 inline-block">Perihal</span><span>: <span className="font-bold capitalize">{formData.perihal || '...'}</span></span></div>
                   </div>
-                  <div className="text-right">
-                    <p>{formData.tempatSurat}, {new Date(formData.tanggalSurat).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
+                  <div className="text-right whitespace-nowrap">
+                    <p className="font-bold">{formData.tempatSurat}, {new Date(formData.tanggalSurat).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
                   </div>
                 </div>
 
                 {/* RECIPIENT */}
-                <div className="text-[10px] mb-8">
+                <div className="text-[13px] mb-10 leading-relaxed">
                   <p className="font-bold">Kepada Yth.</p>
-                  <p className="font-black mt-1 uppercase text-xs tracking-tight">{formData.penerimaNama || '............................'}</p>
-                  {formData.penerimaJabatan && <p className="italic text-slate-500">{formData.penerimaJabatan}</p>}
-                  <p className="mt-2 font-bold italic">di - {formData.penerimaLokasi || 'Tempat'}</p>
+                  <div className="mt-1 border-b border-black/10 inline-block pb-1 min-w-[200px]">
+                    <p className="font-bold uppercase text-sm tracking-tight">{formData.penerimaNama || '............................'}</p>
+                  </div>
+                  {formData.penerimaJabatan && <p className="italic text-slate-700">{formData.penerimaJabatan}</p>}
+                  <p className="mt-2 font-bold italic">di - <span className="border-b border-black/20 pb-0.5">{formData.penerimaLokasi || 'Tempat'}</span></p>
                 </div>
 
                 {/* CONTENT */}
-                <div className="text-[10px] space-y-4 text-slate-900 leading-relaxed font-serif">
+                <div className="text-[14px] space-y-5 text-slate-900 leading-[1.8] flex-1">
                   {type === 'PROPOSAL' ? (
-                    <p className="whitespace-pre-wrap">{formData.isiSuratPengantar || '[Isi Surat Pengantar Belum Diisi]'}</p>
+                    <div className="whitespace-pre-wrap">{formData.isiSuratPengantar || '[Isi Surat Pengantar Belum Diisi]'}</div>
                   ) : (
                     <>
-                      <p className="font-black">Assalamu'alaikum Wr. Wb.</p>
-                      <p className="whitespace-pre-wrap">{formData.pembuka}</p>
+                      <p className="font-bold">Assalamu'alaikum Warahmatullahi Wabarakatuh,</p>
+                      <p className="whitespace-pre-wrap text-justify">{formData.pembuka}</p>
 
                       {type === 'UNDANGAN' && formData.namaAcara && (
-                        <div className="ml-8 space-y-1 py-4 text-slate-900 font-serif italic border-l-2 border-slate-100 pl-4 bg-slate-50/30 rounded-r-xl">
-                          <p><span className="w-24 inline-block font-bold">Hari / Tanggal</span> : {formData.hariAcara}, {formData.tanggalAcara}</p>
-                          <p><span className="w-24 inline-block font-bold">Waktu</span> : {formData.waktuAcara}</p>
-                          <p><span className="w-24 inline-block font-bold">Tempat</span> : {formData.lokasiAcara}</p>
-                          <p><span className="w-24 inline-block font-bold uppercase">Acara</span> : <span className="font-black underline decoration-slate-400 decoration-2">{formData.namaAcara}</span></p>
+                        <div className="ml-8 space-y-1.5 py-4 text-slate-900 italic border-l-2 border-slate-100 pl-6 bg-slate-50/50 rounded-r-2xl">
+                          <div className="flex"><span className="w-32 inline-block font-bold">Hari / Tanggal</span><span>: {formData.hariAcara}, {formData.tanggalAcara}</span></div>
+                          <div className="flex"><span className="w-32 inline-block font-bold">Waktu</span><span>: {formData.waktuAcara}</span></div>
+                          <div className="flex"><span className="w-32 inline-block font-bold">Tempat</span><span>: {formData.lokasiAcara}</span></div>
+                          <div className="flex"><span className="w-32 inline-block font-bold uppercase">Acara</span><span>: <span className="font-bold underline decoration-slate-400 decoration-2">{formData.namaAcara}</span></span></div>
                         </div>
                       )}
 
-                      <p className="whitespace-pre-wrap">{formData.penutup}</p>
-                      <p className="font-black">Wassalamu'alaikum Wr. Wb.</p>
+                      <p className="whitespace-pre-wrap text-justify">{formData.penutup}</p>
+                      <p className="font-bold">Wassalamu'alaikum Warahmatullahi Wabarakatuh.</p>
                     </>
                   )}
                 </div>
 
                 {/* SIGNATURES */}
-                <div className="mt-16 space-y-12">
-                   <div className="grid grid-cols-2 gap-8 text-[10px] text-center font-bold font-serif">
-                     <div className="space-y-16">
-                       <p className="uppercase tracking-widest text-[#0b3d2e] border-b border-slate-100 pb-1">Sekretaris DKM</p>
-                       <div>
-                         <p className="underline uppercase font-black decoration-slate-900">{formData.ttdSekretarisDKM || '............................'}</p>
-                       </div>
-                     </div>
+                <div className="mt-12">
+                   <div className="flex justify-between text-[13px] font-bold text-center">
+                      <div className="w-1/2" />
+                      <div className="w-1/2 mb-12">
+                        <p>{formData.tempatSurat}, {new Date(formData.tanggalSurat).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
+                      </div>
+                   </div>
+                   
+                   <div className="grid grid-cols-2 gap-x-20 text-[13px] text-center font-bold">
+                      <div className="space-y-20">
+                        <p className="uppercase tracking-wider">SEKRETARIS DKM,</p>
+                        <div>
+                          <p className="font-black underline underline-offset-4 decoration-1 tracking-tight">
+                            ( {formData.ttdSekretarisDKM || '............................'} )
+                          </p>
+                        </div>
+                      </div>
 
-                     <div className="space-y-16">
-                       <p className="uppercase tracking-widest text-[#0b3d2e] border-b border-slate-100 pb-1">Ketua DKM</p>
-                       <div>
-                         <p className="underline uppercase font-black decoration-slate-900">{formData.ttdKetuaDKM || '............................'}</p>
-                       </div>
-                     </div>
+                      <div className="space-y-20">
+                        <p className="uppercase tracking-wider">KETUA DKM,</p>
+                        <div>
+                          <p className="font-black underline underline-offset-4 decoration-1 tracking-tight">
+                            ( {formData.ttdKetuaDKM || '............................'} )
+                          </p>
+                        </div>
+                      </div>
                    </div>
 
                    {formData.ttdTokohMasyarakat && (
-                      <div className="flex flex-col items-center text-[10px] text-center font-bold font-serif">
-                        <div className="space-y-16 w-1/2">
+                      <div className="mt-12 flex flex-col items-center text-[13px] text-center font-bold">
+                        <div className="space-y-20 w-fit">
                           <div>
-                            <p className="uppercase font-black text-slate-400 text-[8px]">Mengetahui,</p>
-                            <p className="uppercase tracking-widest text-[#0b3d2e] border-b border-slate-100 pb-1">Tokoh Masyarakat Masjid Al-Muhajirin</p>
+                            <p className="uppercase text-[11px] font-medium text-slate-500 mb-1">Mengetahui,</p>
+                            <p className="uppercase tracking-wider">Tokoh Masyarakat Masjid Al-Muhajirin</p>
                           </div>
                           <div>
-                            <p className="underline uppercase font-black decoration-slate-900">{formData.ttdTokohMasyarakat}</p>
+                            <p className="font-black underline underline-offset-4 decoration-1 tracking-tight">
+                              ( {formData.ttdTokohMasyarakat} )
+                            </p>
                           </div>
                         </div>
                       </div>
                    )}
+                </div>
 
-                   {(formData.ttdKetuaRW || formData.ttdKetuaRT) && (
-                     <div className="grid grid-cols-2 gap-8 text-[10px] text-center font-bold font-serif border-t border-slate-50 pt-8">
-                        {formData.ttdKetuaRW && (
-                          <div className="space-y-16">
-                            <p className="uppercase tracking-widest text-slate-500">Ketua RW</p>
-                            <p className="underline uppercase font-black">{formData.ttdKetuaRW}</p>
-                          </div>
-                        )}
-                        {formData.ttdKetuaRT && (
-                          <div className="space-y-16">
-                            <p className="uppercase tracking-widest text-slate-500">Ketua RT</p>
-                            <p className="underline uppercase font-black">{formData.ttdKetuaRT}</p>
-                          </div>
-                        )}
-                     </div>
-                   )}
+                {/* FOOTER */}
+                <div className="absolute bottom-10 left-12 right-12 pt-4 border-t border-slate-100 flex justify-between items-center text-[9px] text-slate-400 font-sans uppercase font-black tracking-widest">
+                  <span>DKM Al-Muhajirin Ragas Grenyang</span>
+                  <span>Halaman 1 dari {type === 'PROPOSAL' ? '5' : '1'}</span>
                 </div>
               </div>
 
