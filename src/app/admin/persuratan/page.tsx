@@ -27,7 +27,8 @@ import {
   Paperclip,
   MoreHorizontal,
   Check,
-  X
+  X,
+  MailOpen
 } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { AdminLayout } from '@/components/layout/admin-layout'
@@ -366,6 +367,135 @@ export default function PersuratanAdmin() {
     }
   }
 
+  // Generate Envelope (110 x 230 mm) for Undangan and Surat Resmi
+  const generateEnvelope = (item: any) => {
+    if (item.type === 'PROPOSAL') {
+      toast.error('Amplop hanya tersedia untuk Undangan dan Surat Resmi')
+      return
+    }
+
+    try {
+      // 110mm x 230mm in points (1mm = 2.83465 points)
+      const width = 110 * 2.83465  // ~311.8 points
+      const height = 230 * 2.83465 // ~652 points
+      
+      const doc = new jsPDF({
+        orientation: 'landscape',
+        unit: 'pt',
+        format: [height, width]
+      })
+
+      const dkmEmerald = [11, 61, 46]
+      const dkmGold = [158, 115, 30]
+      
+      const pageWidth = doc.internal.pageSize.getWidth()
+      const pageHeight = doc.internal.pageSize.getHeight()
+      const margin = 30
+
+      // Parse recipient data
+      let formData: any = {}
+      try {
+        formData = typeof item.content === 'string' ? JSON.parse(item.content) : item.content
+      } catch (e) {
+        formData = {}
+      }
+
+      // Left side: DKM Letterhead
+      let curY = margin + 20
+      
+      // Logo placeholder (decorative bar)
+      doc.setFillColor(dkmEmerald[0], dkmEmerald[1], dkmEmerald[2])
+      doc.rect(margin, margin, 3, pageHeight - (margin * 2), 'F')
+      
+      // DKM Header
+      doc.setFont('times', 'bold')
+      doc.setFontSize(9)
+      doc.setTextColor(dkmEmerald[0], dkmEmerald[1], dkmEmerald[2])
+      doc.text('DEWAN KEMAKMURAN MASJID (DKM)', margin + 10, curY)
+      
+      curY += 10
+      doc.setFontSize(11)
+      doc.text('AL-MUHAJIRIN KP. RAGAS GRENYANG', margin + 10, curY)
+      
+      curY += 10
+      doc.setFontSize(7)
+      doc.setFont('times', 'italic')
+      doc.setTextColor(100, 100, 100)
+      doc.text('Desa Argawana, Kecamatan Puloampel', margin + 10, curY)
+      curY += 8
+      doc.text('Kabupaten Serang Provinsi Banten 42455', margin + 10, curY)
+      
+      curY += 15
+      doc.setDrawColor(dkmGold[0], dkmGold[1], dkmGold[2])
+      doc.setLineWidth(1)
+      doc.line(margin + 10, curY, margin + 200, curY)
+
+      // Document Info
+      curY += 20
+      doc.setFont('times', 'normal')
+      doc.setFontSize(8)
+      doc.setTextColor(50, 50, 50)
+      doc.text(`Nomor: ${item.nomorSurat || '-'}`, margin + 10, curY)
+      curY += 12
+      doc.setFont('times', 'bold')
+      doc.text(`Perihal: ${item.title}`, margin + 10, curY)
+
+      // Right side: Recipient Address Box
+      const boxX = pageWidth - margin - 220
+      const boxY = pageHeight / 2 - 60
+      const boxWidth = 200
+      const boxHeight = 120
+      
+      // Draw recipient box with border
+      doc.setDrawColor(dkmEmerald[0], dkmEmerald[1], dkmEmerald[2])
+      doc.setLineWidth(2)
+      doc.roundedRect(boxX, boxY, boxWidth, boxHeight, 5, 5, 'S')
+      
+      // "Kepada Yth." label
+      doc.setFont('times', 'bold')
+      doc.setFontSize(9)
+      doc.setTextColor(dkmEmerald[0], dkmEmerald[1], dkmEmerald[2])
+      doc.text('Kepada Yth.', boxX + 10, boxY + 20)
+      
+      // Recipient name
+      doc.setFont('times', 'bold')
+      doc.setFontSize(11)
+      doc.setTextColor(0, 0, 0)
+      const recipientName = item.recipient || 'Penerima'
+      const nameLines = doc.splitTextToSize(recipientName, boxWidth - 20)
+      doc.text(nameLines, boxX + 10, boxY + 35)
+      
+      let addressY = boxY + 35 + (nameLines.length * 12)
+      
+      // Recipient position/title
+      if (formData.penerimaJabatan) {
+        doc.setFont('times', 'italic')
+        doc.setFontSize(9)
+        doc.setTextColor(80, 80, 80)
+        const titleLines = doc.splitTextToSize(formData.penerimaJabatan, boxWidth - 20)
+        doc.text(titleLines, boxX + 10, addressY)
+        addressY += titleLines.length * 10
+      }
+      
+      // "di -" and location
+      addressY += 5
+      doc.setFont('times', 'normal')
+      doc.setFontSize(9)
+      doc.setTextColor(0, 0, 0)
+      doc.text('di -', boxX + 10, addressY)
+      addressY += 12
+      doc.setFont('times', 'bold')
+      doc.text(item.location || 'Tempat', boxX + 15, addressY)
+
+      // Save the envelope
+      const filename = `Amplop_${item.type}_${item.title.replace(/[^a-z0-9]/gi, '_')}.pdf`
+      doc.save(filename)
+      toast.success('Amplop berhasil diunduh!')
+    } catch (error) {
+      console.error('Error generating envelope:', error)
+      toast.error('Gagal membuat amplop')
+    }
+  }
 
   return (
     <AdminLayout title="Administrasi & Persuratan" subtitle="Pembuatan Proposal, Undangan, dan Surat Resmi DKM.">
@@ -529,6 +659,16 @@ export default function PersuratanAdmin() {
                                    <Eye className="h-4 w-4 mr-3 text-indigo-500" />
                                    Lihat Detail
                                  </DropdownMenuItem>
+
+                                 {(item.type === 'UNDANGAN' || item.type === 'SURAT_RESMI') && (
+                                   <DropdownMenuItem 
+                                     onClick={() => generateEnvelope(item)}
+                                     className="rounded-xl h-11 px-3 cursor-pointer font-bold text-slate-600 hover:text-purple-600 transition-colors"
+                                   >
+                                     <MailOpen className="h-4 w-4 mr-3 text-purple-500" />
+                                     Cetak Amplop
+                                   </DropdownMenuItem>
+                                 )}
 
                                  <DropdownMenuItem 
                                    onClick={() => generatePDF(item)}
