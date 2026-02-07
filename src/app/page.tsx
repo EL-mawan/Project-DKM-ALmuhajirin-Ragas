@@ -84,20 +84,21 @@ export default function Home() {
             <div className="space-y-10 fade-in-up">
               <div className="inline-flex items-center space-x-2 px-4 py-2 rounded-full bg-primary/5 border border-primary/10 backdrop-blur-sm">
                 <Building className="h-4 w-4 text-primary" />
-                <span className="text-xs font-bold uppercase tracking-widest text-primary">DKM Al-Muhajirin</span>
+                <span className="text-xs font-bold uppercase tracking-widest text-primary">
+                  {content?.hero?.subtitle || 'DKM Al-Muhajirin'}
+                </span>
               </div>
               
               <div className="space-y-6">
                 <h1 className="text-5xl lg:text-7xl font-extrabold tracking-tight text-foreground leading-[1.1]">
-                  Memakmurkan Masjid,
+                  {content?.hero?.title?.split(',')[0] || 'Memakmurkan Masjid'},
                   <br />
                   <span className="bg-clip-text text-transparent bg-linear-to-r from-primary via-primary/80 to-accent">
-                    Mendekatkan Diri Kepada Allah
+                    {content?.hero?.title?.split(',')[1] || ' Mendekatkan Diri Kepada Allah'}
                   </span>
                 </h1>
                 <p className="text-xl text-muted-foreground leading-relaxed max-w-xl">
-                  Pusat kegiatan spiritual, pendidikan, dan sosial untuk masyarakat Ragas Grenyang. 
-                  Mari bersama menebar kebaikan dan mempererat ukhuwah islamiyah.
+                  {content?.hero?.description || 'Pusat kegiatan spiritual, pendidikan, dan sosial untuk masyarakat Ragas Grenyang. Mari bersama menebar kebaikan dan mempererat ukhuwah islamiyah.'}
                 </p>
               </div>
 
@@ -122,12 +123,14 @@ export default function Home() {
               <div className="relative z-10 aspect-4/5 rounded-4xl overflow-hidden shadow-2xl shadow-primary/20 rotate-3 group-hover:rotate-0 transition-transform duration-700">
                 <div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent z-10" />
                 <img 
-                  src="/WhatsApp Image 2026-02-06 at 20.29.40.jpeg" 
+                  src={content?.hero?.imageUrl || "/WhatsApp Image 2026-02-06 at 20.29.40.jpeg"} 
                   alt="Masjid Al-Muhajirin Ragas" 
                   className="w-full h-full object-cover scale-110 group-hover:scale-100 transition-transform duration-700"
                 />
-                <div className="absolute bottom-10 left-10 z-20 space-y-2">
-                  <Badge className="bg-white/20 backdrop-blur-md text-white border-white/30">Masjid AL-Muhajirin</Badge>
+                <div className="absolute bottom-10 left-10 z-20 space-y-2 text-left">
+                  <Badge className="bg-white/20 backdrop-blur-md text-white border-white/30">
+                    {content?.hero?.subtitle || 'Masjid AL-Muhajirin'}
+                  </Badge>
                   <p className="text-2xl font-bold text-white uppercase tracking-wider">Kp. Ragas Grenyang</p>
                 </div>
               </div>
@@ -168,13 +171,14 @@ export default function Home() {
       <section id="profil" className="py-24 bg-muted/30">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center mb-20 space-y-4">
-            <Badge variant="outline" className="px-4 py-1.5 rounded-full border-primary/20 text-primary uppercase tracking-[0.2em] text-[10px]">Visi & Misi</Badge>
+            <Badge variant="outline" className="px-4 py-1.5 rounded-full border-primary/20 text-primary uppercase tracking-[0.2em] text-[10px]">
+              {content?.about?.subtitle || 'Visi & Misi'}
+            </Badge>
             <h2 className="text-4xl lg:text-5xl font-bold tracking-tight text-foreground">
-              Membangun Peradaban dari Masjid
+              {content?.about?.title || 'Membangun Peradaban dari Masjid'}
             </h2>
             <p className="text-lg text-muted-foreground leading-relaxed">
-              Kami percaya bahwa masjid bukan sekadar tempat ibadah, melainkan pusat pembinaan 
-              karakter dan pemberdayaan sosial bagi seluruh lapisan masyarakat.
+              {content?.about?.description || 'Kami percaya bahwa masjid bukan sekadar tempat ibadah, melainkan pusat pembinaan karakter dan pemberdayaan sosial bagi seluruh lapisan masyarakat.'}
             </p>
           </div>
           
@@ -214,12 +218,12 @@ export default function Home() {
       <section id="informasi" className="py-24">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row justify-between items-end gap-6 mb-16">
-            <div className="space-y-4">
+            <div className="space-y-4 text-left">
               <Badge variant="outline" className="px-4 py-1.5 rounded-full border-primary/20 text-primary uppercase tracking-[0.2em] text-[10px]">Agenda Masjid</Badge>
               <h2 className="text-4xl font-bold tracking-tight text-foreground">
                 Kegiatan Mendatang
               </h2>
-              <p className="text-muted-foreground max-w-xl">
+              <p className="text-muted-foreground max-w-xl text-left">
                 Bergabunglah dalam rangkaian kegiatan yang kami selenggarakan untuk meningkatkan iman dan ketaqwaan.
               </p>
             </div>
@@ -236,7 +240,7 @@ export default function Home() {
               ))
             ) : data?.kegiatan?.length > 0 ? (
               data.kegiatan.map((activity: any, index: number) => (
-                <div key={index} className="group relative bg-background rounded-4xl border border-border/50 overflow-hidden hover:shadow-2xl transition-all duration-500">
+                <div key={index} className="group relative bg-background rounded-4xl border border-border/50 overflow-hidden hover:shadow-2xl transition-all duration-500 text-left">
                   <div className="aspect-16/10 relative overflow-hidden">
                     <img 
                       src={activity.image || '/WhatsApp Image 2026-02-06 at 20.29.40.jpeg'} 
@@ -283,23 +287,24 @@ export default function Home() {
         
         <div className="container relative z-10 mx-auto px-4 text-center">
           <div className="max-w-3xl mx-auto space-y-6 mb-16">
-            <Badge variant="outline" className="px-4 py-1.5 rounded-full border-primary/20 text-primary uppercase tracking-[0.2em] text-[10px]">Transparansi</Badge>
+            <Badge variant="outline" className="px-4 py-1.5 rounded-full border-primary/20 text-primary uppercase tracking-[0.2em] text-[10px]">
+              {content?.transparency?.subtitle || 'Transparansi'}
+            </Badge>
             <h2 className="text-4xl lg:text-5xl font-bold tracking-tight text-foreground">
-              Amanah & Profesional
+              {content?.transparency?.title || 'Amanah & Profesional'}
             </h2>
             <p className="text-lg text-muted-foreground leading-relaxed">
-              Kami berkomitmen untuk mengelola dana umat dengan penuh tanggung jawab, 
-              kejujuran, dan transparansi yang dapat diakses oleh seluruh jamaah.
+              {content?.transparency?.description || 'Kami berkomitmen untuk mengelola dana umat dengan penuh tanggung jawab, kejujuran, dan transparansi yang dapat diakses oleh seluruh jamaah.'}
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto mb-16">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto mb-16 text-left">
             {[
               { label: 'Pemasukan Total', value: loading ? '...' : formatCurrency(data?.keuangan?.totalIncome || 0), delta: '+12%', color: 'text-emerald-500' },
               { label: 'Pengeluaran Total', value: loading ? '...' : formatCurrency(data?.keuangan?.totalExpense || 0), delta: '+8%', color: 'text-amber-500' },
               { label: 'Saldo Kas Masjid', value: loading ? '...' : formatCurrency(data?.keuangan?.balance || 0), delta: 'Stabil', color: 'text-primary' }
             ].map((item, index) => (
-              <div key={index} className="p-10 rounded-[2.5rem] bg-background border border-border/50 shadow-xl shadow-primary/5 relative group">
+              <div key={index} className="p-10 rounded-[2.5rem] bg-background border border-border/50 shadow-xl shadow-primary/5 relative group text-center">
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1/2 h-1 bg-primary scale-x-0 group-hover:scale-x-100 transition-transform duration-500" />
                 <div className={`text-4xl font-black mb-2 tracking-tighter ${item.color}`}>
                   {item.value}
@@ -354,27 +359,32 @@ export default function Home() {
             <div className="absolute top-0 right-0 w-1/2 h-full bg-white/5 skew-x-[-20deg] translate-x-1/2" />
             
             <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-              <div className="space-y-8">
+              <div className="space-y-8 text-left">
                 <h2 className="text-4xl lg:text-6xl font-black text-white leading-tight">
-                  Mari Berdiskusi & <br /> Berkolaborasi
+                  {content?.contact?.title || 'Mari Berdiskusi & Berkolaborasi'}
                 </h2>
                 <p className="text-xl text-white/80 leading-relaxed">
-                  Pintu kami selalu terbuka untuk aspirasi, saran, and pertanyaan Anda. 
-                  Hubungi kami kapan saja untuk layanan jamaah yang lebih baik.
+                  {content?.contact?.description || 'Pintu kami selalu terbuka untuk aspirasi, saran, dan pertanyaan Anda. Hubungi kami kapan saja untuk layanan jamaah yang lebih baik.'}
                 </p>
                 <div className="flex flex-col sm:flex-row gap-5">
-                  <Button size="lg" className="bg-white text-primary hover:bg-white/90 h-14 px-8 rounded-2xl shadow-2xl">
+                  <Button size="lg" className="bg-white text-primary hover:bg-white/90 h-14 px-8 rounded-2xl shadow-2xl" onClick={() => {
+                    const phone = content?.contact?.content ? JSON.parse(content.contact.content).phone : '0812-3456-7890';
+                    window.open(`https://wa.me/${phone.replace(/[^0-9]/g, '')}`, '_blank');
+                  }}>
                     <Phone className="mr-2 h-5 w-5" />
                     WhatsApp Layanan
                   </Button>
-                  <Button variant="outline" size="lg" className="border-white/20 text-primary hover:bg-white/10 h-14 px-8 rounded-2xl">
+                  <Button variant="outline" size="lg" className="border-white/20 text-white hover:bg-white/10 h-14 px-8 rounded-2xl" onClick={() => {
+                    const email = content?.contact?.content ? JSON.parse(content.contact.content).email : 'dkm.almuhajirin@example.com';
+                    window.location.href = `mailto:${email}`;
+                  }}>
                     <Mail className="mr-2 h-5 w-5" />
                     Kirim Email
                   </Button>
                 </div>
               </div>
               
-              <div className="bg-white/10 backdrop-blur-xl rounded-4xl p-8 border border-white/20 space-y-6">
+              <div className="bg-white/10 backdrop-blur-xl rounded-4xl p-8 border border-white/20 space-y-6 text-left">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <label className="text-xs font-bold text-white uppercase tracking-wider">Nama Lengkap</label>
@@ -389,7 +399,7 @@ export default function Home() {
                   <label className="text-xs font-bold text-white uppercase tracking-wider">Pesan Anda</label>
                   <textarea className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-white/20 transition-all min-h-[120px]" placeholder="Apa yang bisa kami bantu?"></textarea>
                 </div>
-                <Button className="w-full bg-white text-primary font-bold py-6 rounded-xl">
+                <Button className="w-full bg-white text-primary font-bold py-6 rounded-xl hover:bg-white/90">
                   Kirim Pesan Sekarang
                 </Button>
               </div>
