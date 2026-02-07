@@ -1528,45 +1528,44 @@ Pastikan setiap poin dimulai dengan kata kerja (Contoh: Menjalin, Meningkatkan, 
                 Preview <Badge className="bg-emerald-100 text-emerald-700 border-none font-black text-[10px] px-2.5 py-0.5 rounded-full">LIVE</Badge>
               </h2>
               {bulkRecipients.length > 0 && (
-                <div className="flex flex-wrap items-center gap-2">
-                  <div className="flex items-center gap-1.5 bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-xl border border-emerald-100">
-                    <Users className="h-3.5 w-3.5" />
-                    <span className="text-[10px] font-black uppercase tracking-wider">{bulkRecipients.length} Penerima Excel</span>
-                  </div>
-                  {bulkRecipients.length > 1 && (
-                    <div className="flex items-center gap-1.5 bg-white border border-slate-200 p-1 rounded-xl px-2 shadow-sm">
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        className="h-7 w-7 rounded-lg hover:bg-slate-100"
-                        onClick={() => setCurrentRecipientIndex(prev => Math.max(0, prev - 1))}
-                        disabled={currentRecipientIndex === 0}
-                      >
-                        <ChevronLeft className="h-4 w-4" />
-                      </Button>
-                      <span className="text-xs font-bold text-slate-600 px-1 min-w-[40px] text-center">{currentRecipientIndex + 1} / {bulkRecipients.length}</span>
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        className="h-7 w-7 rounded-lg hover:bg-slate-100"
-                        onClick={() => setCurrentRecipientIndex(prev => Math.min(bulkRecipients.length - 1, prev + 1))}
-                        disabled={currentRecipientIndex === bulkRecipients.length - 1}
-                      >
-                        <ChevronRight className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  )}
+                <div className="flex items-center gap-1.5 bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-xl border border-emerald-100">
+                  <Users className="h-3.5 w-3.5" />
+                  <span className="text-[10px] font-black uppercase tracking-wider">{bulkRecipients.length} Penerima Excel</span>
                 </div>
               )}
             </div>
             <div className="flex items-center gap-2 w-full sm:w-auto">
-                <Button 
-                  onClick={() => setIsRecipientsDialogOpen(true)} 
-                  className="flex-1 sm:flex-none h-11 px-5 rounded-2xl font-black bg-white border-2 border-slate-200 text-slate-700 shadow-xl shadow-slate-100 hover:bg-slate-50 transition-all active:scale-95 text-[10px] uppercase tracking-widest"
-                >
-                    <Users className="mr-2 h-4 w-4 text-emerald-600" /> 
-                    View {bulkRecipients.length > 0 ? bulkRecipients.length : 1} Tujuan Penerima
-                </Button>
+                <div className="flex items-center gap-0.5 bg-white border-2 border-slate-100 rounded-full h-11 px-1 shadow-sm overflow-hidden animate-in zoom-in-95 duration-200">
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-9 w-9 rounded-full hover:bg-slate-50 text-slate-400 hover:text-emerald-600 transition-colors"
+                    onClick={() => setCurrentRecipientIndex(prev => Math.max(0, prev - 1))}
+                    disabled={currentRecipientIndex === 0}
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                  
+                  <div 
+                    className="px-4 h-9 flex items-center justify-center min-w-[60px] cursor-pointer hover:bg-slate-50 rounded-xl transition-all group"
+                    onClick={() => setIsRecipientsDialogOpen(true)}
+                    title="Klik untuk melihat semua daftar penerima"
+                  >
+                    <span className="text-sm font-black text-slate-700 group-hover:text-emerald-600">
+                      {currentRecipientIndex + 1} <span className="text-slate-300 mx-1">/</span> {bulkRecipients.length > 0 ? bulkRecipients.length : 1}
+                    </span>
+                  </div>
+
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-9 w-9 rounded-full hover:bg-slate-50 text-slate-400 hover:text-emerald-600 transition-colors"
+                    onClick={() => setCurrentRecipientIndex(prev => Math.min((bulkRecipients.length > 0 ? bulkRecipients.length : 1) - 1, prev + 1))}
+                    disabled={currentRecipientIndex === (bulkRecipients.length > 0 ? bulkRecipients.length : 1) - 1}
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
             </div>
           </div>
 
