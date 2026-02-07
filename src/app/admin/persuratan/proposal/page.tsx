@@ -24,7 +24,8 @@ import {
   XCircle,
   Clock,
   Eye,
-  Paperclip
+  Paperclip,
+  MoreVertical
 } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { AdminLayout } from '@/components/layout/admin-layout'
@@ -40,6 +41,14 @@ import { StatusPopup } from '@/components/ui/status-popup'
 import { useStatusPopup } from '@/lib/hooks/use-status-popup'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { toast } from 'sonner'
 import jsPDF from 'jspdf'
 
@@ -445,7 +454,8 @@ export default function PersuratanProposal() {
                               </div>
                            </div>
 
-                           <div className="flex flex-wrap items-center gap-1.5 bg-slate-50/80 p-1.5 rounded-2xl border border-slate-100">
+                           {/* Desktop: Inline Buttons */}
+                           <div className="hidden md:flex items-center gap-1.5 bg-slate-50/80 p-1.5 rounded-2xl border border-slate-100">
                               {/* Validation Logic */}
                               {canValidate && item.status === 'pending' && (
                                 <div className="flex gap-1 pr-1 border-r border-slate-200 mr-1">
@@ -456,7 +466,7 @@ export default function PersuratanProposal() {
                                     onClick={() => handleValidate(item.id, 'validate')}
                                     title="Validasi"
                                   >
-                                    <CheckCircle className="h-4 w-4 md:h-5 md:w-5" />
+                                    <CheckCircle className="h-5 w-5" />
                                   </Button>
                                   <Button 
                                     variant="ghost" 
@@ -465,7 +475,7 @@ export default function PersuratanProposal() {
                                     onClick={() => handleValidate(item.id, 'reject')}
                                     title="Tolak"
                                   >
-                                    <XCircle className="h-4 w-4 md:h-5 md:w-5" />
+                                    <XCircle className="h-5 w-5" />
                                   </Button>
                                 </div>
                               )}
@@ -477,7 +487,7 @@ export default function PersuratanProposal() {
                                 onClick={() => router.push(item.type === 'PROPOSAL' ? `/admin/persuratan/proposal/buat?id=${item.id}&mode=view` : `/admin/persuratan/buat?type=${item.type}&id=${item.id}&mode=view`)}
                                 title="Lihat"
                               >
-                                <Eye className="h-4 w-4 md:h-5 md:w-5" />
+                                <Eye className="h-5 w-5" />
                               </Button>
 
                               <Button 
@@ -488,7 +498,7 @@ export default function PersuratanProposal() {
                                 onClick={() => generatePDF(item)}
                                 title="Download"
                               >
-                                <Download className="h-4 w-4 md:h-5 md:w-5" />
+                                <Download className="h-5 w-5" />
                               </Button>
 
                               <Button 
@@ -498,7 +508,7 @@ export default function PersuratanProposal() {
                                 onClick={() => router.push(item.type === 'PROPOSAL' ? `/admin/persuratan/proposal/buat?id=${item.id}` : `/admin/persuratan/buat?type=${item.type}&id=${item.id}`)}
                                 title="Edit"
                               >
-                                <Edit2 className="h-4 w-4 md:h-5 md:w-5" />
+                                <Edit2 className="h-5 w-5" />
                               </Button>
 
                               <Button 
@@ -508,8 +518,77 @@ export default function PersuratanProposal() {
                                 onClick={() => handleDelete(item.id)}
                                 title="Hapus"
                               >
-                                <Trash2 className="h-4 w-4 md:h-5 md:w-5" />
+                                <Trash2 className="h-5 w-5" />
                               </Button>
+                           </div>
+
+                           {/* Mobile: Dropdown Menu */}
+                           <div className="md:hidden">
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button variant="ghost" size="icon" className="h-10 w-10 rounded-2xl bg-slate-50 hover:bg-white hover:shadow-md transition-all">
+                                    <MoreVertical className="h-5 w-5 text-slate-400" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" className="w-56 rounded-2xl p-2 border-none shadow-2xl">
+                                  <DropdownMenuLabel className="text-[10px] uppercase tracking-widest text-slate-400 px-3 py-2">Opsi Dokumen</DropdownMenuLabel>
+                                  
+                                  {canValidate && item.status === 'pending' && (
+                                    <>
+                                      <DropdownMenuItem 
+                                        onClick={() => handleValidate(item.id, 'validate')} 
+                                        className="rounded-xl h-11 px-3 text-emerald-600 focus:text-emerald-700 focus:bg-emerald-50 cursor-pointer font-bold transition-colors"
+                                      >
+                                        <CheckCircle className="h-4 w-4 mr-3" />
+                                        Validasi Sekarang
+                                      </DropdownMenuItem>
+                                      <DropdownMenuItem 
+                                        onClick={() => handleValidate(item.id, 'reject')} 
+                                        className="rounded-xl h-11 px-3 text-rose-600 focus:text-rose-700 focus:bg-rose-50 cursor-pointer font-bold transition-colors"
+                                      >
+                                        <XCircle className="h-4 w-4 mr-3" />
+                                        Tolak Dokumen
+                                      </DropdownMenuItem>
+                                      <DropdownMenuSeparator className="my-2 bg-slate-50" />
+                                    </>
+                                  )}
+
+                                  <DropdownMenuItem 
+                                    onClick={() => router.push(item.type === 'PROPOSAL' ? `/admin/persuratan/proposal/buat?id=${item.id}&mode=view` : `/admin/persuratan/buat?type=${item.type}&id=${item.id}&mode=view`)}
+                                    className="rounded-xl h-11 px-3 cursor-pointer font-bold text-slate-600 hover:text-indigo-600 transition-colors"
+                                  >
+                                    <Eye className="h-4 w-4 mr-3 text-indigo-500" />
+                                    Lihat Detail
+                                  </DropdownMenuItem>
+
+                                  <DropdownMenuItem 
+                                    onClick={() => generatePDF(item)}
+                                    disabled={item.status !== 'validated'}
+                                    className="rounded-xl h-11 px-3 cursor-pointer font-bold text-slate-600 hover:text-blue-600 transition-colors"
+                                  >
+                                    <Download className="h-4 w-4 mr-3 text-blue-500" />
+                                    Download PDF
+                                  </DropdownMenuItem>
+
+                                  <DropdownMenuItem 
+                                    onClick={() => router.push(item.type === 'PROPOSAL' ? `/admin/persuratan/proposal/buat?id=${item.id}` : `/admin/persuratan/buat?type=${item.type}&id=${item.id}`)} 
+                                    className="rounded-xl h-11 px-3 cursor-pointer font-bold text-slate-600 hover:text-emerald-600 transition-colors"
+                                  >
+                                    <Edit2 className="h-4 w-4 mr-3 text-emerald-500" />
+                                    Edit Konten
+                                  </DropdownMenuItem>
+
+                                  <DropdownMenuSeparator className="my-2 bg-slate-50" />
+
+                                  <DropdownMenuItem 
+                                    onClick={() => handleDelete(item.id)} 
+                                    className="rounded-xl h-11 px-3 text-rose-400 focus:text-rose-600 focus:bg-rose-50 cursor-pointer font-bold transition-colors"
+                                  >
+                                    <Trash2 className="h-4 w-4 mr-3" />
+                                    Hapus Permanen
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
                            </div>
                         </div>
                       </CardContent>

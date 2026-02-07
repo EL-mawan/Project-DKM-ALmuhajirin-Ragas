@@ -481,18 +481,18 @@ export default function PersuratanAdmin() {
                           </div>
 
                           <div className="flex items-center gap-2">
-                             {/* Primary Action Button (View) - Accessible directly for better UX */}
+                             {/* Primary Action Button (View) - Desktop Only */}
                              <Button 
                                variant="ghost" 
                                size="icon" 
-                               className="h-10 w-10 rounded-2xl bg-white shadow-sm hover:shadow-md hover:bg-white text-indigo-600 transition-all duration-300"
+                               className="hidden md:flex h-10 w-10 rounded-2xl bg-white shadow-sm hover:shadow-md hover:bg-white text-indigo-600 transition-all duration-300"
                                onClick={() => router.push(item.type === 'PROPOSAL' ? `/admin/persuratan/proposal/buat?id=${item.id}&mode=view` : `/admin/persuratan/buat?type=${item.type}&id=${item.id}&mode=view`)}
                                title="Lihat Detail"
                              >
                                <Eye className="h-5 w-5" />
                              </Button>
 
-                             {/* Secondary Actions (Kebab Menu) */}
+                             {/* Kebab Menu - All Actions */}
                              <DropdownMenu>
                                <DropdownMenuTrigger asChild>
                                  <Button variant="ghost" size="icon" className="h-10 w-10 rounded-2xl bg-slate-50/50 hover:bg-white hover:shadow-md transition-all">
@@ -521,6 +521,14 @@ export default function PersuratanAdmin() {
                                      <DropdownMenuSeparator className="my-2 bg-slate-50" />
                                    </>
                                  )}
+
+                                 <DropdownMenuItem 
+                                   onClick={() => router.push(item.type === 'PROPOSAL' ? `/admin/persuratan/proposal/buat?id=${item.id}&mode=view` : `/admin/persuratan/buat?type=${item.type}&id=${item.id}&mode=view`)}
+                                   className="rounded-xl h-11 px-3 cursor-pointer font-bold text-slate-600 hover:text-indigo-600 transition-colors"
+                                 >
+                                   <Eye className="h-4 w-4 mr-3 text-indigo-500" />
+                                   Lihat Detail
+                                 </DropdownMenuItem>
 
                                  <DropdownMenuItem 
                                    onClick={() => generatePDF(item)}
