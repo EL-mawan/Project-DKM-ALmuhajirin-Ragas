@@ -7,14 +7,15 @@ import { checkPermission } from '@/lib/auth/rbac'
 // GET /api/admin/kegiatan/[id] - Get specific activity
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const session = await getServerSession(authOptions)
     if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
     const activity = await db.kegiatan.findUnique({
-      where: { id: params.id }
+      where: { id }
     })
 
     if (!activity) return NextResponse.json({ error: 'Not found' }, { status: 404 })
@@ -28,9 +29,10 @@ export async function GET(
 // PATCH /api/admin/kegiatan/[id] - Update activity
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const session = await getServerSession(authOptions)
     if (!session || !session.user?.email) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
@@ -62,7 +64,7 @@ export async function PATCH(
     }
 
     const updated = await db.kegiatan.update({
-      where: { id: params.id },
+      where: { id },
       data: updateData
     })
 
@@ -75,9 +77,10 @@ export async function PATCH(
 // DELETE /api/admin/kegiatan/[id] - Delete activity
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const session = await getServerSession(authOptions)
     if (!session || !session.user?.email) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
@@ -91,7 +94,7 @@ export async function DELETE(
     }
 
     await db.kegiatan.delete({
-      where: { id: params.id }
+      where: { id }
     })
 
     return NextResponse.json({ message: 'Deleted successfully' })

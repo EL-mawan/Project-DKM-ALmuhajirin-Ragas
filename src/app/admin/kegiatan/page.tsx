@@ -248,12 +248,15 @@ export default function KegiatanAdmin() {
   }
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Apakah Anda yakin ingin menghapus kegiatan ini?')) return
+    if (!window.confirm('Apakah Anda yakin ingin menghapus kegiatan ini?')) return
     try {
       const res = await fetch(`/api/admin/kegiatan/${id}`, { method: 'DELETE' })
       if (res.ok) {
         showSuccess('Kegiatan Dibatalkan', 'Agenda telah dihapus secara permanen dari sistem.')
         fetchData()
+      } else {
+        const err = await res.json()
+        showError('Gagal Menghapus', err.error || 'Terjadi kesalahan saat menghapus data.')
       }
     } catch (error) {
       showError('Gagal Menghapus', 'Agenda gagal dihapus karena kendala jaringan.')
