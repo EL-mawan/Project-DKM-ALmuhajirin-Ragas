@@ -1144,12 +1144,12 @@ Salam silaturahmi kami sampaikan, teriring doa semoga bapak beserta keluarga sel
                       </CardTitle>
                       <div className="flex gap-2">
                         <a href="/template_penerima_proposal.xlsx" download>
-                           <Button variant="outline" size="sm" className="h-7 text-[9px] uppercase font-bold rounded-lg border-purple-200 text-purple-600 hover:bg-purple-50">
-                              <FileDown className="h-3 w-3 mr-1" /> Template
+                           <Button variant="outline" size="sm" className="h-7 text-[9px] uppercase font-bold rounded-lg border-purple-200 text-purple-600 hover:bg-purple-50 gap-2">
+                              <FileDown className="h-3 w-3" /> Template
                            </Button>
                         </a>
-                        <Button variant="outline" size="sm" className="h-7 text-[9px] uppercase font-bold rounded-lg border-purple-200 text-purple-600 hover:bg-purple-50">
-                           <Upload className="h-3 w-3 mr-1" /> Upload Excel
+                        <Button variant="outline" size="sm" className="h-7 text-[9px] uppercase font-bold rounded-lg border-purple-200 text-purple-600 hover:bg-purple-50 gap-2">
+                           <Upload className="h-3 w-3" /> Upload Excel
                         </Button>
                       </div>
                     </CardHeader>
@@ -1350,27 +1350,58 @@ Salam silaturahmi kami sampaikan, teriring doa semoga bapak beserta keluarga sel
                       <div className="whitespace-pre-wrap text-justify">{formData.isiSuratPengantar || '[Isi Surat Pengantar Belum Diisi]'}</div>
                       
                       {formData.waktuTempatAktif && (
-                        <div className="ml-16 space-y-1 my-4">
-                          <div className="flex"><span className="w-32 inline-block">Hari, Tanggal</span><span>: {formData.hariAcara}, {formData.tanggalAcara}</span></div>
-                          <div className="flex"><span className="w-32 inline-block">Waktu</span><span>: {formData.waktuAcara}</span></div>
-                          <div className="flex"><span className="w-32 inline-block">Tempat</span><span>: {formData.lokasiAcara}</span></div>
-                          <div className="flex"><span className="w-32 inline-block">Acara</span><span>: {formData.namaAcara}</span></div>
+                        <div className="ml-20 space-y-2 my-6">
+                           <div className="flex">
+                              <span className="w-32 inline-block">Hari, Tanggal</span>
+                              <span className="mr-2">:</span>
+                              <span>{formData.hariAcara}{formData.hariAcara && formData.tanggalAcara ? ', ' : ''}{formData.tanggalAcara}</span>
+                           </div>
+                           <div className="flex">
+                              <span className="w-32 inline-block">Waktu</span>
+                              <span className="mr-2">:</span>
+                              <span>{formData.waktuAcara}</span>
+                           </div>
+                           <div className="flex">
+                              <span className="w-32 inline-block">Tempat</span>
+                              <span className="mr-2">:</span>
+                              <span>{formData.lokasiAcara}</span>
+                           </div>
+                           <div className="flex">
+                              <span className="w-32 inline-block">Acara</span>
+                              <span className="mr-2">:</span>
+                              <span>{formData.namaAcara}</span>
+                           </div>
                         </div>
                       )}
 
                       <div className="whitespace-pre-wrap text-justify">{formData.kalimatPenutup}</div>
-                      <p className="font-bold">Wassalamu'alaikum Warahmatullahi Wabarakatuh.</p>
                     </>
                   ) : (
                     <>
                       <div className="whitespace-pre-wrap text-justify">{formData.pembuka}</div>
 
                       {formData.waktuTempatAktif && (
-                        <div className="ml-16 space-y-1 my-4">
-                          <div className="flex"><span className="w-32 inline-block">Hari, Tanggal</span><span>: {formData.hariAcara}, {formData.tanggalAcara}</span></div>
-                          <div className="flex"><span className="w-32 inline-block">Waktu</span><span>: {formData.waktuAcara}</span></div>
-                          <div className="flex"><span className="w-32 inline-block">Tempat</span><span>: {formData.lokasiAcara}</span></div>
-                          <div className="flex"><span className="w-32 inline-block">Acara</span><span>: {formData.namaAcara}</span></div>
+                        <div className="ml-20 space-y-2 my-6">
+                           <div className="flex">
+                              <span className="w-32 inline-block">Hari, Tanggal</span>
+                              <span className="mr-2">:</span>
+                              <span>{formData.hariAcara}{formData.hariAcara && formData.tanggalAcara ? ', ' : ''}{formData.tanggalAcara}</span>
+                           </div>
+                           <div className="flex">
+                              <span className="w-32 inline-block">Waktu</span>
+                              <span className="mr-2">:</span>
+                              <span>{formData.waktuAcara}</span>
+                           </div>
+                           <div className="flex">
+                              <span className="w-32 inline-block">Tempat</span>
+                              <span className="mr-2">:</span>
+                              <span>{formData.lokasiAcara}</span>
+                           </div>
+                           <div className="flex">
+                              <span className="w-32 inline-block">Acara</span>
+                              <span className="mr-2">:</span>
+                              <span>{formData.namaAcara}</span>
+                           </div>
                         </div>
                       )}
 
