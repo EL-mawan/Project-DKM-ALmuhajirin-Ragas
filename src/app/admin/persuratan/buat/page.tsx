@@ -660,25 +660,54 @@ Salam silaturahmi kami sampaikan, teriring doa semoga bapak beserta keluarga sel
                     </div>
 
                     {/* Section 7: WAKTU DAN TEMPAT */}
-                    <div className="p-8 rounded-4xl border-2 border-slate-50 bg-white flex items-center justify-between shadow-sm">
-                      <div className="flex items-center gap-4">
-                        <div className="h-10 w-10 rounded-xl bg-purple-50 flex items-center justify-center text-purple-500">
-                          <Calendar className="h-5 w-5" />
+                    <div className="space-y-4">
+                      <div className="p-8 rounded-4xl border-2 border-slate-50 bg-white flex items-center justify-between shadow-sm hover:border-purple-100 transition-colors">
+                        <div className="flex items-center gap-4">
+                          <div className="h-10 w-10 rounded-xl bg-purple-50 flex items-center justify-center text-purple-500">
+                            <Calendar className="h-5 w-5" />
+                          </div>
+                          <div>
+                            <h4 className="text-sm font-black text-slate-800 uppercase tracking-widest italic">Waktu dan Tempat Pelaksanaan</h4>
+                            <p className="text-[10px] text-slate-400 mt-0.5">Muncul di surat pengantar proposal jika diaktifkan.</p>
+                          </div>
                         </div>
-                        <div>
-                          <h4 className="text-sm font-black text-slate-800 uppercase tracking-widest italic">Waktu dan Tempat Pelaksanaan</h4>
-                          <p className="text-[10px] text-slate-400 mt-0.5">Bagian ini tidak akan muncul di proposal jika dinonaktifkan.</p>
+                        <div className="flex items-center gap-3">
+                          <span className={`text-[10px] font-black uppercase tracking-widest ${formData.waktuTempatAktif ? 'text-emerald-500' : 'text-slate-400'}`}>
+                            {formData.waktuTempatAktif ? 'AKTIF' : 'NONAKTIF'}
+                          </span>
+                          <Switch 
+                            checked={formData.waktuTempatAktif} 
+                            onCheckedChange={(val) => setFormData({...formData, waktuTempatAktif: val})}
+                          />
                         </div>
                       </div>
-                      <div className="flex items-center gap-3">
-                        <span className={`text-[10px] font-black uppercase tracking-widest ${formData.waktuTempatAktif ? 'text-emerald-500' : 'text-slate-400'}`}>
-                          {formData.waktuTempatAktif ? 'AKTIF' : 'NONAKTIF'}
-                        </span>
-                        <Switch 
-                          checked={formData.waktuTempatAktif} 
-                          onCheckedChange={(val) => setFormData({...formData, waktuTempatAktif: val})}
-                        />
-                      </div>
+
+                      {formData.waktuTempatAktif && (
+                        <div className="p-8 rounded-4xl bg-purple-50/30 border-2 border-purple-100/50 space-y-6 animate-in fade-in slide-in-from-top-4 duration-300">
+                           <div className="grid grid-cols-2 gap-6">
+                              <div className="space-y-2">
+                                <Label className="text-[10px] font-black uppercase tracking-widest text-purple-800/60">Hari</Label>
+                                <Input className="h-12 rounded-2xl bg-white border-purple-100 focus:ring-purple-500/20" placeholder="Senin" value={formData.hariAcara} onChange={e => setFormData({...formData, hariAcara: e.target.value})} />
+                              </div>
+                              <div className="space-y-2">
+                                <Label className="text-[10px] font-black uppercase tracking-widest text-purple-800/60">Tanggal</Label>
+                                <Input className="h-12 rounded-2xl bg-white border-purple-100 focus:ring-purple-500/20" placeholder="10 Januari 2026" value={formData.tanggalAcara} onChange={e => setFormData({...formData, tanggalAcara: e.target.value})} />
+                              </div>
+                              <div className="space-y-2">
+                                <Label className="text-[10px] font-black uppercase tracking-widest text-purple-800/60">Waktu</Label>
+                                <Input className="h-12 rounded-2xl bg-white border-purple-100 focus:ring-purple-500/20" placeholder="09:00 WIB s/d Selesai" value={formData.waktuAcara} onChange={e => setFormData({...formData, waktuAcara: e.target.value})} />
+                              </div>
+                              <div className="space-y-2">
+                                <Label className="text-[10px] font-black uppercase tracking-widest text-purple-800/60">Tempat</Label>
+                                <Input className="h-12 rounded-2xl bg-white border-purple-100 focus:ring-purple-500/20" placeholder="Masjid Al-Muhajirin" value={formData.lokasiAcara} onChange={e => setFormData({...formData, lokasiAcara: e.target.value})} />
+                              </div>
+                           </div>
+                           <div className="space-y-2">
+                              <Label className="text-[10px] font-black uppercase tracking-widest text-purple-800/60">Nama Kegiatan / Agenda Utama</Label>
+                              <Input className="h-12 rounded-2xl bg-white border-purple-100 focus:ring-purple-500/20" placeholder="Contoh: Peringatan Hari Besar Islam" value={formData.namaAcara} onChange={e => setFormData({...formData, namaAcara: e.target.value})} />
+                           </div>
+                        </div>
+                      )}
                     </div>
 
                     <div className="flex justify-end pt-4">
@@ -1295,7 +1324,22 @@ Salam silaturahmi kami sampaikan, teriring doa semoga bapak beserta keluarga sel
                 {/* CONTENT */}
                 <div className="text-[14px] space-y-5 text-slate-900 leading-[1.8] flex-1">
                   {type === 'PROPOSAL' ? (
-                    <div className="whitespace-pre-wrap">{formData.isiSuratPengantar || '[Isi Surat Pengantar Belum Diisi]'}</div>
+                    <>
+                      <p className="font-bold">Assalamu'alaikum Warahmatullahi Wabarakatuh,</p>
+                      <div className="whitespace-pre-wrap text-justify">{formData.isiSuratPengantar || '[Isi Surat Pengantar Belum Diisi]'}</div>
+                      
+                      {formData.waktuTempatAktif && formData.namaAcara && (
+                        <div className="ml-8 space-y-1.5 py-4 text-slate-900 italic border-l-2 border-slate-100 pl-6 bg-slate-50/50 rounded-r-2xl">
+                          <div className="flex"><span className="w-32 inline-block font-bold">Hari / Tanggal</span><span>: {formData.hariAcara}, {formData.tanggalAcara}</span></div>
+                          <div className="flex"><span className="w-32 inline-block font-bold">Waktu</span><span>: {formData.waktuAcara}</span></div>
+                          <div className="flex"><span className="w-32 inline-block font-bold">Tempat</span><span>: {formData.lokasiAcara}</span></div>
+                          <div className="flex"><span className="w-32 inline-block font-bold uppercase">Acara</span><span>: <span className="font-bold underline decoration-slate-400 decoration-2">{formData.namaAcara}</span></span></div>
+                        </div>
+                      )}
+
+                      <p className="whitespace-pre-wrap text-justify">{formData.kalimatPenutup}</p>
+                      <p className="font-bold">Wassalamu'alaikum Warahmatullahi Wabarakatuh.</p>
+                    </>
                   ) : (
                     <>
                       <p className="font-bold">Assalamu'alaikum Warahmatullahi Wabarakatuh,</p>
