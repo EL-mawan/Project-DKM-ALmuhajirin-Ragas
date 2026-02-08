@@ -260,7 +260,7 @@ export default function PersuratanAdmin() {
       // --- 2. DOCUMENT INFO ---
       const dateStr = new Date(item.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })
       doc.setFont('times', 'bold')
-      doc.setFontSize(11)
+      doc.setFontSize(9)
       doc.text(`${item.location || 'Argawana'}, ${dateStr}`, pageWidth - margin, curY, { align: 'right' })
       
       doc.setFont('times', 'normal')
@@ -367,14 +367,38 @@ export default function PersuratanAdmin() {
     }
   }
 
+  // Helper to load image
+  const loadImage = (url: string): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const img = new Image()
+      img.crossOrigin = 'Anonymous'
+      img.src = url
+      img.onload = () => {
+        const canvas = document.createElement('canvas')
+        canvas.width = img.width
+        canvas.height = img.height
+        const ctx = canvas.getContext('2d')
+        if (ctx) {
+          ctx.drawImage(img, 0, 0)
+          resolve(canvas.toDataURL('image/png'))
+        } else {
+          reject(new Error('Canvas context failed'))
+        }
+      }
+      img.onerror = () => reject(new Error('Image load failed'))
+    })
+  }
+
   // Generate Envelope (110 x 230 mm) for Undangan and Surat Resmi
-  const generateEnvelope = (item: any) => {
+  const generateEnvelope = async (item: any) => {
     if (item.type === 'PROPOSAL') {
       toast.error('Amplop hanya tersedia untuk Undangan dan Surat Resmi')
       return
     }
 
     try {
+      toast.info('Sedang menyiapkan amplop...')
+      
       // 110mm x 230mm in points (1mm = 2.83465 points)
       const width = 110 * 2.83465  // ~311.8 points
       const height = 230 * 2.83465 // ~652 points
@@ -400,35 +424,47 @@ export default function PersuratanAdmin() {
         formData = {}
       }
 
+      // Load Logo
+      try {
+        const logoData = await loadImage('/logo.png')
+        doc.addImage(logoData, 'PNG', margin + 10, margin + 15, 50, 50)
+      } catch (e) {
+        console.error('Failed to load logo', e)
+        // Fallback placeholder if logo fails
+        doc.setFillColor(dkmEmerald[0], dkmEmerald[1], dkmEmerald[2])
+        doc.rect(margin + 10, margin + 15, 50, 50, 'F')
+      }
+
       // Left side: DKM Letterhead
-      let curY = margin + 20
+      let curY = margin + 25
+      const textX = margin + 70 // Adjusted for logo
       
-      // Logo placeholder (decorative bar)
+      // Logo placeholder (decorative bar) - REMOVE or KEEP? I'll keep it as design element but shift it
       doc.setFillColor(dkmEmerald[0], dkmEmerald[1], dkmEmerald[2])
       doc.rect(margin, margin, 3, pageHeight - (margin * 2), 'F')
       
       // DKM Header
       doc.setFont('times', 'bold')
-      doc.setFontSize(9)
+      doc.setFontSize(11) // Increased slightly
       doc.setTextColor(dkmEmerald[0], dkmEmerald[1], dkmEmerald[2])
-      doc.text('DEWAN KEMAKMURAN MASJID (DKM)', margin + 10, curY)
+      doc.text('DEWAN KEMAKMURAN MASJID (DKM)', textX, curY)
       
-      curY += 10
-      doc.setFontSize(11)
-      doc.text('AL-MUHAJIRIN KP. RAGAS GRENYANG', margin + 10, curY)
+      curY += 12
+      doc.setFontSize(13) // Increased slightly
+      doc.text('AL-MUHAJIRIN KP. RAGAS GRENYANG', textX, curY)
       
-      curY += 10
-      doc.setFontSize(7)
+      curY += 12
+      doc.setFontSize(8)
       doc.setFont('times', 'italic')
       doc.setTextColor(100, 100, 100)
-      doc.text('Desa Argawana, Kecamatan Puloampel', margin + 10, curY)
-      curY += 8
-      doc.text('Kabupaten Serang Provinsi Banten 42455', margin + 10, curY)
+      doc.text('Desa Argawana, Kecamatan Puloampel', textX, curY)
+      curY += 10
+      doc.text('Kabupaten Serang Provinsi Banten 42455', textX, curY)
       
       curY += 15
       doc.setDrawColor(dkmGold[0], dkmGold[1], dkmGold[2])
       doc.setLineWidth(1)
-      doc.line(margin + 10, curY, margin + 200, curY)
+      doc.line(margin + 10, curY, margin + 280, curY) // Extended line width
 
       // Document Info
       curY += 20

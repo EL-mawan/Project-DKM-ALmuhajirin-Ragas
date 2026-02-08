@@ -367,7 +367,17 @@ Salam silaturahmi kami sampaikan, teriring doa semoga bapak beserta keluarga sel
     
     try {
       toast.info('Sedang merender PDF premium...')
-      const doc = new jsPDF('p', 'mm', 'a4')
+      
+      // Tunggu hingga font siap
+      await document.fonts.ready;
+      
+      const doc = new jsPDF({
+        orientation: 'p',
+        unit: 'mm',
+        format: 'a4',
+        compress: true
+      })
+      
       const pages = previewRef.current.querySelectorAll('.pdf-page')
       
       if (pages.length === 0) {
@@ -377,8 +387,12 @@ Salam silaturahmi kami sampaikan, teriring doa semoga bapak beserta keluarga sel
 
       for (let i = 0; i < pages.length; i++) {
         const page = pages[i] as HTMLElement
+        
+        // Simpan style original
+        const originalStyle = page.style.cssText
+        
         const canvas = await html2canvas(page, {
-          scale: 2, 
+          scale: 3, // Skala lebih tinggi untuk ketajaman
           useCORS: true,
           logging: false,
           backgroundColor: '#ffffff',
@@ -386,49 +400,49 @@ Salam silaturahmi kami sampaikan, teriring doa semoga bapak beserta keluarga sel
           height: 1123,
           windowWidth: 794,
           windowHeight: 1123,
-          scrollY: 0,
-          scrollX: 0,
           onclone: (clonedDoc, clonedElement) => {
-             // Convert oklch() colors to hex for html2canvas compatibility
+             // Pastikan font seri diterapkan
              const style = clonedDoc.createElement('style');
              style.textContent = `
-               :root {
-                 --background: #fafafa;
-                 --foreground: #262626;
-                 --primary: #0b3d2e;
-                 --primary-foreground: #fafafa;
-                 --muted: #f5f5f5;
-                 --muted-foreground: #737373;
-                 --border: #e5e5e5;
-                 --input: #f0f0f0;
+               @import url('https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;700&display=swap');
+               * {
+                 -webkit-font-smoothing: antialiased;
+                 -moz-osx-font-smoothing: grayscale;
+               }
+               .pdf-page {
+                 font-family: 'Times New Roman', Times, serif !important;
+                 padding: 60px !important;
+                 margin: 0 !important;
+                 box-shadow: none !important;
+                 border: none !important;
+               }
+               h1, h2, h3, p, div, span {
+                 color: black !important;
                }
              `;
              clonedDoc.head.appendChild(style);
              
-             clonedElement.style.borderRadius = '0'
-             clonedElement.style.boxShadow = 'none'
-             clonedElement.style.transform = 'none'
-             
-             const container = clonedElement.parentElement
-             if (container) {
-                container.style.transform = 'none'
-                container.style.padding = '0'
-                container.style.margin = '0'
+             // Hapus border dan bayangan pada elemen kloning
+             if (clonedElement instanceof HTMLElement) {
+               clonedElement.style.boxShadow = 'none';
+               clonedElement.style.border = 'none';
+               clonedElement.style.borderRadius = '0';
+               clonedElement.style.transform = 'none';
              }
           }
         })
         
-        const imgData = canvas.toDataURL('image/jpeg', 0.98)
+        const imgData = canvas.toDataURL('image/jpeg', 1.0)
         if (i > 0) doc.addPage()
         doc.addImage(imgData, 'JPEG', 0, 0, 210, 297, undefined, 'FAST')
       }
       
-      const fileName = `${type}_${formData.perihal.replace(/[^a-z0-9]/gi, '_')}.pdf`
+      const fileName = `${type}_${(formData.perihal || 'Dokumen').replace(/[^a-z0-9]/gi, '_')}.pdf`
       doc.save(fileName)
-      toast.success('PDF berhasil diunduh')
+      toast.success('PDF berhasil diunduh dengan kualitas premium')
     } catch (error) {
       console.error('PDF Generation Error:', error)
-      toast.error('Gagal membuat PDF. Coba gunakan browser lain.')
+      toast.error('Gagal membuat PDF. Pastikan browser Anda mendukung.')
     }
   }
 
@@ -1387,111 +1401,120 @@ Salam silaturahmi kami sampaikan, teriring doa semoga bapak beserta keluarga sel
                       <div className="whitespace-pre-wrap text-justify">{formData.isiSuratPengantar || '[Isi Surat Pengantar Belum Diisi]'}</div>
                       
                       {formData.waktuTempatAktif && (
-                        <div className="ml-20 space-y-2 my-6">
-                           <div className="flex">
-                              <span className="w-32 inline-block">Hari, Tanggal</span>
-                              <span className="mr-2">:</span>
-                              <span>{formData.hariAcara}{formData.hariAcara && formData.tanggalAcara ? ', ' : ''}{formData.tanggalAcara}</span>
-                           </div>
-                           <div className="flex">
-                              <span className="w-32 inline-block">Waktu</span>
-                              <span className="mr-2">:</span>
-                              <span>{formData.waktuAcara}</span>
-                           </div>
-                           <div className="flex">
-                              <span className="w-32 inline-block">Tempat</span>
-                              <span className="mr-2">:</span>
-                              <span>{formData.lokasiAcara}</span>
-                           </div>
-                           <div className="flex">
-                              <span className="w-32 inline-block">Acara</span>
-                              <span className="mr-2">:</span>
-                              <span>{formData.namaAcara}</span>
-                           </div>
+                        <div className="ml-4 md:ml-12 my-6">
+                           <table className="w-full text-[12pt] leading-normal">
+                             <tbody>
+                               <tr>
+                                  <td className="w-32 align-top py-1 text-slate-900">Hari, Tanggal</td>
+                                  <td className="w-4 align-top py-1 text-slate-900">:</td>
+                                  <td className="align-top py-1 text-slate-900 font-bold">
+                                    {formData.hariAcara || ''}
+                                    {(formData.hariAcara && formData.tanggalAcara) ? ', ' : ''}
+                                    {formData.tanggalAcara || ''}
+                                  </td>
+                               </tr>
+                               <tr>
+                                  <td className="w-32 align-top py-1 text-slate-900">Waktu</td>
+                                  <td className="w-4 align-top py-1 text-slate-900">:</td>
+                                  <td className="align-top py-1 text-slate-900 font-bold">{formData.waktuAcara}</td>
+                               </tr>
+                               <tr>
+                                  <td className="w-32 align-top py-1 text-slate-900">Tempat</td>
+                                  <td className="w-4 align-top py-1 text-slate-900">:</td>
+                                  <td className="align-top py-1 text-slate-900 font-bold">{formData.lokasiAcara}</td>
+                               </tr>
+                               {formData.namaAcara && (
+                                 <tr>
+                                    <td className="w-32 align-top py-1 text-slate-900">Acara</td>
+                                    <td className="w-4 align-top py-1 text-slate-900">:</td>
+                                    <td className="align-top py-1 text-slate-900 font-bold">{formData.namaAcara}</td>
+                                 </tr>
+                               )}
+                             </tbody>
+                           </table>
                         </div>
                       )}
 
-                      <div className="whitespace-pre-wrap text-justify">{formData.kalimatPenutup}</div>
+                      <div className="whitespace-pre-wrap text-justify text-[12pt] leading-[1.8]">{formData.kalimatPenutup}</div>
                     </>
                   ) : (
                     <>
                       <div className="whitespace-pre-wrap text-justify">{formData.pembuka}</div>
 
                       {formData.waktuTempatAktif && (
-                        <div className="ml-20 space-y-2 my-6">
-                           <div className="flex">
-                              <span className="w-32 inline-block">Hari, Tanggal</span>
-                              <span className="mr-2">:</span>
-                              <span>{formData.hariAcara}{formData.hariAcara && formData.tanggalAcara ? ', ' : ''}{formData.tanggalAcara}</span>
-                           </div>
-                           <div className="flex">
-                              <span className="w-32 inline-block">Waktu</span>
-                              <span className="mr-2">:</span>
-                              <span>{formData.waktuAcara}</span>
-                           </div>
-                           <div className="flex">
-                              <span className="w-32 inline-block">Tempat</span>
-                              <span className="mr-2">:</span>
-                              <span>{formData.lokasiAcara}</span>
-                           </div>
-                           <div className="flex">
-                              <span className="w-32 inline-block">Acara</span>
-                              <span className="mr-2">:</span>
-                              <span>{formData.namaAcara}</span>
-                           </div>
+                        <div className="ml-4 md:ml-12 my-6">
+                           <table className="w-full text-[12pt] leading-normal">
+                             <tbody>
+                               <tr>
+                                  <td className="w-32 align-top py-1 text-slate-900">Hari, Tanggal</td>
+                                  <td className="w-4 align-top py-1 text-slate-900">:</td>
+                                  <td className="align-top py-1 text-slate-900 font-bold">
+                                    {formData.hariAcara || ''}
+                                    {(formData.hariAcara && formData.tanggalAcara) ? ', ' : ''}
+                                    {formData.tanggalAcara || ''}
+                                  </td>
+                               </tr>
+                               <tr>
+                                  <td className="w-32 align-top py-1 text-slate-900">Waktu</td>
+                                  <td className="w-4 align-top py-1 text-slate-900">:</td>
+                                  <td className="align-top py-1 text-slate-900 font-bold">{formData.waktuAcara}</td>
+                               </tr>
+                               <tr>
+                                  <td className="w-32 align-top py-1 text-slate-900">Tempat</td>
+                                  <td className="w-4 align-top py-1 text-slate-900">:</td>
+                                  <td className="align-top py-1 text-slate-900 font-bold">{formData.lokasiAcara}</td>
+                               </tr>
+                             </tbody>
+                           </table>
                         </div>
                       )}
-
-                      <div className="whitespace-pre-wrap text-justify">{formData.penutup}</div>
+                      
+                      <div className="whitespace-pre-wrap text-justify text-[12pt] leading-[1.8]">{formData.penutup}</div>
                     </>
                   )}
                 </div>
 
-                {/* SIGNATURES */}
-                <div className="mt-12">
-                   <div className="flex justify-between text-[12pt] font-bold text-center">
-                      <div className="w-1/2" />
-                      <div className="w-1/2 mb-12">
-                        <p>{formData.tempatSurat}, {new Date(formData.tanggalSurat).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
-                      </div>
-                   </div>
-                   
-                   <div className="grid grid-cols-2 gap-x-20 text-[12pt] text-center">
-                      <div className="space-y-20">
-                        <p className="uppercase tracking-wider">SEKRETARIS DKM,</p>
-                        <div>
-                          <p className="font-black underline underline-offset-4 decoration-1 tracking-tight">
-                            ( {formData.ttdSekretarisDKM || '............................'} )
+                {/* SIGNATURES - FIXED LAYOUT */}
+                <div className="mt-16 mb-20 px-4">
+                   <div className="grid grid-cols-2 gap-10 text-[12pt]">
+                      {/* Kiri: Sekretaris */}
+                      <div className="flex flex-col items-center justify-between min-h-[140px]">
+                        <p className="uppercase font-bold tracking-wider text-center text-slate-900">SEKRETARIS DKM,</p>
+                        <div className="mt-20 text-center">
+                          <p className="font-bold text-slate-900 underline underline-offset-4 decoration-1 tracking-tight uppercase">
+                            {formData.ttdSekretarisDKM || '............................'}
                           </p>
                         </div>
                       </div>
 
-                      <div className="space-y-20">
-                        <p className="uppercase tracking-wider">KETUA DKM,</p>
-                        <div>
-                          <p className="font-black underline underline-offset-4 decoration-1 tracking-tight">
-                            ( {formData.ttdKetuaDKM || '............................'} )
+                      {/* Kanan: Ketua */}
+                      <div className="flex flex-col items-center justify-between min-h-[140px]">
+                        <p className="uppercase font-bold tracking-wider text-center text-slate-900">KETUA DKM,</p>
+                        <div className="mt-20 text-center">
+                          <p className="font-bold text-slate-900 underline underline-offset-4 decoration-1 tracking-tight uppercase">
+                            {formData.ttdKetuaDKM || '............................'}
                           </p>
                         </div>
                       </div>
                    </div>
 
+                   {/* Tengah: Mengetahui (Jika ada) */}
                    {formData.ttdTokohMasyarakat && (
-                      <div className="mt-12 flex flex-col items-center text-[13px] text-center">
-                        <div className="space-y-20 w-fit">
-                          <div>
-                            <p className="uppercase text-[11px] font-medium text-slate-500 mb-1">Mengetahui,</p>
-                            <p className="uppercase tracking-wider">Tokoh Masyarakat Masjid Al-Muhajirin</p>
+                      <div className="mt-12 flex flex-col items-center text-[12pt]">
+                        <div className="flex flex-col items-center justify-between min-h-[140px] w-fit">
+                          <div className="text-center">
+                            <p className="normal-case italic text-[11pt] text-slate-600 mb-1">Mengetahui,</p>
+                            <p className="uppercase font-bold tracking-wider text-slate-900">Tokoh Masyarakat</p>
                           </div>
-                          <div>
-                            <p className="font-black underline underline-offset-4 decoration-1 tracking-tight">
-                              ( {formData.ttdTokohMasyarakat} )
+                          <div className="mt-20 text-center">
+                            <p className="font-bold text-slate-900 underline underline-offset-4 decoration-1 tracking-tight uppercase">
+                              {formData.ttdTokohMasyarakat}
                             </p>
                           </div>
                         </div>
                       </div>
                    )}
-                </div>
+               </div>
 
                 {/* FOOTER */}
                 <div className="absolute bottom-10 left-12 right-12 pt-4 border-t border-slate-100 flex justify-between items-center text-[9px] text-slate-400 font-sans uppercase font-black tracking-widest">
