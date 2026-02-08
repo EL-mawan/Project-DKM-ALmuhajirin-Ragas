@@ -361,26 +361,37 @@ export default function PersuratanAdmin() {
         })
       }
 
-      // Handle both Builder Schema and old schema
-      const pembuka = formData.pembuka || formData.isiSuratPengantar || ''
-      const penutup = formData.penutup || formData.kalimatPenutup || ''
+      // Handle and Format Content (Smart Formatting Auto-Fix)
+      let pembuka = formData.pembuka || formData.isiSuratPengantar || ''
+      // Regex lebih kuat: handle Assalam...Wb followed by anything (not just Uppercase)
+      pembuka = pembuka.replace(/(Assalamu['’`]?alaikum.*?Wb\.?)\s*([a-zA-Z])/i, "$1\n\n$2")
+      
+      let penutup = formData.penutup || formData.kalimatPenutup || ''
 
       renderContent(pembuka)
 
       // Event Details for Undangan/Surat
       if (formData.waktuTempatAktif) {
         curY += 5
-        const labelX = margin + 15  // Indent from left
-        const labelWidth = 35       // Width reserved for label
+        const labelX = margin + 10  // Indent kiri
+        const labelWidth = 35
         const sepX = labelX + labelWidth
         const valueX = sepX + 5
         
+        // Helper untuk format tanggal yang rapi
+        const hari = formData.hariAcara
+        const tanggal = formData.tanggalAcara
+        const hariTanggalVal = (hari && tanggal) ? `${hari}, ${tanggal}` : (hari || tanggal || '-')
+
+        // Pastikan Value tidak kosong string agar garis tidak putus di tengah
+        const val = (v: string) => v || '-'
+
         const rows = [
-          ['Hari, Tanggal', `${formData.hariAcara || ''}${formData.hariAcara && formData.tanggalAcara ? ', ' : ''}${formData.tanggalAcara || ''}`],
-          ['Waktu', `${formData.waktuAcara || ''}`],
-          ['Tempat', `${formData.lokasiAcara || ''}`],
+          ['Hari, Tanggal', hariTanggalVal],
+          ['Waktu', val(formData.waktuAcara)],
+          ['Tempat', val(formData.lokasiAcara)],
           // Acara conditional check
-          ...(formData.namaAcara ? [['Acara', `${formData.namaAcara}`]] : [])
+          ...(formData.namaAcara ? [['Acara', formData.namaAcara]] : [])
         ]
 
         rows.forEach(([label, value]) => {
@@ -400,6 +411,13 @@ export default function PersuratanAdmin() {
           curY += (valueLines.length * 6) + 2
         })
         curY += 10
+      }
+
+      // Add space for signature if near bottom
+      const signatureHeight = 70 // Sedikit diperbesar safety marginnya
+      if (curY + signatureHeight > pageHeight - margin) {
+         doc.addPage()
+         curY = margin
       }
 
       renderContent(penutup)
