@@ -233,62 +233,107 @@ export default function PersuratanAdmin() {
       }
 
       // --- 1. PREMIUM HEADER / KOP ---
+      // Load Logo
+      try {
+        const logoData = await loadImage('/logo.png')
+        // Logo di sebelah kiri, ukuran disesuaikan
+        const logoSize = 25
+        doc.addImage(logoData, 'PNG', margin, 12, logoSize, logoSize)
+      } catch (e) {
+        console.error('Failed to load logo', e)
+      }
+
+      const textCenterX = (pageWidth - margin * 2) / 2 + margin
       // DKM Text
       doc.setFontSize(14)
       doc.setFont('times', 'bold')
       doc.setTextColor(dkmEmerald[0], dkmEmerald[1], dkmEmerald[2])
-      doc.text(formData.namaKopSurat?.split('\n')[0] || 'DEWAN KEMAKMURAN MASJID (DKM)', centerX, 22, { align: 'center' })
+      doc.text(formData.namaKopSurat?.split('\n')[0] || 'DEWAN KEMAKMURAN MASJID (DKM)', textCenterX, 22, { align: 'center' })
       
       doc.setFontSize(18)
-      doc.text(formData.namaKopSurat?.split('\n')[1] || 'AL-MUHAJIRIN KP. RAGAS GRENYANG', centerX, 30, { align: 'center' })
+      doc.text(formData.namaKopSurat?.split('\n')[1] || 'AL-MUHAJIRIN KP. RAGAS GRENYANG', textCenterX, 30, { align: 'center' })
       
       doc.setFontSize(9)
+      doc.setFont('times', 'normal') // Ubah jadi normal agar lebih mirip preview
+      doc.setTextColor(0, 0, 0) // Warna hitam untuk alamat
+      const alamatLines = doc.splitTextToSize(formData.alamatKopSurat || 'Desa Argawana, Kecamatan Puloampel Kabupaten Serang Provinsi Banten 42455', pageWidth - 80)
+      doc.text(alamatLines, textCenterX, 36, { align: 'center' })
+      
+      // Kontak (Email/Website) - Baris Baru
+      doc.setFontSize(8)
       doc.setFont('times', 'italic')
-      doc.setTextColor(100, 116, 139)
-      const alamatLines = doc.splitTextToSize(formData.alamatKopSurat || 'Desa Argawana, Kecamatan Puloampel Kabupaten Serang Provinsi Banten 42455', pageWidth - 60)
-      doc.text(alamatLines, centerX, 36, { align: 'center' })
+      doc.setTextColor(100, 116, 139) // Slate color
+      doc.text('Email: dkm_almuhajirin@gmail.com / Website: dkm-almuhajirin-ragas.vercel.app', textCenterX, 41, { align: 'center' })
       
       doc.setDrawColor(dkmEmerald[0], dkmEmerald[1], dkmEmerald[2])
       doc.setLineWidth(1)
-      doc.line(margin, 48, pageWidth - margin, 48)
-      doc.setLineWidth(0.2)
-      doc.line(margin, 49.5, pageWidth - margin, 49.5)
+      doc.line(margin, 46, pageWidth - margin, 46)
+      
+      // Garis tipis kedua (jika perlu, tapi preview hanya satu garis tebal dominan)
+      // doc.setLineWidth(0.2)
+      // doc.line(margin, 47.5, pageWidth - margin, 47.5)
 
       let curY = 60
       doc.setTextColor(dkmSlate[0], dkmSlate[1], dkmSlate[2])
 
       // --- 2. DOCUMENT INFO ---
+      // Tanggal di kanan
       const dateStr = new Date(item.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })
       doc.setFont('times', 'bold')
-      doc.setFontSize(9)
+      doc.setFontSize(11) // Sesuaikan ukuran font
       doc.text(`${item.location || 'Argawana'}, ${dateStr}`, pageWidth - margin, curY, { align: 'right' })
       
+      // Info Kiri (Nomor, Lampiran, Perihal) dengan Tabulasi
       doc.setFont('times', 'normal')
-      doc.text(`Nomor      : ${item.nomorSurat || '-'}`, margin, curY)
-      doc.text(`Lampiran  : ${formData.lampiran || '-'}`, margin, curY + 6)
-      doc.setFont('times', 'bold')
-      doc.text(`Perihal      : ${item.title.toUpperCase()}`, margin, curY + 12)
+      const labelWidth = 25 
       
-      curY += 25
+      // Helper untuk baris info
+      const addInfoRow = (label: string, value: string, boldValue: boolean = false) => {
+          doc.setFont('times', 'normal')
+          doc.text(label, margin, curY)
+          doc.text(':', margin + labelWidth - 3, curY)
+          if (boldValue) doc.setFont('times', 'bold')
+          doc.text(value, margin + labelWidth, curY)
+          curY += 6
+      }
+
+      addInfoRow('Nomor', item.nomorSurat || '-', true)
+      addInfoRow('Lampiran', formData.lampiran || '-')
+      addInfoRow('Perihal', item.title, true) // Title as perihal, bold
+      
+      curY += 20 // Jarak ke Kepada Yth
 
       // Recipient Section
       doc.setFont('times', 'normal')
       doc.text('Kepada Yth.', margin, curY)
+      curY += 7 
+      
+      // Nama Penerima dengan Garis Bawah
       doc.setFont('times', 'bold')
-      doc.text(item.recipient || '............................', margin, curY + 6)
+      const recipientName = item.recipient || '............................'
+      doc.text(recipientName.toUpperCase(), margin, curY)
+      const recipientWidth = doc.getTextWidth(recipientName.toUpperCase())
+      doc.setLineWidth(0.5)
+      doc.line(margin, curY + 1, margin + Math.max(recipientWidth, 50), curY + 1)
       
       if (formData.penerimaJabatan) {
+        curY += 6
         doc.setFont('times', 'italic')
         doc.setFontSize(10)
-        doc.text(formData.penerimaJabatan, margin, curY + 11)
+        doc.text(formData.penerimaJabatan, margin, curY)
         doc.setFontSize(11)
       }
 
-      doc.setFont('times', 'normal')
-      doc.text('di_', margin, curY + (formData.penerimaJabatan ? 17 : 12))
+      curY += 8
       doc.setFont('times', 'bold')
-      doc.text(formData.penerimaLokasi || 'Tempat', margin + 5, curY + (formData.penerimaJabatan ? 22 : 18))
-      curY += 35
+      doc.text('di -', margin, curY)
+      
+      curY += 6
+      doc.text(formData.penerimaLokasi || 'Tempat', margin + 8, curY) // Sedikit indent
+      const lokasiWidth = doc.getTextWidth(formData.penerimaLokasi || 'Tempat')
+      doc.line(margin + 8, curY + 1, margin + 8 + lokasiWidth, curY + 1) // Garis bawah lokasi
+
+      curY += 25
 
       // --- 4. CONTENT RENDERING ---
       const renderContent = (text: string, fontSize = 11, fontStyle: any = 'normal') => {
@@ -296,9 +341,24 @@ export default function PersuratanAdmin() {
         doc.setFont('times', fontStyle)
         doc.setFontSize(fontSize)
         const maxWidth = pageWidth - (margin * 2)
-        const split = doc.splitTextToSize(text, maxWidth)
-        doc.text(split, margin, curY, { align: 'justify', lineHeightFactor: 1.5 })
-        curY += (split.length * 7) + 3
+        
+        // Split paragraphs to handle newlines correctly
+        const paragraphs = text.split('\n')
+        
+        paragraphs.forEach(paragraph => {
+            if (!paragraph.trim()) {
+                curY += 5
+                return
+            }
+            
+            // Check if paragraph is short (like greetings) to avoid forced justify stretching
+            const isShort = doc.getTextWidth(paragraph) < (maxWidth * 0.7)
+            const alignMode = isShort ? 'left' : 'justify'
+            
+            const split = doc.splitTextToSize(paragraph, maxWidth)
+            doc.text(split, margin, curY, { align: alignMode, lineHeightFactor: 1.5 })
+            curY += (split.length * 6) + 4
+        })
       }
 
       // Handle both Builder Schema and old schema
@@ -309,22 +369,37 @@ export default function PersuratanAdmin() {
 
       // Event Details for Undangan/Surat
       if (formData.waktuTempatAktif) {
-        const detailsX = margin + 15
-        doc.setFont('times', 'normal')
+        curY += 5
+        const labelX = margin + 15  // Indent from left
+        const labelWidth = 35       // Width reserved for label
+        const sepX = labelX + labelWidth
+        const valueX = sepX + 5
         
         const rows = [
-          ['Hari, Tanggal', `: ${formData.hariAcara || ''}${formData.hariAcara && formData.tanggalAcara ? ', ' : ''}${formData.tanggalAcara || ''}`],
-          ['Waktu', `: ${formData.waktuAcara || ''}`],
-          ['Tempat', `: ${formData.lokasiAcara || ''}`],
-          ['Acara', `: ${formData.namaAcara || ''}`]
+          ['Hari, Tanggal', `${formData.hariAcara || ''}${formData.hariAcara && formData.tanggalAcara ? ', ' : ''}${formData.tanggalAcara || ''}`],
+          ['Waktu', `${formData.waktuAcara || ''}`],
+          ['Tempat', `${formData.lokasiAcara || ''}`],
+          // Acara conditional check
+          ...(formData.namaAcara ? [['Acara', `${formData.namaAcara}`]] : [])
         ]
 
         rows.forEach(([label, value]) => {
-          doc.text(label, detailsX, curY)
-          doc.text(value, detailsX + 35, curY)
-          curY += 7
+          // Label
+          doc.setFont('times', 'normal')
+          doc.text(label, labelX, curY)
+          
+          // Separator
+          doc.text(':', sepX, curY)
+          
+          // Value (Bold)
+          doc.setFont('times', 'bold')
+          const valueMaxWidth = pageWidth - valueX - margin
+          const valueLines = doc.splitTextToSize(value, valueMaxWidth)
+          doc.text(valueLines, valueX, curY)
+          
+          curY += (valueLines.length * 6) + 2
         })
-        curY += 5
+        curY += 10
       }
 
       renderContent(penutup)
