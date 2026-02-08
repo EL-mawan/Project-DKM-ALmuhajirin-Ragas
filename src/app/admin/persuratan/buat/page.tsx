@@ -48,9 +48,11 @@ function BuatPersuratanContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const type = searchParams.get('type') || 'PROPOSAL'
+  const documentId = searchParams.get('id')
   const [activeTab, setActiveTab] = useState('umum')
   const [showPreview, setShowPreview] = useState(false)
   const previewRef = useRef<HTMLDivElement>(null)
+  const [documentStatus, setDocumentStatus] = useState<string>('pending')
 
   const [formData, setFormData] = useState({
     // Kop Surat
@@ -140,6 +142,29 @@ Salam silaturahmi kami sampaikan, teriring doa semoga bapak beserta keluarga sel
     }
     fetchStruktur()
   }, [])
+
+  // Fetch existing document if editing
+  useEffect(() => {
+    if (documentId) {
+      const fetchDocument = async () => {
+        try {
+          const res = await fetch(`/api/admin/persuratan/${documentId}`)
+          if (res.ok) {
+            const doc = await res.json()
+            if (doc.content) {
+              const parsed = JSON.parse(doc.content)
+              setFormData(parsed)
+            }
+            setDocumentStatus(doc.status || 'pending')
+          }
+        } catch (error) {
+          console.error('Failed to fetch document:', error)
+          toast.error('Gagal mengambil data dokumen')
+        }
+      }
+      fetchDocument()
+    }
+  }, [documentId])
 
   // Helper for RAB calculations
   const totalRAB = formData.rabItems.reduce((acc, curr) => acc + curr.total, 0)
@@ -1284,11 +1309,23 @@ Salam silaturahmi kami sampaikan, teriring doa semoga bapak beserta keluarga sel
                   <h2 className="text-sm font-black text-slate-800 uppercase tracking-[0.2em]">Live Preview</h2>
                   <Badge variant="outline" className="bg-emerald-50 text-emerald-600 border-emerald-100 text-[9px] font-black px-2 py-0">LIVE</Badge>
                 </div>
-                <div className="flex gap-2">
-                  <Button size="sm" onClick={generatePreviewPDF} className="h-10 rounded-2xl bg-[#1e293b] text-white hover:bg-black transition-all shadow-lg shadow-slate-200 gap-2 px-6">
-                    <Download className="h-4 w-4" /> 
-                    <span className="text-[10px] font-black uppercase tracking-widest">Unduh PDF</span>
-                  </Button>
+                <div className="flex flex-col items-end gap-2">
+                  <div className="flex gap-2">
+                    <Button 
+                      size="sm" 
+                      onClick={generatePreviewPDF} 
+                      disabled={documentStatus !== 'validated'}
+                      className="h-10 rounded-2xl bg-[#1e293b] text-white hover:bg-black transition-all shadow-lg shadow-slate-200 gap-2 px-6 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <Download className="h-4 w-4" /> 
+                      <span className="text-[10px] font-black uppercase tracking-widest">Unduh PDF</span>
+                    </Button>
+                  </div>
+                  {documentStatus !== 'validated' && (
+                    <p className="text-[9px] text-amber-600 font-bold italic">
+                      * Download aktif setelah disetujui Admin/Ketua/Tokoh
+                    </p>
+                  )}
                 </div>
               </div>
 

@@ -1665,11 +1665,21 @@ Pastikan setiap poin dimulai dengan kata kerja (Contoh: Menjalin, Meningkatkan, 
                         </div>
                         <div className="flex gap-2">
                            {bulkRecipients.length > 1 && (
-                             <Button size="sm" onClick={() => { generatePDF(false); setIsRecipientsDialogOpen(false); }} className="h-10 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10px] uppercase gap-2 px-4 shadow-lg shadow-emerald-100">
+                             <Button 
+                               size="sm" 
+                               onClick={() => { generatePDF(false); setIsRecipientsDialogOpen(false); }} 
+                               disabled={proposalStatus !== 'validated'}
+                               className="h-10 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10px] uppercase gap-2 px-4 shadow-lg shadow-emerald-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                             >
                                 <Download className="h-3.5 w-3.5" /> Unduh ZIP
                              </Button>
                            )}
-                           <Button size="sm" onClick={() => { generatePDF(true); setIsRecipientsDialogOpen(false); }} className="h-10 rounded-xl bg-slate-900 hover:bg-black text-white font-bold text-[10px] uppercase gap-2 px-4 shadow-lg shadow-slate-200">
+                           <Button 
+                             size="sm" 
+                             onClick={() => { generatePDF(true); setIsRecipientsDialogOpen(false); }} 
+                             disabled={proposalStatus !== 'validated'}
+                             className="h-10 rounded-xl bg-slate-900 hover:bg-black text-white font-bold text-[10px] uppercase gap-2 px-4 shadow-lg shadow-slate-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                           >
                                 <Download className="h-3.5 w-3.5" /> Unduh PDF
                            </Button>
                         </div>
@@ -1719,10 +1729,15 @@ Pastikan setiap poin dimulai dengan kata kerja (Contoh: Menjalin, Meningkatkan, 
                     )}
                 </div>
             </div>
-            <DialogFooter className="p-6 bg-slate-50 border-t border-slate-100">
+            <DialogFooter className="p-6 bg-slate-50 border-t border-slate-100 space-y-2">
                 <p className="text-[9px] text-slate-400 font-bold uppercase tracking-[0.2em] italic">
                     * Untuk mengubah daftar penerima massal, silakan unggah ulang file Excel pada tab UMUM.
                 </p>
+                {proposalStatus !== 'validated' && (
+                  <p className="text-[9px] text-amber-600 font-bold uppercase tracking-[0.2em]">
+                    ⚠️ Tombol download aktif setelah proposal disetujui oleh Admin/Ketua/Tokoh
+                  </p>
+                )}
             </DialogFooter>
         </DialogContent>
     </Dialog>
